@@ -1,0 +1,15 @@
+version: "3"
+services:
+  saham_rakyat_amqp_listener_amqp_listener_verify_mail:
+    container_name: saham_rakyat_amqp_listener_amqp_listener_verify_mail
+    image: saham_rakyat_amqp_listener_amqp_listener_verify_mail:latest
+    restart: always
+    hostname: saham_rakyat_amqp_listener_amqp_listener_verify_mail
+    ports:
+      - "28189:3000"
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.191.235.0/24

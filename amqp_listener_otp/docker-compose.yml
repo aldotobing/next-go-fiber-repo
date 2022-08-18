@@ -1,0 +1,15 @@
+version: "3"
+services:
+  saham_rakyat_amqp_listener_amqp_listener_otp:
+    container_name: saham_rakyat_amqp_listener_amqp_listener_otp
+    image: saham_rakyat_amqp_listener_amqp_listener_otp:latest
+    restart: always
+    hostname: saham_rakyat_amqp_listener_amqp_listener_otp
+    ports:
+      - "28189:3000"
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.191.235.0/24

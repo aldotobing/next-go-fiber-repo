@@ -1,0 +1,865 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:v="urn:schemas-microsoft-com:vml"
+  xmlns:o="urn:schemas-microsoft-com:office:office"
+>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="format-detection" content="date=no" />
+    <meta name="format-detection" content="address=no" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Fira+Mono:400,500,700|Ubuntu:400,400i,500,500i,700,700i"
+      rel="stylesheet"
+    />
+    <title>Email Template</title>
+
+    <style type="text/css" media="screen">
+      /* Linked Styles */
+      @font-face {
+        font-family: MyriadPro;
+        src: url('[font-url]/MyriadPro-Regular.otf');
+      }
+
+      @font-face {
+        font-family: MyriadPro;
+        src: url('[font-url]/MyriadPro-Bold.otf');
+        font-weight: bold;
+      }
+
+      @font-face {
+        font-family: MyriadPro;
+        src: url('[font-url]/MyriadPro-It.otf');
+        font-style: italic;
+      }
+
+      @font-face {
+        font-family: MyriadPro;
+        src: url('[font-url]/MyriadPro-BoldIt.otf');
+        font-weight: bold;
+        font-style: italic;
+      }
+
+      @font-face {
+        font-family: MyriadPro;
+        src: url('[font-url]/MyriadPro-Regular.otf');
+        font-weight: 300;
+      }
+
+      @font-face {
+        font-family: MyriadPro;
+        src: url('[font-url]/MyriadPro-It.otf');
+        font-style: italic;
+        font-weight: 300;
+      }
+
+      @font-face {
+        font-family: MyriadPro;
+        src: url('[font-url]/MyriadPro-Light.otf');
+        font-style: italic;
+        font-weight: 100;
+      }
+
+      body {
+        font-family: Helvetica, sans-serif;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block !important;
+        min-width: 100% !important;
+        width: 100% !important;
+        background: #d8e0e3;
+        -webkit-text-size-adjust: none;
+      }
+
+      a {
+        color: #000001;
+        text-decoration: none;
+      }
+
+      p {
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      img {
+        -ms-interpolation-mode: bicubic;
+        /* Allow smoother rendering of resized image in Internet Explorer */
+      }
+
+      .mcnPreviewText {
+        display: none !important;
+      }
+
+      ul li {
+        position: relative;
+      }
+
+      ul li:first-child:before {
+        position: absolute;
+        /* content: url("[image-url]/Group.png"); */
+        top: -10px;
+        left: -40px;
+      }
+
+      ul li:before {
+        position: absolute;
+        /* content: url("[image-url]/Group (1).png"); */
+        top: 0px;
+        left: -35px;
+      }
+
+      .btn-ivr {
+        border-radius: 50px;
+        border: none;
+        background-color: #003d79;
+        font-size: 16px;
+        color: #ffffff;
+        text-decoration: none;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .bg-gradient {
+        background: linear-gradient(116deg, rgba(246, 183, 14, 1) 0%, rgba(254, 147, 14, 1) 100%);
+      }
+
+      .shadow {
+        box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
+      }
+
+      /* Mobile styles */
+      @media only screen and (max-device-width: 480px), only screen and (max-width: 480px) {
+        .mobile-shell {
+          width: 100% !important;
+          min-width: 100% !important;
+        }
+
+        .m-center {
+          text-align: center !important;
+        }
+
+        .text3,
+        .text-footer,
+        .text-header {
+          text-align: center !important;
+        }
+
+        .lh-18 {
+          line-height: 18px;
+        }
+
+        .center {
+          margin: 0 auto !important;
+        }
+
+        .td {
+          width: 100% !important;
+          min-width: 100% !important;
+        }
+
+        .m-br-15 {
+          height: 15px !important;
+        }
+
+        .m-0 {
+          margin: 0 !important;
+        }
+
+        .p-0 {
+          padding: 0 !important;
+        }
+
+        .p20-15 {
+          padding: 20px 15px !important;
+        }
+
+        .p0-15 {
+          padding: 0 15px !important;
+        }
+
+        .p30-15 {
+          padding: 30px 15px !important;
+        }
+
+        .p30-15-15 {
+          padding: 30px 15px 15px !important;
+        }
+
+        .p30-15-0-80 {
+          padding: 30px 15px 0px 80px !important;
+        }
+
+        .p30-15-0 {
+          padding: 30px 15px 0px 15px !important;
+        }
+
+        .p40 {
+          padding-bottom: 30px !important;
+        }
+
+        .pt36 {
+          padding-top: 36px !important;
+        }
+
+        .pb8 {
+          padding-bottom: 8px !important;
+        }
+
+        .footer {
+          padding: 20px 15px !important;
+        }
+
+        .h2-white {
+          font-size: 40px !important;
+          line-height: 44px !important;
+          text-align: center !important;
+        }
+
+        .fz-18 {
+          font-size: 18px !important;
+        }
+
+        .h2 {
+          font-size: 42px !important;
+          line-height: 50px !important;
+        }
+
+        .m-td,
+        .m-hide {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+          font-size: 0 !important;
+          line-height: 0 !important;
+          min-height: 0 !important;
+        }
+
+        .m-block {
+          display: block !important;
+        }
+
+        .container {
+          padding: 0px !important;
+        }
+
+        .separator {
+          padding-top: 30px !important;
+        }
+
+        .fluid-img img {
+          width: 100% !important;
+          max-width: 100% !important;
+          height: auto !important;
+        }
+
+        .column,
+        .column-top,
+        .column-dir,
+        .column-empty,
+        .column-empty2,
+        .column-bottom,
+        .column-dir-top,
+        .column-dir-bottom {
+          float: left !important;
+          width: 100% !important;
+          display: block !important;
+        }
+
+        .column-empty {
+          padding-bottom: 10px !important;
+        }
+
+        .column-empty2 {
+          padding-bottom: 30px !important;
+        }
+
+        .content-spacing {
+          width: 15px !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body
+    class="body"
+    style="padding:0 !important; margin:0 !important; display:block !important; min-width:100% !important; width:100% !important; background:#d8e0e3; -webkit-text-size-adjust:none;"
+  >
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#d8e0e3">
+      <tr>
+        <td align="center" valign="top" class="container" style="padding:50px 10px;">
+          <!-- Container -->
+          <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td align="center">
+                <table width="650" border="0" cellspacing="0" cellpadding="0" class="mobile-shell">
+                  <tr>
+                    <td
+                      class="td"
+                      bgcolor="#ffffff"
+                      style="width:650px; min-width:650px; font-size:0pt; line-height:0pt; padding:0; margin:0; font-weight:normal;"
+                    >
+                      <!-- Header -->
+                      <table
+                        width="100%"
+                        height="7px"
+                        border="0"
+                        cellspacing="0"
+                        cellpadding="0"
+                        bgcolor="#d8e0e3"
+                      >
+                        <tr>
+                          <td bgcolor="#ffb700" width="30%" class="bg-gradient"></td>
+                          <td class="td" bgcolor="#203C6A" width="70%"></td>
+                        </tr>
+                      </table>
+
+                      <!-- END Header -->
+
+                      <!-- Intro -->
+                      <table
+                        width="100%"
+                        border="0"
+                        cellspacing="0"
+                        cellpadding="0"
+                        bgcolor="#ffffff"
+                      >
+                        <tr>
+                          <td class="p0-15" style="padding: 80px 20px 0">
+                            <table
+                              width="100%"
+                              border="0"
+                              cellspacing="0"
+                              cellpadding="0"
+                              class="shadow"
+                              style="border-radius: 12px;"
+                            >
+                              <tr>
+                                <td width="100%" style="padding-top: 20px;">
+                                  <tr>
+                                    <td style="text-align: left; width: 50%;">
+                                      <img
+                                        src="[image-url]/flag3.png"
+                                        alt=""
+                                        border="0"
+                                        style="width: 100%; max-width: 32px;text-align: left; height: auto; display: block;"
+                                      />
+                                    </td>
+                                    <td style="text-align: right; width: 50%;">
+                                      <img
+                                        src="[image-url]/logo.png"
+                                        alt=""
+                                        border="0"
+                                        style="height: 60px; padding-right: 30px;"
+                                      />
+                                    </td>
+                                  </tr>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td
+                                  width="100%"
+                                  colspan="2"
+                                  style="padding-top: 0px; text-align: center;"
+                                >
+                                  <img
+                                    src="[image-url]/img_2.png"
+                                    alt=""
+                                    border="0"
+                                    style="height: 250px;"
+                                  />
+                                </td>
+                              </tr>
+                              <tr>
+                                <td class="pt36 fz-18" style="padding: 30px;" colspan="2">
+                                  <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                    <tr>
+                                      <td
+                                        class="pt36 fz-18"
+                                        style="color:#1F497D; text-align: center; font-weight: bold; font-size:22px; line-height:1;"
+                                      >
+                                        Pemesanan IPO Anda telah kami batalkan.
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                      <td
+                                        class="h5"
+                                        style="font-size:14px; line-height:1.5; color:#404852; padding: 20px 0 0; text-align: left;"
+                                      >
+                                        <p>
+                                          Terima kasih sebelumnya telah melakukan pemesanan IPO di Mandiri Sekuritas. 
+Pemesanan IPO Anda telah kami batalkan sesuai permintaan Anda pada [current-date].
+Berikut ini adalah Detail Pemesanan IPO yang telah dibatalkan:
+                                        </p>
+                                      </td>
+                                    </tr>
+
+                                    <tr>
+                                      <td style="padding: 0;">
+                                        <table
+                                          width="100%"
+                                          border="0"
+                                          cellspacing="0"
+                                          cellpadding="0"
+                                          bgcolor="#ffffff"
+                                          style="
+                                            margin-top: 10px;
+                                            font-weight: bold;
+                                          "
+                                        >
+                                          <tbody>
+                                            <tr>
+                                              <td align="center" style="padding-top: 10px;">
+                                                <table
+                                                  width="100%"
+                                                  border="1"
+                                                  bordercolor="#CACCCF"
+                                                  cellspacing="0"
+                                                  cellpadding="0"
+                                                  bgcolor="#ffffff"
+                                                  style="border-radius: 8px;"
+                                                >
+                                                  <tbody>
+                                                    <tr>
+                                                      <td
+                                                        class="h5 pb8"
+                                                        width="40%"
+                                                        style="
+                                                          font-size: 14px;
+                                                          text-align: left;
+                                                          line-height: 1.5;
+                                                          color: #000;
+                                                          border-radius: 8px 0 0 0;
+                                                          padding: 10px;
+                                                          font-weight: 500;
+                                                        "
+                                                      >
+                                                        <img src="[image-url]/ellipse.png" alt="" />
+                                                        Client ID
+                                                      </td>
+                                                      <td
+                                                        bgcolor="#F2F6FD"
+                                                        class="h5 pb8"
+                                                        width="60%"
+                                                        style="
+                                                          font-size: 14px;
+                                                          border-radius: 0 8px 0 0;
+                                                          text-align: left;
+                                                          line-height: 1.5;
+                                                          color: #2e5585;
+                                                          padding: 10px;
+                                                        "
+                                                      >
+                                                        [client-id]
+                                                      </td>
+                                                    </tr>
+                                                    <tr>
+                                                      <td
+                                                        class="h5 pb8"
+                                                        width="40%"
+                                                        style="
+                                          
+                                                          text-align: left;
+                                                          font-size: 14px;
+                                                          line-height: 1.5;
+                                                          color: #000;
+                                                          padding: 10px;
+                                                          font-weight: 500;
+                                                        "
+                                                      >
+                                                        <img src="[image-url]/ellipse.png" alt="" />
+                                                        Nama
+                                                      </td>
+                                                      <td
+                                                        bgcolor="#F2F6FD"
+                                                        class="h5 pb8"
+                                                        width="60%"
+                                                        style="
+                                                          font-weight: bold;
+                                                          text-align: left;
+                                                          font-size: 14px;
+                                                          line-height: 1.5;
+                                                          color: #2e5585;
+                                                          padding: 10px;
+                                                        "
+                                                      >
+                                                        [name]
+                                                      </td>
+                                                    </tr>
+                                                    <tr>
+                                                      <td
+                                                        class="h5 pb8"
+                                                        width="40%"
+                                                        style="
+                                                  
+                                                          text-align: left;
+                                                          font-size: 14px;
+                                                          line-height: 1.5;
+                                                          color: #000;
+                                                          padding: 10px;
+                                                          font-weight: 500;
+                                                        "
+                                                      >
+                                                        <img src="[image-url]/ellipse.png" alt="" />
+                                                        Nama Perusahaan
+                                                      </td>
+                                                      <td
+                                                        bgcolor="#F2F6FD"
+                                                        class="h5 pb8"
+                                                        width="60%"
+                                                        style="
+                                                          font-weight: bold;
+                                                          text-align: left;
+                                                          font-size: 14px;
+                                                          line-height: 1.5;
+                                                          color: #2e5585;
+                                                          padding: 10px;
+                                                        "
+                                                      >
+                                                        [company-name]
+                                                      </td>
+                                                    </tr>
+                                                    <tr>
+                                                      <td
+                                                        class="h5 pb8"
+                                                        width="40%"
+                                                        style="
+                                                        
+                                                          text-align: left;
+                                                          font-size: 14px;
+                                                          line-height: 1.5;
+                                                          color: #000;
+                                                          padding: 10px;
+                                                          font-weight: 500;
+                                                        "
+                                                      >
+                                                        <img src="[image-url]/ellipse.png" alt="" />
+                                                        Jumlah LOT
+                                                      </td>
+                                                      <td
+                                                        bgcolor="#F2F6FD"
+                                                        class="h5 pb8"
+                                                        width="60%"
+                                                        style="
+                                              
+                                                          text-align: left;
+                                                          font-size: 14px;
+                                                          line-height: 1.5;
+                                                          color: #2e5585;
+                                                          padding: 10px;
+                                                        "
+                                                      >
+                                                        [quantity]
+                                                      </td>
+                                                    </tr>
+                                                    <tr>
+                                                      <td
+                                                        class="h5 pb8"
+                                                        width="40%"
+                                                        style="
+                                              
+                                                          text-align: left;
+                                                          font-size: 14px;
+                                                          line-height: 1.5;
+                                                          color: #000;
+                                                          padding: 10px;
+                                                          font-weight: 500;
+                                                        "
+                                                      >
+                                                        <img src="[image-url]/ellipse.png" alt="" />
+                                                        Harga
+                                                      </td>
+                                                      <td
+                                                        bgcolor="#F2F6FD"
+                                                        class="h5 pb8"
+                                                        width="60%"
+                                                        style="
+                                                          font-weight: bold;
+                                                          text-align: left;
+                                                          font-size: 14px;
+                                                          line-height: 1.5;
+                                                          color: #2e5585;
+                                                          padding: 10px;
+                                                        "
+                                                      >
+                                                        [price]
+                                                      </td>
+                                                    </tr>
+                                                    <tr>
+                                                      <td
+                                                        class="h5 pb8"
+                                                        width="40%"
+                                                        style="
+                                              
+                                                          text-align: left;
+                                                          font-size: 14px;
+                                                          line-height: 1.5;
+                                                          color: #000;
+                                                          padding: 10px;
+                                                          font-weight: 500;
+                                                          border-radius: 0 0 0 8px;
+                                                        "
+                                                      >
+                                                        <img src="[image-url]/ellipse.png" alt="" />
+                                                        Nilai Pemesanan
+                                                      </td>
+                                                      <td
+                                                        bgcolor="#F2F6FD"
+                                                        class="h5 pb8"
+                                                        width="60%"
+                                                        style="
+                                                          font-weight: bold;
+                                                          text-align: left;
+                                                          font-size: 14px;
+                                                          line-height: 1.5;
+                                                          color: #2e5585;
+                                                          padding: 10px;
+                                                          border-radius: 0 0 8px 0;
+                                                        "
+                                                      >
+                                                        [amount]
+                                                      </td>
+                                                    </tr>
+                                                  </tbody>
+                                                </table>
+                                              </td>
+                                            </tr>
+                                          </tbody>
+                                        </table>
+                                      </td>
+                                    </tr>
+
+                                    <tr>
+                                      <td
+                                        class="h5 center p12-0"
+                                        style="text-align:center; font-size:14px; line-height: 1; color:#003D79; padding: 25px 0 0;"
+                                      >
+                                        Segera unduh aplikasi MOST Mandiri Sekuritas untuk mulai
+                                        berinvestasi!
+                                      </td>
+                                    </tr>
+
+                                    <tr>
+                                      <td
+                                        class="h5 center p12-0"
+                                        style="text-align:center; font-size:14px; line-height: 1; color:#1F497D; padding: 4px 0"
+                                      >
+                                        <table
+                                          width="100%"
+                                          border="0"
+                                          cellspacing="0"
+                                          cellpadding="0"
+                                          bgcolor="#ffffff"
+                                        >
+                                          <tr>
+                                            <td style="text-align:right;">
+                                              <a
+                                                href="https://play.google.com/store/apps/details?id=com.mandirisekuritas.most"
+                                                target="_blank"
+                                              >
+                                                <img
+                                                  src="[image-url]/en_playstore.png"
+                                                  width="200"
+                                                  height="auto"
+                                                  border="0"
+                                                  alt=""
+                                                />
+                                              </a>
+                                            </td>
+                                            <td style="text-align: left;">
+                                              <a
+                                                href="https://apps.apple.com/id/app/most-mobile-mandiri-sekuritas/id1104878671"
+                                                target="_blank"
+                                              >
+                                                <img
+                                                  src="[image-url]/en_appstore.png"
+                                                  width="200"
+                                                  height="auto"
+                                                  border="0"
+                                                  alt=""
+                                                />
+                                              </a>
+                                            </td>
+                                          </tr>
+                                        </table>
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                      <td
+                                        class="h5"
+                                        style="font-size:12px; text-align:center; line-height:1.5; padding: 15px 30px 0 30px; color: #404852;"
+                                      >
+                                        <p>
+                                          Terima kasih atas kepercayaan Anda telah memilih Mandiri
+                                          Sekuritas sebagai solusi dalam berinvestasi di Pasar
+                                          Modal. Selamat berinvestasi!
+                                        </p>
+                                      </td>
+                                    </tr>
+
+                                    <tr>
+                                      <td
+                                        style="border-bottom: 1px solid #dedede; padding: 10px;"
+                                      ></td>
+                                    </tr>
+                                    <tr>
+                                      <td>
+                                        <table
+                                          width="100%"
+                                          border="0"
+                                          cellspacing="0"
+                                          cellpadding="0"
+                                          bgcolor="#ffffff"
+                                        >
+                                          <tr>
+                                            <td
+                                              class="h5 pb8"
+                                              width="100%"
+                                              style="font-size:14px; line-height:1.5; color:#404852; padding:0 0 0 20px "
+                                            >
+                                              <div style="padding:30px 0 15px; font-size:18px; ">
+                                                <b style="color: #203C6A;">Care Center </b>
+                                                - Melayani dengan sepenuh hati
+                                              </div>
+                                              <table>
+                                                <tr>
+                                                  <td
+                                                    style="padding-bottom:10px;padding-right: 5px;"
+                                                  >
+                                                    <img src="[image-url]/icon_headphone.png" alt="" />
+                                                  </td>
+                                                  <td
+                                                    style="font-size:13px; padding-bottom:10px;padding-right: 5px;"
+                                                  >
+                                                    14032
+                                                  </td>
+                                                </tr>
+                                                <tr>
+                                                  <td
+                                                    style="padding-bottom:10px;padding-right: 5px;"
+                                                  >
+                                                    <img src="[image-url]/icon_mail.png" alt="" />
+                                                  </td>
+                                                  <td
+                                                    style="font-size:13px;padding-bottom:10px;padding-right: 5px; "
+                                                  >
+                                                    care_center@mandirisek.co.id
+                                                  </td>
+                                                </tr>
+                                                <tr>
+                                                  <td
+                                                    style="padding-bottom:10px;padding-right: 5px;"
+                                                  >
+                                                    <img src="[image-url]/icon_map.png" alt="" />
+                                                  </td>
+                                                  <td style="font-size:13px;padding-right: 5px; ">
+                                                    <p>
+                                                      <b>PT.Mandiri Sekuritas </b>
+                                                    </p>
+                                                  </td>
+                                                </tr>
+                                                <tr>
+                                                  <td></td>
+                                                  <td style="font-size:10px; ">
+                                                    <p>
+                                                      Menara Mandiri Lt. 24-25
+                                                    </p>
+                                                    <p>
+                                                      Jl. Jend Sudirman Kav.54-55, Jakarta
+                                                    </p>
+                                                    <p>
+                                                      12190
+                                                    </p>
+                                                  </td>
+                                                </tr>
+                                                <tr>
+                                                  <td colspan="2" style="padding: 20px 10px 10px 0">
+                                                    <table style="margin-left: 170px;">
+                                                      <tr>
+                                                        <td style="padding-right: 5px">
+                                                          <a href="">
+                                                            <img
+                                                              src="[image-url]/icon_instagram.png"
+                                                              alt=""
+                                                              width="32px"
+                                                            />
+                                                          </a>
+                                                        </td>
+                                                        <td style="padding-right: 5px">
+                                                          <a href="">
+                                                            <img
+                                                              src="[image-url]/icon_facebook.png"
+                                                              alt=""
+                                                              width="32px"
+                                                            />
+                                                          </a>
+                                                        </td>
+                                                        <td style="padding-right: 5px" ;>
+                                                          <a href="">
+                                                            <img
+                                                              src="[image-url]/icon_twitter.png"
+                                                              alt=""
+                                                              width="32px"
+                                                            />
+                                                          </a>
+                                                        </td>
+                                                        <td style="padding-right: 5px">
+                                                          <a href="">
+                                                            <img
+                                                              src="[image-url]/icon_youtube.png"
+                                                              alt=""
+                                                              width="32px"
+                                                            />
+                                                          </a>
+                                                        </td>
+                                                      </tr>
+                                                    </table>
+                                                  </td>
+                                                </tr>
+                                              </table>
+                                            </td>
+                                          </tr>
+                                        </table>
+                                      </td>
+                                    </tr>
+                                  </table>
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <!-- END Intro -->
+                      <!-- Closing -->
+                      <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                          <td
+                            class=" h5 center"
+                            style="font-size:13px; line-height:1.2; padding: 20px; text-align: center;"
+                          >
+                            Mandiri Sekuritas terdaftar dan diawasi oleh Otoritas Jasa Keuangan
+                          </td>
+                        </tr>
+                      </table>
+
+                      <!-- END Closing -->
+                      <!-- Footer -->
+
+                      <!-- END Footer -->
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+          <!-- END Container -->
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
