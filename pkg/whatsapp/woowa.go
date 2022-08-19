@@ -21,8 +21,6 @@ func NewWooWAClient(ApiUrl, Apikey string) *Client {
 }
 
 func (cl Client) SendWA(phoneNo, txtMessages string) (err error) {
-	fmt.Println("enter wa")
-	fmt.Println(cl.apikey)
 
 	type confi struct {
 		Key   string `json:"key"`
@@ -33,7 +31,7 @@ func (cl Client) SendWA(phoneNo, txtMessages string) (err error) {
 	Waconf := new(confi)
 	Waconf.Key = cl.apikey
 	Waconf.Phone = "081329998633"
-	Waconf.Pesan = "cok"
+	Waconf.Pesan = "Your Otp is " + txtMessages
 	jsonReq, err := json.Marshal(Waconf)
 
 	client := &http.Client{}
@@ -49,7 +47,7 @@ func (cl Client) SendWA(phoneNo, txtMessages string) (err error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("do err")
+
 		fmt.Print(err.Error())
 	}
 	defer resp.Body.Close()

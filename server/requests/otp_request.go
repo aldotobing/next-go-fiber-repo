@@ -3,7 +3,7 @@ package requests
 // UserOtpRequest ...
 type UserOtpRequest struct {
 	Type  string `json:"type" validate:"required"`
-	Email string `json:"email_otp"`
+	Phone string `json:"phone"`
 	// CountryCode string `json:"country_code" validate:"required"`
 	// Phone       string `json:"phone" validate:"required"`
 }

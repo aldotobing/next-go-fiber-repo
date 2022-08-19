@@ -17,6 +17,7 @@ type UserAccountParameter struct {
 	Password      string `json:"password"`
 	Gender        string `json:"gender"`
 	PhoneNo       string `json:"phone_no"`
+	Code          string `json:"code_cus"`
 	Email         string `json:"email_user"`
 	NoTelp        string `json:"no_telp"`
 	Address       string `json:"address_user"`

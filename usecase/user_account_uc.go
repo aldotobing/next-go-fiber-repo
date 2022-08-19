@@ -111,14 +111,14 @@ func (uc UserAccountUC) FindByID(c context.Context, parameter models.UserAccount
 }
 
 func (uc UserAccountUC) Login(c context.Context, data *requests.UserAccountLoginRequest) (res viewmodel.UserAccountVM, err error) {
-	chkuser, _ := uc.FindByPhoneNo(c, models.UserAccountParameter{PhoneNo: data.PhoneNo})
+	chkuser, _ := uc.FindByPhoneNo(c, models.UserAccountParameter{PhoneNo: data.PhoneNo, Code: data.Code})
 	if chkuser.ID == "" {
 		logruslogger.Log(logruslogger.WarnLevel, helper.NameAlreadyExist, functioncaller.PrintFuncName(), "email", c.Value("requestid"))
 		return res, errors.New(helper.InvalidEmail)
 	}
 	userOtpRequest := requests.UserOtpRequest{
 		Type:  OtpTypeLogin,
-		Email: data.PhoneNo,
+		Phone: data.PhoneNo,
 	}
 	res.UserID = chkuser.ID
 	otpUc := OtpUC{ContractUC: uc.ContractUC}
@@ -138,8 +138,8 @@ func (uc UserAccountUC) Login(c context.Context, data *requests.UserAccountLogin
 	res.RefreshToken = tokens.RefreshToken
 	res.RefreshExpiredDate = tokens.RefreshExpiredDate
 	res.UserID = chkuser.ID
-	tes := uc.ContractUC.WhatsApp.SendWA("081329998633", "90")
-	if tes != nil {
+	senDwaMessage := uc.ContractUC.WhatsApp.SendWA("081329998633", res.Otp)
+	if senDwaMessage != nil {
 		fmt.Println("sukses")
 	}
 
@@ -178,7 +178,7 @@ func (uc UserAccountUC) ResendOtp(c context.Context, id string, data *requests.U
 	res.UserID = id
 	userOtpRequest := requests.UserOtpRequest{
 		Type:  data.Type,
-		Email: data.Email,
+		Phone: data.Phone,
 	}
 
 	otpUc := OtpUC{ContractUC: uc.ContractUC}
@@ -197,6 +197,11 @@ func (uc UserAccountUC) ResendOtp(c context.Context, id string, data *requests.U
 	res.ExpiredDate = tokens.ExpiredDate
 	res.RefreshToken = tokens.RefreshToken
 	res.RefreshExpiredDate = tokens.RefreshExpiredDate
+
+	senDwaMessage := uc.ContractUC.WhatsApp.SendWA("081329998633", res.Otp)
+	if senDwaMessage != nil {
+		fmt.Println("sukses")
+	}
 
 	// res.RoleList = *chkuser.RoleList
 	// res.RoGroupID = *chkuser.RoleGroupID

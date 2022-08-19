@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
 )
@@ -85,8 +86,8 @@ func (repository UserAccountRepository) FindByEmailAndPassword(c context.Context
 }
 
 func (repository UserAccountRepository) FindByPhoneNo(c context.Context, parameter models.UserAccountParameter) (data models.UserAccount, err error) {
-	statement := models.UserAccountSelectStatement + ` WHERE def.created_date is not null AND p.phone_no = $1`
-	row := repository.DB.QueryRowContext(c, statement, parameter.PhoneNo)
+	statement := models.UserAccountSelectStatement + ` WHERE def.created_date is not null AND p.phone_no = $1 AND lower(p.code) = $2`
+	row := repository.DB.QueryRowContext(c, statement, parameter.PhoneNo, strings.ToLower(parameter.Code))
 
 	data, err = repository.scanRow(row)
 	if err != nil {
@@ -97,7 +98,7 @@ func (repository UserAccountRepository) FindByPhoneNo(c context.Context, paramet
 }
 
 func (repository UserAccountRepository) FindByID(c context.Context, parameter models.UserAccountParameter) (data models.UserAccount, err error) {
-	statement := models.UserAccountSelectStatement + ` WHERE def.deleted_at_user IS NULL AND def.id_user = $1`
+	statement := models.UserAccountSelectStatement + ` WHERE  def.id = $1`
 
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
 	data, err = repository.scanRow(row)
