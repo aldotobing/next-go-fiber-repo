@@ -113,4 +113,8 @@ func (boot Bootstrap) RegisterRouters() {
 	MuUserRoutes := routers.MuUserRoutes{RouterGroup: apiV1, Handler: handler}
 	MuUserRoutes.RegisterRoute()
 
+	//muuser
+	ItemRoutes := routers.ItemRoutes{RouterGroup: apiV1, Handler: handler}
+	ItemRoutes.RegisterRoute()
+
 }
