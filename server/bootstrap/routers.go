@@ -117,4 +117,7 @@ func (boot Bootstrap) RegisterRouters() {
 	ItemRoutes := routers.ItemRoutes{RouterGroup: apiV1, Handler: handler}
 	ItemRoutes.RegisterRoute()
 
+	ShoppingCartRoutes := routers.ShoppingCartRoutes{RouterGroup: apiV1, Handler: handler}
+	ShoppingCartRoutes.RegisterRoute()
+
 }
