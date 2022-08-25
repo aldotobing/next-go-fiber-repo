@@ -10,7 +10,6 @@ import (
 	"nextbasis-service-v-0.1/helper"
 	"nextbasis-service-v-0.1/pkg/functioncaller"
 	"nextbasis-service-v-0.1/pkg/logruslogger"
-	"nextbasis-service-v-0.1/pkg/str"
 	"nextbasis-service-v-0.1/server/requests"
 	"nextbasis-service-v-0.1/usecase/viewmodel"
 )
@@ -21,20 +20,6 @@ type UserAccountUC struct {
 
 // BuildBody ...
 func (uc UserAccountUC) BuildBody(res *models.UserAccount) {
-}
-
-func (uc UserAccountUC) GenerateReferalCode(c context.Context, userName string) (res models.UserAccountParameter, err error) {
-	repo := repository.NewUserAccountRepository(uc.DB)
-	res.ReferalCode = userName + str.RandNumericString(3)
-	for {
-		data, _ := repo.FindByRefferalCode(c, res)
-		if data.ID == "" {
-			break
-		}
-		res.ReferalCode = userName + str.RandAlphanumericString(3)
-	}
-
-	return res, err
 }
 
 func (uc UserAccountUC) GenerateToken(c context.Context, id string) (res viewmodel.JwtVM, err error) {
@@ -51,45 +36,9 @@ func (uc UserAccountUC) GenerateToken(c context.Context, id string) (res viewmod
 	return res, err
 }
 
-func (uc UserAccountUC) FindByRefferalCode(c context.Context, parameter models.UserAccountParameter) (res models.UserAccount, err error) {
-	repo := repository.NewUserAccountRepository(uc.DB)
-	res, err = repo.FindByRefferalCode(c, parameter)
-	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
-		return res, err
-	}
-	uc.BuildBody(&res)
-
-	return res, err
-}
-
 func (uc UserAccountUC) FindByPhoneNo(c context.Context, parameter models.UserAccountParameter) (res models.UserAccount, err error) {
 	repo := repository.NewUserAccountRepository(uc.DB)
 	res, err = repo.FindByPhoneNo(c, parameter)
-	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
-		return res, err
-	}
-	uc.BuildBody(&res)
-
-	return res, err
-}
-
-func (uc UserAccountUC) FindByEmail(c context.Context, parameter models.UserAccountParameter) (res models.UserAccount, err error) {
-	repo := repository.NewUserAccountRepository(uc.DB)
-	res, err = repo.FindByEmail(c, parameter)
-	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
-		return res, err
-	}
-	uc.BuildBody(&res)
-
-	return res, err
-}
-
-func (uc UserAccountUC) FindByEmailAndPassword(c context.Context, parameter models.UserAccountParameter) (res models.UserAccount, err error) {
-	repo := repository.NewUserAccountRepository(uc.DB)
-	res, err = repo.FindByEmailAndPassword(c, parameter)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
@@ -120,15 +69,15 @@ func (uc UserAccountUC) Login(c context.Context, data *requests.UserAccountLogin
 		Type:  OtpTypeLogin,
 		Phone: data.PhoneNo,
 	}
-	res.UserID = chkuser.ID
+	res.CustomerID = *chkuser.CustomerID
 	otpUc := OtpUC{ContractUC: uc.ContractUC}
-	res.Otp, err = otpUc.OtpRequest(c, res.UserID, &userOtpRequest)
+	res.Otp, err = otpUc.OtpRequest(c, res.CustomerID, &userOtpRequest)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "otp_request", uc.ContractUC.ReqID)
 		return res, err
 	}
 
-	tokens, err := uc.GenerateToken(c, res.UserID)
+	tokens, err := uc.GenerateToken(c, res.CustomerID)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "token_request", uc.ContractUC.ReqID)
 		return res, err
@@ -137,58 +86,45 @@ func (uc UserAccountUC) Login(c context.Context, data *requests.UserAccountLogin
 	res.ExpiredDate = tokens.ExpiredDate
 	res.RefreshToken = tokens.RefreshToken
 	res.RefreshExpiredDate = tokens.RefreshExpiredDate
-	res.UserID = chkuser.ID
-	senDwaMessage := uc.ContractUC.WhatsApp.SendWA("081329998633", res.Otp)
+	res.ID = chkuser.ID
+	res.Code = *chkuser.Code
+	res.CustomerID = *chkuser.CustomerID
+	res.CustomerName = *chkuser.Name
+	res.Phone = *chkuser.Phone
+	res.PriceListID = chkuser.PriceListID
+	res.PriceListVersionID = chkuser.PriceListVersionID
+	res.CustomerTypeID = chkuser.CustomerTypeID
+	res.CustomerLevelName = chkuser.CustomerLevelName
+
+	senDwaMessage := uc.ContractUC.WhatsApp.SendWA(res.Phone, res.Otp)
 	if senDwaMessage != nil {
 		fmt.Println("sukses")
 	}
-
-	// res.RoleList = *chkuser.RoleList
-	// res.RoGroupID = *chkuser.RoleGroupID
-	// res.QrCode = *&chkuser.QrCode
-	// EmailUc := UserAccountMailUC{ContractUC: uc.ContractUC}
-	// // mail := EmailUc.SendUserOtp(c, res.UserID, res.Otp)
-	// EmailUc := MailUC{ContractUC: uc.ContractUC}
-	// strEmail := helper.MailOTPTemplate(res.Otp)
-	// strsubjects := res.Otp + ` Is Your One-Time Password`
-	// mail := EmailUc.Send(c, data.Email, strsubjects, strEmail)
-	// if mail != nil {
-	// 	logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "mail_sender", uc.ContractUC.ReqID)
-	// 	return res, mail
-	// }
-
-	// SendSmsUc := SmsUC{ContractUC: uc.ContractUC}
-	// sendsms := SendSmsUc.SendOtpSMS("+15398003148", "+6281329998633", res.Otp, "sender")
-	// if sendsms != nil {
-	// 	// logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "sms_sender", uc.ContractUC.ReqID)
-	// 	// return res, sendsms
-	// }
-
 	return res, nil
 }
 
 func (uc UserAccountUC) ResendOtp(c context.Context, id string, data *requests.UserOtpRequest) (res viewmodel.UserAccountVM, err error) {
 
-	chkuser, _ := uc.FindByID(c, models.UserAccountParameter{ID: id})
+	chkuser, _ := uc.FindByID(c, models.UserAccountParameter{CustomerID: id})
 	if chkuser.ID == "" {
 		logruslogger.Log(logruslogger.WarnLevel, helper.ReferralNotFound, functioncaller.PrintFuncName(), "referral_code", c.Value("requestid"))
 		return res, errors.New(helper.ReferralNotFound)
 	}
 
-	res.UserID = id
+	res.CustomerID = id
 	userOtpRequest := requests.UserOtpRequest{
 		Type:  data.Type,
 		Phone: data.Phone,
 	}
 
 	otpUc := OtpUC{ContractUC: uc.ContractUC}
-	res.Otp, err = otpUc.OtpRequest(c, res.UserID, &userOtpRequest)
+	res.Otp, err = otpUc.OtpRequest(c, res.CustomerID, &userOtpRequest)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "otp_request", uc.ContractUC.ReqID)
 		return res, err
 	}
 
-	tokens, err := uc.GenerateToken(c, res.UserID)
+	tokens, err := uc.GenerateToken(c, res.CustomerID)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "token_request", uc.ContractUC.ReqID)
 		return res, err
@@ -198,50 +134,38 @@ func (uc UserAccountUC) ResendOtp(c context.Context, id string, data *requests.U
 	res.RefreshToken = tokens.RefreshToken
 	res.RefreshExpiredDate = tokens.RefreshExpiredDate
 
-	senDwaMessage := uc.ContractUC.WhatsApp.SendWA("081329998633", res.Otp)
+	res.ID = chkuser.ID
+	res.Code = *chkuser.Code
+	res.CustomerID = *chkuser.CustomerID
+	res.CustomerName = *chkuser.Name
+	res.Phone = *chkuser.Phone
+	res.PriceListID = chkuser.PriceListID
+	res.PriceListVersionID = chkuser.PriceListVersionID
+	res.CustomerTypeID = chkuser.CustomerTypeID
+	res.CustomerLevelName = chkuser.CustomerLevelName
+
+	senDwaMessage := uc.ContractUC.WhatsApp.SendWA(res.Phone, res.Otp)
 	if senDwaMessage != nil {
 		fmt.Println("sukses")
 	}
 
-	// res.RoleList = *chkuser.RoleList
-	// res.RoGroupID = *chkuser.RoleGroupID
-	// res.QrCode = *&chkuser.QrCode
-
-	// // EmailUc := UserAccountMailUC{ContractUC: uc.ContractUC}
-	// // mail := EmailUc.SendUserOtp(c, res.UserID, res.Otp)
-	// EmailUc := MailUC{ContractUC: uc.ContractUC}
-	// strEmail := helper.MailOTPTemplate(res.Otp)
-	// strsubjects := res.Otp + ` Is Your One-Time Password`
-	// mail := EmailUc.Send(c, chkuser.Email, strsubjects, strEmail)
-
-	// if mail != nil {
-	// 	logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "mail_sender", uc.ContractUC.ReqID)
-	// 	return res, mail
-	// }
 	return res, err
 }
 
 func (uc UserAccountUC) SubmitOtpUser(c context.Context, id string, data *requests.UserOtpSubmit) (res viewmodel.UserAccountVM, err error) {
 	otpUc := OtpUC{ContractUC: uc.ContractUC}
+	fmt.Println(id, data.Type)
 	verifyOtp, err := otpUc.VerifyOtp(c, id, data.Type, data.Otp)
 	if !verifyOtp {
 		logruslogger.Log(logruslogger.WarnLevel, "", functioncaller.PrintFuncName(), "otp-not-valid")
 		return res, err
 	}
 	Useracountuc := UserAccountUC{ContractUC: uc.ContractUC}
-	user, err := Useracountuc.FindByID(c, models.UserAccountParameter{ID: id})
+	user, err := Useracountuc.FindByID(c, models.UserAccountParameter{CustomerID: id})
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-find-user")
 		return res, err
 	}
-
-	// if data.Type == OtpTypeRegister {
-	// 	_, err = uc.SetActiveUser(c, user.ID)
-	// 	if err != nil {
-	// 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "set-active-fail")
-	// 		return res, err
-	// 	}
-	// }
 
 	tokens, err := uc.GenerateToken(c, user.ID)
 	if err != nil {
@@ -252,9 +176,14 @@ func (uc UserAccountUC) SubmitOtpUser(c context.Context, id string, data *reques
 	res.ExpiredDate = tokens.ExpiredDate
 	res.RefreshToken = tokens.RefreshToken
 	res.RefreshExpiredDate = tokens.RefreshExpiredDate
-	res.UserID = user.ID
-	// res.RoleList = *user.RoleList
-	// res.RoGroupID = *user.RoleGroupID
-	// res.QrCode = *&user.QrCode
+	res.ID = user.ID
+	res.Code = *user.Code
+	res.CustomerID = *user.CustomerID
+	res.CustomerName = *user.Name
+	res.Phone = *user.Phone
+	res.PriceListID = user.PriceListID
+	res.PriceListVersionID = user.PriceListVersionID
+	res.CustomerTypeID = user.CustomerTypeID
+	res.CustomerLevelName = user.CustomerLevelName
 	return res, err
 }

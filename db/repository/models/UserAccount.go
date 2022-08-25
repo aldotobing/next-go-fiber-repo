@@ -1,13 +1,20 @@
 package models
 
 type UserAccount struct {
-	ID   string  `json:"id_user"`
-	Name *string `json:"name"`
-	Code *string `json:"code"`
+	ID                 string  `json:"id_user"`
+	CustomerID         *string `json:"customer_id"`
+	Name               *string `json:"name"`
+	Code               *string `json:"code"`
+	Phone              *string `json:"phone"`
+	PriceListID        *string `json:"price_list_id"`
+	PriceListVersionID *string `json:"price_list_version_id"`
+	CustomerTypeID     *string `json:"customer_type_id"`
+	CustomerLevelName  *string `json:"customer_level_name"`
 }
 
 type UserAccountParameter struct {
 	ID            string `json:"id_user"`
+	CustomerID    string `json:"customer_id"`
 	BranchID      string `json:"id_branch"`
 	FbId          string `json:"id_facebook"`
 	GoogleId      string `json:"id_google"`
@@ -43,9 +50,16 @@ var (
 	}
 
 	// UserAccountSelectStatement ...
-	UserAccountSelectStatement = `select def.id as user_id,p._name,p.code
+	UserAccountSelectStatement = `select def.id as user_id,cus.id as cus_id,
+	cus.customer_name,
+	cus.customer_code,cus.customer_phone,
+	cus.price_list_id,
+	(select plv.id from price_list_version plv where plv.price_list_id = pl.id and now()::date between plv.start_date and plv.end_date) as version_id,
+	cus.customer_type_id,cl._name cus_level_name
 	from _user def 
-	join partner p on p.id = def.partner_id 
+	join customer cus on cus.id = def.partner_id 
+	left join price_list pl on pl.id = cus.price_list_id
+	left join customer_level cl on cl.id = cus.customer_level_id 
 	`
 
 	// UserAccountWhereStatement ...

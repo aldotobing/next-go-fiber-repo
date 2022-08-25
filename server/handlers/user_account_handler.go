@@ -35,7 +35,7 @@ func (h *UserAccountHandler) Login(ctx *fiber.Ctx) error {
 
 func (h *UserAccountHandler) ResendOtp(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
-	id := ctx.Query("user_id")
+	id := ctx.Query("customer_id")
 	input := new(requests.UserOtpRequest)
 	if err := ctx.BodyParser(input); err != nil {
 		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
@@ -53,7 +53,7 @@ func (h *UserAccountHandler) ResendOtp(ctx *fiber.Ctx) error {
 
 func (h *UserAccountHandler) SubmitOtp(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
-	id := ctx.Query("user_id")
+	id := ctx.Query("customer_id")
 	println(id)
 	input := new(requests.UserOtpSubmit)
 	if err := ctx.BodyParser(input); err != nil {

@@ -10,9 +10,6 @@ import (
 
 type IUserAccountRepository interface {
 	FindByID(c context.Context, parameter models.UserAccountParameter) (models.UserAccount, error)
-	FindByRefferalCode(c context.Context, parameter models.UserAccountParameter) (models.UserAccount, error)
-	FindByEmail(c context.Context, parameter models.UserAccountParameter) (models.UserAccount, error)
-	FindByEmailAndPassword(c context.Context, parameter models.UserAccountParameter) (models.UserAccount, error)
 	FindByPhoneNo(c context.Context, parameter models.UserAccountParameter) (models.UserAccount, error)
 }
 
@@ -27,7 +24,9 @@ func NewUserAccountRepository(DB *sql.DB) IUserAccountRepository {
 // Scan rows
 func (repository UserAccountRepository) scanRows(rows *sql.Rows) (res models.UserAccount, err error) {
 	err = rows.Scan(
-		&res.ID, &res.Name, &res.Code,
+		&res.ID, &res.CustomerID, &res.Name, &res.Code,
+		&res.Phone, &res.PriceListID, &res.PriceListVersionID,
+		&res.CustomerTypeID, &res.CustomerLevelName,
 	)
 	if err != nil {
 		return res, err
@@ -39,7 +38,9 @@ func (repository UserAccountRepository) scanRows(rows *sql.Rows) (res models.Use
 // Scan row
 func (repository UserAccountRepository) scanRow(row *sql.Row) (res models.UserAccount, err error) {
 	err = row.Scan(
-		&res.ID, &res.Name, &res.Code,
+		&res.ID, &res.CustomerID, &res.Name, &res.Code,
+		&res.Phone, &res.PriceListID, &res.PriceListVersionID,
+		&res.CustomerTypeID, &res.CustomerLevelName,
 	)
 
 	if err != nil {
@@ -49,44 +50,8 @@ func (repository UserAccountRepository) scanRow(row *sql.Row) (res models.UserAc
 	return res, nil
 }
 
-func (repository UserAccountRepository) FindByRefferalCode(c context.Context, parameter models.UserAccountParameter) (data models.UserAccount, err error) {
-	statement := models.UserAccountSelectStatement + ` WHERE def.deleted_at_user IS NULL AND def.referral_code = $1`
-	row := repository.DB.QueryRowContext(c, statement, parameter.ReferalCode)
-
-	data, err = repository.scanRow(row)
-	if err != nil {
-		return data, err
-	}
-
-	return data, nil
-}
-
-func (repository UserAccountRepository) FindByEmail(c context.Context, parameter models.UserAccountParameter) (data models.UserAccount, err error) {
-	statement := models.UserAccountSelectStatement + ` WHERE def.deleted_at_user IS NULL AND def.email_user = $1`
-	row := repository.DB.QueryRowContext(c, statement, parameter.Email)
-
-	data, err = repository.scanRow(row)
-	if err != nil {
-		return data, err
-	}
-
-	return data, nil
-}
-
-func (repository UserAccountRepository) FindByEmailAndPassword(c context.Context, parameter models.UserAccountParameter) (data models.UserAccount, err error) {
-	statement := models.UserAccountSelectStatement + ` WHERE def.deleted_at_user IS NULL AND def.email_user = $1 and def.password = $2 `
-	row := repository.DB.QueryRowContext(c, statement, parameter.Email, parameter.Password)
-
-	data, err = repository.scanRow(row)
-	if err != nil {
-		return data, err
-	}
-
-	return data, nil
-}
-
 func (repository UserAccountRepository) FindByPhoneNo(c context.Context, parameter models.UserAccountParameter) (data models.UserAccount, err error) {
-	statement := models.UserAccountSelectStatement + ` WHERE def.created_date is not null AND p.phone_no = $1 AND lower(p.code) = $2`
+	statement := models.UserAccountSelectStatement + ` WHERE def.created_date is not null AND cus.customer_phone = $1 AND lower(cus.customer_code) = $2`
 	row := repository.DB.QueryRowContext(c, statement, parameter.PhoneNo, strings.ToLower(parameter.Code))
 
 	data, err = repository.scanRow(row)
@@ -98,9 +63,9 @@ func (repository UserAccountRepository) FindByPhoneNo(c context.Context, paramet
 }
 
 func (repository UserAccountRepository) FindByID(c context.Context, parameter models.UserAccountParameter) (data models.UserAccount, err error) {
-	statement := models.UserAccountSelectStatement + ` WHERE  def.id = $1`
+	statement := models.UserAccountSelectStatement + ` WHERE  cus.id = $1`
 
-	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
+	row := repository.DB.QueryRowContext(c, statement, parameter.CustomerID)
 	data, err = repository.scanRow(row)
 	if err != nil {
 
