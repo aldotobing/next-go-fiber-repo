@@ -47,7 +47,7 @@ var (
 	CustomerOrderHeaderOrderBy = []string{"def.id", "def.created_date"}
 	// CustomerOrderHeaderOrderByrByString ...
 	CustomerOrderHeaderOrderByrByString = []string{
-		"def.created_date",
+		"def.id",
 	}
 
 	// CustomerOrderHeaderSelectStatement ...
