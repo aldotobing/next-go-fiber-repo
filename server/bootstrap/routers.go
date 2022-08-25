@@ -121,13 +121,10 @@ func (boot Bootstrap) RegisterRouters() {
 	CustomerRoutes := routers.CustomerRoutes{RouterGroup: apiV1, Handler: handler}
 	CustomerRoutes.RegisterRoute()
 
-<<<<<<< HEAD
-=======
 	ShoppingCartRoutes := routers.ShoppingCartRoutes{RouterGroup: apiV1, Handler: handler}
 	ShoppingCartRoutes.RegisterRoute()
 
 	CustomerOrderRoutes := routers.CustomerOrderHeaderRoutes{RouterGroup: apiV1, Handler: handler}
 	CustomerOrderRoutes.RegisterRoute()
 
->>>>>>> remotes/origin/adidev
 }
