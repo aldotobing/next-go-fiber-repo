@@ -20,12 +20,12 @@ func (route UserAccountRoutes) RegisterRoute() {
 
 	jwtMiddleware := middlewares.JwtMiddleware{ContractUC: handler.ContractUC}
 
-	r := route.RouterGroup.Group("/api/akun-register-login")
+	r := route.RouterGroup.Group("/api/apps/auth")
 	r.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
 
-	r.Post("/login", handler.Login)
+	r.Post("/", handler.Login)
 
-	r2 := route.RouterGroup.Group("/api/akun-verfikasi")
+	r2 := route.RouterGroup.Group("/api/apps/verify")
 	r2.Use(jwtMiddleware.VerifyUser)
 	r2.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
 	r2.Post("/submitOtp", handler.SubmitOtp)

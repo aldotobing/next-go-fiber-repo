@@ -7,7 +7,6 @@ import (
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/pkg/functioncaller"
 	"nextbasis-service-v-0.1/pkg/logruslogger"
-	"nextbasis-service-v-0.1/pkg/str"
 	"nextbasis-service-v-0.1/usecase/viewmodel"
 )
 
@@ -17,34 +16,6 @@ type MuUserUC struct {
 
 // BuildBody ...
 func (uc MuUserUC) BuildBody(res *models.MuUser) {
-}
-
-func (uc MuUserUC) GenerateBasicReferalCode(c context.Context) (res models.UserAccountParameter, err error) {
-	repo := repository.NewUserAccountRepository(uc.DB)
-	res.ReferalCode = str.RandAlphanumericString(8)
-	for {
-		data, _ := repo.FindByRefferalCode(c, res)
-		if data.ID == "" {
-			break
-		}
-		res.ReferalCode = str.RandAlphanumericString(8)
-	}
-
-	return res, err
-}
-
-func (uc MuUserUC) GenerateReferalCode(c context.Context, userName string) (res models.UserAccountParameter, err error) {
-	repo := repository.NewUserAccountRepository(uc.DB)
-	res.ReferalCode = userName + str.RandNumericString(3)
-	for {
-		data, _ := repo.FindByRefferalCode(c, res)
-		if data.ID == "" {
-			break
-		}
-		res.ReferalCode = userName + str.RandNumericString(3)
-	}
-
-	return res, err
 }
 
 func (uc MuUserUC) GenerateToken(c context.Context, id string) (res viewmodel.JwtVM, err error) {

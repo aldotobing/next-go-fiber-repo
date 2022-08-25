@@ -37,7 +37,7 @@ func (li LimitInit) LimitOtpRequest(ctx *fiber.Ctx) (err error) {
 	}
 
 	var res float64
-	key := "OtpRequest" + input.Email
+	key := "OtpRequest" + input.Phone
 	err = li.GetFromRedis(key, &res)
 	if err != nil {
 		li.StoreToRedisExp(key, 1, li.Duration)

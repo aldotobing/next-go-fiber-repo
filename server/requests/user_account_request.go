@@ -9,6 +9,7 @@ type UserAccountRegisterRequest struct {
 
 type UserAccountLoginRequest struct {
 	PhoneNo string `json:"phone_no" validate:"required"`
+	Code    string `json:"code" validate:"required"`
 }
 
 type UserAccountLoginBackEndRequest struct {
