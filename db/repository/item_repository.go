@@ -31,7 +31,7 @@ func NewItemRepository(DB *sql.DB) IItemRepository {
 // Scan rows
 func (repository ItemRepository) scanRows(rows *sql.Rows) (res models.Item, err error) {
 	err = rows.Scan(
-		&res.ID, &res.Code, &res.Name,
+		&res.ID, &res.Code, &res.Name, &res.Description, &res.ItemCategoryId, &res.ItemCategoryName, &res.ItemPicture, &res.Uom,
 	)
 	if err != nil {
 
@@ -44,7 +44,7 @@ func (repository ItemRepository) scanRows(rows *sql.Rows) (res models.Item, err 
 // Scan row
 func (repository ItemRepository) scanRow(row *sql.Row) (res models.Item, err error) {
 	err = row.Scan(
-		&res.ID, &res.Code, &res.Name,
+		&res.ID, &res.Code, &res.Name, &res.Description, &res.ItemCategoryId, &res.ItemCategoryName, &res.ItemPicture, &res.Uom,
 	)
 	if err != nil {
 		return res, err
