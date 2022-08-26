@@ -22,11 +22,11 @@ func (uc JwtUC) GenerateToken(c context.Context, payload map[string]interface{},
 
 	deviceID := xid.New().String()
 	payload["device_id"] = deviceID
-	err = uc.StoreToRedisExp("userDeviceID"+payload["user_id"].(string), deviceID, uc.EnvConfig["TOKEN_EXP_SECRET"]+"m")
-	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "device_id", c.Value("requestid"))
-		return errors.New(helper.InternalServer)
-	}
+	// err = uc.StoreToRedisExp("userDeviceID"+payload["user_id"].(string), deviceID, uc.EnvConfig["TOKEN_EXP_SECRET"]+"m")
+	// if err != nil {
+	// 	logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "device_id", c.Value("requestid"))
+	// 	return errors.New(helper.InternalServer)
+	// }
 
 	jwePayload, err := uc.ContractUC.JweCred.Generate(payload)
 	if err != nil {
