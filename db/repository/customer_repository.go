@@ -13,6 +13,7 @@ type ICustomerRepository interface {
 	SelectAll(c context.Context, parameter models.CustomerParameter) ([]models.Customer, error)
 	FindAll(ctx context.Context, parameter models.CustomerParameter) ([]models.Customer, int, error)
 	FindByID(c context.Context, parameter models.CustomerParameter) (models.Customer, error)
+	Edit(c context.Context, model *models.Customer) (*string, error)
 }
 
 // CustomerRepository ...

@@ -39,7 +39,7 @@ var (
 	}
 
 	// CitySelectStatement ...
-	CitySelectStatement = `SELECT def.id,def.code,  def._name
+	CitySelectStatement = `SELECT def.id, def.code,  def._name
 	FROM city def
 	`
 

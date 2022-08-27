@@ -78,15 +78,11 @@ func (uc CustomerUC) Edit(c context.Context, id string, data *requests.CustomerR
 	// now := time.Now().UTC()
 	// strnow := now.Format(time.RFC3339)
 	res = models.Customer{
-		ID: &id,
-		// ProvinceID: &data.ProvinceID,
-		Name: &data.Name,
-		// Longitude:  &data.Lat,
-		// Latitude:   &data.Long,
-		// CreatedAt:  &strnow,
-		// UpdatedAt:  &strnow,
-		// CreatedBy:  &data.CreatedBy,
-		// UpdatedBy:  &data.UpdatedBy,
+		ID:      &id,
+		Code:    &data.Code,
+		Name:    &data.Name,
+		Address: &data.Address,
+		Phone:   &data.Phone,
 	}
 
 	res.ID, err = repo.Edit(c, &res)
