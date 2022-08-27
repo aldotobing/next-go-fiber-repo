@@ -30,6 +30,22 @@ func (h *CustomerOrderHeaderHandler) SelectAll(ctx *fiber.Ctx) error {
 	uc := usecase.CustomerOrderHeaderUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectAll(c, parameter)
 
+	for i := range res {
+		lineuc := usecase.CustomerOrderLineUC{ContractUC: h.ContractUC}
+		lineparameter := models.CustomerOrderLineParameter{
+			HeaderID: *res[i].ID,
+			Search:   ctx.Query("search"),
+			By:       ctx.Query("by"),
+			Sort:     ctx.Query("sort"),
+		}
+		listLine, _ := lineuc.SelectAll(c, lineparameter)
+
+		if listLine != nil {
+			res[i].ListLine = listLine
+		}
+
+	}
+
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
