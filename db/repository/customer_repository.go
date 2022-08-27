@@ -13,6 +13,7 @@ type ICustomerRepository interface {
 	SelectAll(c context.Context, parameter models.CustomerParameter) ([]models.Customer, error)
 	FindAll(ctx context.Context, parameter models.CustomerParameter) ([]models.Customer, int, error)
 	FindByID(c context.Context, parameter models.CustomerParameter) (models.Customer, error)
+	Edit(c context.Context, model *models.Customer) (*string, error)
 }
 
 // CustomerRepository ...
@@ -127,4 +128,18 @@ func (repository CustomerRepository) FindByID(c context.Context, parameter model
 	}
 
 	return data, nil
+}
+
+// Edit ...
+func (repository CustomerRepository) Edit(c context.Context, model *models.Customer) (res *string, err error) {
+	statement := `UPDATE customer SET 
+	name_Customer = $1, id_province = $2, long_Customer = $3, lat_Customer = $4, 
+	updated_at_Customer = $5, updated_by_Customer = $6 WHERE id_Customer = $7 RETURNING id_Customer`
+
+	err = repository.DB.QueryRowContext(c, statement, model.Name, model.Name,
+		model.Name, model.Name, model.Name, model.Name, model.ID).Scan(&res)
+	if err != nil {
+		return res, err
+	}
+	return res, err
 }

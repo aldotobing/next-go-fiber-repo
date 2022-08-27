@@ -7,6 +7,7 @@ import (
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/pkg/functioncaller"
 	"nextbasis-service-v-0.1/pkg/logruslogger"
+	"nextbasis-service-v-0.1/server/requests"
 	"nextbasis-service-v-0.1/usecase/viewmodel"
 )
 
@@ -67,6 +68,28 @@ func (uc CustomerUC) FindByID(c context.Context, parameter models.CustomerParame
 		return res, err
 	}
 	uc.BuildBody(&res)
+
+	return res, err
+}
+
+// Edit ,...
+func (uc CustomerUC) Edit(c context.Context, id string, data *requests.CustomerRequest) (res models.Customer, err error) {
+	repo := repository.NewCustomerRepository(uc.DB)
+	// now := time.Now().UTC()
+	// strnow := now.Format(time.RFC3339)
+	res = models.Customer{
+		ID:      &id,
+		Code:    &data.Code,
+		Name:    &data.Name,
+		Address: &data.Address,
+		Phone:   &data.Phone,
+	}
+
+	res.ID, err = repo.Edit(c, &res)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
 
 	return res, err
 }
