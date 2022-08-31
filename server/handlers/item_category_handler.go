@@ -28,7 +28,17 @@ func (h *ItemCategoryHandler) SelectAll(ctx *fiber.Ctx) error {
 	uc := usecase.ItemCategoryUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectAll(c, parameter)
 
-	return h.SendResponse(ctx, res, nil, err, 0)
+	type ResponseObject struct {
+		ListObject []models.ItemCategory `json:"list_category"`
+	}
+
+	ObjectData := new(ResponseObject)
+
+	if res != nil {
+		ObjectData.ListObject = res
+	}
+
+	return h.SendResponse(ctx, ObjectData, nil, err, 0)
 }
 
 // FindAll ...
