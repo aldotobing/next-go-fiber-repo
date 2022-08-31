@@ -29,7 +29,17 @@ func (h *ItemHandler) SelectAll(ctx *fiber.Ctx) error {
 	uc := usecase.ItemUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectAll(c, parameter)
 
-	return h.SendResponse(ctx, res, nil, err, 0)
+	type StructObject struct {
+		ListObjcet []models.Item `json:"list_item"`
+	}
+
+	ObjcetData := new(StructObject)
+
+	if res != nil {
+		ObjcetData.ListObjcet = res
+	}
+
+	return h.SendResponse(ctx, ObjcetData, nil, err, 0)
 }
 
 // FindAll ...
@@ -47,7 +57,17 @@ func (h *ItemHandler) FindAll(ctx *fiber.Ctx) error {
 	uc := usecase.ItemUC{ContractUC: h.ContractUC}
 	res, meta, err := uc.FindAll(c, parameter)
 
-	return h.SendResponse(ctx, res, meta, err, 0)
+	type StructObject struct {
+		ListObjcet []models.Item `json:"list_item"`
+	}
+
+	ObjcetData := new(StructObject)
+
+	if res != nil {
+		ObjcetData.ListObjcet = res
+	}
+
+	return h.SendResponse(ctx, ObjcetData, meta, err, 0)
 }
 
 // FindByID ...
