@@ -47,7 +47,7 @@ func (h *CustomerOrderHeaderHandler) SelectAll(ctx *fiber.Ctx) error {
 	}
 
 	type StructObject struct {
-		ListObjcet []models.CustomerOrderHeader `json:"list_item"`
+		ListObjcet []models.CustomerOrderHeader `json:"list_customer_order"`
 	}
 
 	ObjcetData := new(StructObject)
