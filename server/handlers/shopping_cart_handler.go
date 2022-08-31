@@ -66,7 +66,7 @@ func (h *ShoppingCartHandler) FindAll(ctx *fiber.Ctx) error {
 	res, meta, err := uc.FindAll(c, parameter)
 
 	type StructObject struct {
-		ListObjcet []models.ShoppingCart `json:"list_item"`
+		ListObjcet []models.ShoppingCart `json:"list_sopping_cart"`
 	}
 
 	ObjcetData := new(StructObject)
