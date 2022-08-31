@@ -29,7 +29,17 @@ func (h *SalesInvoiceHandler) SelectAll(ctx *fiber.Ctx) error {
 	uc := usecase.SalesInvoiceUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectAll(c, parameter)
 
-	return h.SendResponse(ctx, res, nil, err, 0)
+	type InvoceHeaderObjcet struct {
+		ListObjcet []models.SalesInvoice `json:"list_invoice"`
+	}
+
+	ObjcetData := new(InvoceHeaderObjcet)
+
+	if res != nil {
+		ObjcetData.ListObjcet = res
+	}
+
+	return h.SendResponse(ctx, ObjcetData, nil, err, 0)
 }
 
 // FindAll ...
@@ -47,7 +57,17 @@ func (h *SalesInvoiceHandler) FindAll(ctx *fiber.Ctx) error {
 	uc := usecase.SalesInvoiceUC{ContractUC: h.ContractUC}
 	res, meta, err := uc.FindAll(c, parameter)
 
-	return h.SendResponse(ctx, res, meta, err, 0)
+	type InvoceHeaderObjcet struct {
+		ListObjcet []models.SalesInvoice `json:"list_invoice"`
+	}
+
+	ObjcetData := new(InvoceHeaderObjcet)
+
+	if res != nil {
+		ObjcetData.ListObjcet = res
+	}
+
+	return h.SendResponse(ctx, ObjcetData, meta, err, 0)
 }
 
 // FindByID ...
