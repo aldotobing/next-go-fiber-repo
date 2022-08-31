@@ -75,7 +75,7 @@ func (h *CustomerOrderHeaderHandler) FindAll(ctx *fiber.Ctx) error {
 	res, meta, err := uc.FindAll(c, parameter)
 
 	type StructObject struct {
-		ListObjcet []models.CustomerOrderHeader `json:"list_item"`
+		ListObjcet []models.CustomerOrderHeader `json:"list_customer_order"`
 	}
 
 	ObjcetData := new(StructObject)

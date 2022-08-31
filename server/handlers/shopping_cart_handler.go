@@ -38,7 +38,7 @@ func (h *ShoppingCartHandler) SelectAll(ctx *fiber.Ctx) error {
 	res, err := uc.SelectAll(c, parameter)
 
 	type StructObject struct {
-		ListObjcet []models.ShoppingCart `json:"list_item"`
+		ListObjcet []models.ShoppingCart `json:"list_sopping_cart"`
 	}
 
 	ObjcetData := new(StructObject)
