@@ -91,6 +91,7 @@ func (uc ShoppingCartUC) Add(c context.Context, data *requests.ShoppingCartReque
 		CreatedAt:  &strnow,
 		Qty:        &data.Qty,
 		StockQty:   &data.StockQty,
+		TotalPrice: &data.TotalPrice,
 	}
 	res.ID, err = repo.Add(c, &res)
 	if err != nil {
@@ -114,6 +115,7 @@ func (uc ShoppingCartUC) Edit(c context.Context, id string, data *requests.Shopp
 		Price:      &data.Price,
 		ModifiedAt: &strnow,
 		ModifiedBy: &data.CustomerID,
+		TotalPrice: &data.TotalPrice,
 	}
 
 	res.ID, err = repo.Edit(c, &res)
