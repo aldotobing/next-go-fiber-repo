@@ -103,3 +103,45 @@ func (h *CustomerOrderHeaderHandler) FindByID(ctx *fiber.Ctx) error {
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
+
+//rest
+func (h *CustomerOrderHeaderHandler) RestSelectAll(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.CustomerOrderHeaderParameter{
+		DateParam: ctx.Query("date_param"),
+		Search:    ctx.Query("search"),
+		By:        ctx.Query("by"),
+		Sort:      ctx.Query("sort"),
+	}
+	uc := usecase.CustomerOrderHeaderUC{ContractUC: h.ContractUC}
+	res, err := uc.SelectAll(c, parameter)
+
+	for i := range res {
+		lineuc := usecase.CustomerOrderLineUC{ContractUC: h.ContractUC}
+		lineparameter := models.CustomerOrderLineParameter{
+			HeaderID: *res[i].ID,
+			Search:   ctx.Query("search"),
+			By:       ctx.Query("by"),
+			Sort:     ctx.Query("sort"),
+		}
+		listLine, _ := lineuc.SelectAll(c, lineparameter)
+
+		if listLine != nil {
+			res[i].ListLine = listLine
+		}
+
+	}
+
+	type StructObject struct {
+		ListObjcet []models.CustomerOrderHeader `json:"list_customer_order"`
+	}
+
+	ObjcetData := new(StructObject)
+
+	if res != nil {
+		ObjcetData.ListObjcet = res
+	}
+
+	return h.SendResponse(ctx, ObjcetData, nil, err, 0)
+}

@@ -21,6 +21,9 @@ type ShoppingCartUC struct {
 func (uc ShoppingCartUC) BuildBody(res *models.ShoppingCart) {
 }
 
+func (uc ShoppingCartUC) BuildHroupedBody(res *models.GroupedShoppingCart) {
+}
+
 // SelectAll ...
 func (uc ShoppingCartUC) SelectAll(c context.Context, parameter models.ShoppingCartParameter) (res []models.ShoppingCart, err error) {
 	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(0, 0, parameter.By, parameter.Sort, models.ShoppingCartOrderBy, models.ShoppingCartOrderByrByString)
@@ -194,6 +197,24 @@ func (uc ShoppingCartUC) MultipleDelete(c context.Context, data *[]requests.Shop
 	}
 
 	res = listobjectData
+
+	return res, err
+}
+
+func (uc ShoppingCartUC) SelectAllForGroup(c context.Context, parameter models.ShoppingCartParameter) (res []models.GroupedShoppingCart, err error) {
+	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(0, 0, parameter.By, parameter.Sort, models.ShoppingCartOrderBy, models.ShoppingCartOrderByrByString)
+
+	repo := repository.NewShoppingCartRepository(uc.DB)
+	res, err = repo.SelectAllForGroup(c, parameter)
+
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	for i := range res {
+		uc.BuildHroupedBody(&res[i])
+	}
 
 	return res, err
 }

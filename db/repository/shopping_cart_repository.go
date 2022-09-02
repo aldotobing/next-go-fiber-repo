@@ -16,6 +16,7 @@ type IShoppingCartRepository interface {
 	Add(c context.Context, model *models.ShoppingCart) (*string, error)
 	Edit(c context.Context, model *models.ShoppingCart) (*string, error)
 	Delete(c context.Context, id string) (*string, error)
+	SelectAllForGroup(c context.Context, parameter models.ShoppingCartParameter) ([]models.GroupedShoppingCart, error)
 }
 
 // ShoppingCartRepository ...
@@ -32,7 +33,7 @@ func NewShoppingCartRepository(DB *sql.DB) IShoppingCartRepository {
 func (repository ShoppingCartRepository) scanRows(rows *sql.Rows) (res models.ShoppingCart, err error) {
 	err = rows.Scan(
 		&res.ID, &res.CustomerID, &res.CustomerName, &res.ItemID, &res.ItemName, &res.UomID, &res.UomName,
-		&res.Qty, &res.StockQty, &res.Price,
+		&res.Qty, &res.StockQty, &res.Price, &res.ItemCategoryID, &res.ItemCategoryName, &res.ItemPicture,
 	)
 	if err != nil {
 
@@ -46,7 +47,32 @@ func (repository ShoppingCartRepository) scanRows(rows *sql.Rows) (res models.Sh
 func (repository ShoppingCartRepository) scanRow(row *sql.Row) (res models.ShoppingCart, err error) {
 	err = row.Scan(
 		&res.ID, &res.CustomerID, &res.CustomerName, &res.ItemID, &res.ItemName, &res.UomID, &res.UomName,
-		&res.Qty, &res.StockQty, &res.Price,
+		&res.Qty, &res.StockQty, &res.Price, &res.ItemCategoryID, &res.ItemCategoryName, &res.ItemPicture,
+	)
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
+// Scan rows
+func (repository ShoppingCartRepository) scanGroupedRows(rows *sql.Rows) (res models.GroupedShoppingCart, err error) {
+	err = rows.Scan(
+		&res.CategoryID, &res.CategoryName,
+	)
+	if err != nil {
+
+		return res, err
+	}
+
+	return res, nil
+}
+
+// Scan row
+func (repository ShoppingCartRepository) scanGroupedRow(row *sql.Row) (res models.GroupedShoppingCart, err error) {
+	err = row.Scan(
+		&res.CategoryID, &res.CategoryName,
 	)
 	if err != nil {
 		return res, err
@@ -61,6 +87,10 @@ func (repository ShoppingCartRepository) SelectAll(c context.Context, parameter 
 
 	if parameter.CustomerID != "" {
 		conditionString += ` and def.customer_id = ` + parameter.CustomerID
+	}
+
+	if parameter.ItemCategoryID != "" {
+		conditionString += ` and it.item_category_id = ` + parameter.ItemCategoryID
 	}
 
 	statement := models.ShoppingCartSelectStatement + ` ` + models.ShoppingCartWhereStatement +
@@ -170,4 +200,32 @@ func (repository ShoppingCartRepository) Delete(c context.Context, id string) (r
 		return res, err
 	}
 	return res, err
+}
+
+func (repository ShoppingCartRepository) SelectAllForGroup(c context.Context, parameter models.ShoppingCartParameter) (data []models.GroupedShoppingCart, err error) {
+	conditionString := ``
+
+	if parameter.CustomerID != "" {
+		conditionString += ` and def.customer_id = ` + parameter.CustomerID
+	}
+
+	statement := models.GroupedShoppingCartSelectStatement + ` ` + models.ShoppingCartWhereStatement +
+		` AND (LOWER(it."_name") LIKE $1 ) ` + conditionString + ` group by it.item_category_id,ic._name  `
+	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
+
+	if err != nil {
+		return data, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+
+		temp, err := repository.scanGroupedRows(rows)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
+	}
+
+	return data, err
 }
