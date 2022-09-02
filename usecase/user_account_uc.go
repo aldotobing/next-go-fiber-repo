@@ -95,6 +95,7 @@ func (uc UserAccountUC) Login(c context.Context, data *requests.UserAccountLogin
 	res.PriceListVersionID = chkuser.PriceListVersionID
 	res.CustomerTypeID = chkuser.CustomerTypeID
 	res.CustomerLevelName = chkuser.CustomerLevelName
+	res.CustomerAddress = chkuser.CustomerAddress
 
 	senDwaMessage := uc.ContractUC.WhatsApp.SendWA(res.Phone, res.Otp)
 	if senDwaMessage != nil {

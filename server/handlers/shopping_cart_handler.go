@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -198,4 +199,52 @@ func (h *ShoppingCartHandler) CheckOut(ctx *fiber.Ctx) error {
 	res, err := uc.CheckOut(c, input)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *ShoppingCartHandler) SelecGroupedtAll(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	cusid := ctx.Params("customer_id")
+	if cusid == "" {
+		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
+	}
+
+	parameter := models.ShoppingCartParameter{
+		CustomerID: ctx.Params("customer_id"),
+		Search:     ctx.Query("search"),
+		By:         ctx.Query("by"),
+		Sort:       ctx.Query("sort"),
+	}
+	uc := usecase.ShoppingCartUC{ContractUC: h.ContractUC}
+	res, err := uc.SelectAllForGroup(c, parameter)
+
+	type StructObject struct {
+		ListObjcet []models.GroupedShoppingCart `json:"list_sopping_cart"`
+	}
+
+	ObjcetData := new(StructObject)
+
+	if res != nil {
+		ObjcetData.ListObjcet = res
+	}
+
+	if ObjcetData.ListObjcet != nil && len(ObjcetData.ListObjcet) > 0 {
+		for i, object := range ObjcetData.ListObjcet {
+			lineparameter := models.ShoppingCartParameter{
+				CustomerID:     ctx.Params("customer_id"),
+				ItemCategoryID: object.CategoryID,
+				Search:         ctx.Query("search"),
+				By:             ctx.Query("by"),
+				Sort:           ctx.Query("sort"),
+			}
+			lineres, err := uc.SelectAll(c, lineparameter)
+			if err != nil {
+				fmt.Println("error bind")
+			}
+			ObjcetData.ListObjcet[i].ListShoppingChart = lineres
+
+		}
+	}
+
+	return h.SendResponse(ctx, ObjcetData, nil, err, 0)
 }

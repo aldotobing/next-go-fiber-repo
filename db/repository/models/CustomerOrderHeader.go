@@ -36,6 +36,7 @@ type CustomerOrderHeaderParameter struct {
 	ID         string `json:"id_customer_order_header"`
 	CustomerID string `json:"id_customer"`
 	Search     string `json:"search"`
+	DateParam  string `json:"date_param"`
 	Page       int    `json:"page"`
 	Offset     int    `json:"offset"`
 	Limit      int    `json:"limit"`

@@ -73,6 +73,10 @@ func (repository CustomerOrderHeaderRepository) SelectAll(c context.Context, par
 		conditionString += ` AND def.cust_ship_to_id = '` + parameter.CustomerID + `'`
 	}
 
+	if parameter.DateParam != "" {
+		conditionString += ` AND def.modified_date > '` + parameter.DateParam + `'`
+	}
+
 	statement := models.CustomerOrderHeaderSelectStatement + ` ` + models.CustomerOrderHeaderWhereStatement +
 		` AND (LOWER(cus."customer_name") LIKE $1 ) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")

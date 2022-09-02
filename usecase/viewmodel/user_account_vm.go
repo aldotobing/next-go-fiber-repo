@@ -18,4 +18,5 @@ type UserAccountVM struct {
 	PriceListVersionID *string `json:"price_list_version_id"`
 	CustomerTypeID     *string `json:"customer_type_id"`
 	CustomerLevelName  *string `json:"customer_level_name"`
+	CustomerAddress    *string `json:"customer_address"`
 }

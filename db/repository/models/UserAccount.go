@@ -10,6 +10,7 @@ type UserAccount struct {
 	PriceListVersionID *string `json:"price_list_version_id"`
 	CustomerTypeID     *string `json:"customer_type_id"`
 	CustomerLevelName  *string `json:"customer_level_name"`
+	CustomerAddress    *string `json:"customer_address"`
 }
 
 type UserAccountParameter struct {
@@ -55,7 +56,7 @@ var (
 	cus.customer_code,cus.customer_phone,
 	cus.price_list_id,
 	(select plv.id from price_list_version plv where plv.price_list_id = pl.id and now()::date between plv.start_date and plv.end_date) as version_id,
-	cus.customer_type_id,cl._name cus_level_name
+	cus.customer_type_id,cl._name cus_level_name,cus.customer_address
 	from _user def 
 	join customer cus on cus.id = def.partner_id 
 	left join price_list pl on pl.id = cus.price_list_id
