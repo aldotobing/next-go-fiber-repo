@@ -82,7 +82,6 @@ func (uc UserAccountUC) Login(c context.Context, data *requests.UserAccountLogin
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "token_request", uc.ContractUC.ReqID)
 		return res, err
 	}
-	fmt.Println("login")
 	res.Token = tokens.Token
 	res.ExpiredDate = tokens.ExpiredDate
 	res.RefreshToken = tokens.RefreshToken
@@ -99,7 +98,7 @@ func (uc UserAccountUC) Login(c context.Context, data *requests.UserAccountLogin
 	res.CustomerAddress = chkuser.CustomerAddress
 	res.SalesmanID = chkuser.SalesmanID
 	res.SalesmanName = chkuser.SalesmanName
-	res.SalesmanCode = chkuser.SalesmanName
+	res.SalesmanCode = chkuser.SalesmanCode
 
 	senDwaMessage := uc.ContractUC.WhatsApp.SendWA(res.Phone, res.Otp)
 	if senDwaMessage != nil {
@@ -150,7 +149,7 @@ func (uc UserAccountUC) ResendOtp(c context.Context, id string, data *requests.U
 	res.CustomerLevelName = chkuser.CustomerLevelName
 	res.SalesmanID = chkuser.SalesmanID
 	res.SalesmanName = chkuser.SalesmanName
-	res.SalesmanCode = chkuser.SalesmanName
+	res.SalesmanCode = chkuser.SalesmanCode
 	senDwaMessage := uc.ContractUC.WhatsApp.SendWA(res.Phone, res.Otp)
 	if senDwaMessage != nil {
 		fmt.Println("sukses")
@@ -192,5 +191,8 @@ func (uc UserAccountUC) SubmitOtpUser(c context.Context, id string, data *reques
 	res.PriceListVersionID = user.PriceListVersionID
 	res.CustomerTypeID = user.CustomerTypeID
 	res.CustomerLevelName = user.CustomerLevelName
+	res.SalesmanID = user.SalesmanID
+	res.SalesmanName = user.SalesmanName
+	res.SalesmanCode = user.SalesmanCode
 	return res, err
 }
