@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strings"
 	"time"
 
@@ -99,6 +100,8 @@ func (repository CityRepository) FindAll(ctx context.Context, parameter models.C
 		return data, count, err
 	}
 
+	fmt.Println(query)
+
 	defer rows.Close()
 	for rows.Next() {
 		temp, err := repository.scanRows(rows)
@@ -120,8 +123,10 @@ func (repository CityRepository) FindAll(ctx context.Context, parameter models.C
 
 // FindByID ...
 func (repository CityRepository) FindByID(c context.Context, parameter models.CityParameter) (data models.City, err error) {
-	statement := models.CitySelectStatement + ` WHERE def.deleted_at_city IS NULL AND def.id_city = $1`
+	statement := models.CitySelectStatement + ` WHERE def.created_date IS NOT NULL AND def.id = $1`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
+
+	fmt.Println(statement)
 
 	data, err = repository.scanRow(row)
 	if err != nil {

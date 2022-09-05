@@ -113,7 +113,7 @@ func (boot Bootstrap) RegisterRouters() {
 	MuUserRoutes := routers.MuUserRoutes{RouterGroup: apiV1, Handler: handler}
 	MuUserRoutes.RegisterRoute()
 
-	//muuser
+	//item routes
 	ItemRoutes := routers.ItemRoutes{RouterGroup: apiV1, Handler: handler}
 	ItemRoutes.RegisterRoute()
 
@@ -124,6 +124,15 @@ func (boot Bootstrap) RegisterRouters() {
 	//SalesInvoice Routes
 	SalesInvoiceRoutes := routers.SalesInvoiceRoutes{RouterGroup: apiV1, Handler: handler}
 	SalesInvoiceRoutes.RegisterRoute()
+	//Customer routes
+	CustomerRoutes := routers.CustomerRoutes{RouterGroup: apiV1, Handler: handler}
+	CustomerRoutes.RegisterRoute()
+
+	ShoppingCartRoutes := routers.ShoppingCartRoutes{RouterGroup: apiV1, Handler: handler}
+	ShoppingCartRoutes.RegisterRoute()
+
+	CustomerOrderRoutes := routers.CustomerOrderHeaderRoutes{RouterGroup: apiV1, Handler: handler}
+	CustomerOrderRoutes.RegisterRoute()
 
 	//ProductFocusCategory Routes
 	ProductFocusCategoryRoutes := routers.ProductFocusCategoryRoutes{RouterGroup: apiV1, Handler: handler}
