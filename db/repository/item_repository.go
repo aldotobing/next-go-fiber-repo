@@ -84,6 +84,7 @@ func (repository ItemRepository) scanRow(row *sql.Row) (res models.Item, err err
 func (repository ItemRepository) SelectAll(c context.Context, parameter models.ItemParameter) (data []models.Item, err error) {
 	conditionString := ``
 	conditionStringPriceListVersion := ``
+	conditionStringException := ``
 
 	if parameter.ItemCategoryId != "" {
 		conditionString += ` AND def.item_category_id = '` + parameter.ItemCategoryId + `'`
@@ -93,8 +94,12 @@ func (repository ItemRepository) SelectAll(c context.Context, parameter models.I
 		conditionStringPriceListVersion += ` AND ip.price_list_version_id = '` + parameter.PriceListVersionId + `'`
 	}
 
+	if parameter.ExceptId != "" {
+		conditionStringException += ` AND def.id <> '` + parameter.ExceptId + `'`
+	}
+
 	statement := models.ItemSelectStatement + ` ` + models.ItemWhereStatement +
-		` AND (LOWER(def."_name") LIKE $1) ` + conditionString + conditionStringPriceListVersion + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+		` AND (LOWER(def."_name") LIKE $1) ` + conditionString + conditionStringPriceListVersion + conditionStringException + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 
 	fmt.Println(statement)
@@ -119,6 +124,8 @@ func (repository ItemRepository) SelectAll(c context.Context, parameter models.I
 // FindAll ...
 func (repository ItemRepository) FindAll(ctx context.Context, parameter models.ItemParameter) (data []models.Item, count int, err error) {
 	conditionString := ``
+	conditionStringPriceListVersion := ``
+	conditionStringException := ``
 
 	if parameter.ItemCategoryId != "" {
 		conditionString += ` AND def.item_category_id = '` + parameter.ItemCategoryId + `'`
@@ -128,7 +135,7 @@ func (repository ItemRepository) FindAll(ctx context.Context, parameter models.I
 		conditionString += ` AND IP.PRICE_LIST_VERSION_ID = '` + parameter.PriceListVersionId + `'`
 	}
 
-	query := models.ItemSelectStatement + ` ` + models.ItemWhereStatement + ` ` + conditionString + `
+	query := models.ItemSelectStatement + ` ` + models.ItemWhereStatement + ` ` + conditionString + conditionStringPriceListVersion + conditionStringException + `
 		AND (LOWER(def."_name") LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
 	if err != nil {

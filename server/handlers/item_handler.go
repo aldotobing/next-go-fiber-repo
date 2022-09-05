@@ -26,6 +26,7 @@ func (h *ItemHandler) SelectAll(ctx *fiber.Ctx) error {
 		Search:             ctx.Query("search"),
 		By:                 ctx.Query("by"),
 		Sort:               ctx.Query("sort"),
+		ExceptId:           ctx.Query("except_id"),
 	}
 	uc := usecase.ItemUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectAll(c, parameter)
@@ -55,6 +56,7 @@ func (h *ItemHandler) FindAll(ctx *fiber.Ctx) error {
 		Limit:              str.StringToInt(ctx.Query("limit")),
 		By:                 ctx.Query("by"),
 		Sort:               ctx.Query("sort"),
+		ExceptId:           ctx.Query("except_id"),
 	}
 	uc := usecase.ItemUC{ContractUC: h.ContractUC}
 	res, meta, err := uc.FindAll(c, parameter)
