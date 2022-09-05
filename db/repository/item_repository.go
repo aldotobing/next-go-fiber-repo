@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -31,7 +32,19 @@ func NewItemRepository(DB *sql.DB) IItemRepository {
 // Scan rows
 func (repository ItemRepository) scanRows(rows *sql.Rows) (res models.Item, err error) {
 	err = rows.Scan(
-		&res.ID, &res.Code, &res.Name, &res.Description, &res.ItemCategoryId, &res.ItemCategoryName, &res.ItemPicture, &res.Uom,
+		&res.ID,
+		&res.Code,
+		&res.Name,
+		&res.Description,
+		&res.ItemCategoryId,
+		&res.ItemCategoryName,
+		&res.ItemPicture,
+		&res.UomID,
+		&res.UomName,
+		&res.UomLineConversion,
+		&res.ItemPrice,
+		&res.PriceListVersionId,
+		&res.Uom,
 	)
 	if err != nil {
 
@@ -44,8 +57,22 @@ func (repository ItemRepository) scanRows(rows *sql.Rows) (res models.Item, err 
 // Scan row
 func (repository ItemRepository) scanRow(row *sql.Row) (res models.Item, err error) {
 	err = row.Scan(
-		&res.ID, &res.Code, &res.Name, &res.Description, &res.ItemCategoryId, &res.ItemCategoryName, &res.ItemPicture, &res.Uom,
+		&res.ID,
+		&res.Code,
+		&res.Name,
+		&res.Description,
+		&res.ItemCategoryId,
+		&res.ItemCategoryName,
+		&res.ItemPicture,
+		&res.UomID,
+		&res.UomName,
+		&res.UomLineConversion,
+		&res.ItemPrice,
+		&res.PriceListVersionId,
+		&res.Uom,
 	)
+
+	fmt.Println(err)
 	if err != nil {
 		return res, err
 	}
@@ -56,14 +83,21 @@ func (repository ItemRepository) scanRow(row *sql.Row) (res models.Item, err err
 // SelectAll ...
 func (repository ItemRepository) SelectAll(c context.Context, parameter models.ItemParameter) (data []models.Item, err error) {
 	conditionString := ``
+	conditionStringPriceListVersion := ``
 
 	if parameter.ItemCategoryId != "" {
 		conditionString += ` AND def.item_category_id = '` + parameter.ItemCategoryId + `'`
 	}
 
+	if parameter.PriceListVersionId != "" {
+		conditionStringPriceListVersion += ` AND ip.price_list_version_id = '` + parameter.PriceListVersionId + `'`
+	}
+
 	statement := models.ItemSelectStatement + ` ` + models.ItemWhereStatement +
-		` AND (LOWER(def."_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+		` AND (LOWER(def."_name") LIKE $1) ` + conditionString + conditionStringPriceListVersion + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
+
+	fmt.Println(statement)
 
 	if err != nil {
 		return data, err
@@ -88,6 +122,10 @@ func (repository ItemRepository) FindAll(ctx context.Context, parameter models.I
 
 	if parameter.ItemCategoryId != "" {
 		conditionString += ` AND def.item_category_id = '` + parameter.ItemCategoryId + `'`
+	}
+
+	if parameter.PriceListVersionId != "" {
+		conditionString += ` AND IP.PRICE_LIST_VERSION_ID = '` + parameter.PriceListVersionId + `'`
 	}
 
 	query := models.ItemSelectStatement + ` ` + models.ItemWhereStatement + ` ` + conditionString + `
@@ -118,6 +156,18 @@ func (repository ItemRepository) FindAll(ctx context.Context, parameter models.I
 
 // FindByID ...
 func (repository ItemRepository) FindByID(c context.Context, parameter models.ItemParameter) (data models.Item, err error) {
+	statement := models.ItemSelectStatement + ` WHERE def.created_date IS NOT NULL AND def.id = $1`
+	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
+
+	data, err = repository.scanRow(row)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
+}
+
+func (repository ItemRepository) FindByCategoryID(c context.Context, parameter models.ItemParameter) (data models.Item, err error) {
 	statement := models.ItemSelectStatement + ` WHERE def.created_date IS NOT NULL AND def.id = $1`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
 

@@ -21,10 +21,11 @@ func (h *ItemHandler) SelectAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.ItemParameter{
-		ItemCategoryId: ctx.Query("item_category_id"),
-		Search:         ctx.Query("search"),
-		By:             ctx.Query("by"),
-		Sort:           ctx.Query("sort"),
+		ItemCategoryId:     ctx.Query("item_category_id"),
+		PriceListVersionId: ctx.Query("price_list_version_id"),
+		Search:             ctx.Query("search"),
+		By:                 ctx.Query("by"),
+		Sort:               ctx.Query("sort"),
 	}
 	uc := usecase.ItemUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectAll(c, parameter)
@@ -47,12 +48,13 @@ func (h *ItemHandler) FindAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.ItemParameter{
-		ItemCategoryId: ctx.Query("item_category_id"),
-		Search:         ctx.Query("search"),
-		Page:           str.StringToInt(ctx.Query("page")),
-		Limit:          str.StringToInt(ctx.Query("limit")),
-		By:             ctx.Query("by"),
-		Sort:           ctx.Query("sort"),
+		ItemCategoryId:     ctx.Query("item_category_id"),
+		PriceListVersionId: ctx.Query("price_list_version_id"),
+		Search:             ctx.Query("search"),
+		Page:               str.StringToInt(ctx.Query("page")),
+		Limit:              str.StringToInt(ctx.Query("limit")),
+		By:                 ctx.Query("by"),
+		Sort:               ctx.Query("sort"),
 	}
 	uc := usecase.ItemUC{ContractUC: h.ContractUC}
 	res, meta, err := uc.FindAll(c, parameter)
