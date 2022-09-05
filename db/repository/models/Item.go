@@ -32,6 +32,7 @@ type ItemParameter struct {
 	Limit              int    `json:"limit"`
 	By                 string `json:"by"`
 	Sort               string `json:"sort"`
+	ExceptId           string `json:"except_id"`
 }
 
 var (
@@ -56,10 +57,10 @@ var (
 		IC.ID AS I_CATEGORY_ID,
 		IC._NAME AS I_CATEGORY_NAME,
 		DEF.ITEM_PICTURE AS ITEM_PICTURE,
-		UOM.ID::varchar(255) AS UOM_ID,
-		UOM._NAME::varchar(255) AS UOM_NAME,
-		IUL.CONVERSION::varchar(255) AS IUL_CONVERSION,
-		IP.PRICE::varchar(255) AS ITEM_PRICE,
+		UOM.ID AS UOM_ID,
+		UOM._NAME AS UOM_NAME,
+		IUL.CONVERSION AS IUL_CONVERSION,
+		IP.PRICE AS ITEM_PRICE,
 		IP.PRICE_LIST_VERSION_ID AS PRICE_LIST_VERSION_ID,
 			(SELECT JSON_AGG(T) 
 				FROM
