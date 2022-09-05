@@ -133,11 +133,13 @@ func (repository CustomerRepository) FindByID(c context.Context, parameter model
 // Edit ...
 func (repository CustomerRepository) Edit(c context.Context, model *models.Customer) (res *string, err error) {
 	statement := `UPDATE customer SET 
-	name_Customer = $1, id_province = $2, long_Customer = $3, lat_Customer = $4, 
-	updated_at_Customer = $5, updated_by_Customer = $6 WHERE id_Customer = $7 RETURNING id_Customer`
-
-	err = repository.DB.QueryRowContext(c, statement, model.Name, model.Name,
-		model.Name, model.Name, model.Name, model.Name, model.ID).Scan(&res)
+	customer_name = $1, 
+	customer_address = $2, 
+	customer_phone = $3 
+	WHERE id = $4 
+	RETURNING id`
+	err = repository.DB.QueryRowContext(c, statement, model.Name, model.Address,
+		model.Phone, model.ID).Scan(&res)
 	if err != nil {
 		return res, err
 	}

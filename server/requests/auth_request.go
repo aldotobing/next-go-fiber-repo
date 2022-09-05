@@ -24,5 +24,5 @@ type VerifyMailRequest struct {
 
 // VerifyUserKeyRequest ...
 type VerifyUserKeyRequest struct {
-	Key string `json:"key" validate:"required`
+	Key string `json:"key" validate:"required"`
 }
