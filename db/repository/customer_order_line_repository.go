@@ -29,7 +29,7 @@ func NewCustomerOrderLineRepository(DB *sql.DB) ICustomerOrderLineRepository {
 func (repository CustomerOrderLineRepository) scanRows(rows *sql.Rows) (res models.CustomerOrderLine, err error) {
 	err = rows.Scan(
 		&res.ID, &res.HeaderID, &res.CategoryName, &res.CategoryID,
-		&res.ItemID, &res.ItemID, &res.UomID, &res.UomName,
+		&res.ItemID, &res.ItemName, &res.UomID, &res.UomName,
 		&res.QTY, &res.StockQty, &res.UnitPrice, &res.GrossAmount,
 		&res.UseDiscPercent, &res.DisPercent1, &res.DisPercent2, &res.DisPercent3,
 		&res.DisPercent4, &res.DisPercent5, &res.TaxableAmount, &res.TaxAmount,
@@ -47,7 +47,7 @@ func (repository CustomerOrderLineRepository) scanRows(rows *sql.Rows) (res mode
 func (repository CustomerOrderLineRepository) scanRow(row *sql.Row) (res models.CustomerOrderLine, err error) {
 	err = row.Scan(
 		&res.ID, &res.HeaderID, &res.CategoryName, &res.CategoryID,
-		&res.ItemID, &res.ItemID, &res.UomID, &res.UomName,
+		&res.ItemID, &res.ItemName, &res.UomID, &res.UomName,
 		&res.QTY, &res.StockQty, &res.UnitPrice, &res.GrossAmount,
 		&res.UseDiscPercent, &res.DisPercent1, &res.DisPercent2, &res.DisPercent3,
 		&res.DisPercent4, &res.DisPercent5, &res.TaxableAmount, &res.TaxAmount,
