@@ -49,8 +49,8 @@ var (
 	ItemPromoSelectStatement = `
 	SELECT
 	pil.item_id          AS item_id,
-	u._name              AS uom_name,
 	i._name              AS item_name,
+	u._name              AS uom_name,
 	prl.disc_pct         AS disc_percent,
 	prl.disc_amt         AS disc_amount,
 	prl.minimum_value    AS minimum_value,
