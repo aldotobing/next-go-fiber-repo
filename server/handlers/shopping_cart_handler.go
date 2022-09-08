@@ -219,7 +219,7 @@ func (h *ShoppingCartHandler) SelecGroupedtAll(ctx *fiber.Ctx) error {
 	res, err := uc.SelectAllForGroup(c, parameter)
 
 	type StructObject struct {
-		ListObjcet []models.GroupedShoppingCart `json:"list_sopping_cart"`
+		ListObjcet []models.GroupedShoppingCart `json:"list_shopping_cart"`
 	}
 
 	ObjcetData := new(StructObject)

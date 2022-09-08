@@ -137,4 +137,7 @@ func (boot Bootstrap) RegisterRouters() {
 	ItemPromoRoutes := routers.ItemPromoRoutes{RouterGroup: apiV1, Handler: handler}
 	ItemPromoRoutes.RegisterRoute()
 
+	//ProductFocusCategory Routes
+	ProductFocusCategoryRoutes := routers.ProductFocusCategoryRoutes{RouterGroup: apiV1, Handler: handler}
+	ProductFocusCategoryRoutes.RegisterRoute()
 }

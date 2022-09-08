@@ -25,7 +25,7 @@ type ShoppingCart struct {
 type GroupedShoppingCart struct {
 	CategoryID        string         `json:"category_id"`
 	CategoryName      string         `json:"CategoryName"`
-	ListShoppingChart []ShoppingCart `json:"list_shopping_cart"`
+	ListShoppingChart []ShoppingCart `json:"list_sopping_cart"`
 }
 
 // ShoppingCartParameter ...

@@ -87,7 +87,7 @@ func (uc UserAccountUC) Login(c context.Context, data *requests.UserAccountLogin
 	res.RefreshToken = tokens.RefreshToken
 	res.RefreshExpiredDate = tokens.RefreshExpiredDate
 	res.ID = chkuser.ID
-	res.Code = *chkuser.Code
+	res.Code = chkuser.Code
 	res.CustomerID = *chkuser.CustomerID
 	res.CustomerName = *chkuser.Name
 	res.Phone = *chkuser.Phone
@@ -96,6 +96,9 @@ func (uc UserAccountUC) Login(c context.Context, data *requests.UserAccountLogin
 	res.CustomerTypeID = chkuser.CustomerTypeID
 	res.CustomerLevelName = chkuser.CustomerLevelName
 	res.CustomerAddress = chkuser.CustomerAddress
+	res.SalesmanID = chkuser.SalesmanID
+	res.SalesmanName = chkuser.SalesmanName
+	res.SalesmanCode = chkuser.SalesmanCode
 
 	senDwaMessage := uc.ContractUC.WhatsApp.SendWA(res.Phone, res.Otp)
 	if senDwaMessage != nil {
@@ -136,7 +139,7 @@ func (uc UserAccountUC) ResendOtp(c context.Context, id string, data *requests.U
 	res.RefreshExpiredDate = tokens.RefreshExpiredDate
 
 	res.ID = chkuser.ID
-	res.Code = *chkuser.Code
+	res.Code = chkuser.Code
 	res.CustomerID = *chkuser.CustomerID
 	res.CustomerName = *chkuser.Name
 	res.Phone = *chkuser.Phone
@@ -144,7 +147,9 @@ func (uc UserAccountUC) ResendOtp(c context.Context, id string, data *requests.U
 	res.PriceListVersionID = chkuser.PriceListVersionID
 	res.CustomerTypeID = chkuser.CustomerTypeID
 	res.CustomerLevelName = chkuser.CustomerLevelName
-
+	res.SalesmanID = chkuser.SalesmanID
+	res.SalesmanName = chkuser.SalesmanName
+	res.SalesmanCode = chkuser.SalesmanCode
 	senDwaMessage := uc.ContractUC.WhatsApp.SendWA(res.Phone, res.Otp)
 	if senDwaMessage != nil {
 		fmt.Println("sukses")
@@ -178,7 +183,7 @@ func (uc UserAccountUC) SubmitOtpUser(c context.Context, id string, data *reques
 	res.RefreshToken = tokens.RefreshToken
 	res.RefreshExpiredDate = tokens.RefreshExpiredDate
 	res.ID = user.ID
-	res.Code = *user.Code
+	res.Code = user.Code
 	res.CustomerID = *user.CustomerID
 	res.CustomerName = *user.Name
 	res.Phone = *user.Phone
@@ -186,5 +191,8 @@ func (uc UserAccountUC) SubmitOtpUser(c context.Context, id string, data *reques
 	res.PriceListVersionID = user.PriceListVersionID
 	res.CustomerTypeID = user.CustomerTypeID
 	res.CustomerLevelName = user.CustomerLevelName
+	res.SalesmanID = user.SalesmanID
+	res.SalesmanName = user.SalesmanName
+	res.SalesmanCode = user.SalesmanCode
 	return res, err
 }
