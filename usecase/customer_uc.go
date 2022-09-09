@@ -61,6 +61,7 @@ func (uc CustomerUC) FindAll(c context.Context, parameter models.CustomerParamet
 
 // FindByID ...
 func (uc CustomerUC) FindByID(c context.Context, parameter models.CustomerParameter) (res models.Customer, err error) {
+
 	repo := repository.NewCustomerRepository(uc.DB)
 	res, err = repo.FindByID(c, parameter)
 	if err != nil {
