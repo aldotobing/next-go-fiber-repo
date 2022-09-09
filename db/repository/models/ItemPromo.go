@@ -60,7 +60,7 @@ var (
 	prl.description      AS description,
 	pr.start_date        AS start_date,
 	pr.end_date          AS end_date 
-FROM
+	FROM
 	promo_item_line pil 
 		LEFT JOIN promo_line prl 
 		ON prl.id = pil.promo_line_id 
