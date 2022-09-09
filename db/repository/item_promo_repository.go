@@ -82,7 +82,7 @@ func (repository ItemPromoRepository) scanRow(row *sql.Row) (res models.ItemProm
 func (repository ItemPromoRepository) SelectAll(c context.Context, parameter models.ItemPromoParameter) (data []models.ItemPromo, err error) {
 	conditionString := ``
 
-	if parameter.StartDate != "" || parameter.EndDate != "" {
+	if parameter.StartDate != "" && parameter.EndDate != "" {
 		conditionString += ` AND pr.start_date = '` + parameter.StartDate + `' AND pr.end_date = '` + parameter.EndDate + `'`
 	}
 

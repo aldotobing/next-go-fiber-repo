@@ -62,16 +62,16 @@ func (h *CustomerHandler) FindAll(ctx *fiber.Ctx) error {
 	res, meta, err := uc.FindAll(c, parameter)
 
 	type StructObject struct {
-		ListObjcet []models.Customer `json:"list_customer"`
+		ListObject []models.Customer `json:"list_customer"`
 	}
 
-	ObjcetData := new(StructObject)
+	ObjectData := new(StructObject)
 
 	if res != nil {
-		ObjcetData.ListObjcet = res
+		ObjectData.ListObject = res
 	}
 
-	return h.SendResponse(ctx, ObjcetData, meta, err, 0)
+	return h.SendResponse(ctx, ObjectData, meta, err, 0)
 }
 
 // FindByID ...
@@ -88,7 +88,17 @@ func (h *CustomerHandler) FindByID(ctx *fiber.Ctx) error {
 	uc := usecase.CustomerUC{ContractUC: h.ContractUC}
 	res, err := uc.FindByID(c, parameter)
 
-	return h.SendResponse(ctx, res, nil, err, 0)
+	type StructObject struct {
+		ListObject models.Customer `json:"customer"`
+	}
+
+	ObjectData := new(StructObject)
+
+	// if res != nil {
+	ObjectData.ListObject = res
+	// }
+
+	return h.SendResponse(ctx, ObjectData, nil, err, 0)
 }
 
 // Edit ...
