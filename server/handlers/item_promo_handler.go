@@ -32,7 +32,7 @@ func (h *ItemPromoHandler) SelectAll(ctx *fiber.Ctx) error {
 	res, err := uc.SelectAll(c, parameter)
 
 	type StructObject struct {
-		ListObjcet []models.ItemPromo `json:"list_ItemPromo"`
+		ListObjcet []models.ItemPromo `json:"list_item"`
 	}
 
 	ObjcetData := new(StructObject)
@@ -61,7 +61,7 @@ func (h *ItemPromoHandler) FindAll(ctx *fiber.Ctx) error {
 	res, meta, err := uc.FindAll(c, parameter)
 
 	type StructObject struct {
-		ListObjcet []models.ItemPromo `json:"list_ItemPromo"`
+		ListObjcet []models.ItemPromo `json:"list_item"`
 	}
 
 	ObjcetData := new(StructObject)

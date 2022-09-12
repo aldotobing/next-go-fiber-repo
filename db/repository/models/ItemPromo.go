@@ -2,18 +2,26 @@ package models
 
 // ItemPromoPromo ...
 type ItemPromo struct {
-	ItemID       *string `json:"item_id"`
-	ItemName     *string `json:"item_name"`
-	UomName      *string `json:"uom_name"`
-	DiscPercent  *string `json:"disc_percent"`
-	DiscAmount   *string `json:"disc_amount"`
-	MinValue     *string `json:"min_value"`
-	MinQty       *string `json:"min_qty"`
-	CustMaxQty   *string `json:"cust_max_qty"`
-	GlobalMaxQty *string `json:"global_max_qty"`
-	Description  *string `json:"description"`
-	StartDate    *string `json:"start_date"`
-	EndDate      *string `json:"end_date"`
+	ItemID             *string `json:"item_id"`
+	ItemName           *string `json:"item_name"`
+	ItemDescription    *string `json:"item_description"`
+	ItemCategoryID     *string `json:"item_category_id"`
+	ItemCategoryName   *string `json:"item_category_name"`
+	ItemPicture        *string `json:"item_picture"`
+	UomID              *string `json:"uom_id"`
+	UomName            *string `json:"uom_name"`
+	UomLineConversion  *string `json:"uom_line_conversion"`
+	ItemPrice          *string `json:"item_price"`
+	PriceListVersionID *string `json:"price_list_version_id"`
+	DiscPercent        *string `json:"disc_percent"`
+	DiscAmount         *string `json:"disc_amount"`
+	MinValue           *string `json:"min_value"`
+	MinQty             *string `json:"min_qty"`
+	CustMaxQty         *string `json:"cust_max_qty"`
+	GlobalMaxQty       *string `json:"global_max_qty"`
+	Description        *string `json:"description"`
+	StartDate          *string `json:"start_date"`
+	EndDate            *string `json:"end_date"`
 }
 
 // ItemPromoParameter ...
@@ -47,29 +55,36 @@ var (
 		--ItemPromo CONVERSION > 1 (HIGHEST UOM)
 	*/
 	ItemPromoSelectStatement = `
-	SELECT
-	pil.item_id          AS item_id,
-	i._name              AS item_name,
-	u._name              AS uom_name,
-	prl.disc_pct         AS disc_percent,
-	prl.disc_amt         AS disc_amount,
-	prl.minimum_value    AS minimum_value,
-	prl.minimum_qty      AS minimum_qty,
-	prl.customer_max_qty AS cus_max_qty,
-	prl.global_max_qty   AS global_max_qty,
-	prl.description      AS description,
-	pr.start_date        AS start_date,
-	pr.end_date          AS end_date 
-	FROM
-	promo_item_line pil 
-		LEFT JOIN promo_line prl 
-		ON prl.id = pil.promo_line_id 
-			LEFT JOIN promo pr 
-			ON pr.id = prl.promo_id 
-				LEFT JOIN item i 
-				ON i.id = pil.item_id 
-					LEFT JOIN uom u 
-					ON u.id = pil.uom_id
+	SELECT 
+		PIL.ITEM_ID AS ITEM_ID,
+		I._NAME AS ITEM_NAME,
+		I.DESCRIPTION AS I_DESCRIPTION,
+		IC.ID AS I_CATEGORY_ID,
+		IC._NAME AS I_CATEGORY_NAME,
+		I.ITEM_PICTURE AS ITEM_PICTURE,
+		U.ID AS UOM_ID,
+		U._NAME AS UOM_NAME,
+		IUL.CONVERSION AS IUL_CONVERSION,
+		IP.PRICE AS ITEM_PRICE,
+		IP.PRICE_LIST_VERSION_ID AS PRICE_LIST_VERSION_ID,
+		PRL.DISC_PCT AS DISC_PERCENT,
+		PRL.DISC_AMT AS DISC_AMOUNT,
+		PRL.MINIMUM_VALUE AS MINIMUM_VALUE,
+		PRL.MINIMUM_QTY AS MINIMUM_QTY,
+		PRL.CUSTOMER_MAX_QTY AS CUS_MAX_QTY,
+		PRL.GLOBAL_MAX_QTY AS GLOBAL_MAX_QTY,
+		PRL.DESCRIPTION AS DESCRIPTION,
+		PR.START_DATE AS START_DATE,
+		PR.END_DATE AS END_DATE
+	FROM PROMO_ITEM_LINE PIL
+	LEFT JOIN PROMO_LINE PRL ON PRL.ID = PIL.PROMO_LINE_ID
+	LEFT JOIN PROMO PR ON PR.ID = PRL.PROMO_ID
+	LEFT JOIN ITEM I ON I.ID = PIL.ITEM_ID
+	LEFT JOIN UOM U ON U.ID = PIL.UOM_ID
+	LEFT JOIN ITEM_CATEGORY IC ON IC.ID = I.ITEM_CATEGORY_ID
+	LEFT JOIN ITEM_UOM_LINE IUL ON IUL.ITEM_ID = I.ID
+	JOIN ITEM_PRICE IP ON IP.UOM_ID = U.ID
+	AND IP.ITEM_ID = IUL.ITEM_ID
 	`
 
 	// ItemPromoWhereStatement ...
