@@ -31,11 +31,20 @@ func (repository CustomerRepository) scanRows(rows *sql.Rows) (res models.Custom
 	err = rows.Scan(
 		&res.ID,
 		&res.Code,
-		&res.Name,
+		&res.CustomerName,
+		&res.CustomerCpName,
+		&res.CustomerAddress,
+		&res.CustomerProvinceName,
+		&res.CustomerCityName,
+		&res.CustomerDistrictName,
+		&res.CustomerSubdistrictName,
+		&res.CustomerSalesmanCode,
+		&res.CustomerSalesmanName,
+		&res.CustomerSalesmanPhone,
+		&res.CustomerSalesCycle,
 		&res.CustomerTypeId,
 		&res.CustomerTypeName,
-		&res.Address,
-		&res.Phone,
+		&res.CustomerPhone,
 		&res.Point,
 		&res.GiftName,
 		&res.Loyalty,
@@ -53,11 +62,20 @@ func (repository CustomerRepository) scanRow(row *sql.Row) (res models.Customer,
 	err = row.Scan(
 		&res.ID,
 		&res.Code,
-		&res.Name,
+		&res.CustomerName,
+		&res.CustomerCpName,
+		&res.CustomerAddress,
+		&res.CustomerProvinceName,
+		&res.CustomerCityName,
+		&res.CustomerDistrictName,
+		&res.CustomerSubdistrictName,
+		&res.CustomerSalesmanCode,
+		&res.CustomerSalesmanName,
+		&res.CustomerSalesmanPhone,
+		&res.CustomerSalesCycle,
 		&res.CustomerTypeId,
 		&res.CustomerTypeName,
-		&res.Address,
-		&res.Phone,
+		&res.CustomerPhone,
 		&res.Point,
 		&res.GiftName,
 		&res.Loyalty,
@@ -74,11 +92,11 @@ func (repository CustomerRepository) SelectAll(c context.Context, parameter mode
 	conditionString := ``
 
 	if parameter.ID != "" {
-		conditionString += ` AND def.id = '` + parameter.ID + `'`
+		conditionString += ` AND c.id = '` + parameter.ID + `'`
 	}
 
 	statement := models.CustomerSelectStatement + ` ` + models.CustomerWhereStatement +
-		` AND (LOWER(def."customer_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+		` AND (LOWER(c."customer_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 
 	//print
@@ -106,11 +124,11 @@ func (repository CustomerRepository) FindAll(ctx context.Context, parameter mode
 	conditionString := ``
 
 	if parameter.ID != "" {
-		conditionString += ` AND def.id = '` + parameter.ID + `'`
+		conditionString += ` AND c.id = '` + parameter.ID + `'`
 	}
 
 	query := models.CustomerSelectStatement + ` ` + models.CustomerWhereStatement + ` ` + conditionString + `
-		AND (LOWER(def."customer_name") LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
+		AND (LOWER(c."customer_name") LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
 	if err != nil {
 		return data, count, err
@@ -129,15 +147,15 @@ func (repository CustomerRepository) FindAll(ctx context.Context, parameter mode
 		return data, count, err
 	}
 
-	query = `SELECT COUNT(*) FROM "customer" def ` + models.CustomerWhereStatement + ` ` +
-		conditionString + ` AND (LOWER(def."customer_name") LIKE $1)`
+	query = `SELECT COUNT(*) FROM "customer" c ` + models.CustomerWhereStatement + ` ` +
+		conditionString + ` AND (LOWER(c."customer_name") LIKE $1)`
 	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
 	return data, count, err
 }
 
 // FindByID ...
 func (repository CustomerRepository) FindByID(c context.Context, parameter models.CustomerParameter) (data models.Customer, err error) {
-	statement := models.CustomerSelectStatement + ` WHERE def.created_date IS NOT NULL AND def.id = $1`
+	statement := models.CustomerSelectStatement + ` WHERE c.created_date IS NOT NULL AND c.id = $1`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
 
 	data, err = repository.scanRow(row)
@@ -156,8 +174,11 @@ func (repository CustomerRepository) Edit(c context.Context, model *models.Custo
 	customer_phone = $3 
 	WHERE id = $4 
 	RETURNING id`
-	err = repository.DB.QueryRowContext(c, statement, model.Name, model.Address,
-		model.Phone, model.ID).Scan(&res)
+	err = repository.DB.QueryRowContext(c, statement,
+		model.CustomerName,
+		model.CustomerAddress,
+		model.CustomerPhone,
+		model.ID).Scan(&res)
 	if err != nil {
 		return res, err
 	}
