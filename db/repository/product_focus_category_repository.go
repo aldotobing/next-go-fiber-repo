@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -85,6 +86,8 @@ func (repository ProductFocusCategoryRepository) FindAll(ctx context.Context, pa
 
 	query := models.ProductFocusCategorySelectStatement + ` ` + models.ProductFocusCategoryWhereStatement + ` ` + conditionString + `
 		AND (LOWER(ic."_name") LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
+
+	fmt.Println(query)
 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
 	if err != nil {
 		return data, count, err
@@ -103,7 +106,8 @@ func (repository ProductFocusCategoryRepository) FindAll(ctx context.Context, pa
 		return data, count, err
 	}
 
-	query = `SELECT COUNT(*) FROM "product_focus" def ` + models.ProductFocusCategoryWhereStatement + ` ` +
+	query = `SELECT COUNT(*) FROM "product_focus" def  JOIN ITEM I ON I.ID = DEF.ITEM_ID
+	JOIN ITEM_CATEGORY IC ON IC.ID = I.ITEM_CATEGORY_ID ` + models.ProductFocusCategoryWhereStatement + ` ` +
 		conditionString + ` AND (LOWER(ic."_name") LIKE $1)`
 	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
 	return data, count, err
@@ -111,7 +115,7 @@ func (repository ProductFocusCategoryRepository) FindAll(ctx context.Context, pa
 
 // FindByID ...
 func (repository ProductFocusCategoryRepository) FindByID(c context.Context, parameter models.ProductFocusCategoryParameter) (data models.ProductFocusCategory, err error) {
-	statement := models.ProductFocusCategorySelectStatement + ` WHERE def.created_date IS NOT NULL AND def.id = $1`
+	statement := models.ProductFocusCategorySelectStatement + ` WHERE def.created_date IS NOT NULL AND ic.id = $1`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
 
 	data, err = repository.scanRow(row)

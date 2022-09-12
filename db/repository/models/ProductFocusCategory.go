@@ -23,15 +23,14 @@ type ProductFocusCategoryParameter struct {
 
 var (
 	// ProductFocusCategoryOrderBy ...
-	ProductFocusCategoryOrderBy = []string{"def.id", "ic._name", "def.created_date"}
+	ProductFocusCategoryOrderBy = []string{"ic.id", "ic._name", "def.created_date"}
 	// ProductFocusCategoryOrderByrByString ...
 	ProductFocusCategoryOrderByrByString = []string{
-		"ic._name",
+		"ic.id",
 	}
 
 	// ProductFocusCategorySelectStatement ...
-	ProductFocusCategorySelectStatement = `SELECT DEF.ID AS DEF_ID,
-	IC.CODE AS IC_CODE,
+	ProductFocusCategorySelectStatement = `SELECT DISTINCT IC.ID AS IC_ID, IC.CODE AS IC_CODE,
 	IC._NAME AS IC_NAME,
 	null AS PICTURE
 FROM PRODUCT_FOCUS DEF
