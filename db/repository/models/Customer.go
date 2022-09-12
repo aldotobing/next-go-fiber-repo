@@ -2,17 +2,25 @@ package models
 
 // Customer ...
 type Customer struct {
-	ID               *string `json:"customer_id"`
-	Code             *string `json:"customer_code"`
-	Name             *string `json:"customer_name"`
-	CustomerTypeId   *string `json:"customer_type_id"`
-	CustomerTypeName *string `json:"customer_type_name"`
-	Address          *string `json:"customer_address"`
-	Phone            *string `json:"customer_phone"`
-	Point            *string `json:"customer_point"`
-	GiftName         *string `json:"customer_gift_name"`
-	GiftDesc         *string `json:"customer_gift_desc"`
-	Loyalty          *string `json:"customer_loyalty"`
+	ID                    *string `json:"customer_id"`
+	Code                  *string `json:"customer_code"`
+	Name                  *string `json:"customer_name"`
+	CustomerCpName        *string `json:"customer_cp_name"`
+	Address               *string `json:"customer_address"`
+	CustomerProvince      *string `json:"customer_province"`
+	CustomerCity          *string `json:"customer_city"`
+	CustomerDistrict      *string `json:"customer_district"`
+	CustomerSubdistrict   *string `json:"customer_subdistrict"`
+	CustomerSalesmanCode  *string `json:"customer_salesman_code"`
+	CustomerSalesmanName  *string `json:"customer_salesman_name"`
+	CustomerSalesmanPhone *string `json:"customer_salesman_phone"`
+	CustomerSalesCycle    *string `json:"customer_sales_cycle"`
+	CustomerTypeId        *string `json:"customer_type_id"`
+	CustomerTypeName      *string `json:"customer_type_name"`
+	Phone                 *string `json:"customer_phone"`
+	Point                 *string `json:"customer_point"`
+	GiftName              *string `json:"customer_gift_name"`
+	Loyalty               *string `json:"customer_loyalty"`
 }
 
 // CustomerParameter ...

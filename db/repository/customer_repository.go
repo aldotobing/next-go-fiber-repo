@@ -29,7 +29,16 @@ func NewCustomerRepository(DB *sql.DB) ICustomerRepository {
 // Scan rows
 func (repository CustomerRepository) scanRows(rows *sql.Rows) (res models.Customer, err error) {
 	err = rows.Scan(
-		&res.ID, &res.Code, &res.Name, &res.CustomerTypeId, &res.CustomerTypeName, &res.Address, &res.Phone, &res.Point, &res.GiftName, &res.GiftDesc, &res.Loyalty,
+		&res.ID,
+		&res.Code,
+		&res.Name,
+		&res.CustomerTypeId,
+		&res.CustomerTypeName,
+		&res.Address,
+		&res.Phone,
+		&res.Point,
+		&res.GiftName,
+		&res.Loyalty,
 	)
 	if err != nil {
 
@@ -42,7 +51,16 @@ func (repository CustomerRepository) scanRows(rows *sql.Rows) (res models.Custom
 // Scan row
 func (repository CustomerRepository) scanRow(row *sql.Row) (res models.Customer, err error) {
 	err = row.Scan(
-		&res.ID, &res.Code, &res.Name, &res.CustomerTypeId, &res.CustomerTypeName, &res.Address, &res.Phone, &res.Point, &res.GiftName, &res.GiftDesc, &res.Loyalty,
+		&res.ID,
+		&res.Code,
+		&res.Name,
+		&res.CustomerTypeId,
+		&res.CustomerTypeName,
+		&res.Address,
+		&res.Phone,
+		&res.Point,
+		&res.GiftName,
+		&res.Loyalty,
 	)
 	if err != nil {
 		return res, err
