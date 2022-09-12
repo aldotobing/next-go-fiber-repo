@@ -41,8 +41,9 @@ var (
 	// CitySelectStatement ...
 	CitySelectStatement = `SELECT def.id, def.code,  def._name
 	FROM city def
+	join province prov on prov.id = def.province_id
 	`
 
 	// CityWhereStatement ...
-	CityWhereStatement = `WHERE def.created_date IS not NULL`
+	CityWhereStatement = `WHERE def._name IS not NULL`
 )

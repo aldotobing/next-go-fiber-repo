@@ -96,15 +96,15 @@ func (uc ProvinceUC) Add(c context.Context, data *requests.ProvinceRequest) (res
 	}
 
 	repo := repository.NewProvinceRepository(uc.DB)
-	now := time.Now().UTC()
-	nowstr := now.Format(time.RFC3339)
+	// now := time.Now().UTC()
+	// nowstr := now.Format(time.RFC3339)
 	res = models.Province{
-		Code:      &data.Code,
-		Name:      &data.Name,
-		IdNation:  &data.IdNation,
-		CreatedAt: &nowstr,
-		UpdatedAt: &nowstr,
-		CreatedBy: &data.CreatedBy,
+		Code: &data.Code,
+		Name: &data.Name,
+		// IdNation:  &data.IdNation,
+		// CreatedAt: &nowstr,
+		// UpdatedAt: &nowstr,
+		// CreatedBy: &data.CreatedBy,
 	}
 	res.ID, err = repo.Add(c, &res)
 	if err != nil {
@@ -118,15 +118,15 @@ func (uc ProvinceUC) Add(c context.Context, data *requests.ProvinceRequest) (res
 // Edit ,...
 func (uc ProvinceUC) Edit(c context.Context, id string, data *requests.ProvinceRequest) (res models.Province, err error) {
 	repo := repository.NewProvinceRepository(uc.DB)
-	now := time.Now().UTC()
-	nowstr := now.Format(time.RFC3339)
+	// now := time.Now().UTC()
+	// nowstr := now.Format(time.RFC3339)
 	res = models.Province{
-		ID:        id,
-		Code:      &data.Code,
-		Name:      &data.Name,
-		IdNation:  &data.IdNation,
-		UpdatedAt: &nowstr,
-		UpdatedBy: &data.UpdatedBy,
+		ID:   id,
+		Code: &data.Code,
+		Name: &data.Name,
+		// IdNation:  &data.IdNation,
+		// UpdatedAt: &nowstr,
+		// UpdatedBy: &data.UpdatedBy,
 	}
 
 	res.ID, err = repo.Edit(c, &res)

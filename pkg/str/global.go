@@ -25,6 +25,23 @@ func EmptyString(text string) *string {
 	return &text
 }
 
+// EmptyString ...
+func NullString(text *string) *string {
+	if text == nil {
+		return nil
+	}
+	return text
+}
+
+// EmptyStringToZero ...
+func EmptyStringToZero(text string) *string {
+	var ZeroString = "0"
+	if text == "" {
+		return &ZeroString
+	}
+	return &text
+}
+
 // NullStringToEmty ...
 func NullToEmptyString(text *string) string {
 	if text == nil {

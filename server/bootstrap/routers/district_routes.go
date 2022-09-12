@@ -19,10 +19,10 @@ type DistrictRoutes struct {
 // RegisterRoute register district routes
 func (route DistrictRoutes) RegisterRoute() {
 	handler := handlers.DistrictHandler{Handler: route.Handler}
-	jwtMiddleware := middlewares.JwtMiddleware{ContractUC: handler.ContractUC}
+	// jwtMiddleware := middlewares.JwtMiddleware{ContractUC: handler.ContractUC}
 
-	r := route.RouterGroup.Group("/api/district")
-	r.Use(jwtMiddleware.VerifyUser)
+	r := route.RouterGroup.Group("/api/apps/district")
+	// r.Use(jwtMiddleware.VerifyUser)
 	r.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
 	r.Get("/", handler.FindAll)
 	r.Get("/select", handler.SelectAll)

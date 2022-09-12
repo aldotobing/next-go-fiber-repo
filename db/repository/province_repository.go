@@ -34,7 +34,7 @@ func NewProvinceRepository(DB *sql.DB) IProvinceRepository {
 // Scan rows
 func (repository ProvinceRepository) scanRows(rows *sql.Rows) (res models.Province, err error) {
 	err = rows.Scan(
-		&res.ID, &res.Code, &res.Name, &res.CreatedAt, &res.UpdatedAt, &res.DeletedAt,
+		&res.ID, &res.Code, &res.Name,
 	)
 	if err != nil {
 		return res, err
@@ -46,7 +46,7 @@ func (repository ProvinceRepository) scanRows(rows *sql.Rows) (res models.Provin
 // Scan row
 func (repository ProvinceRepository) scanRow(row *sql.Row) (res models.Province, err error) {
 	err = row.Scan(
-		&res.ID, &res.Code, &res.Name, &res.CreatedAt, &res.UpdatedAt, &res.DeletedAt,
+		&res.ID, &res.Code, &res.Name,
 	)
 	if err != nil {
 		return res, err
@@ -60,7 +60,7 @@ func (repository ProvinceRepository) SelectAll(c context.Context, parameter mode
 	conditionString := ``
 
 	statement := models.ProvinceSelectStatement + ` ` + models.ProvinceWhereStatement +
-		` AND (LOWER(def."name_province") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+		` AND (LOWER(def."_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 	if err != nil {
 		return data, err
@@ -83,7 +83,7 @@ func (repository ProvinceRepository) FindAll(ctx context.Context, parameter mode
 	conditionString := ``
 
 	query := models.ProvinceSelectStatement + ` ` + models.ProvinceWhereStatement + ` ` + conditionString + `
-		AND (LOWER(def."name_province") LIKE $1) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
+		AND (LOWER(def."_name") LIKE $1) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
 	if err != nil {
 		return data, count, err
@@ -102,8 +102,8 @@ func (repository ProvinceRepository) FindAll(ctx context.Context, parameter mode
 		return data, count, err
 	}
 
-	query = `SELECT COUNT(*) FROM "mp_province" def ` + models.ProvinceWhereStatement + ` ` +
-		conditionString + ` AND (LOWER(def."name_province") LIKE $1)`
+	query = `SELECT COUNT(*) FROM "province" def ` + models.ProvinceWhereStatement + ` ` +
+		conditionString + ` AND (LOWER(def."_name") LIKE $1)`
 	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
 
 	return data, count, err
@@ -111,7 +111,7 @@ func (repository ProvinceRepository) FindAll(ctx context.Context, parameter mode
 
 // FindByID ...
 func (repository ProvinceRepository) FindByID(c context.Context, parameter models.ProvinceParameter) (data models.Province, err error) {
-	statement := models.ProvinceSelectStatement + ` WHERE def.deleted_at_province IS NULL AND def.id_province = $1`
+	statement := models.ProvinceSelectStatement + ` WHERE def._name IS NOT NULL AND def.id = $1`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
 
 	data, err = repository.scanRow(row)
@@ -124,7 +124,7 @@ func (repository ProvinceRepository) FindByID(c context.Context, parameter model
 
 // FindByCode ...
 func (repository ProvinceRepository) FindByCode(c context.Context, parameter models.ProvinceParameter) (data models.Province, err error) {
-	statement := models.ProvinceSelectStatement + ` WHERE def.deleted_at IS NULL AND def.code = $1`
+	statement := models.ProvinceSelectStatement + ` WHERE def._name IS NOT NULL AND def.code = $1`
 	row := repository.DB.QueryRowContext(c, statement, parameter.Code)
 
 	data, err = repository.scanRow(row)
@@ -140,7 +140,7 @@ func (repository ProvinceRepository) Add(c context.Context, model *models.Provin
 	statement := `INSERT INTO mp_province (code_province, name_province, id_nation,created_at_province,created_by_province)
 	VALUES ($1, $2, $3, $4,$5) RETURNING id_province`
 
-	err = repository.DB.QueryRowContext(c, statement, model.Code, model.Name, model.IdNation, model.CreatedAt, model.CreatedBy).Scan(&res)
+	err = repository.DB.QueryRowContext(c, statement, model.Code, model.Name).Scan(&res)
 
 	if err != nil {
 		return res, err
@@ -153,7 +153,7 @@ func (repository ProvinceRepository) Edit(c context.Context, model *models.Provi
 	statement := `UPDATE mp_province SET code_province = $1, name_province = $2, updated_at_province =$3, updated_by_province= $4 
 	WHERE id_province = $5 RETURNING id_province`
 
-	err = repository.DB.QueryRowContext(c, statement, model.Code, model.Name, model.UpdatedAt, model.UpdatedBy, model.ID).Scan(&res)
+	err = repository.DB.QueryRowContext(c, statement, model.Code, model.Name, model.ID).Scan(&res)
 	if err != nil {
 		return res, err
 	}
