@@ -15,6 +15,7 @@ type IProductFocusCategoryRepository interface {
 	FindAll(ctx context.Context, parameter models.ProductFocusCategoryParameter) ([]models.ProductFocusCategory, int, error)
 	FindByID(c context.Context, parameter models.ProductFocusCategoryParameter) (models.ProductFocusCategory, error)
 	FindByBranchID(c context.Context, parameter models.ProductFocusCategoryParameter) (models.ProductFocusCategory, error)
+	FindByCategoryID(ctx context.Context, parameter models.ProductFocusCategoryParameter) ([]models.ProductFocusCategory, int, error)
 	// Add(c context.Context, model *models.ProductFocusCategory) (*string, error)
 	// Edit(c context.Context, model *models.ProductFocusCategory) (*string, error)
 	// Delete(c context.Context, id string, now time.Time) (string, error)
@@ -129,7 +130,7 @@ func (repository ProductFocusCategoryRepository) FindByID(c context.Context, par
 // FindByBranchID ...
 func (repository ProductFocusCategoryRepository) FindByBranchID(c context.Context, parameter models.ProductFocusCategoryParameter) (data models.ProductFocusCategory, err error) {
 	statement := models.ProductFocusCategorySelectStatement + ` WHERE def.created_date IS NOT NULL AND def.branch_id = $1`
-	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
+	row := repository.DB.QueryRowContext(c, statement, parameter.BRANCHID)
 
 	data, err = repository.scanRow(row)
 	if err != nil {
@@ -137,4 +138,39 @@ func (repository ProductFocusCategoryRepository) FindByBranchID(c context.Contex
 	}
 
 	return data, nil
+}
+
+// FindByCategoryID ...
+func (repository ProductFocusCategoryRepository) FindByCategoryID(ctx context.Context, parameter models.ProductFocusCategoryParameter) (data []models.ProductFocusCategory, count int, err error) {
+	conditionString := ``
+
+	query := `SELECT distinct I._NAME AS I_NAME, IC.ID AS IC_ID, I.CODE AS I_CODE,
+	null AS PICTURE FROM "product_focus" def  JOIN ITEM I ON I.ID = DEF.ITEM_ID
+	JOIN ITEM_CATEGORY IC ON IC.ID = I.ITEM_CATEGORY_ID ` + models.ProductFocusCategoryWhereStatement + ` ` + conditionString + `
+		AND (LOWER(i."_name") LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
+	fmt.Println(query)
+	fmt.Println(query)
+	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
+	if err != nil {
+		return data, count, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		temp, err := repository.scanRows(rows)
+		if err != nil {
+			return data, count, err
+		}
+		data = append(data, temp)
+	}
+	err = rows.Err()
+	if err != nil {
+		return data, count, err
+	}
+
+	query = `SELECT COUNT(*) FROM "product_focus" def  JOIN ITEM I ON I.ID = DEF.ITEM_ID
+	JOIN ITEM_CATEGORY IC ON IC.ID = I.ITEM_CATEGORY_ID ` + models.ProductFocusCategoryWhereStatement + ` ` +
+		conditionString + ` AND (LOWER(i."_name") LIKE $1)`
+	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
+	return data, count, err
 }

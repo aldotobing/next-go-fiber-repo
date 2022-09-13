@@ -83,3 +83,23 @@ func (uc ProductFocusCategoryUC) FindByBranchID(c context.Context, parameter mod
 
 	return res, err
 }
+
+// FindByCategoryID ...
+func (uc ProductFocusCategoryUC) FindByCategoryID(c context.Context, parameter models.ProductFocusCategoryParameter) (res []models.ProductFocusCategory, p viewmodel.PaginationVM, err error) {
+	parameter.Offset, parameter.Limit, parameter.Page, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.ProductFocusCategoryOrderBy, models.ProductFocusCategoryOrderByrByString)
+
+	var count int
+	repo := repository.NewProductFocusCategoryRepository(uc.DB)
+	res, count, err = repo.FindByCategoryID(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, p, err
+	}
+
+	p = uc.setPaginationResponse(parameter.Page, parameter.Limit, count)
+	for i := range res {
+		uc.BuildBody(&res[i])
+	}
+
+	return res, p, err
+}
