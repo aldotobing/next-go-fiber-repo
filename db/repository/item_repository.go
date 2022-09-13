@@ -142,6 +142,8 @@ func (repository ItemRepository) FindAll(ctx context.Context, parameter models.I
 		return data, count, err
 	}
 
+	fmt.Println(query)
+
 	defer rows.Close()
 	for rows.Next() {
 		temp, err := repository.scanRows(rows)
