@@ -10,20 +10,22 @@ type ProductFocusCategory struct {
 
 // ProductFocusCategoryParameter ...
 type ProductFocusCategoryParameter struct {
-	ID     string `json:"id"`
-	Code   string `json:"code"`
-	Name   string `json:"name"`
-	Search string `json:"search"`
-	Page   int    `json:"page"`
-	Offset int    `json:"offset"`
-	Limit  int    `json:"limit"`
-	By     string `json:"by"`
-	Sort   string `json:"sort"`
+	ID         string `json:"id"`
+	CategoryID string `json:"category_id"`
+	BRANCHID   string `json:"branch_id"`
+	Code       string `json:"code"`
+	Name       string `json:"name"`
+	Search     string `json:"search"`
+	Page       int    `json:"page"`
+	Offset     int    `json:"offset"`
+	Limit      int    `json:"limit"`
+	By         string `json:"by"`
+	Sort       string `json:"sort"`
 }
 
 var (
 	// ProductFocusCategoryOrderBy ...
-	ProductFocusCategoryOrderBy = []string{"ic.id", "ic._name", "def.created_date"}
+	ProductFocusCategoryOrderBy = []string{"ic.id", "ic._name", "def.created_date", "i._name"}
 	// ProductFocusCategoryOrderByrByString ...
 	ProductFocusCategoryOrderByrByString = []string{
 		"ic.id",

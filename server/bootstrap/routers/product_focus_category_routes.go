@@ -28,4 +28,6 @@ func (route ProductFocusCategoryRoutes) RegisterRoute() {
 	r.Get("/select", handler.SelectAll)
 	r.Get("/id/:id", handler.FindByID)
 	r.Get("/branchid/:branchid", handler.FindByBranchID)
+	r.Get("/itemfocus", handler.FindByCategoryID)
+
 }
