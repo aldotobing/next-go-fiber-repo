@@ -7,9 +7,13 @@ type Customer struct {
 	CustomerName            *string `json:"customer_name"`
 	CustomerCpName          *string `json:"customer_cp_name"`
 	CustomerAddress         *string `json:"customer_address"`
+	CustomerPostalCode      *string `json:"customer_postal_code"`
 	CustomerProvinceName    *string `json:"customer_province_name"`
+	CustomerCityID          *string `json:"customer_city_id"`
 	CustomerCityName        *string `json:"customer_city_name"`
+	CustomerDistrictID      *string `json:"customer_district_id"`
 	CustomerDistrictName    *string `json:"customer_district_name"`
+	CustomerSubdistrictID   *string `json:"customer_subdistrict_id"`
 	CustomerSubdistrictName *string `json:"customer_subdistrict_name"`
 	CustomerSalesmanCode    *string `json:"customer_salesman_code"`
 	CustomerSalesmanName    *string `json:"customer_salesman_name"`
@@ -70,13 +74,13 @@ var (
 		CG.GIFT_NAME AS CUST_GIFT_NAME,
 		LOY.LOYALTY_NAME AS CUST_LOYALTI_NAME
 	FROM CUSTOMER C
-	JOIN CUSTOMER_TYPE CT ON CT.ID = C.CUSTOMER_TYPE_ID
+	LEFT JOIN CUSTOMER_TYPE CT ON CT.ID = C.CUSTOMER_TYPE_ID
 	JOIN PROVINCE PRV ON PRV.ID = C.CUSTOMER_PROVINCE_ID
 	JOIN CITY CTY ON CTY.ID = C.CUSTOMER_CITY_ID
 	JOIN DISTRICT DIST ON DIST.ID = C.CUSTOMER_DISTRICT_ID
 	JOIN SUBDISTRICT SDIST ON SDIST.ID = C.CUSTOMER_SUBDISTRICT_ID
-	JOIN SALESMAN S ON S.ID = C.SALESMAN_ID
-	JOIN PARTNER PS ON PS.ID = S.PARTNER_ID
+	LEFT JOIN SALESMAN S ON S.ID = C.SALESMAN_ID
+	LEFT JOIN PARTNER PS ON PS.ID = S.PARTNER_ID
 	LEFT JOIN CUSTOMER_GIFT CG ON CG.CUSTOMER_ID = C.ID
 	LEFT JOIN CUSTOMER_POINT CP ON CP.CUSTOMER_ID = C.ID
 	LEFT JOIN LOYALTY LOY ON LOY.CUSTOMER_ID = C.ID

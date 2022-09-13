@@ -28,4 +28,5 @@ func (route CustomerRoutes) RegisterRoute() {
 	r.Get("/select", handler.SelectAll)
 	r.Get("/id/:customer_id", handler.FindByID)
 	r.Put("/id/:customer_id", handler.Edit)
+	r.Put("/address/id/:customer_id", handler.EditAddress)
 }

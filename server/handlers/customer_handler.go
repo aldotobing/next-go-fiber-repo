@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -119,8 +120,33 @@ func (h *CustomerHandler) Edit(ctx *fiber.Ctx) error {
 		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
 	}
 
+	fmt.Println("aedit")
+
 	uc := usecase.CustomerUC{ContractUC: h.ContractUC}
 	res, err := uc.Edit(c, id, input)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *CustomerHandler) EditAddress(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	id := ctx.Params("customer_id")
+	if id == "" {
+		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
+	}
+
+	input := new(requests.CustomerRequest)
+	if err := ctx.BodyParser(input); err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+	if err := h.Validator.Struct(input); err != nil {
+		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
+		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+	}
+
+	uc := usecase.CustomerUC{ContractUC: h.ContractUC}
+	res, err := uc.EditAddress(c, id, input)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }

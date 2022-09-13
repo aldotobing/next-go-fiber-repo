@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -14,6 +15,7 @@ type ICustomerRepository interface {
 	FindAll(ctx context.Context, parameter models.CustomerParameter) ([]models.Customer, int, error)
 	FindByID(c context.Context, parameter models.CustomerParameter) (models.Customer, error)
 	Edit(c context.Context, model *models.Customer) (*string, error)
+	EditAddress(c context.Context, model *models.Customer) (*string, error)
 }
 
 // CustomerRepository ...
@@ -155,7 +157,7 @@ func (repository CustomerRepository) FindAll(ctx context.Context, parameter mode
 
 // FindByID ...
 func (repository CustomerRepository) FindByID(c context.Context, parameter models.CustomerParameter) (data models.Customer, err error) {
-	statement := models.CustomerSelectStatement + ` WHERE c.created_date IS NOT NULL AND c.id = $1`
+	statement := models.CustomerSelectStatement + ` WHERE c.id = $1`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
 
 	data, err = repository.scanRow(row)
@@ -179,6 +181,32 @@ func (repository CustomerRepository) Edit(c context.Context, model *models.Custo
 		model.CustomerAddress,
 		model.CustomerPhone,
 		model.ID).Scan(&res)
+	if err != nil {
+		return res, err
+	}
+	return res, err
+}
+
+func (repository CustomerRepository) EditAddress(c context.Context, model *models.Customer) (res *string, err error) {
+	statement := `UPDATE customer SET 
+	customer_name = $1, 
+	customer_address = $2, 
+	customer_city_id = $3, 
+	customer_district_id = $4, 
+	customer_subdistrict_id = $5, 
+	customer_postal_code = $6
+	WHERE id = $7 
+	RETURNING id`
+	err = repository.DB.QueryRowContext(c, statement,
+		model.CustomerName,
+		model.CustomerAddress,
+		model.CustomerCityID,
+		model.CustomerDistrictID,
+		model.CustomerSubdistrictID,
+		model.CustomerPostalCode,
+		model.ID).Scan(&res)
+
+	fmt.Println(statement)
 	if err != nil {
 		return res, err
 	}
