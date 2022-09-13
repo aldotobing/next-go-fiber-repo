@@ -50,8 +50,7 @@ var (
 	}
 
 	// CustomerSelectStatement ...
-	/*
-	 */
+
 	CustomerSelectStatement = `
 	SELECT 
 		C.ID AS CUST_ID,
