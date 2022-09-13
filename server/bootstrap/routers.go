@@ -144,4 +144,8 @@ func (boot Bootstrap) RegisterRouters() {
 	//Invoice Routes
 	InvoiceRoutes := routers.CilentInvoiceRoutes{RouterGroup: apiV1, Handler: handler}
 	InvoiceRoutes.RegisterRoute()
+
+	//Item MostSold Routes
+	ItemMostSoldRoutes := routers.ItemMostSoldRoutes{RouterGroup: apiV1, Handler: handler}
+	ItemMostSoldRoutes.RegisterRoute()
 }
