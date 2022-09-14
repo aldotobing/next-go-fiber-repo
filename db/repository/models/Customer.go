@@ -5,9 +5,12 @@ type Customer struct {
 	ID                      *string `json:"customer_id"`
 	Code                    *string `json:"customer_code"`
 	CustomerName            *string `json:"customer_name"`
+	CustomerProfilePicture  *string `json:"customer_profile_picture"`
+	CustomerEmail           *string `json:"customer_email"`
 	CustomerCpName          *string `json:"customer_cp_name"`
 	CustomerAddress         *string `json:"customer_address"`
 	CustomerPostalCode      *string `json:"customer_postal_code"`
+	CustomerProvinceID      *string `json:"customer_province_id"`
 	CustomerProvinceName    *string `json:"customer_province_name"`
 	CustomerCityID          *string `json:"customer_city_id"`
 	CustomerCityName        *string `json:"customer_city_name"`
@@ -58,6 +61,8 @@ var (
 		C.CUSTOMER_NAME AS CUST_NAME,
 		C.CUSTOMER_CP_NAME AS CUST_CP_NAME,
 		C.CUSTOMER_ADDRESS AS CUST_ADDRESS,
+		C.CUSTOMER_PROFILE_PICTURE AS CUST_PROFILE_PICTURE,
+		C.CUSTOMER_EMAIL AS CUST_EMAIL,
 		PRV._NAME AS CUST_PROVINCE_NAME,
 		CTY._NAME AS CUST_CITY_NAME,
 		DIST._NAME AS CUST_DISTRICT_NAME,

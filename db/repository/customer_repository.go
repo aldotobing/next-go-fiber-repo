@@ -36,6 +36,8 @@ func (repository CustomerRepository) scanRows(rows *sql.Rows) (res models.Custom
 		&res.CustomerName,
 		&res.CustomerCpName,
 		&res.CustomerAddress,
+		&res.CustomerProfilePicture,
+		&res.CustomerEmail,
 		&res.CustomerProvinceName,
 		&res.CustomerCityName,
 		&res.CustomerDistrictName,
@@ -67,6 +69,8 @@ func (repository CustomerRepository) scanRow(row *sql.Row) (res models.Customer,
 		&res.CustomerName,
 		&res.CustomerCpName,
 		&res.CustomerAddress,
+		&res.CustomerProfilePicture,
+		&res.CustomerEmail,
 		&res.CustomerProvinceName,
 		&res.CustomerCityName,
 		&res.CustomerDistrictName,
@@ -173,13 +177,19 @@ func (repository CustomerRepository) Edit(c context.Context, model *models.Custo
 	statement := `UPDATE customer SET 
 	customer_name = $1, 
 	customer_address = $2, 
-	customer_phone = $3 
-	WHERE id = $4 
+	customer_phone = $3, 
+	customer_email = $4,
+	customer_cp_name = $5,
+	customer_profile_picture = $6 
+	WHERE id = $7 
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		model.CustomerName,
 		model.CustomerAddress,
 		model.CustomerPhone,
+		model.CustomerEmail,
+		model.CustomerCpName,
+		model.CustomerProfilePicture,
 		model.ID).Scan(&res)
 	if err != nil {
 		return res, err
@@ -191,15 +201,17 @@ func (repository CustomerRepository) EditAddress(c context.Context, model *model
 	statement := `UPDATE customer SET 
 	customer_name = $1, 
 	customer_address = $2, 
-	customer_city_id = $3, 
-	customer_district_id = $4, 
-	customer_subdistrict_id = $5, 
-	customer_postal_code = $6
-	WHERE id = $7 
+	customer_province_id = $3,
+	customer_city_id = $4, 
+	customer_district_id = $5, 
+	customer_subdistrict_id = $6, 
+	customer_postal_code = $7
+	WHERE id = $8 
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		model.CustomerName,
 		model.CustomerAddress,
+		model.CustomerProvinceID,
 		model.CustomerCityID,
 		model.CustomerDistrictID,
 		model.CustomerSubdistrictID,
