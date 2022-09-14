@@ -3,6 +3,7 @@ package models
 // ItemPromoPromo ...
 type ItemPromo struct {
 	ItemID             *string `json:"item_id"`
+	ItemCode           *string `json:"item_code"`
 	ItemName           *string `json:"item_name"`
 	ItemDescription    *string `json:"item_description"`
 	ItemCategoryID     *string `json:"item_category_id"`
@@ -58,6 +59,7 @@ var (
 	SELECT 
 		PIL.ITEM_ID AS ITEM_ID,
 		I._NAME AS ITEM_NAME,
+		I.CODE AS ITEM_CODE,
 		I.DESCRIPTION AS I_DESCRIPTION,
 		IC.ID AS I_CATEGORY_ID,
 		IC._NAME AS I_CATEGORY_NAME,
