@@ -32,9 +32,9 @@ func (repository ItemMostSoldRepository) scanRows(rows *sql.Rows) (res models.It
 		&res.ID,
 		&res.Code,
 		&res.Name,
+		&res.ItemPicture,
 		&res.ItemCategoryId,
 		&res.ItemCategoryName,
-		&res.ItemPicture,
 		&res.ItemTotalSold,
 	)
 	if err != nil {
@@ -51,9 +51,9 @@ func (repository ItemMostSoldRepository) scanRow(row *sql.Row) (res models.ItemM
 		&res.ID,
 		&res.Code,
 		&res.Name,
+		&res.ItemPicture,
 		&res.ItemCategoryId,
 		&res.ItemCategoryName,
-		&res.ItemPicture,
 		&res.ItemTotalSold,
 	)
 
