@@ -13,10 +13,10 @@ type ItemMostSold struct {
 
 // ItemMostSoldParameter ...
 type ItemMostSoldParameter struct {
-	ID             string `json:"ItemMostSold_id"`
-	Code           string `json:"ItemMostSold_code"`
-	Name           string `json:"ItemMostSold_name"`
-	ItemCategoryId string `json:"ItemMostSold_category_id"`
+	ID             string `json:"item_id"`
+	Code           string `json:"item_code"`
+	Name           string `json:"item_name"`
+	ItemCategoryId string `json:"item_category_id"`
 	Search         string `json:"search"`
 	Page           int    `json:"page"`
 	Offset         int    `json:"offset"`

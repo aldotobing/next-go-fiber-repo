@@ -33,6 +33,7 @@ func NewItemPromoRepository(DB *sql.DB) IItemPromoRepository {
 func (repository ItemPromoRepository) scanRows(rows *sql.Rows) (res models.ItemPromo, err error) {
 	err = rows.Scan(
 		&res.ItemID,
+		&res.ItemCode,
 		&res.ItemName,
 		&res.ItemDescription,
 		&res.ItemCategoryID,
@@ -65,6 +66,7 @@ func (repository ItemPromoRepository) scanRows(rows *sql.Rows) (res models.ItemP
 func (repository ItemPromoRepository) scanRow(row *sql.Row) (res models.ItemPromo, err error) {
 	err = row.Scan(
 		&res.ItemID,
+		&res.ItemCode,
 		&res.ItemName,
 		&res.ItemDescription,
 		&res.ItemCategoryID,

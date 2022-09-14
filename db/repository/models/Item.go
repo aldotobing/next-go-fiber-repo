@@ -5,7 +5,7 @@ import "encoding/json"
 // Item ...
 type Item struct {
 	ID                 *string          `json:"item_id"`
-	Code               *string          `json:"code"`
+	Code               *string          `json:"item_code"`
 	Name               *string          `json:"item_name"`
 	Description        *string          `json:"item_description"`
 	ItemCategoryId     *string          `json:"item_category_id"`
