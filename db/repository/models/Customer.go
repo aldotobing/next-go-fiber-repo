@@ -8,6 +8,7 @@ type Customer struct {
 	CustomerCpName          *string `json:"customer_cp_name"`
 	CustomerAddress         *string `json:"customer_address"`
 	CustomerPostalCode      *string `json:"customer_postal_code"`
+	CustomerProvinceID      *string `json:"customer_province_id"`
 	CustomerProvinceName    *string `json:"customer_province_name"`
 	CustomerCityID          *string `json:"customer_city_id"`
 	CustomerCityName        *string `json:"customer_city_name"`

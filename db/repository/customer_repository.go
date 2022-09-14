@@ -191,6 +191,7 @@ func (repository CustomerRepository) EditAddress(c context.Context, model *model
 	statement := `UPDATE customer SET 
 	customer_name = $1, 
 	customer_address = $2, 
+	customer_province_id = $3,
 	customer_city_id = $3, 
 	customer_district_id = $4, 
 	customer_subdistrict_id = $5, 
@@ -200,6 +201,7 @@ func (repository CustomerRepository) EditAddress(c context.Context, model *model
 	err = repository.DB.QueryRowContext(c, statement,
 		model.CustomerName,
 		model.CustomerAddress,
+		model.CustomerProvinceID,
 		model.CustomerCityID,
 		model.CustomerDistrictID,
 		model.CustomerSubdistrictID,

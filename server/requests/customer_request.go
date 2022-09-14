@@ -7,6 +7,7 @@ type CustomerRequest struct {
 	CustomerName          string `json:"customer_name"`
 	CustomerAddress       string `json:"customer_address"`
 	CustomerPhone         string `json:"customer_phone"`
+	CustomerProvinceID    string `json:"customer_province_id"`
 	CustomerCityID        string `json:"customer_city_id"`
 	CustomerDistrictID    string `json:"customer_district_id"`
 	CustomerSubdistrictID string `json:"customer_subdistrict_id"`

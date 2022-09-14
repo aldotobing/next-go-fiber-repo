@@ -103,6 +103,7 @@ func (uc CustomerUC) EditAddress(c context.Context, id string, data *requests.Cu
 		ID:                    &id,
 		CustomerName:          &data.CustomerName,
 		CustomerAddress:       &data.CustomerAddress,
+		CustomerProvinceID:    &data.CustomerProvinceID,
 		CustomerCityID:        &data.CustomerCityID,
 		CustomerDistrictID:    &data.CustomerDistrictID,
 		CustomerSubdistrictID: &data.CustomerSubdistrictID,
