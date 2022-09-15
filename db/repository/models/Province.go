@@ -2,16 +2,9 @@ package models
 
 // Province ...
 type Province struct {
-	ID        string  `json:"id_province"`
-	Code      *string `json:"code_province"`
-	Name      *string `json:"name_province"`
-	IdNation  *string `json:"id_nation"`
-	CreatedAt *string `json:"created_at_province"`
-	UpdatedAt *string `json:"updated_at_province"`
-	DeletedAt *string `json:"deleted_at_province"`
-	CreatedBy *int    `json:"created_by_province"`
-	UpdatedBy *int    `json:"updated_by_province"`
-	DeletedBy *int    `json:"deleted_by_province"`
+	ID   string  `json:"id"`
+	Code *string `json:"code_province"`
+	Name *string `json:"name_province"`
 }
 
 type MpProvinceDataBreakDown struct {
@@ -38,16 +31,16 @@ type ProvinceParameter struct {
 
 var (
 	// ProvinceOrderBy ...
-	ProvinceOrderBy = []string{"def.id_province", "def.created_at_province", "def.updated_at_province"}
+	ProvinceOrderBy = []string{"def.id", "def.code", "def._name", "def.created_date"}
 	// ProvinceOrderByrByString ...
 	ProvinceOrderByrByString = []string{
-		"def.code_province", "def.name_province",
+		"def.id", "def._name",
 	}
 
 	// ProvinceSelectStatement ...
-	ProvinceSelectStatement = `SELECT def.id_province, def.code_province, def.name_province, def.created_at_province, def.updated_at_province, def.deleted_at_province
-	FROM mp_province def`
+	ProvinceSelectStatement = `select def.id,def.code,def._name as name 
+	from province def`
 
 	// ProvinceWhereStatement ...
-	ProvinceWhereStatement = `WHERE def.deleted_at_province IS NULL`
+	ProvinceWhereStatement = `WHERE def._name IS NOT NULL`
 )

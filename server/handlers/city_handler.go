@@ -32,7 +32,17 @@ func (h *CityHandler) SelectAll(ctx *fiber.Ctx) error {
 	uc := usecase.CityUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectAll(c, parameter)
 
-	return h.SendResponse(ctx, res, nil, err, 0)
+	type StructObject struct {
+		ListObjcet []models.City `json:"list_city"`
+	}
+
+	ObjcetData := new(StructObject)
+
+	if res != nil {
+		ObjcetData.ListObjcet = res
+	}
+
+	return h.SendResponse(ctx, ObjcetData, nil, err, 0)
 }
 
 // FindAll ...
@@ -50,7 +60,17 @@ func (h *CityHandler) FindAll(ctx *fiber.Ctx) error {
 	uc := usecase.CityUC{ContractUC: h.ContractUC}
 	res, meta, err := uc.FindAll(c, parameter)
 
-	return h.SendResponse(ctx, res, meta, err, 0)
+	type StructObject struct {
+		ListObjcet []models.City `json:"list_city"`
+	}
+
+	ObjcetData := new(StructObject)
+
+	if res != nil {
+		ObjcetData.ListObjcet = res
+	}
+
+	return h.SendResponse(ctx, ObjcetData, meta, err, 0)
 }
 
 // FindByID ...

@@ -134,6 +134,9 @@ func (boot Bootstrap) RegisterRouters() {
 	CustomerOrderRoutes := routers.CustomerOrderHeaderRoutes{RouterGroup: apiV1, Handler: handler}
 	CustomerOrderRoutes.RegisterRoute()
 
+	ItemPromoRoutes := routers.ItemPromoRoutes{RouterGroup: apiV1, Handler: handler}
+	ItemPromoRoutes.RegisterRoute()
+
 	//ProductFocusCategory Routes
 	ProductFocusCategoryRoutes := routers.ProductFocusCategoryRoutes{RouterGroup: apiV1, Handler: handler}
 	ProductFocusCategoryRoutes.RegisterRoute()
@@ -141,4 +144,12 @@ func (boot Bootstrap) RegisterRouters() {
 	//ItemProductFocus Routes
 	ItemProductFocusRoutes := routers.ItemProductFocusRoutes{RouterGroup: apiV1, Handler: handler}
 	ItemProductFocusRoutes.RegisterRoute()
+
+	//Invoice Routes
+	InvoiceRoutes := routers.CilentInvoiceRoutes{RouterGroup: apiV1, Handler: handler}
+	InvoiceRoutes.RegisterRoute()
+
+	//Item MostSold Routes
+	ItemMostSoldRoutes := routers.ItemMostSoldRoutes{RouterGroup: apiV1, Handler: handler}
+	ItemMostSoldRoutes.RegisterRoute()
 }

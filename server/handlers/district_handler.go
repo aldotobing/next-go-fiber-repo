@@ -33,7 +33,17 @@ func (h *DistrictHandler) SelectAll(ctx *fiber.Ctx) error {
 	uc := usecase.DistrictUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectAll(c, parameter)
 
-	return h.SendResponse(ctx, res, nil, err, 0)
+	type StructObject struct {
+		ListObjcet []models.District `json:"list_district"`
+	}
+
+	ObjcetData := new(StructObject)
+
+	if res != nil {
+		ObjcetData.ListObjcet = res
+	}
+
+	return h.SendResponse(ctx, ObjcetData, nil, err, 0)
 }
 
 // FindAll ...
@@ -52,7 +62,17 @@ func (h *DistrictHandler) FindAll(ctx *fiber.Ctx) error {
 	uc := usecase.DistrictUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectAll(c, parameter)
 
-	return h.SendResponse(ctx, res, nil, err, 0)
+	type StructObject struct {
+		ListObjcet []models.District `json:"list_district"`
+	}
+
+	ObjcetData := new(StructObject)
+
+	if res != nil {
+		ObjcetData.ListObjcet = res
+	}
+
+	return h.SendResponse(ctx, ObjcetData, nil, err, 0)
 }
 
 // FindByID ...

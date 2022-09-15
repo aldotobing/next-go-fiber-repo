@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"nextbasis-service-v-0.1/db/repository/models"
-	"nextbasis-service-v-0.1/pkg/str"
 )
 
 // IDistrictRepository ...
@@ -34,7 +33,7 @@ func NewDistrictRepository(DB *sql.DB) IDistrictRepository {
 // Scan rows
 func (repository DistrictRepository) scanRows(rows *sql.Rows) (res models.District, err error) {
 	err = rows.Scan(
-		&res.ID, &res.CityID, &res.Code, &res.Name, &res.Status, &res.CreatedAt, &res.UpdatedAt, &res.DeletedAt, &res.City.Name, &res.City.Name,
+		&res.ID, &res.Code, &res.Name,
 	)
 	if err != nil {
 		return res, err
@@ -46,7 +45,7 @@ func (repository DistrictRepository) scanRows(rows *sql.Rows) (res models.Distri
 // Scan row
 func (repository DistrictRepository) scanRow(row *sql.Row) (res models.District, err error) {
 	err = row.Scan(
-		&res.ID, &res.CityID, &res.Code, &res.Name, &res.Status, &res.CreatedAt, &res.UpdatedAt, &res.DeletedAt, &res.City.Name, &res.City.Name,
+		&res.ID, &res.Code, &res.Name,
 	)
 	if err != nil {
 		return res, err
@@ -58,16 +57,14 @@ func (repository DistrictRepository) scanRow(row *sql.Row) (res models.District,
 // SelectAll ...
 func (repository DistrictRepository) SelectAll(c context.Context, parameter models.DistrictParameter) (data []models.District, err error) {
 	conditionString := ``
-	if parameter.Status != "" {
-		conditionString += ` AND def.status = ` + str.StringToBoolString(parameter.Status)
-	}
-	if str.IsValidUUID(parameter.CityID) {
+
+	if parameter.CityID != "" {
 		conditionString += ` AND def.city_id = '` + parameter.CityID + `'`
 	}
 
 	statement := models.DistrictSelectStatement + ` ` + models.DistrictWhereStatement +
-		` AND (LOWER(def."name") LIKE $1 OR LOWER(c."name") LIKE $1 OR LOWER(p."name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
-	rows, err := repository.DB.QueryContext(c, statement, parameter.Search)
+		` AND (LOWER(def."_name") LIKE $1  ) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 	if err != nil {
 		return data, err
 	}
@@ -86,15 +83,12 @@ func (repository DistrictRepository) SelectAll(c context.Context, parameter mode
 // FindAll ...
 func (repository DistrictRepository) FindAll(ctx context.Context, parameter models.DistrictParameter) (data []models.District, count int, err error) {
 	conditionString := ``
-	if parameter.Status != "" {
-		conditionString += ` AND def.status = ` + str.StringToBoolString(parameter.Status)
-	}
-	if str.IsValidUUID(parameter.CityID) {
+	if parameter.CityID != "" {
 		conditionString += ` AND def.city_id = '` + parameter.CityID + `'`
 	}
 
 	query := models.DistrictSelectStatement + ` ` + models.DistrictWhereStatement + ` ` + conditionString + `
-		AND (LOWER(def."name") LIKE $1 OR LOWER(c."name") LIKE $1 OR LOWER(p."name") LIKE $1) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
+		AND (LOWER(def."_name") LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
 	if err != nil {
 		return data, count, err
@@ -113,8 +107,8 @@ func (repository DistrictRepository) FindAll(ctx context.Context, parameter mode
 		return data, count, err
 	}
 
-	query = `SELECT COUNT(*) FROM "districts" def ` + models.DistrictWhereStatement + ` ` +
-		conditionString + ` AND (LOWER(def."name") LIKE $1)`
+	query = `SELECT COUNT(*) FROM "district" def ` + models.DistrictWhereStatement + ` ` +
+		conditionString + ` AND (LOWER(def."_name") LIKE $1)`
 	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
 
 	return data, count, err
@@ -122,7 +116,7 @@ func (repository DistrictRepository) FindAll(ctx context.Context, parameter mode
 
 // FindByID ...
 func (repository DistrictRepository) FindByID(c context.Context, parameter models.DistrictParameter) (data models.District, err error) {
-	statement := models.DistrictSelectStatement + ` WHERE def.deleted_at IS NULL AND def.id = $1`
+	statement := models.DistrictSelectStatement + ` WHERE def._name IS NOT NULL AND def.id = $1`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
 
 	data, err = repository.scanRow(row)
@@ -151,7 +145,7 @@ func (repository DistrictRepository) Add(c context.Context, model *models.Distri
 	statement := `INSERT INTO districts (city_id, code, name, status)
 	VALUES ($1, $2, $3, $4) RETURNING id`
 
-	err = repository.DB.QueryRowContext(c, statement, model.CityID, model.Code, model.Name, model.Status).Scan(&res)
+	err = repository.DB.QueryRowContext(c, statement, model.Code, model.Name).Scan(&res)
 
 	if err != nil {
 		return res, err
@@ -163,7 +157,7 @@ func (repository DistrictRepository) Add(c context.Context, model *models.Distri
 func (repository DistrictRepository) Edit(c context.Context, model *models.District) (res string, err error) {
 	statement := `UPDATE districts SET city_id = $1, code = $2, name = $3, status = $4 WHERE id = $5 RETURNING id`
 
-	err = repository.DB.QueryRowContext(c, statement, model.CityID, model.Code, model.Name, model.Status, model.ID).Scan(&res)
+	err = repository.DB.QueryRowContext(c, statement, model.Code, model.Name, model.ID).Scan(&res)
 	if err != nil {
 		return res, err
 	}

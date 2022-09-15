@@ -61,6 +61,7 @@ func (uc CustomerUC) FindAll(c context.Context, parameter models.CustomerParamet
 
 // FindByID ...
 func (uc CustomerUC) FindByID(c context.Context, parameter models.CustomerParameter) (res models.Customer, err error) {
+
 	repo := repository.NewCustomerRepository(uc.DB)
 	res, err = repo.FindByID(c, parameter)
 	if err != nil {
@@ -78,14 +79,41 @@ func (uc CustomerUC) Edit(c context.Context, id string, data *requests.CustomerR
 	// now := time.Now().UTC()
 	// strnow := now.Format(time.RFC3339)
 	res = models.Customer{
-		ID:      &id,
-		Code:    &data.Code,
-		Name:    &data.Name,
-		Address: &data.Address,
-		Phone:   &data.Phone,
+		ID:                     &id,
+		Code:                   &data.Code,
+		CustomerName:           &data.CustomerName,
+		CustomerAddress:        &data.CustomerAddress,
+		CustomerPhone:          &data.CustomerPhone,
+		CustomerEmail:          &data.CustomerEmail,
+		CustomerCpName:         &data.CustomerCpName,
+		CustomerProfilePicture: &data.CustomerProfilePicture,
 	}
 
 	res.ID, err = repo.Edit(c, &res)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	return res, err
+}
+
+func (uc CustomerUC) EditAddress(c context.Context, id string, data *requests.CustomerRequest) (res models.Customer, err error) {
+	repo := repository.NewCustomerRepository(uc.DB)
+	// now := time.Now().UTC()
+	// strnow := now.Format(time.RFC3339)
+	res = models.Customer{
+		ID:                    &id,
+		CustomerName:          &data.CustomerName,
+		CustomerAddress:       &data.CustomerAddress,
+		CustomerProvinceID:    &data.CustomerProvinceID,
+		CustomerCityID:        &data.CustomerCityID,
+		CustomerDistrictID:    &data.CustomerDistrictID,
+		CustomerSubdistrictID: &data.CustomerSubdistrictID,
+		CustomerPostalCode:    &data.CustomerPostalCode,
+	}
+
+	res.ID, err = repo.EditAddress(c, &res)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
