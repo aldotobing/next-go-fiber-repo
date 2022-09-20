@@ -140,7 +140,7 @@ func (repository ItemDetailsRepository) FindAll(ctx context.Context, parameter m
 		return data, count, err
 	}
 
-	fmt.Println(query)
+	//fmt.Println(query)
 
 	defer rows.Close()
 	for rows.Next() {
