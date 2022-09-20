@@ -39,6 +39,11 @@ func (repository ItemSearchRepository) scanRows(rows *sql.Rows) (res models.Item
 		&res.ItemCategoryId,
 		&res.ItemCategoryName,
 		&res.ItemPicture,
+		&res.UomID,
+		&res.UomName,
+		&res.UomLineConversion,
+		&res.ItemPrice,
+		&res.PriceListVersionId,
 	)
 	if err != nil {
 
@@ -58,6 +63,11 @@ func (repository ItemSearchRepository) scanRow(row *sql.Row) (res models.ItemSea
 		&res.ItemCategoryId,
 		&res.ItemCategoryName,
 		&res.ItemPicture,
+		&res.UomID,
+		&res.UomName,
+		&res.UomLineConversion,
+		&res.ItemPrice,
+		&res.PriceListVersionId,
 	)
 
 	fmt.Println(err)
@@ -71,16 +81,21 @@ func (repository ItemSearchRepository) scanRow(row *sql.Row) (res models.ItemSea
 // SelectAll ...
 func (repository ItemSearchRepository) SelectAll(c context.Context, parameter models.ItemSearchParameter) (data []models.ItemSearch, err error) {
 	conditionString := ``
+	conditionStringPriceListVersion := ``
 
 	if parameter.Name != "" {
-		conditionString += ` or LOWER (ic."_name") like` + `'%` + parameter.Name + `%'`
+		conditionString += ` or (LOWER (ic."_name") like ` + `'%` + parameter.Name + `%'))`
+	}
+
+	if parameter.PriceListVersionId != "" {
+		conditionStringPriceListVersion += ` AND ip.price_list_version_id = '` + parameter.PriceListVersionId + `'`
 	}
 
 	statement := models.ItemSearchSelectStatement + ` ` + models.ItemSearchWhereStatement +
-		` AND (LOWER(def."_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+		` AND ((LOWER(def."_name") LIKE $1) ` + conditionString + conditionStringPriceListVersion + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Name)+"%")
 
-	// fmt.Println("select ALL : " + statement)
+	fmt.Println("select ALL : " + statement)
 	// fmt.Println("select ALL PARAM : " + parameter.Name)
 
 	if err != nil {
