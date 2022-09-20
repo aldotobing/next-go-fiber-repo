@@ -64,5 +64,5 @@ var (
 	`
 
 	// ItemSearchWhereStatement ...
-	ItemSearchWhereStatement = ` WHERE def.created_date IS not NULL `
+	ItemSearchWhereStatement = ` WHERE def.created_date IS not NULL AND IUL.CONVERSION > 1 `
 )
