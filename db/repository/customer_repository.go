@@ -38,9 +38,13 @@ func (repository CustomerRepository) scanRows(rows *sql.Rows) (res models.Custom
 		&res.CustomerAddress,
 		&res.CustomerProfilePicture,
 		&res.CustomerEmail,
+		&res.CustomerProvinceID,
 		&res.CustomerProvinceName,
+		&res.CustomerCityID,
 		&res.CustomerCityName,
+		&res.CustomerDistrictID,
 		&res.CustomerDistrictName,
+		&res.CustomerSubdistrictID,
 		&res.CustomerSubdistrictName,
 		&res.CustomerSalesmanCode,
 		&res.CustomerSalesmanName,
@@ -71,9 +75,13 @@ func (repository CustomerRepository) scanRow(row *sql.Row) (res models.Customer,
 		&res.CustomerAddress,
 		&res.CustomerProfilePicture,
 		&res.CustomerEmail,
+		&res.CustomerProvinceID,
 		&res.CustomerProvinceName,
+		&res.CustomerCityID,
 		&res.CustomerCityName,
+		&res.CustomerDistrictID,
 		&res.CustomerDistrictName,
+		&res.CustomerSubdistrictID,
 		&res.CustomerSubdistrictName,
 		&res.CustomerSalesmanCode,
 		&res.CustomerSalesmanName,
@@ -106,7 +114,7 @@ func (repository CustomerRepository) SelectAll(c context.Context, parameter mode
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 
 	//print
-	//fmt.Println(statement)
+	// fmt.Println(statement)
 
 	if err != nil {
 		return data, err
@@ -163,6 +171,8 @@ func (repository CustomerRepository) FindAll(ctx context.Context, parameter mode
 func (repository CustomerRepository) FindByID(c context.Context, parameter models.CustomerParameter) (data models.Customer, err error) {
 	statement := models.CustomerSelectStatement + ` WHERE c.id = $1`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
+
+	fmt.Println(statement)
 
 	data, err = repository.scanRow(row)
 	if err != nil {
