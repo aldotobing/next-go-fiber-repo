@@ -3,3 +3,4 @@
 dbconfig.yml
 vendor
 .exe
+.env
