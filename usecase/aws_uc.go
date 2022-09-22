@@ -22,9 +22,9 @@ func (uc AwsUC) Upload(filePath string, f *multipart.FileHeader) (res viewmodel.
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "upload", uc.ReqID)
 		return res, err
 	}
-	// res.Name = data
-	res.Size = f.Size
-	res.SPath = s3path
+
+	res.FileSize = f.Size
+	res.FilePath = s3path
 	res.FileName = fileName
 
 	return res, err
