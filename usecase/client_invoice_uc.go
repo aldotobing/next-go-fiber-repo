@@ -130,7 +130,7 @@ func (uc CilentInvoiceUC) SelectAll3RD(c context.Context, parameter models.Cilen
 
 		_, errinsert := repo.InsertDataWithLine(c, &invoiceObject)
 		if errinsert != nil {
-			fmt.Print(err.Error())
+			fmt.Print("")
 		}
 
 		resBuilder = append(resBuilder, invoiceObject)

@@ -156,4 +156,8 @@ func (boot Bootstrap) RegisterRouters() {
 	//Item Details Routes
 	ItemDetailsRoutes := routers.ItemDetailsRoutes{RouterGroup: apiV1, Handler: handler}
 	ItemDetailsRoutes.RegisterRoute()
+
+	//Data Sync Routes
+	DataSyncRoutes := routers.DataSyncRoutes{RouterGroup: apiV1, Handler: handler}
+	DataSyncRoutes.RegisterRoute()
 }

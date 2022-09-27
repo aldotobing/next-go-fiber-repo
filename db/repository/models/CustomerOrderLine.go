@@ -26,6 +26,7 @@ type CustomerOrderLine struct {
 	NetAmount      *string `json:"net_amount"`
 	SalesmanName   *string `json:"salesman_name"`
 	SalesmanCode   *string `json:"salesman_code"`
+	ItemPicture    *string `json:"item_picture"`
 }
 
 // CustomerOrderLineParameter ...
@@ -55,7 +56,7 @@ var (
 	def.qty,def.stock_qty, def.unit_price,def.gross_amount,
 	def.use_disc_percent,def.disc_percent1,def.disc_percent2,def.disc_percent3,
 	def.disc_percent4,def.disc_percent5, def.taxable_amount, def.tax_amount,
-	def.rounding_amount, def.net_amount, s.salesman_name, s.salesman_code
+	def.rounding_amount, def.net_amount, s.salesman_name, s.salesman_code, i.item_picture
 	from customer_order_line def
 	join customer_order_header coh on coh.id = def.header_id
 	join customer cus on cus.id = coh.cust_ship_to_id
