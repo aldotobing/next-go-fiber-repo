@@ -7,22 +7,23 @@ type CustomerTarget struct {
 	CustomerName   *string `json:"customer_name"`
 	CustomerTarget *string `json:"customer_target"`
 	Month          *string `json:"month"`
+	Year           *string `json:"year"`
 }
 
 // CustomerTargetParameter ...
 type CustomerTargetParameter struct {
-	ID                   string `json:"customer_id"`
-	Code                 string `json:"customer_code"`
-	Name                 string `json:"customer_name"`
-	CustomerTargetTypeId string `json:"custome_type_id"`
-	CustomerSalesmanId   string `json:"custome_salesman_id"`
-	Month                string `json:"month"`
-	Search               string `json:"search"`
-	Page                 int    `json:"page"`
-	Offset               int    `json:"offset"`
-	Limit                int    `json:"limit"`
-	By                   string `json:"by"`
-	Sort                 string `json:"sort"`
+	ID             string `json:"customer_id"`
+	Code           string `json:"customer_code"`
+	CustomerName   string `json:"customer_name"`
+	CustomerTarget string `json:"customer_target"`
+	Month          string `json:"month"`
+	Year           string `json:"year"`
+	Search         string `json:"search"`
+	Page           int    `json:"page"`
+	Offset         int    `json:"offset"`
+	Limit          int    `json:"limit"`
+	By             string `json:"by"`
+	Sort           string `json:"sort"`
 }
 
 var (
@@ -52,7 +53,7 @@ var (
 	`
 
 	// CustomerTargetWhereStatement ...
-	CustomerTargetWhereStatement = ` WHERE cus.created_date IS not NULL `
+	CustomerTargetWhereStatement = ` WHERE cus.created_date IS not NULL and byt._year = 2021 `
 )
 
 //Customer Target where statement
