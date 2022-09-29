@@ -28,10 +28,10 @@ type CustomerTargetParameter struct {
 
 var (
 	// CustomerTargetOrderBy ...
-	CustomerTargetOrderBy = []string{"c.id", "c.customer_name", "c.created_date"}
+	CustomerTargetOrderBy = []string{"cus.id", "cus.customer_name", "cus.created_date"}
 	// CustomerTargetOrderByrByString ...
 	CustomerTargetOrderByrByString = []string{
-		"c.customer_name",
+		"cus.customer_name",
 	}
 
 	// CustomerTargetSelectStatement ...
