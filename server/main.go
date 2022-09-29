@@ -73,6 +73,7 @@ func main() {
 		Mail:        configs.Mail,
 		Mailing:     configs.Mailing,
 		WhatsApp:    configs.WooWAClient,
+		Fcm:         configs.FCM,
 	}
 
 	boot := bootstrap.Bootstrap{
