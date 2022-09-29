@@ -6,6 +6,7 @@ import (
 
 	"nextbasis-service-v-0.1/pkg/aes"
 	"nextbasis-service-v-0.1/pkg/aesfront"
+	"nextbasis-service-v-0.1/pkg/fcm"
 	"nextbasis-service-v-0.1/pkg/jwe"
 	"nextbasis-service-v-0.1/pkg/jwt"
 	"nextbasis-service-v-0.1/pkg/mail"
@@ -49,6 +50,7 @@ type Configs struct {
 	Mailing      mailing.GoMailConfig
 	TwilioClient *twilioPkg.Client
 	WooWAClient  *whatsapp.Client
+	FCM          fcm.Connection
 }
 
 var (
@@ -170,6 +172,7 @@ func LoadConfigs() (res Configs, err error) {
 	// setup twilio
 	res.TwilioClient = twilioPkg.NewTwilioClient(res.EnvConfig["TWILIO_SID"], res.EnvConfig["TWILIO_TOKEN"], res.EnvConfig["TWILIO_SEND_FROM"])
 	res.WooWAClient = whatsapp.NewWooWAClient(res.EnvConfig["WA_URL"], res.EnvConfig["WA_KEY"])
+	res.FCM.APIKey = res.EnvConfig["FCM_API_KEY"]
 	fmt.Printf("+%v", res.TwilioClient)
 	fmt.Printf("+%v", res.WooWAClient)
 	return res, err
