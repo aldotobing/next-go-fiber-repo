@@ -6,8 +6,6 @@ type CustomerTarget struct {
 	Code           *string `json:"customer_code"`
 	CustomerName   *string `json:"customer_name"`
 	CustomerTarget *string `json:"customer_target"`
-	Month          *string `json:"month"`
-	Year           *string `json:"year"`
 }
 
 // CustomerTargetParameter ...
@@ -16,8 +14,6 @@ type CustomerTargetParameter struct {
 	Code           string `json:"customer_code"`
 	CustomerName   string `json:"customer_name"`
 	CustomerTarget string `json:"customer_target"`
-	Month          string `json:"month"`
-	Year           string `json:"year"`
 	Search         string `json:"search"`
 	Page           int    `json:"page"`
 	Offset         int    `json:"offset"`
@@ -28,7 +24,7 @@ type CustomerTargetParameter struct {
 
 var (
 	// CustomerTargetOrderBy ...
-	CustomerTargetOrderBy = []string{"cus.id", "cus.customer_name", "cus.created_date"}
+	CustomerTargetOrderBy = []string{"cus.id", "cus.customer_name", "cus.created_date", "bmt._month"}
 	// CustomerTargetOrderByrByString ...
 	CustomerTargetOrderByrByString = []string{
 		"cus.customer_name",
@@ -37,24 +33,20 @@ var (
 	// CustomerTargetSelectStatement ...
 
 	CustomerTargetSelectStatement = `
-	SELECT 
-		cus.id as customer_id, 
-		cus.customer_code as customer_code,
-		cus.customer_name as customer_name, 
-		bmt._month as _month, 
-		sct.sales_turnover as target
-	FROM customer cus
-		JOIN salesman s on s.id = cus.salesman_id
-		LEFT JOIN salesman_customer_target sct on sct.customer_id = cus.id
-		LEFT JOIN salesman_target_line stl on sct.salesman_target_line_id = stl.id
-		LEFT JOIN branch_monthly_target bmt on bmt.id = stl.branch_monthly_target_id
-		LEFT JOIN branch_yearly_target byt on byt.id = bmt.branch_yearly_target_id
-   	order by customer_name , _month
+	SELECT CUS.ID AS CUSTOMER_ID,
+	CUS.CUSTOMER_CODE AS CUSTOMER_CODE,
+	CUS.CUSTOMER_NAME AS CUSTOMER_NAME,
+	COALESCE ((SELECT (SCT.SALES_TURNOVER)
+				FROM CUSTOMER CUS
+				JOIN SALESMAN S ON S.ID = CUS.SALESMAN_ID
+				LEFT JOIN SALESMAN_CUSTOMER_TARGET SCT ON SCT.CUSTOMER_ID = CUS.ID
+				LEFT JOIN SALESMAN_TARGET_LINE STL ON SCT.SALESMAN_TARGET_LINE_ID = STL.ID
+				LEFT JOIN BRANCH_MONTHLY_TARGET BMT ON BMT.ID = STL.BRANCH_MONTHLY_TARGET_ID
+				LEFT JOIN BRANCH_YEARLY_TARGET BYT ON BYT.ID = BMT.BRANCH_YEARLY_TARGET_ID
 	`
-
 	// CustomerTargetWhereStatement ...
-	CustomerTargetWhereStatement = ` WHERE cus.created_date IS not NULL and byt._year = 2021 `
+	CustomerTargetWhereStatement = ` WHERE cus.created_date IS not NULL 
+									and byt._year = (SELECT DATE_PART('year', now()::date)) 
+									and bmt._month = (SELECT DATE_PART('month', now()::date)) 
+									`
 )
-
-//Customer Target where statement
-// where byt._year = 2021 and s.id in (1) and coalesce(cus.active, 1) = 1 and cus.id = 5317
