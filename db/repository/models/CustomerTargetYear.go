@@ -1,15 +1,15 @@
 package models
 
-// CustomerTargetQuarterQuarter ...
-type CustomerTargetQuarter struct {
-	ID                    *string `json:"customer_id"`
-	Code                  *string `json:"customer_code"`
-	CustomerName          *string `json:"customer_name"`
-	CustomerTargetQuarter *string `json:"customer_target"`
+// CustomerTargetYearQuarter ...
+type CustomerTargetYear struct {
+	ID             *string `json:"customer_id"`
+	Code           *string `json:"customer_code"`
+	CustomerName   *string `json:"customer_name"`
+	CustomerTarget *string `json:"customer_target"`
 }
 
-// CustomerTargetQuarterParameter ...
-type CustomerTargetQuarterParameter struct {
+// CustomerTargetYearParameter ...
+type CustomerTargetYearParameter struct {
 	ID           string `json:"customer_id"`
 	Code         string `json:"customer_code"`
 	CustomerName string `json:"customer_name"`
@@ -22,20 +22,20 @@ type CustomerTargetQuarterParameter struct {
 }
 
 var (
-	// CustomerTargetQuarterOrderBy ...
-	CustomerTargetQuarterOrderBy = []string{"cus.id", "cus.customer_name", "cus.created_date", "bmt._month"}
-	// CustomerTargetQuarterOrderByrByString ...
-	CustomerTargetQuarterOrderByrByString = []string{
+	// CustomerTargetYearOrderBy ...
+	CustomerTargetYearOrderBy = []string{"cus.id", "cus.customer_name", "cus.created_date", "bmt._month"}
+	// CustomerTargetYearOrderByrByString ...
+	CustomerTargetYearOrderByrByString = []string{
 		"cus.customer_name",
 	}
 
-	CustomerTargetQuarterGroupByrByString = []string{
+	CustomerTargetYearGroupByrByString = []string{
 		"cus.customer_name",
 	}
 
-	// CustomerTargetQuarterSelectStatement ...
+	// CustomerTargetYearSelectStatement ...
 
-	CustomerTargetQuarterSelectStatement = `
+	CustomerTargetYearSelectStatement = `
 	SELECT
 	CUS.ID AS CUSTOMER_ID,
 	CUS.CUSTOMER_CODE AS CUSTOMER_CODE,
@@ -48,9 +48,8 @@ var (
 		LEFT JOIN BRANCH_MONTHLY_TARGET BMT ON BMT.ID = STL.BRANCH_MONTHLY_TARGET_ID
 		LEFT JOIN BRANCH_YEARLY_TARGET BYT ON BYT.ID = BMT.BRANCH_YEARLY_TARGET_ID
 	`
-	// CustomerTargetQuarterWhereStatement ...
-	CustomerTargetQuarterWhereStatement = ` WHERE byt._year = 2021
-											and coalesce(cus.active, 1) = 1  `
+	// CustomerTargetYearWhereStatement ...
+	CustomerTargetYearWhereStatement = ` WHERE BYT._YEAR = 2021 AND COALESCE(CUS.ACTIVE, 1) = 1 `
 )
 
 //and cus.id = 5317 and bmt._month in (1, 2, 3)

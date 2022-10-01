@@ -101,9 +101,9 @@ func (repository CustomerTargetQuarterRepository) SelectAll(c context.Context, p
 		` AND (LOWER(cus."customer_name") LIKE $1) ` +
 		conditionString + conditionStringQuarter +
 		` GROUP BY cus.id` + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort +
-		` ), 0)
-		AS TARGET
-		FROM CUSTOMER CUS WHERE CUS.ID = '` + parameter.ID + `'`
+		` ), 0)` +
+		` AS TARGET` +
+		` FROM CUSTOMER CUS WHERE CUS.ID = '` + parameter.ID + `'`
 
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 
