@@ -35,7 +35,6 @@ func (repository CustomerTargetRepository) scanRows(rows *sql.Rows) (res models.
 		&res.Code,
 		&res.CustomerName,
 		&res.CustomerTarget,
-		&res.Month,
 	)
 	if err != nil {
 
@@ -51,7 +50,6 @@ func (repository CustomerTargetRepository) scanRow(row *sql.Row) (res models.Cus
 		&res.Code,
 		&res.CustomerName,
 		&res.CustomerTarget,
-		&res.Month,
 	)
 	if err != nil {
 		return res, err
@@ -65,15 +63,19 @@ func (repository CustomerTargetRepository) SelectAll(c context.Context, paramete
 	conditionString := ``
 
 	if parameter.ID != "" {
-		conditionString += ` AND c.id = '` + parameter.ID + `'`
+		conditionString += ` AND cus.id = '` + parameter.ID + `'`
 	}
 
 	statement := models.CustomerTargetSelectStatement + ` ` + models.CustomerTargetWhereStatement +
-		` AND (LOWER(c."customer_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+		` AND (LOWER(cus."customer_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort +
+		` ), 0) AS TARGET
+		FROM CUSTOMER CUS
+		WHERE CUS.ID = '` + parameter.ID + `'`
+
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 
 	//print
-	// fmt.Println(statement)
+	fmt.Println(statement)
 
 	if err != nil {
 		return data, err

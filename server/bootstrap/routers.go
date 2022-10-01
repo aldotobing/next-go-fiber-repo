@@ -124,6 +124,7 @@ func (boot Bootstrap) RegisterRouters() {
 	//SalesInvoice Routes
 	SalesInvoiceRoutes := routers.SalesInvoiceRoutes{RouterGroup: apiV1, Handler: handler}
 	SalesInvoiceRoutes.RegisterRoute()
+
 	//Customer routes
 	CustomerRoutes := routers.CustomerRoutes{RouterGroup: apiV1, Handler: handler}
 	CustomerRoutes.RegisterRoute()
@@ -164,4 +165,7 @@ func (boot Bootstrap) RegisterRouters() {
 	//Data Sync Routes
 	DataSyncRoutes := routers.DataSyncRoutes{RouterGroup: apiV1, Handler: handler}
 	DataSyncRoutes.RegisterRoute()
+
+	CustomerTargetRoutes := routers.CustomerTargetRoutes{RouterGroup: apiV1, Handler: handler}
+	CustomerTargetRoutes.RegisterRoute()
 }
