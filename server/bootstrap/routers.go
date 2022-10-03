@@ -168,4 +168,7 @@ func (boot Bootstrap) RegisterRouters() {
 
 	CustomerTargetRoutes := routers.CustomerTargetRoutes{RouterGroup: apiV1, Handler: handler}
 	CustomerTargetRoutes.RegisterRoute()
+
+	CustomerAchievementRoutes := routers.CustomerAchievementRoutes{RouterGroup: apiV1, Handler: handler}
+	CustomerAchievementRoutes.RegisterRoute()
 }
