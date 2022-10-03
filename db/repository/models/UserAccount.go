@@ -68,6 +68,17 @@ var (
 	left join salesman s on s.id = cus.salesman_id
 	`
 
+	// UserAccountSelectStatement ...
+	AdminUserAccountSelectStatement = ` select def.id as user_id,null as cus_id,
+	def.login,
+	null,null,
+	null,
+	null,
+	null,null,null,
+	null,null,null
+	from _user def
+	`
+
 	// UserAccountWhereStatement ...
 	UserAccountWhereStatement = ` def.created_date is not null `
 )
