@@ -9,20 +9,23 @@ type SalesInvoice struct {
 	NoOrder        *string          `json:"no_order"`
 	TrasactionDate *string          `json:"transaction_date"`
 	Status         *string          `json:"status"`
+	NetAmount      *string          `json:"net_amount"`
 	InvoiceLine    *json.RawMessage `json:"invoice_line"`
-	NetAmount      *int             `json:"net_amount"`
 }
 
 // SalesInvoiceParameter ...
 type SalesInvoiceParameter struct {
-	ID        string `json:"id"`
-	NoInvoice string `json:"no_invoice"`
-	Search    string `json:"search"`
-	Page      int    `json:"page"`
-	Offset    int    `json:"offset"`
-	Limit     int    `json:"limit"`
-	By        string `json:"by"`
-	Sort      string `json:"sort"`
+	ID         string `json:"id"`
+	NoInvoice  string `json:"no_invoice"`
+	CustomerID string `json:"customer_id"`
+	StartDate  string `json:"start_date"`
+	EndDate    string `json:"end_date"`
+	Search     string `json:"search"`
+	Page       int    `json:"page"`
+	Offset     int    `json:"offset"`
+	Limit      int    `json:"limit"`
+	By         string `json:"by"`
+	Sort       string `json:"sort"`
 }
 
 var (
@@ -34,7 +37,10 @@ var (
 	}
 
 	// SalesInvoiceSelectStatement ...
-	SalesInvoiceSelectStatement = `SELECT DEF.DOCUMENT_NO AS NO_INVOICE,
+	SalesInvoiceSelectStatement = `
+	SELECT 
+	DEF.ID as ID,
+	DEF.DOCUMENT_NO AS NO_INVOICE,
 	SOH.DOCUMENT_NO AS NO_ORDER,
 	DEF.TRANSACTION_DATE,
 	DEF.STATUS,
@@ -45,18 +51,16 @@ var (
 											SIL.UNIT_PRICE::VARCHAR(255) AS UNIT_PRICE,
 											U._NAME::VARCHAR(255) AS UOMNAME,
 											SIL.QTY::VARCHAR(255) AS QTY
-										FROM SALES_INVOICE_HEADER DEF
-										JOIN SALES_INVOICE_LINE SIL ON SIL.HEADER_ID = DEF.ID
-										JOIN SALES_ORDER_HEADER SOH ON SOH.ID = DEF.SALES_ORDER_ID
+										FROM SALES_INVOICE_HEADER subDEF
+										JOIN SALES_INVOICE_LINE SIL ON SIL.HEADER_ID = subDEF.ID
+										left JOIN SALES_ORDER_HEADER SOH ON SOH.ID = subDEF.SALES_ORDER_ID
 										JOIN ITEM I ON I.ID = SIL.ITEM_ID
 										JOIN UOM U ON U.ID = SIL.UOM_ID
-										JOIN CUSTOMER C ON C.ID = DEF.CUST_BILL_TO_ID
-										WHERE SIL.HEADER_ID = DEF.ID ) T)
+										JOIN CUSTOMER C ON C.ID = subDEF.CUST_BILL_TO_ID
+										WHERE SIL.HEADER_ID = subDEF.ID AND subDEF.CUST_BILL_TO_ID = DEF.CUST_BILL_TO_ID
+										AND subdef.transaction_date = def.transaction_date) T)
 FROM SALES_INVOICE_HEADER DEF
-JOIN SALES_INVOICE_LINE SIL ON SIL.HEADER_ID = DEF.ID
-JOIN SALES_ORDER_HEADER SOH ON SOH.ID = DEF.SALES_ORDER_ID
-JOIN ITEM I ON I.ID = SIL.ITEM_ID
-JOIN UOM U ON U.ID = SIL.UOM_ID
+left JOIN SALES_ORDER_HEADER SOH ON SOH.ID = DEF.SALES_ORDER_ID
 JOIN CUSTOMER C ON C.ID = DEF.CUST_BILL_TO_ID `
 
 	// SalesInvoiceWhereStatement ...
