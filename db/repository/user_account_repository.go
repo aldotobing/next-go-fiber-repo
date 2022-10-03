@@ -11,6 +11,7 @@ import (
 type IUserAccountRepository interface {
 	FindByID(c context.Context, parameter models.UserAccountParameter) (models.UserAccount, error)
 	FindByPhoneNo(c context.Context, parameter models.UserAccountParameter) (models.UserAccount, error)
+	FindByEmailAndPass(c context.Context, parameter models.UserAccountParameter) (models.UserAccount, error)
 }
 
 type UserAccountRepository struct {
@@ -71,6 +72,18 @@ func (repository UserAccountRepository) FindByID(c context.Context, parameter mo
 	data, err = repository.scanRow(row)
 	if err != nil {
 
+		return data, err
+	}
+
+	return data, nil
+}
+
+func (repository UserAccountRepository) FindByEmailAndPass(c context.Context, parameter models.UserAccountParameter) (data models.UserAccount, err error) {
+	statement := models.AdminUserAccountSelectStatement + ` WHERE def.created_date is not null AND def._password = $1 AND lower(def.login) = $2`
+	row := repository.DB.QueryRowContext(c, statement, parameter.Password, strings.ToLower(parameter.Email))
+
+	data, err = repository.scanRow(row)
+	if err != nil {
 		return data, err
 	}
 

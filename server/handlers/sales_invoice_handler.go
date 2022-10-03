@@ -21,10 +21,13 @@ func (h *SalesInvoiceHandler) SelectAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.SalesInvoiceParameter{
-		NoInvoice: ctx.Query("document_no"),
-		Search:    ctx.Query("search"),
-		By:        ctx.Query("by"),
-		Sort:      ctx.Query("sort"),
+		NoInvoice:  ctx.Query("document_no"),
+		CustomerID: ctx.Query("customer_id"),
+		StartDate:  ctx.Query("start_date"),
+		EndDate:    ctx.Query("end_date"),
+		Search:     ctx.Query("search"),
+		By:         ctx.Query("by"),
+		Sort:       ctx.Query("sort"),
 	}
 	uc := usecase.SalesInvoiceUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectAll(c, parameter)

@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -33,7 +34,7 @@ func NewSalesInvoiceRepository(DB *sql.DB) ISalesInvoiceRepository {
 // Scan rows
 func (repository SalesInvoiceRepository) scanRows(rows *sql.Rows) (res models.SalesInvoice, err error) {
 	err = rows.Scan(
-		&res.ID, &res.NoInvoice, &res.NoOrder, &res.TrasactionDate, &res.Status, &res.InvoiceLine, &res.NetAmount,
+		&res.ID, &res.NoInvoice, &res.NoOrder, &res.TrasactionDate, &res.Status, &res.NetAmount, &res.InvoiceLine,
 	)
 	if err != nil {
 
@@ -46,7 +47,7 @@ func (repository SalesInvoiceRepository) scanRows(rows *sql.Rows) (res models.Sa
 // Scan row
 func (repository SalesInvoiceRepository) scanRow(row *sql.Row) (res models.SalesInvoice, err error) {
 	err = row.Scan(
-		&res.ID, &res.NoInvoice, &res.NoOrder, &res.TrasactionDate, &res.Status, &res.InvoiceLine, &res.NetAmount,
+		&res.ID, &res.NoInvoice, &res.NoOrder, &res.TrasactionDate, &res.Status, &res.NetAmount, &res.InvoiceLine,
 	)
 	if err != nil {
 		return res, err
@@ -59,9 +60,17 @@ func (repository SalesInvoiceRepository) scanRow(row *sql.Row) (res models.Sales
 func (repository SalesInvoiceRepository) SelectAll(c context.Context, parameter models.SalesInvoiceParameter) (data []models.SalesInvoice, err error) {
 	conditionString := ``
 
+	if parameter.CustomerID != "" {
+		conditionString += ` AND def.cust_bill_to_id = ` + parameter.CustomerID + ``
+	}
+	if parameter.StartDate != "" && parameter.EndDate != "" {
+		conditionString += ` AND def.transaction_date between '` + parameter.StartDate + `' AND '` + parameter.EndDate + `'`
+	}
 	statement := models.SalesInvoiceSelectStatement + ` ` + models.SalesInvoiceWhereStatement +
 		` AND (LOWER(def."document_no") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
-	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
+	fmt.Println(statement)
+	fmt.Println(parameter.StartDate)
+	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.NoInvoice)+"%")
 
 	if err != nil {
 		return data, err
@@ -84,8 +93,15 @@ func (repository SalesInvoiceRepository) SelectAll(c context.Context, parameter 
 func (repository SalesInvoiceRepository) FindAll(ctx context.Context, parameter models.SalesInvoiceParameter) (data []models.SalesInvoice, count int, err error) {
 	conditionString := ``
 
+	if parameter.CustomerID != "" {
+		conditionString += ` AND def.cust_bill_to_id = '` + parameter.CustomerID + `'`
+	}
+	if parameter.StartDate != "" && parameter.EndDate != "" {
+		conditionString += ` AND def.transaction_date between '` + parameter.StartDate + `' AND '` + parameter.EndDate + `'`
+	}
+
 	query := models.SalesInvoiceSelectStatement + ` ` + models.SalesInvoiceWhereStatement + ` ` + conditionString + `
-		AND (LOWER(def."document_no") LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
+		AND (LOWER(def."document_no") LIKE $4  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $5 LIMIT $6`
 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
 	if err != nil {
 		return data, count, err
@@ -105,7 +121,7 @@ func (repository SalesInvoiceRepository) FindAll(ctx context.Context, parameter 
 	}
 
 	query = `SELECT COUNT(*) FROM "sales_invoice_header" def ` + models.SalesInvoiceWhereStatement + ` ` +
-		conditionString + ` AND (LOWER(def."document_no") LIKE $1)`
+		conditionString + ` AND (LOWER(def."document_no") LIKE $4)`
 	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
 	return data, count, err
 
@@ -113,7 +129,7 @@ func (repository SalesInvoiceRepository) FindAll(ctx context.Context, parameter 
 
 // FindByID ...
 func (repository SalesInvoiceRepository) FindByID(c context.Context, parameter models.SalesInvoiceParameter) (data models.SalesInvoice, err error) {
-	statement := models.SalesInvoiceSelectStatement + ` WHERE  def.id = $1`
+	statement := models.SalesInvoiceSelectStatement + ` WHERE  def.id = $4`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
 
 	data, err = repository.scanRow(row)
@@ -126,7 +142,7 @@ func (repository SalesInvoiceRepository) FindByID(c context.Context, parameter m
 
 // FindByDocumentNo ...
 func (repository SalesInvoiceRepository) FindByDocumentNo(c context.Context, parameter models.SalesInvoiceParameter) (data models.SalesInvoice, err error) {
-	statement := models.SalesInvoiceSelectStatement + ` WHERE  def.document_no = $1`
+	statement := models.SalesInvoiceSelectStatement + ` WHERE  def.document_no = $4`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
 
 	data, err = repository.scanRow(row)
@@ -139,7 +155,7 @@ func (repository SalesInvoiceRepository) FindByDocumentNo(c context.Context, par
 
 // FindByCustomerId ...
 func (repository SalesInvoiceRepository) FindByCustomerId(c context.Context, parameter models.SalesInvoiceParameter) (data models.SalesInvoice, err error) {
-	statement := models.SalesInvoiceSelectStatement + ` WHERE  def.cust_bill_to_id = $1`
+	statement := models.SalesInvoiceSelectStatement + ` WHERE  def.cust_bill_to_id = $4`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
 
 	data, err = repository.scanRow(row)

@@ -25,6 +25,11 @@ func (route UserAccountRoutes) RegisterRoute() {
 
 	r.Post("/", handler.Login)
 
+	r1 := route.RouterGroup.Group("/api/web/auth")
+	r1.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
+
+	r1.Post("/", handler.LoginBackend)
+
 	r2 := route.RouterGroup.Group("/api/apps/verify")
 	r2.Use(jwtMiddleware.VerifyUser)
 	r2.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))

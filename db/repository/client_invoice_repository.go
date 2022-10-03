@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -210,7 +209,6 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 
 	if model.ListLine != nil && len(*model.ListLine) > 0 {
 		for _, lineObject := range *model.ListLine {
-			fmt.Println(lineObject.CategoryID)
 			line_statement := `
 			insert into sales_invoice_line(
 				header_id ,line_no ,category_id ,item_id ,qty ,
