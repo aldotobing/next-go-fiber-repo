@@ -28,3 +28,8 @@ type UserAccountRequest struct {
 	Address   string `json:"address"`
 	UpdatedBy int    `json:"updated_by"`
 }
+
+type UserAccountBackendLoginRequest struct {
+	Email    string `json:"email" validate:"required"`
+	Password string `json:"password" validate:"required"`
+}
