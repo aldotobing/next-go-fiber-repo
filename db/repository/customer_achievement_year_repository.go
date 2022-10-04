@@ -61,14 +61,17 @@ func (repository CustomerAchievementYear) scanRow(row *sql.Row) (res models.Cust
 // SelectAll ...
 func (repository CustomerAchievementYear) SelectAll(c context.Context, parameter models.CustomerAchievementYearParameter) (data []models.CustomerAchievementYear, err error) {
 	conditionString := ``
-	groupByString := ` GROUP BY CUSTOMER_ID, CUSTOMER_CODE, CUSTOMER_NAME `
+	groupByString := ` GROUP BY CUS.ID, CUSTOMER_CODE, CUSTOMER_NAME `
 
 	if parameter.ID != "" {
 		conditionString += ` AND cus.id = '` + parameter.ID + `'`
 	}
 
 	statement := models.CustomerAchievementYearSelectStatement + ` ` + models.CustomerAchievementYearWhereStatement +
-		` AND (LOWER(cus."customer_name") LIKE $1) ` + conditionString + groupByString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+		` AND (LOWER(cus."customer_name") LIKE $1) ` + conditionString + groupByString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort +
+		` ), 0) AS ACHIEVEMENT ` +
+		` FROM CUSTOMER CUS ` +
+		` WHERE CUS.ID = '` + parameter.ID + `'`
 
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 
