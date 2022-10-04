@@ -69,7 +69,9 @@ func (repository PromoContent) SelectAll(c context.Context, parameter models.Pro
 	conditionString := ``
 
 	if (parameter.StartDate != "") && (parameter.EndDate != "") {
-		conditionString += ` AND start_date >= ` + `'` + parameter.StartDate + `'` + ` AND end_date <= ` + `'` + parameter.EndDate + `'`
+		conditionString += ` AND start_date >= ` + `'` +
+			parameter.StartDate + `'::date` + ` AND end_date <= ` + `'` + parameter.EndDate + `'::date` +
+			` + INTERVAL ` + `'1 MONTH' `
 	}
 
 	statement := models.PromoContentSelectStatement + ` ` + models.PromoContentWhereStatement +
