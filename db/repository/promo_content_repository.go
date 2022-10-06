@@ -13,7 +13,7 @@ import (
 type IPromoContent interface {
 	SelectAll(c context.Context, parameter models.PromoContentParameter) ([]models.PromoContent, error)
 	FindAll(ctx context.Context, parameter models.PromoContentParameter) ([]models.PromoContent, int, error)
-	// 	FindByID(c context.Context, parameter models.PromoContentParameter) (models.PromoContent, error)
+	Add(c context.Context, parameter *models.PromoContent) (*string, error)
 	// 	Edit(c context.Context, model *models.PromoContent) (*string, error)
 	// 	EditAddress(c context.Context, model *models.PromoContent) (*string, error)
 }
@@ -173,30 +173,16 @@ func (repository PromoContent) FindByID(c context.Context, parameter models.Prom
 // 	return res, err
 // }
 
-// func (repository PromoContent) EditAddress(c context.Context, model *models.PromoContent) (res *string, err error) {
-// 	statement := `UPDATE customer SET
-// 	customer_name = $1,
-// 	customer_address = $2,
-// 	customer_province_id = $3,
-// 	customer_city_id = $4,
-// 	customer_district_id = $5,
-// 	customer_subdistrict_id = $6,
-// 	customer_postal_code = $7
-// 	WHERE id = $8
-// 	RETURNING id`
-// 	err = repository.DB.QueryRowContext(c, statement,
-// 		model.PromoContentName,
-// 		model.PromoContentAddress,
-// 		model.PromoContentProvinceID,
-// 		model.PromoContentCityID,
-// 		model.PromoContentDistrictID,
-// 		model.PromoContentSubdistrictID,
-// 		model.PromoContentPostalCode,
-// 		model.ID).Scan(&res)
+func (repository PromoContent) Add(c context.Context, model *models.PromoContent) (res *string, err error) {
+	statement := `INSERT INTO promo_content (code, _name, description, url_banner,
+		start_date, end_date)
+	VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`
 
-// 	fmt.Println(statement)
-// 	if err != nil {
-// 		return res, err
-// 	}
-// 	return res, err
-// }
+	err = repository.DB.QueryRowContext(c, statement, model.Code, model.PromoName, model.PromoDescription, model.PromoUrlBanner,
+		model.StartDate, model.EndDate).Scan(&res)
+
+	if err != nil {
+		return res, err
+	}
+	return res, err
+}

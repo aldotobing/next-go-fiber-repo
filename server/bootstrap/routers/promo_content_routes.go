@@ -25,4 +25,6 @@ func (route PromoContentRoutes) RegisterRoute() {
 	r.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
 	r.Get("/", handler.FindAll)
 	r.Get("/select", handler.SelectAll)
+	r.Post("/", handler.Add)
+
 }
