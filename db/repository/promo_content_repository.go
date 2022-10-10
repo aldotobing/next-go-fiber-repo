@@ -135,7 +135,7 @@ func (repository PromoContent) FindAll(ctx context.Context, parameter models.Pro
 
 // FindByID ...
 func (repository PromoContent) FindByID(c context.Context, parameter models.PromoContentParameter) (data models.PromoContent, err error) {
-	statement := models.PromoContentSelectStatement + ` WHERE c.id = $1`
+	statement := models.PromoContentSelectStatement + ` WHERE pc.id = $1`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
 
 	fmt.Println(statement)
