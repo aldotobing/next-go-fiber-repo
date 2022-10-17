@@ -77,6 +77,10 @@ func (repository CustomerOrderHeaderRepository) SelectAll(c context.Context, par
 		conditionString += ` AND def.modified_date > '` + parameter.DateParam + `'`
 	}
 
+	if parameter.UserID != "" {
+		conditionString += ` AND def.branch_id in ( select branch_id from user_branch where user_id = ` + parameter.UserID + `)`
+	}
+
 	statement := models.CustomerOrderHeaderSelectStatement + ` ` + models.CustomerOrderHeaderWhereStatement +
 		` AND (LOWER(cus."customer_name") LIKE $1 ) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
@@ -104,6 +108,10 @@ func (repository CustomerOrderHeaderRepository) FindAll(ctx context.Context, par
 
 	if parameter.CustomerID != "" {
 		conditionString += ` AND def.cust_ship_to_id = '` + parameter.CustomerID + `'`
+	}
+
+	if parameter.UserID != "" {
+		conditionString += ` AND def.branch_id in ( select branch_id from user_branch where user_id = ` + parameter.UserID + `)`
 	}
 
 	query := models.CustomerOrderHeaderSelectStatement + ` ` + models.CustomerOrderHeaderWhereStatement + ` ` + conditionString + `
