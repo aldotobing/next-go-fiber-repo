@@ -36,7 +36,7 @@ func (route CustomerOrderHeaderRoutes) RegisterRoute() {
 	r3 := route.RouterGroup.Group("/api/web/customerorder")
 	// r.Use(jwtMiddleware.VerifyUser)
 	r3.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
-	r3.Get("/", handler.FindAll)
+	r3.Get("/", handler.FindAllForWeb)
 	r3.Get("/select", handler.SelectAll)
 	r3.Get("/id/:id", handler.FindByID)
 }

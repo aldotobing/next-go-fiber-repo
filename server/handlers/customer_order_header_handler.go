@@ -145,3 +145,31 @@ func (h *CustomerOrderHeaderHandler) RestSelectAll(ctx *fiber.Ctx) error {
 
 	return h.SendResponse(ctx, ObjcetData, nil, err, 0)
 }
+
+// FindAll ...
+func (h *CustomerOrderHeaderHandler) FindAllForWeb(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.CustomerOrderHeaderParameter{
+		UserID: ctx.Query("admin_user_id"),
+		Search: ctx.Query("search"),
+		Page:   str.StringToInt(ctx.Query("page")),
+		Limit:  str.StringToInt(ctx.Query("limit")),
+		By:     ctx.Query("by"),
+		Sort:   ctx.Query("sort"),
+	}
+	uc := usecase.CustomerOrderHeaderUC{ContractUC: h.ContractUC}
+	res, meta, err := uc.FindAll(c, parameter)
+
+	type StructObject struct {
+		ListObjcet []models.CustomerOrderHeader `json:"list_customer_order"`
+	}
+
+	ObjcetData := new(StructObject)
+
+	if res != nil {
+		ObjcetData.ListObjcet = res
+	}
+
+	return h.SendResponse(ctx, ObjcetData, meta, err, 0)
+}

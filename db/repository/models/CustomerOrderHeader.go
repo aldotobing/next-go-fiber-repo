@@ -34,6 +34,7 @@ type CustomerOrderHeader struct {
 // CustomerOrderHeaderParameter ...
 type CustomerOrderHeaderParameter struct {
 	ID         string `json:"id_customer_order_header"`
+	UserID     string `json:"admin_user_id"`
 	CustomerID string `json:"id_customer"`
 	Search     string `json:"search"`
 	DateParam  string `json:"date_param"`
