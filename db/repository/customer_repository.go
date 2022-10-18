@@ -38,6 +38,13 @@ func (repository CustomerRepository) scanRows(rows *sql.Rows) (res models.Custom
 		&res.CustomerAddress,
 		&res.CustomerProfilePicture,
 		&res.CustomerEmail,
+		&res.CustomerActiveStatus,
+		&res.CustomerLatitude,
+		&res.CustomerLongitude,
+		&res.CustomerBranchCode,
+		&res.CustomerBranchName,
+		&res.CustomerRegionCode,
+		&res.CustomerRegionName,
 		&res.CustomerProvinceID,
 		&res.CustomerProvinceName,
 		&res.CustomerCityID,
@@ -75,6 +82,13 @@ func (repository CustomerRepository) scanRow(row *sql.Row) (res models.Customer,
 		&res.CustomerAddress,
 		&res.CustomerProfilePicture,
 		&res.CustomerEmail,
+		&res.CustomerActiveStatus,
+		&res.CustomerLatitude,
+		&res.CustomerLongitude,
+		&res.CustomerBranchCode,
+		&res.CustomerBranchName,
+		&res.CustomerRegionCode,
+		&res.CustomerRegionName,
 		&res.CustomerProvinceID,
 		&res.CustomerProvinceName,
 		&res.CustomerCityID,
@@ -114,7 +128,7 @@ func (repository CustomerRepository) SelectAll(c context.Context, parameter mode
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 
 	//print
-	// fmt.Println(statement)
+	fmt.Println(statement)
 
 	if err != nil {
 		return data, err

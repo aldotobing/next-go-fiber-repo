@@ -6,6 +6,13 @@ type Customer struct {
 	Code                    *string `json:"customer_code"`
 	CustomerName            *string `json:"customer_name"`
 	CustomerProfilePicture  *string `json:"customer_profile_picture"`
+	CustomerActiveStatus    *string `json:"customer_active_status"`
+	CustomerLatitude        *string `json:"customer_latitude"`
+	CustomerLongitude       *string `json:"customer_longitude"`
+	CustomerBranchCode      *string `json:"customer_branch_code"`
+	CustomerBranchName      *string `json:"customer_branch_name"`
+	CustomerRegionCode      *string `json:"customer_region_code"`
+	CustomerRegionName      *string `json:"customer_region_name"`
 	CustomerEmail           *string `json:"customer_email"`
 	CustomerCpName          *string `json:"customer_cp_name"`
 	CustomerAddress         *string `json:"customer_address"`
@@ -63,6 +70,16 @@ var (
 		C.CUSTOMER_ADDRESS AS CUST_ADDRESS,
 		C.CUSTOMER_PROFILE_PICTURE AS CUST_PROFILE_PICTURE,
 		C.CUSTOMER_EMAIL AS CUST_EMAIL,
+		CASE C.ACTIVE
+				WHEN 1 THEN 'Active'
+				WHEN 0 THEN 'Inactive'
+		END AS CUST_ACTIVE_STATUS,
+		C.LATITUDE AS CUST_LATITUDE,
+		C.LONGITUDE AS CUST_LONGITUDE,
+		B.BRANCH_CODE AS BRANCH_CODE,
+		B._NAME AS BRANCH_NAME,
+		REG.CODE AS REGION_CODE,
+		REG._NAME AS REGION_NAME,
 		PRV.ID AS CUST_PROVINCE_ID,
 		PRV._NAME AS CUST_PROVINCE_NAME,
 		CTY.ID AS CUST_CITY_ID,
@@ -82,6 +99,8 @@ var (
 		CG.GIFT_NAME AS CUST_GIFT_NAME,
 		LOY.LOYALTY_NAME AS CUST_LOYALTY_NAME
 	FROM CUSTOMER C
+	LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
+	LEFT JOIN REGION REG ON REG.ID = B.REGION_ID
 	LEFT JOIN CUSTOMER_TYPE CT ON CT.ID = C.CUSTOMER_TYPE_ID
 	JOIN PROVINCE PRV ON PRV.ID = C.CUSTOMER_PROVINCE_ID
 	JOIN CITY CTY ON CTY.ID = C.CUSTOMER_CITY_ID
