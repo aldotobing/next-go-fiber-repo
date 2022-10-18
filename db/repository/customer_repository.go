@@ -123,6 +123,10 @@ func (repository CustomerRepository) SelectAll(c context.Context, parameter mode
 		conditionString += ` AND c.id = '` + parameter.ID + `'`
 	}
 
+	if parameter.UserId != "" {
+		conditionString += ` AND C.BRANCH_ID IN (SELECT BRANCH_ID FROM USER_BRANCH UB WHERE UB.USER_ID = ` + parameter.UserId + `) `
+	}
+
 	statement := models.CustomerSelectStatement + ` ` + models.CustomerWhereStatement +
 		` AND (LOWER(c."customer_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
@@ -155,12 +159,17 @@ func (repository CustomerRepository) FindAll(ctx context.Context, parameter mode
 		conditionString += ` AND c.id = '` + parameter.ID + `'`
 	}
 
+	if parameter.UserId != "" {
+		conditionString += ` AND C.BRANCH_ID IN (SELECT BRANCH_ID FROM USER_BRANCH UB WHERE UB.USER_ID = ` + parameter.UserId + `) `
+	}
+
 	query := models.CustomerSelectStatement + ` ` + models.CustomerWhereStatement + ` ` + conditionString + `
 		AND (LOWER(c."customer_name") LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
 	if err != nil {
 		return data, count, err
 	}
+	fmt.Println(query)
 
 	defer rows.Close()
 	for rows.Next() {
