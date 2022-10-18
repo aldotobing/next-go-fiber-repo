@@ -30,6 +30,15 @@ func (route CustomerRoutes) RegisterRoute() {
 	r.Put("/id/:customer_id", handler.Edit)
 	r.Put("/address/id/:customer_id", handler.EditAddress)
 
+	r2 := route.RouterGroup.Group("/api/web/customer")
+	// r.Use(jwtMiddleware.VerifyUser)
+	r2.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
+	r2.Get("/", handler.FindAll)
+	r2.Get("/select", handler.SelectAll)
+	r2.Get("/id/:customer_id", handler.FindByID)
+	r2.Put("/id/:customer_id", handler.Edit)
+	r2.Put("/address/id/:customer_id", handler.EditAddress)
+
 	//AWS UPLOAD IMG ROUTE
 	handlerAws := handlers.AwsHandler{Handler: route.Handler}
 	// jwtMiddleware := middlewares.JwtMiddleware{ContractUC: handler.ContractUC}
