@@ -25,6 +25,7 @@ func (h *SalesInvoiceHandler) SelectAll(ctx *fiber.Ctx) error {
 		CustomerID: ctx.Query("customer_id"),
 		StartDate:  ctx.Query("start_date"),
 		EndDate:    ctx.Query("end_date"),
+		UserId:     ctx.Query("user_id"),
 		Search:     ctx.Query("search"),
 		By:         ctx.Query("by"),
 		Sort:       ctx.Query("sort"),

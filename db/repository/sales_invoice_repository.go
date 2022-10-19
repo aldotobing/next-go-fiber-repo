@@ -66,6 +66,10 @@ func (repository SalesInvoiceRepository) SelectAll(c context.Context, parameter 
 	if parameter.StartDate != "" && parameter.EndDate != "" {
 		conditionString += ` AND def.transaction_date between '` + parameter.StartDate + `' AND '` + parameter.EndDate + `'`
 	}
+	if parameter.UserId != "" {
+		conditionString += ` AND def.branch_id in (select ub.branch_id from user_branch ub where ub.user_id =  ` + parameter.UserId + `)`
+	}
+
 	statement := models.SalesInvoiceSelectStatement + ` ` + models.SalesInvoiceWhereStatement +
 		` AND (LOWER(def."document_no") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	fmt.Println(statement)
@@ -99,7 +103,9 @@ func (repository SalesInvoiceRepository) FindAll(ctx context.Context, parameter 
 	if parameter.StartDate != "" && parameter.EndDate != "" {
 		conditionString += ` AND def.transaction_date between '` + parameter.StartDate + `' AND '` + parameter.EndDate + `'`
 	}
-
+	if parameter.UserId != "" {
+		conditionString += ` AND def.branch_id in (select ub.branch_id from user_branch ub where ub.user_id =  '` + parameter.UserId + `')`
+	}
 	query := models.SalesInvoiceSelectStatement + ` ` + models.SalesInvoiceWhereStatement + ` ` + conditionString + `
 		AND (LOWER(def."document_no") LIKE $4  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $5 LIMIT $6`
 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
