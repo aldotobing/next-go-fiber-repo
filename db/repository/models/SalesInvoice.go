@@ -20,6 +20,7 @@ type SalesInvoiceParameter struct {
 	CustomerID string `json:"customer_id"`
 	StartDate  string `json:"start_date"`
 	EndDate    string `json:"end_date"`
+	UserId     string `json:"user_id"`
 	Search     string `json:"search"`
 	Page       int    `json:"page"`
 	Offset     int    `json:"offset"`
