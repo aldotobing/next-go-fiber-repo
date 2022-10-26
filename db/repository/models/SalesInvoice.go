@@ -5,6 +5,7 @@ import "encoding/json"
 // SalesInvoice ...
 type SalesInvoice struct {
 	ID             *string          `json:"id"`
+	CustomerName   *string          `json:"customer_name"`
 	NoInvoice      *string          `json:"no_invoice"`
 	NoOrder        *string          `json:"no_order"`
 	TrasactionDate *string          `json:"transaction_date"`
@@ -41,6 +42,7 @@ var (
 	SalesInvoiceSelectStatement = `
 	SELECT 
 	DEF.ID as ID,
+	P._NAME AS CUSTOMER_NAME,
 	DEF.DOCUMENT_NO AS NO_INVOICE,
 	SOH.DOCUMENT_NO AS NO_ORDER,
 	DEF.TRANSACTION_DATE,
@@ -62,7 +64,8 @@ var (
 										AND subdef.transaction_date = def.transaction_date) T)
 FROM SALES_INVOICE_HEADER DEF
 left JOIN SALES_ORDER_HEADER SOH ON SOH.ID = DEF.SALES_ORDER_ID
-JOIN CUSTOMER C ON C.ID = DEF.CUST_BILL_TO_ID `
+JOIN CUSTOMER C ON C.ID = DEF.CUST_BILL_TO_ID
+JOIN PARTNER P ON P.ID = C.PARTNER_ID `
 
 	// SalesInvoiceWhereStatement ...
 	SalesInvoiceWhereStatement = ` where def.id is not null `
