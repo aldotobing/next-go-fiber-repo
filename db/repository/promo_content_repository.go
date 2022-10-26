@@ -75,7 +75,7 @@ func (repository PromoContent) SelectAll(c context.Context, parameter models.Pro
 	}
 
 	statement := models.PromoContentSelectStatement + ` ` + models.PromoContentWhereStatement +
-		` AND (LOWER(pc._name) LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` DESC` + ` ` + parameter.Sort
+		` AND (LOWER(pc._name) LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 
