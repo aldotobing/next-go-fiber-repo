@@ -176,7 +176,7 @@ func (repository CustomerOrderHeaderRepository) CheckOut(c context.Context, mode
 			$5,$6,$7,$8,
 			$9,$10,$11,$12,
 			$13,(select salesman_id from customer where id = $14),
-			$15,$16
+			(select branch_id from customer where id = $15),$16
 		)
 	RETURNING id`
 
@@ -191,7 +191,7 @@ func (repository CustomerOrderHeaderRepository) CheckOut(c context.Context, mode
 		model.PaymentTermsID, model.ExpectedDeliveryDate, model.GrossAmount, model.DiscAmount,
 		model.TaxableAmount, model.TaxAmount, model.RoundingAmount, model.NetAmount,
 		model.TaxCalcMethod, model.CustomerID,
-		model.BranchID, model.PriceLIstID,
+		model.CustomerID, model.PriceLIstID,
 	).Scan(&res)
 
 	if err != nil {
