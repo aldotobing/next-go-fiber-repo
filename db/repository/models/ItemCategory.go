@@ -22,7 +22,7 @@ type ItemCategoryParameter struct {
 
 var (
 	// ItemCategoryOrderBy ...
-	ItemCategoryOrderBy = []string{"def.id", "def._name", "def.created_date"}
+	ItemCategoryOrderBy = []string{"def.id", "def._name", "def.created_date", "def.sequenc"}
 	// ItemCategoryOrderByrByString ...
 	ItemCategoryOrderByrByString = []string{
 		"def._name",
