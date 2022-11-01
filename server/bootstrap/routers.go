@@ -24,6 +24,7 @@ func (boot Bootstrap) RegisterRouters() {
 	})
 
 	apiV1 := boot.App.Group("/v1")
+	//http.ListenAndServeTLS(":5000", "../fullchain.pem", "../privkey.pem", nil)
 
 	// auth routes
 	authRoutes := routers.AuthRoutes{RouterGroup: apiV1, Handler: handler}
