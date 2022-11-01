@@ -60,7 +60,7 @@ func main() {
 	m := &autocert.Manager{
 		Prompt: autocert.AcceptTOS,
 		// Replace with your domain
-		HostPolicy: autocert.HostWhitelist("108.137.62.205"),
+		HostPolicy: autocert.HostWhitelist("localhost"),
 		// Folder to store the certificates
 		Cache: autocert.DirCache("./certs"),
 	}
