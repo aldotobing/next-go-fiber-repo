@@ -82,7 +82,7 @@ func main() {
 	// }
 
 	// Start server
-	log.Fatal(app.Listener(ln))
+	// log.Fatal(app.Listener(ln))
 
 	ContractUC := usecase.ContractUC{
 		ReqID:       xid.New().String(),
