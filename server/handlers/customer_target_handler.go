@@ -29,16 +29,16 @@ func (h *CustomerTargetHandler) SelectAll(ctx *fiber.Ctx) error {
 	res, err := uc.SelectAll(c, parameter)
 
 	type StructObject struct {
-		ListObjcet []models.CustomerTarget `json:"list_customer"`
+		ListObject []models.CustomerTarget `json:"list_customer"`
 	}
 
-	ObjcetData := new(StructObject)
+	ObjectData := new(StructObject)
 
 	if res != nil {
-		ObjcetData.ListObjcet = res
+		ObjectData.ListObject = res
 	}
 
-	return h.SendResponse(ctx, ObjcetData, nil, err, 0)
+	return h.SendResponse(ctx, ObjectData, nil, err, 0)
 }
 
 // FindAll ...
