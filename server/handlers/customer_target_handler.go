@@ -46,7 +46,7 @@ func (h *CustomerTargetHandler) SelectAll(ctx *fiber.Ctx) error {
 				res[i].CustomerTarget = &target
 			}
 		}
-		ObjcetData.ListObjcet = res
+		ObjectData.ListObject = res
 
 	}
 
