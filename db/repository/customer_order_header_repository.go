@@ -38,6 +38,7 @@ func (repository CustomerOrderHeaderRepository) scanRows(rows *sql.Rows) (res mo
 		&res.PriceLIstID, &res.PriceLIstName, &res.PriceLIstVersionID, &res.PriceLIstVersionName,
 		&res.Status, &res.GrossAmount, &res.TaxableAmount, &res.TaxAmount,
 		&res.RoundingAmount, &res.NetAmount, &res.DiscAmount,
+		&res.CustomerCode, &res.SalesmanCode, &res.CustomerAddress,
 	)
 	if err != nil {
 
@@ -57,6 +58,7 @@ func (repository CustomerOrderHeaderRepository) scanRow(row *sql.Row) (res model
 		&res.PriceLIstID, &res.PriceLIstName, &res.PriceLIstVersionID, &res.PriceLIstVersionName,
 		&res.Status, &res.GrossAmount, &res.TaxableAmount, &res.TaxAmount,
 		&res.RoundingAmount, &res.NetAmount, res.DiscAmount,
+		&res.CustomerCode, &res.SalesmanCode, &res.CustomerAddress,
 	)
 	if err != nil {
 		return res, err
@@ -168,13 +170,13 @@ func (repository CustomerOrderHeaderRepository) CheckOut(c context.Context, mode
 		payment_terms_id, expected_delivery_date, gross_amount,disc_amount,
 		taxable_amount, tax_amount, rounding_amount, net_amount,
 		tax_calc_method, salesman_id,
-		branch_id,price_list_id
+		branch_id,price_list_id,status
 		)values(
 			$1,$2,$3,$4,
 			$5,$6,$7,$8,
 			$9,$10,$11,$12,
-			$13,$14,
-			$15,$16
+			$13,(select salesman_id from customer where id = $14),
+			(select branch_id from customer where id = $15),$16,'draft'
 		)
 	RETURNING id`
 
@@ -188,8 +190,8 @@ func (repository CustomerOrderHeaderRepository) CheckOut(c context.Context, mode
 	err = transaction.QueryRowContext(c, statement, model.TransactionDate, model.TransactionTime, model.CustomerID, model.CustomerID,
 		model.PaymentTermsID, model.ExpectedDeliveryDate, model.GrossAmount, model.DiscAmount,
 		model.TaxableAmount, model.TaxAmount, model.RoundingAmount, model.NetAmount,
-		model.TaxCalcMethod, model.SalesmanID,
-		model.BranchID, model.PriceLIstID,
+		model.TaxCalcMethod, model.CustomerID,
+		model.CustomerID, model.PriceLIstID,
 	).Scan(&res)
 
 	if err != nil {

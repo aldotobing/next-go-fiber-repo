@@ -29,6 +29,9 @@ type CustomerOrderHeader struct {
 	DiscAmount           *string             `json:"disc_amount"`
 	LineList             *string             `json:"line_list"`
 	ListLine             []CustomerOrderLine `json:"list_line"`
+	CustomerCode         *string             `json:"customer_code"`
+	SalesmanCode         *string             `json:"salesman_code"`
+	CustomerAddress      *string             `json:"customer_address"`
 }
 
 // CustomerOrderHeaderParameter ...
@@ -56,15 +59,16 @@ var (
 	// CustomerOrderHeaderSelectStatement ...
 	CustomerOrderHeaderSelectStatement = ` select 
 	def.id as id_customer_order, def.document_no,to_char(def.transaction_date,'YYYY-MM-DD') as transaction_date ,to_char(def.transaction_time,'HH:MI:SS') as transaction_time,
-	 def.cust_ship_to_id,cus.customer_name, def.tax_calc_method,
-	def.salesman_id, s.salesman_name, def.payment_terms_id,top._name as top_name,
+	def.cust_ship_to_id,cus.customer_name, def.tax_calc_method,
+	cus.salesman_id, s.salesman_name, def.payment_terms_id,top._name as top_name,
 	to_char(def.expected_delivery_date,'YYYY-MM-DD') as expected_d_date,b.id as b_id,b._name as b_name,
 	pl.id as pl_id,pl._name as pl_name, plv.id as plv_id,plv.description,
 	def.status,def.gross_amount,def.taxable_amount, def.tax_amount,
-	def.rounding_amount, def.net_amount,def.disc_amount
+	def.rounding_amount, def.net_amount,def.disc_amount,
+	cus.customer_code as c_code, s.salesman_code as s_code, cus.customer_address
 	from customer_order_header def
 	join customer cus on cus.id = def.cust_ship_to_id
-	left join salesman s on s.id = def.salesman_id
+	left join salesman s on s.id = cus.salesman_id
 	left join term_of_payment top on top.id = def.payment_terms_id
 	left join branch b on b.id = def.branch_id
 	left join price_list pl on pl.id = def.price_list_id
