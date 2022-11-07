@@ -35,6 +35,7 @@ type Customer struct {
 	Point                   *string `json:"customer_point"`
 	GiftName                *string `json:"customer_gift_name"`
 	Loyalty                 *string `json:"customer_loyalty"`
+	VisitDay                *string `json:"visit_day"`
 }
 
 // CustomerParameter ...
