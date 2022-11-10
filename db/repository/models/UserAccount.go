@@ -14,6 +14,7 @@ type UserAccount struct {
 	SalesmanID         *string `json:"salesman_id"`
 	SalesmanName       *string `json:"salesman_name"`
 	SalesmanCode       *string `json:"salesman_code"`
+	FireStoreUID       *string `json:"firestore_uid"`
 }
 
 type UserAccountParameter struct {

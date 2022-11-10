@@ -2,7 +2,6 @@ package config
 
 import (
 	"database/sql"
-	"fmt"
 
 	"nextbasis-service-v-0.1/pkg/aes"
 	"nextbasis-service-v-0.1/pkg/aesfront"
@@ -19,6 +18,7 @@ import (
 	"log"
 	"time"
 
+	firesorepkg "nextbasis-service-v-0.1/pkg/firestore"
 	miniopkg "nextbasis-service-v-0.1/pkg/minio"
 	"nextbasis-service-v-0.1/pkg/mssqldb"
 	postgresqlPkg "nextbasis-service-v-0.1/pkg/postgresql"
@@ -149,6 +149,18 @@ func LoadConfigs() (res Configs, err error) {
 		return res, err
 	}
 
+	//Firestore
+
+	firesoreInfo := firesorepkg.Credential{
+		Key: res.EnvConfig["FIRESTORE_KEY"],
+		DB:  res.EnvConfig["FIRESTORE_PROJECT"],
+	}
+
+	res.Firestore, err = firesoreInfo.CreateClientWithCredentialFile()
+	if err != nil {
+		return res, err
+	}
+
 	// Aws connection
 	// awsInfo := awspkg.AWSS3{
 	// 	Region:    res.EnvConfig["AWS_REGION"],
@@ -210,9 +222,9 @@ func LoadConfigs() (res Configs, err error) {
 	res.TwilioClient = twilioPkg.NewTwilioClient(res.EnvConfig["TWILIO_SID"], res.EnvConfig["TWILIO_TOKEN"], res.EnvConfig["TWILIO_SEND_FROM"])
 	res.WooWAClient = whatsapp.NewWooWAClient(res.EnvConfig["WA_URL"], res.EnvConfig["WA_KEY"])
 
-	fmt.Printf("+%v", res.Aws)
+	// fmt.Printf("+%v", res.Aws)
 	res.FCM.APIKey = res.EnvConfig["FCM_API_KEY"]
-	fmt.Printf("+%v", res.TwilioClient)
-	fmt.Printf("+%v", res.WooWAClient)
+	// fmt.Printf("+%v", res.TwilioClient)
+	// fmt.Printf("+%v", res.WooWAClient)
 	return res, err
 }
