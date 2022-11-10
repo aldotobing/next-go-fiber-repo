@@ -40,6 +40,6 @@ var (
 	`
 
 	// FireStoreUserWhereStatement ...
-	FireStoreUserWhereStatement = ` where def.firestoreuid is not null and trim(def.firestoreuid) !=''
+	FireStoreUserWhereStatement = ` where def.firestoreuid is not null and trim(def.firestoreuid) !='' and (def.partner_id is null or def.partner_id not in (select id from customer))
 	`
 )
