@@ -178,4 +178,7 @@ func (boot Bootstrap) RegisterRouters() {
 
 	BranchRoutes := routers.BranchRoutes{RouterGroup: apiV1, Handler: handler}
 	BranchRoutes.RegisterRoute()
+
+	FireBaseUIDRoutes := routers.FireBaseUIDRoutes{RouterGroup: apiV1, Handler: handler}
+	FireBaseUIDRoutes.RegisterRoute()
 }
