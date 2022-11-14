@@ -18,7 +18,7 @@ type FireBaseUIDHandler struct {
 func (h *FireBaseUIDHandler) GetFirebaseUIDData(ctx *fiber.Ctx) error {
 
 	type firebaseUID struct {
-		ListUID []string `json:"agentUidList "`
+		ListUID []string `json:"agentUidList"`
 	}
 
 	ObjectData := new(firebaseUID)
