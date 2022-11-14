@@ -121,8 +121,10 @@ func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter mode
 	repo := repository.NewCustomerOrderHeaderRepository(uc.DB)
 
 	loc, _ := time.LoadLocation("Asia/Jakarta")
-	now := time.Now().In(loc) //.Add(time.Minute * time.Duration(-15))
+	now := time.Now().In(loc).Add(time.Minute * time.Duration(-15))
+
 	strnow := now.Format(time.RFC3339)
+	fmt.Println(strnow)
 	parameter.DateParam = strnow
 	jsonReq, err := json.Marshal(parameter)
 	client := &http.Client{}

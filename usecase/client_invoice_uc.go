@@ -95,7 +95,7 @@ func (uc CilentInvoiceUC) DataSync(c context.Context, parameter models.CilentInv
 	repo := repository.NewCilentInvoiceRepository(uc.DB)
 
 	loc, _ := time.LoadLocation("Asia/Jakarta")
-	now := time.Now().In(loc) //.Add(time.Minute * time.Duration(-15))
+	now := time.Now().In(loc).Add(time.Minute * time.Duration(-15))
 	strnow := now.Format(time.RFC3339)
 	parameter.DateParam = strnow
 	jsonReq, err := json.Marshal(parameter)
