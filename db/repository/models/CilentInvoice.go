@@ -8,9 +8,13 @@ type CilentInvoice struct {
 	TransactionDate      *string              `json:"transaction_date"`
 	TransactionTime      *string              `json:"transaction_time"`
 	CustomerID           *string              `json:"customer_id"`
+	CustomerCode         *string              `json:"customer_code"`
 	CustomerName         *string              `json:"customer_name"`
 	TaxCalcMethod        *string              `json:"tax_calc_method"`
 	SalesmanID           *string              `json:"salesman_id"`
+	SalesmanCode         *string              `json:"salesman_code"`
+	SalesRequestCode     *string              `json:"srh_doc_no"`
+	TransactionPoint     *string              `json:"customer_point"`
 	SalesmanName         *string              `json:"salesman_name"`
 	PaymentTermsID       *string              `json:"payment_terms_id"`
 	PaymentTermsName     *string              `json:"payment_terms_name"`

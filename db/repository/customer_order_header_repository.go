@@ -16,6 +16,7 @@ type ICustomerOrderHeaderRepository interface {
 	FindAll(ctx context.Context, parameter models.CustomerOrderHeaderParameter) ([]models.CustomerOrderHeader, int, error)
 	FindByID(c context.Context, parameter models.CustomerOrderHeaderParameter) (models.CustomerOrderHeader, error)
 	CheckOut(c context.Context, model *models.CustomerOrderHeader) (*string, error)
+	SyncVoid(c context.Context, model *models.CustomerOrderHeader) (*string, error)
 }
 
 // CustomerOrderHeaderRepository ...
@@ -211,6 +212,19 @@ func (repository CustomerOrderHeaderRepository) CheckOut(c context.Context, mode
 	}
 
 	if err = transaction.Commit(); err != nil {
+		return res, err
+	}
+	return res, err
+}
+
+func (repository CustomerOrderHeaderRepository) SyncVoid(c context.Context, model *models.CustomerOrderHeader) (res *string, err error) {
+	statement := `UPDATE customer_order_header SET 
+	status = 'voided' 
+	WHERE document_no = $1 
+	RETURNING id`
+	err = repository.DB.QueryRowContext(c, statement,
+		model.DocumentNo).Scan(&res)
+	if err != nil {
 		return res, err
 	}
 	return res, err
