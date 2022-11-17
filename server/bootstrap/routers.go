@@ -181,4 +181,7 @@ func (boot Bootstrap) RegisterRouters() {
 
 	FireBaseUIDRoutes := routers.FireBaseUIDRoutes{RouterGroup: apiV1, Handler: handler}
 	FireBaseUIDRoutes.RegisterRoute()
+
+	PromoLineRoutes := routers.PromoLineRoutes{RouterGroup: apiV1, Handler: handler}
+	PromoLineRoutes.RegisterRoute()
 }

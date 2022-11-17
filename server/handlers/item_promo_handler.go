@@ -22,6 +22,7 @@ func (h *ItemPromoHandler) SelectAll(ctx *fiber.Ctx) error {
 
 	parameter := models.ItemPromoParameter{
 		ItemID:    ctx.Query("item_id"),
+		PromoID:   ctx.Query("promo_id"),
 		StartDate: ctx.Query("start_date"),
 		EndDate:   ctx.Query("end_date"),
 		Search:    ctx.Query("search"),
@@ -49,6 +50,7 @@ func (h *ItemPromoHandler) FindAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.ItemPromoParameter{
+		PromoID:   ctx.Query("promo_id"),
 		ItemID:    ctx.Query("item_id"),
 		StartDate: ctx.Query("start_date"),
 		Search:    ctx.Query("search"),

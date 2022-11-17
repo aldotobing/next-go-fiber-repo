@@ -174,7 +174,7 @@ func (repository PromoContent) FindByID(c context.Context, parameter models.Prom
 // }
 
 func (repository PromoContent) Add(c context.Context, model *models.PromoContent) (res *string, err error) {
-	statement := `INSERT INTO promo_content (code, _name, description, url_banner,
+	statement := `INSERT INTO promo (code, _name, description, url_banner,
 		start_date, end_date)
 	VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`
 
