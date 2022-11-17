@@ -32,6 +32,8 @@ func NewItemPromoRepository(DB *sql.DB) IItemPromoRepository {
 // Scan rows
 func (repository ItemPromoRepository) scanRows(rows *sql.Rows) (res models.ItemPromo, err error) {
 	err = rows.Scan(
+		&res.PromoID,
+		&res.PromoLineID,
 		&res.ItemID,
 		&res.ItemCode,
 		&res.ItemName,
@@ -65,6 +67,8 @@ func (repository ItemPromoRepository) scanRows(rows *sql.Rows) (res models.ItemP
 // Scan row
 func (repository ItemPromoRepository) scanRow(row *sql.Row) (res models.ItemPromo, err error) {
 	err = row.Scan(
+		&res.PromoID,
+		&res.PromoLineID,
 		&res.ItemID,
 		&res.ItemCode,
 		&res.ItemName,
@@ -102,6 +106,10 @@ func (repository ItemPromoRepository) SelectAll(c context.Context, parameter mod
 
 	if parameter.StartDate != "" && parameter.EndDate != "" {
 		conditionString += ` AND pr.start_date = '` + parameter.StartDate + `' AND pr.end_date = '` + parameter.EndDate + `'`
+	}
+
+	if parameter.PromoID != "" {
+		conditionString += ` AND PR.ID = '` + parameter.PromoID + `'`
 	}
 
 	statement := models.ItemPromoSelectStatement + ` ` + models.ItemPromoWhereStatement +

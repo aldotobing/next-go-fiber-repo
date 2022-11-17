@@ -47,7 +47,7 @@ var (
 		(concat('https://sidomuncul.s3.ap-southeast-3.amazonaws.com/',PC.URL_BANNER)) AS PROMO_URL_BANNER,
 		PC.START_DATE AS PROMO_START_DATE,
 		PC.END_DATE AS PROMO_END_DATE 
-	FROM PROMO_CONTENT PC
+	FROM PROMO PC
 	`
 	// PromoContentWhereStatement ...
 	PromoContentWhereStatement = ` 

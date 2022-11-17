@@ -33,6 +33,13 @@ func NullString(text *string) *string {
 	return text
 }
 
+func NullOrEmtyString(text *string) *string {
+	if text == nil || (text != nil && strings.Trim(*text, "") == "") {
+		return nil
+	}
+	return text
+}
+
 // EmptyStringToZero ...
 func EmptyStringToZero(text string) *string {
 	var ZeroString = "0"
