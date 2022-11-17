@@ -22,6 +22,7 @@ func (h *ItemHandler) SelectAll(ctx *fiber.Ctx) error {
 
 	parameter := models.ItemParameter{
 		ItemCategoryId:     ctx.Query("item_category_id"),
+		UomID:              ctx.Query("uom_id"),
 		PriceListVersionId: ctx.Query("price_list_version_id"),
 		Search:             ctx.Query("search"),
 		By:                 ctx.Query("by"),
@@ -51,6 +52,7 @@ func (h *ItemHandler) FindAll(ctx *fiber.Ctx) error {
 	parameter := models.ItemParameter{
 		ItemCategoryId:     ctx.Query("item_category_id"),
 		PriceListVersionId: ctx.Query("price_list_version_id"),
+		UomID:              ctx.Query("uom_id"),
 		Search:             ctx.Query("search"),
 		Page:               str.StringToInt(ctx.Query("page")),
 		Limit:              str.StringToInt(ctx.Query("limit")),
