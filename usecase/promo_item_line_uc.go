@@ -72,12 +72,12 @@ func (uc PromoItemLineUC) FindByID(c context.Context, parameter models.PromoItem
 	return res, err
 }
 
-func (uc PromoItemLineUC) Add(c context.Context, data *requests.PromoItemLineRequest) (res models.PromoItemLinBtreakDown, err error) {
+func (uc PromoItemLineUC) Add(c context.Context, data *requests.PromoItemLineRequest) (res models.PromoItemLineBreakDown, err error) {
 
 	repo := repository.NewPromoItemLineRepository(uc.DB)
 	// now := time.Now().UTC()
 	// strNow := now.Format(time.RFC3339)
-	res = models.PromoItemLinBtreakDown{
+	res = models.PromoItemLineBreakDown{
 		PromoLineID: &data.PromoLineID,
 		ItemID:      &data.ItemID,
 		UomID:       &data.UomID,

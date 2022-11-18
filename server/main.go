@@ -10,6 +10,7 @@ import (
 	"nextbasis-service-v-0.1/helper"
 	"nextbasis-service-v-0.1/pkg/str"
 	"nextbasis-service-v-0.1/server/bootstrap"
+	_ "nextbasis-service-v-0.1/server/docs"
 	"nextbasis-service-v-0.1/server/middlewares"
 	"nextbasis-service-v-0.1/usecase"
 
@@ -25,6 +26,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
+	"github.com/gofiber/swagger"
 	"github.com/rs/xid"
 )
 
@@ -54,6 +56,10 @@ func main() {
 		BodyLimit:    str.StringToInt(configs.EnvConfig["FILE_MAX_UPLOAD_SIZE"]),
 		ErrorHandler: middlewares.InternalServer,
 	})
+	app.Get("/swagger/*", swagger.New(swagger.Config{ // custom
+		URL:         "/swagger/doc.json",
+		DeepLinking: false,
+	}))
 
 	// // Certificate manager
 	// m := &autocert.Manager{
