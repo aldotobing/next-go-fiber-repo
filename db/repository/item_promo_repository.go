@@ -166,14 +166,10 @@ func (repository ItemPromoRepository) FindAll(ctx context.Context, parameter mod
 	query = `SELECT count(*)
 		FROM
 			promo_item_line pil 
-				LEFT JOIN promo_line prl 
-				ON prl.id = pil.promo_line_id 
-					LEFT JOIN promo pr 
-					ON pr.id = prl.promo_id 
-						LEFT JOIN item i 
-						ON i.id = pil.item_id 
-							LEFT JOIN uom u 
-							ON u.id = pil.uom_id ` +
+			LEFT JOIN promo_line prl ON prl.id = pil.promo_line_id 
+			LEFT JOIN promo pr ON pr.id = prl.promo_id 
+			LEFT JOIN item i ON i.id = pil.item_id 
+			LEFT JOIN uom u ON u.id = pil.uom_id ` +
 
 		models.ItemPromoWhereStatement + ` ` +
 		conditionString + ` AND (LOWER(i."_name") LIKE $1)`
