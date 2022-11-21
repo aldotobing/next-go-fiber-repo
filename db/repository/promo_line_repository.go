@@ -84,6 +84,10 @@ func (repository PromoLine) SelectAll(c context.Context, parameter models.PromoL
 		conditionString += `AND promo_id = ` + parameter.PromoID + ` `
 	}
 
+	if parameter.ID != "" {
+		conditionString += `AND pl.id = ` + parameter.ID + ` `
+	}
+
 	statement := models.PromoLineSelectStatement + ` ` + models.PromoLineWhereStatement +
 		` ` + conditionString + ` ORDER BY pl.id ` + parameter.Sort
 
@@ -115,6 +119,10 @@ func (repository PromoLine) FindAll(ctx context.Context, parameter models.PromoL
 
 	if parameter.PromoID != "" {
 		conditionString += `AND promo_id = ` + parameter.PromoID + ` `
+	}
+
+	if parameter.ID != "" {
+		conditionString += `AND pl.id = ` + parameter.ID + ` `
 	}
 
 	query := models.PromoLineSelectStatement + ` ` + models.PromoLineWhereStatement + ` ` + conditionString + `

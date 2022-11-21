@@ -28,7 +28,6 @@ type ItemPromo struct {
 }
 
 // ItemPromoParameter ...
-
 type ItemPromoParameter struct {
 	PromoID   string `json:"promo_id"`
 	ItemID    string `json:"item_id"`
