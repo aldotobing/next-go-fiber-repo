@@ -47,6 +47,7 @@ func (repository PromoItemLineRepository) scanRows(rows *sql.Rows) (res models.P
 		&res.ItemPicture,
 		&res.UomID,
 		&res.UomName,
+		&res.ItemPrice,
 		&res.DiscPercent,
 		&res.DiscAmount,
 		&res.MinValue,
@@ -82,6 +83,7 @@ func (repository PromoItemLineRepository) scanRow(row *sql.Row) (res models.Prom
 		&res.ItemPicture,
 		&res.UomID,
 		&res.UomName,
+		&res.ItemPrice,
 		&res.DiscPercent,
 		&res.DiscAmount,
 		&res.MinValue,
@@ -104,6 +106,17 @@ func (repository PromoItemLineRepository) scanRow(row *sql.Row) (res models.Prom
 // SelectAll ...
 func (repository PromoItemLineRepository) SelectAll(c context.Context, parameter models.PromoItemLineParameter) (data []models.PromoItemLine, err error) {
 	conditionString := ``
+	joinString := ``
+
+	if parameter.CustomerID != "" {
+		joinString += ` LEFT JOIN PRICE_LIST_VERSION PLV ON PLV.PRICE_LIST_ID = (SELECT PRICE_LIST_ID FROM CUSTOMER C
+			WHERE C.ID = ` + parameter.CustomerID + `) ` +
+			`LEFT JOIN ITEM_PRICE IP ON IP.UOM_ID = PIL.UOM_ID AND IP.ITEM_ID = PIL.ITEM_ID AND IP.PRICE_LIST_VERSION_ID = PLV.ID `
+	}
+
+	if parameter.StartDate != "" && parameter.EndDate != "" {
+		conditionString += ` AND pr.start_date = '` + parameter.StartDate + `' AND pr.end_date = '` + parameter.EndDate + `'`
+	}
 
 	if parameter.StartDate != "" && parameter.EndDate != "" {
 		conditionString += ` AND pr.start_date = '` + parameter.StartDate + `' AND pr.end_date = '` + parameter.EndDate + `'`
@@ -112,7 +125,6 @@ func (repository PromoItemLineRepository) SelectAll(c context.Context, parameter
 	if parameter.PromoID != "" {
 		conditionString += ` AND PR.ID = '` + parameter.PromoID + `'`
 	}
-
 	if parameter.PromoLineID != "" {
 		conditionString += ` AND PRL.ID = '` + parameter.PromoLineID + `'`
 	}
@@ -120,7 +132,7 @@ func (repository PromoItemLineRepository) SelectAll(c context.Context, parameter
 		conditionString += ` AND PIL.ID = '` + parameter.ID + `'`
 	}
 
-	statement := models.PromoItemLineSelectStatement + ` ` + models.PromoItemLineWhereStatement +
+	statement := models.PromoItemLineSelectStatement + ` ` + joinString + ` ` + models.PromoItemLineWhereStatement +
 		` AND (LOWER(i."_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 
@@ -146,6 +158,13 @@ func (repository PromoItemLineRepository) SelectAll(c context.Context, parameter
 // FindAll ...
 func (repository PromoItemLineRepository) FindAll(ctx context.Context, parameter models.PromoItemLineParameter) (data []models.PromoItemLine, count int, err error) {
 	conditionString := ``
+	joinString := ``
+
+	if parameter.CustomerID != "" {
+		joinString += ` LEFT JOIN PRICE_LIST_VERSION PLV ON PLV.PRICE_LIST_ID = (SELECT PRICE_LIST_ID FROM CUSTOMER C
+			WHERE C.ID = ` + parameter.CustomerID + `) ` +
+			`LEFT JOIN ITEM_PRICE IP ON IP.UOM_ID = PIL.UOM_ID AND IP.ITEM_ID = PIL.ITEM_ID AND IP.PRICE_LIST_VERSION_ID = PLV.ID `
+	}
 
 	if parameter.StartDate != "" || parameter.EndDate != "" {
 		conditionString += ` AND pr.start_date = '` + parameter.StartDate + `AND pr.end_date` + parameter.EndDate + `'`
@@ -163,12 +182,15 @@ func (repository PromoItemLineRepository) FindAll(ctx context.Context, parameter
 		conditionString += ` AND PIL.ID = '` + parameter.ID + `'`
 	}
 
-	query := models.PromoItemLineSelectStatement + ` ` + models.PromoItemLineWhereStatement + ` ` + conditionString + `
+	query := models.PromoItemLineSelectStatement + ` ` + joinString + ` ` + models.PromoItemLineWhereStatement + ` ` +
+		` ` + conditionString + `
 		AND (LOWER(i."_name") LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
 	if err != nil {
 		return data, count, err
 	}
+
+	fmt.Println(query)
 
 	defer rows.Close()
 	for rows.Next() {
@@ -222,7 +244,7 @@ func (repository PromoItemLineRepository) Add(c context.Context, model *models.P
 		qty) VALUES ($1, $2, $3, $4) RETURNING id`
 
 	err = repository.DB.QueryRowContext(c, statement,
-		str.NullString(model.PromoLineID),
+		model.PromoLineID,
 		str.NullString(model.ItemID),
 		str.NullString(model.UomID),
 		str.NullString(model.Qty)).Scan(&res)
