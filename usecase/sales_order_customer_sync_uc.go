@@ -61,7 +61,7 @@ func (uc SalesOrderCustomerSyncUC) DataSync(c context.Context, parameter models.
 	parameter.Status = "submitted"
 	jsonReq, err := json.Marshal(parameter)
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "http://localhost:8084/NEXTbasis-service-agon/rest/salesOrder/data/online_store", bytes.NewBuffer(jsonReq))
+	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrv/rest/salesOrder/data/online_store", bytes.NewBuffer(jsonReq))
 	if err != nil {
 		fmt.Println("client err")
 		fmt.Print(err.Error())
@@ -113,7 +113,7 @@ func (uc SalesOrderCustomerSyncUC) RevisedSync(c context.Context, parameter mode
 	parameter.HeaderOnly = "1"
 	jsonReq, err := json.Marshal(parameter)
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "http://localhost:8084/NEXTbasis-service-agon/rest/salesOrder/data/online_store", bytes.NewBuffer(jsonReq))
+	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrv/rest/salesOrder/data/online_store", bytes.NewBuffer(jsonReq))
 	if err != nil {
 		fmt.Println("client err")
 		fmt.Print(err.Error())
