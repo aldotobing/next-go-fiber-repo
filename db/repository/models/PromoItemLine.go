@@ -16,6 +16,7 @@ type PromoItemLine struct {
 	Qty              *string `json:"item_qty"`
 	UomID            *string `json:"uom_id"`
 	UomName          *string `json:"uom_name"`
+	ItemPrice        *string `json:"item_price"`
 	DiscPercent      *string `json:"disc_percent"`
 	DiscAmount       *string `json:"disc_amount"`
 	MinValue         *string `json:"min_value"`
@@ -42,6 +43,7 @@ type PromoItemLineParameter struct {
 	PromoID     string `json:"promo_id"`
 	PromoLineID string `json:"promo_line_id"`
 	ItemID      string `json:"item_id"`
+	CustomerID  string `json:"customer_id"`
 	ItemName    string `json:"item_name"`
 	StartDate   string `json:"start_date"`
 	EndDate     string `json:"end_date"`
@@ -84,6 +86,7 @@ var (
 		I.ITEM_PICTURE AS ITEM_PICTURE,
 		U.ID AS UOM_ID,
 		U._NAME AS UOM_NAME,
+		COALESCE (IP.PRICE, 0) AS ITEM_PRICE,
 		PRL.DISC_PCT AS DISC_PERCENT,
 		PRL.DISC_AMT AS DISC_AMOUNT,
 		PRL.MINIMUM_VALUE AS MINIMUM_VALUE,
@@ -99,6 +102,7 @@ var (
 	LEFT JOIN ITEM I ON I.ID = PIL.ITEM_ID
 	LEFT JOIN UOM U ON U.ID = PIL.UOM_ID
 	LEFT JOIN ITEM_CATEGORY IC ON IC.ID = I.ITEM_CATEGORY_ID
+	LEFT JOIN ITEM_UOM_LINE IUL ON IUL.ITEM_ID = PIL.ITEM_ID AND IUL.UOM_ID = PIL.UOM_ID 
 	`
 
 	// PromoItemLineWhereStatement ...
