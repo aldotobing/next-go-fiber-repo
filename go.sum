@@ -119,6 +119,8 @@ github.com/gofiber/fiber/v2 v2.2.3 h1:mnaX66dpJOQYS0uii2Nd8fVzpqXMjiXqI5ci1QhM0E
 github.com/gofiber/fiber/v2 v2.2.3/go.mod h1:Aso7/M+EQOinVkWp4LUYjdlTpKTBoCk2Qo4djnMsyHE=
 github.com/gofiber/fiber/v2 v2.39.0 h1:uhWpYQ6EHN8J7FOPYbI2hrdBD/KNZBC5CjbuOd4QUt4=
 github.com/gofiber/fiber/v2 v2.39.0/go.mod h1:Cmuu+elPYGqlvQvdKyjtYsjGMi69PDp8a1AY2I5B2gM=
+github.com/gofiber/fiber/v2 v2.40.0 h1:fdU7w5hT6PLL7jiWIhtQ+S/k5WEFYoUZidptlPu8GBo=
+github.com/gofiber/fiber/v2 v2.40.0/go.mod h1:Gko04sLksnHbzLSRBFWPFdzM9Ws9pRxvvIaohJK1dsk=
 github.com/gofiber/jwt/v2 v2.1.0 h1:eTahBQ8vO73fcXjpQjv/xiKZqMjvDtw5QmsvdgWQg6w=
 github.com/gofiber/jwt/v2 v2.1.0/go.mod h1:sf3l8cbwW93qL0kM9jcX9QTc8VIJgXCO1RWquBJUqTg=
 github.com/gofiber/swagger v0.1.7 h1:+uVrHH/Lrv5z0pK0ELZj458WDq6MtKoLGrNfgK/dYKg=
