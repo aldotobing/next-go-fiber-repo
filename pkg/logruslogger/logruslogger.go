@@ -120,4 +120,3 @@ func (l *StructuredLoggerEntry) Panic(v interface{}, stack []byte) {
 		"panic": fmt.Sprintf("%+v", v),
 	})
 }
-
