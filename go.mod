@@ -18,7 +18,7 @@ require (
 	github.com/go-playground/universal-translator v0.17.0
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/go-redis/redis/v7 v7.4.0
-	github.com/gofiber/fiber/v2 v2.39.0
+	github.com/gofiber/fiber/v2 v2.40.0
 	github.com/gofiber/jwt/v2 v2.1.0
 	github.com/gofiber/swagger v0.1.7 // indirect
 	github.com/joho/godotenv v1.3.0
