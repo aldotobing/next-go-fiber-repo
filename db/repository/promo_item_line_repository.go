@@ -108,11 +108,11 @@ func (repository PromoItemLineRepository) SelectAll(c context.Context, parameter
 	conditionString := ``
 	joinString := ``
 
-	if parameter.CustomerID != "" {
-		joinString += ` LEFT JOIN PRICE_LIST_VERSION PLV ON PLV.PRICE_LIST_ID = (SELECT PRICE_LIST_ID FROM CUSTOMER C
-			WHERE C.ID = ` + parameter.CustomerID + `) ` +
-			`LEFT JOIN ITEM_PRICE IP ON IP.UOM_ID = PIL.UOM_ID AND IP.ITEM_ID = PIL.ITEM_ID AND IP.PRICE_LIST_VERSION_ID = PLV.ID `
-	}
+	// if parameter.CustomerID != "" {
+	// 	joinString += ` LEFT JOIN PRICE_LIST_VERSION PLV ON PLV.PRICE_LIST_ID = (SELECT PRICE_LIST_ID FROM CUSTOMER C
+	// 		WHERE C.ID = ` + parameter.CustomerID + `) ` +
+	// 		`LEFT JOIN ITEM_PRICE IP ON IP.UOM_ID = PIL.UOM_ID AND IP.ITEM_ID = PIL.ITEM_ID AND IP.PRICE_LIST_VERSION_ID = PLV.ID `
+	// }
 
 	if parameter.StartDate != "" && parameter.EndDate != "" {
 		conditionString += ` AND pr.start_date = '` + parameter.StartDate + `' AND pr.end_date = '` + parameter.EndDate + `'`
@@ -160,11 +160,11 @@ func (repository PromoItemLineRepository) FindAll(ctx context.Context, parameter
 	conditionString := ``
 	joinString := ``
 
-	if parameter.CustomerID != "" {
-		joinString += ` LEFT JOIN PRICE_LIST_VERSION PLV ON PLV.PRICE_LIST_ID = (SELECT PRICE_LIST_ID FROM CUSTOMER C
-			WHERE C.ID = ` + parameter.CustomerID + `) ` +
-			`LEFT JOIN ITEM_PRICE IP ON IP.UOM_ID = PIL.UOM_ID AND IP.ITEM_ID = PIL.ITEM_ID AND IP.PRICE_LIST_VERSION_ID = PLV.ID `
-	}
+	// if parameter.CustomerID != "" {
+	// 	joinString += ` LEFT JOIN PRICE_LIST_VERSION PLV ON PLV.PRICE_LIST_ID = (SELECT PRICE_LIST_ID FROM CUSTOMER C
+	// 		WHERE C.ID = ` + parameter.CustomerID + `) ` +
+	// 		`LEFT JOIN ITEM_PRICE IP ON IP.UOM_ID = PIL.UOM_ID AND IP.ITEM_ID = PIL.ITEM_ID AND IP.PRICE_LIST_VERSION_ID = PLV.ID `
+	// }
 
 	if parameter.StartDate != "" || parameter.EndDate != "" {
 		conditionString += ` AND pr.start_date = '` + parameter.StartDate + `AND pr.end_date` + parameter.EndDate + `'`
