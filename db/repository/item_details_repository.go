@@ -81,23 +81,21 @@ func (repository ItemDetailsRepository) scanRow(row *sql.Row) (res models.ItemDe
 // SelectAll ...
 func (repository ItemDetailsRepository) SelectAll(c context.Context, parameter models.ItemDetailsParameter) (data []models.ItemDetails, err error) {
 	conditionString := ``
-	conditionStringPriceListVersion := ``
-	conditionStringException := ``
 
 	if parameter.ItemDetailsCategoryId != "" {
 		conditionString += ` AND def.item_category_id = '` + parameter.ItemDetailsCategoryId + `'`
 	}
 
 	if parameter.PriceListVersionId != "" {
-		conditionStringPriceListVersion += ` AND ip.price_list_version_id = '` + parameter.PriceListVersionId + `'`
+		conditionString += ` AND ip.price_list_version_id = '` + parameter.PriceListVersionId + `'`
 	}
 
 	if parameter.ExceptId != "" {
-		conditionStringException += ` AND def.id <> '` + parameter.ExceptId + `'`
+		conditionString += ` AND def.id <> '` + parameter.ExceptId + `'`
 	}
 
 	statement := models.ItemDetailsSelectStatement + ` ` + models.ItemDetailsWhereStatement +
-		` AND (LOWER(def."_name") LIKE $1) ` + conditionString + conditionStringPriceListVersion + conditionStringException + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+		` AND (LOWER(def."_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 
 	fmt.Println(statement)
@@ -122,8 +120,6 @@ func (repository ItemDetailsRepository) SelectAll(c context.Context, parameter m
 // FindAll ...
 func (repository ItemDetailsRepository) FindAll(ctx context.Context, parameter models.ItemDetailsParameter) (data []models.ItemDetails, count int, err error) {
 	conditionString := ``
-	conditionStringPriceListVersion := ``
-	conditionStringException := ``
 
 	if parameter.ItemDetailsCategoryId != "" {
 		conditionString += ` AND def.item_category_id = '` + parameter.ItemDetailsCategoryId + `'`
@@ -133,14 +129,18 @@ func (repository ItemDetailsRepository) FindAll(ctx context.Context, parameter m
 		conditionString += ` AND IP.PRICE_LIST_VERSION_ID = '` + parameter.PriceListVersionId + `'`
 	}
 
-	query := models.ItemDetailsSelectStatement + ` ` + models.ItemDetailsWhereStatement + ` ` + conditionString + conditionStringPriceListVersion + conditionStringException + `
+	if parameter.ExceptId != "" {
+		conditionString += ` AND def.id <> '` + parameter.ExceptId + `'`
+	}
+
+	query := models.ItemDetailsSelectStatement + ` ` + models.ItemDetailsWhereStatement + ` ` + conditionString + `
 		AND (LOWER(def."_name") LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
 	if err != nil {
 		return data, count, err
 	}
 
-	//fmt.Println(query)
+	fmt.Println(query)
 
 	defer rows.Close()
 	for rows.Next() {
@@ -172,6 +172,8 @@ func (repository ItemDetailsRepository) FindByID(c context.Context, parameter mo
 	statement := models.ItemDetailsSelectStatement + ` WHERE def.created_date IS NOT NULL AND def.id = $1` + conditionString + ``
 
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
+
+	fmt.Print(statement)
 
 	data, err = repository.scanRow(row)
 	if err != nil {
