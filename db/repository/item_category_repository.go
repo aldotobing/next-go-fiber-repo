@@ -31,7 +31,10 @@ func NewItemCategoryRepository(DB *sql.DB) IItemCategoryRepository {
 // Scan rows
 func (repository ItemCategoryRepository) scanRows(rows *sql.Rows) (res models.ItemCategory, err error) {
 	err = rows.Scan(
-		&res.ID, &res.Code, &res.Name,
+		&res.ID,
+		&res.Code,
+		&res.Name,
+		&res.Image,
 	)
 	if err != nil {
 
@@ -44,7 +47,10 @@ func (repository ItemCategoryRepository) scanRows(rows *sql.Rows) (res models.It
 // Scan row
 func (repository ItemCategoryRepository) scanRow(row *sql.Row) (res models.ItemCategory, err error) {
 	err = row.Scan(
-		&res.ID, &res.Code, &res.Name,
+		&res.ID,
+		&res.Code,
+		&res.Name,
+		&res.Image,
 	)
 	if err != nil {
 		return res, err

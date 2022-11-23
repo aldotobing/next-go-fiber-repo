@@ -2,9 +2,10 @@ package models
 
 // ItemCategory ...
 type ItemCategory struct {
-	ID   *string `json:"id"`
-	Code *string `json:"code"`
-	Name *string `json:"name"`
+	ID    *string `json:"id"`
+	Code  *string `json:"code"`
+	Name  *string `json:"name"`
+	Image *string `json:"image"`
 }
 
 // ItemCategoryParameter ...
@@ -29,8 +30,9 @@ var (
 	}
 
 	// ItemCategorySelectStatement ...
-	ItemCategorySelectStatement = `SELECT def.id, def.code, def._name
+	ItemCategorySelectStatement = `SELECT def.id, def.code, def._name, ICI.IMG 
 	FROM item_category def
+	LEFT JOIN ITEM_CATEGORY_IMG ICI ON ICI.CATEGORY_ID = DEF.ID
 	`
 
 	// ItemCategoryWhereStatement ...
