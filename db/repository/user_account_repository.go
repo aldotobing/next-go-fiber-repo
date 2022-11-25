@@ -13,6 +13,7 @@ type IUserAccountRepository interface {
 	FindByPhoneNo(c context.Context, parameter models.UserAccountParameter) (models.UserAccount, error)
 	FindByEmailAndPass(c context.Context, parameter models.UserAccountParameter) (models.UserAccount, error)
 	FIreStoreIDSync(c context.Context, model *models.UserAccount) (*string, error)
+	FCMUpdate(c context.Context, model *models.UserAccount) (*string, error)
 }
 
 type UserAccountRepository struct {
@@ -92,6 +93,21 @@ func (repository UserAccountRepository) FindByEmailAndPass(c context.Context, pa
 }
 
 // Edit ...
+func (repository UserAccountRepository) FCMUpdate(c context.Context, model *models.UserAccount) (res *string, err error) {
+	statement := `UPDATE _user SET
+	fcm_token = $1
+	WHERE id = $2
+	RETURNING id`
+
+	err = repository.DB.QueryRowContext(c, statement,
+		model.FCMToken,
+		model.ID).Scan(&res)
+	if err != nil {
+		return res, err
+	}
+	return res, err
+}
+
 func (repository UserAccountRepository) FIreStoreIDSync(c context.Context, model *models.UserAccount) (res *string, err error) {
 	statement := `UPDATE _user SET
 	firestoreuid = $1
