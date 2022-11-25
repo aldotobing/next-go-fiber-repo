@@ -46,7 +46,7 @@ var (
 	`
 	// CustomerTargetWhereStatement ...
 	CustomerTargetWhereStatement = ` WHERE cus.created_date IS not NULL 
-									and byt._year = (SELECT DATE_PART('year', now()::date)) 
-									and bmt._month = (SELECT DATE_PART('month', now()::date)) 
+									 AND byt._year = (SELECT DATE_PART('year', now()::date)) 
+									 AND bmt._month = (SELECT DATE_PART('month', now()::date)) 
 									`
 )
