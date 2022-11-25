@@ -5,3 +5,4 @@ vendor
 .exe
 .env
 server/__debug_bin.exe
+firebaseconfig.json
