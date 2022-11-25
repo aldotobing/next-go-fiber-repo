@@ -32,7 +32,7 @@ type Customer struct {
 	CustomerTypeId          *string `json:"customer_type_id"`
 	CustomerTypeName        *string `json:"customer_type_name"`
 	CustomerPhone           *string `json:"customer_phone"`
-	Point                   *string `json:"customer_point"`
+	CustomerPoint           *string `json:"customer_point"`
 	GiftName                *string `json:"customer_gift_name"`
 	Loyalty                 *string `json:"customer_loyalty"`
 	VisitDay                *string `json:"visit_day"`
@@ -97,7 +97,7 @@ var (
 		C.CUSTOMER_TYPE_ID AS CUST_TYPE_ID,
 		CT._NAME CUST_TYPE_NAME,
 		C.CUSTOMER_PHONE AS CUSTOMER_PHONE,
-		CP.POINT AS CUST_POINT,
+		(SELECT SUM(SIH.TRANSACTION_POINT) FROM SALES_INVOICE_HEADER SIH WHERE SIH.CUST_BILL_TO_ID = C.ID) AS CUSTOMER_POINT,
 		CG.GIFT_NAME AS CUST_GIFT_NAME,
 		LOY.LOYALTY_NAME AS CUST_LOYALTY_NAME
 	FROM CUSTOMER C
