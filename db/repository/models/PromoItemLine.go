@@ -2,30 +2,35 @@ package models
 
 // PromoItemLinePromo ...
 type PromoItemLine struct {
-	ID               *string `json:"id"`
-	PromoID          *string `json:"promo_id"`
-	PromoName        *string `json:"promo_name"`
-	PromoLineID      *string `json:"promo_line_id"`
-	ItemID           *string `json:"item_id"`
-	ItemCode         *string `json:"item_code"`
-	ItemName         *string `json:"item_name"`
-	ItemDescription  *string `json:"item_description"`
-	ItemCategoryID   *string `json:"item_category_id"`
-	ItemCategoryName *string `json:"item_category_name"`
-	ItemPicture      *string `json:"item_picture"`
-	Qty              *string `json:"item_qty"`
-	UomID            *string `json:"uom_id"`
-	UomName          *string `json:"uom_name"`
-	ItemPrice        *string `json:"item_price"`
-	DiscPercent      *string `json:"disc_percent"`
-	DiscAmount       *string `json:"disc_amount"`
-	MinValue         *string `json:"min_value"`
-	MinQty           *string `json:"min_qty"`
-	CustMaxQty       *string `json:"cust_max_qty"`
-	GlobalMaxQty     *string `json:"global_max_qty"`
-	Description      *string `json:"description"`
-	StartDate        *string `json:"start_date"`
-	EndDate          *string `json:"end_date"`
+	ID                 *string `json:"id"`
+	ItemID             *string `json:"item_id"`
+	PromoID            *string `json:"promo_id"`
+	PromoLineID        *string `json:"promo_line_id"`
+	PromoName          *string `json:"promo_name"`
+	ItemCode           *string `json:"item_code"`
+	ItemName           *string `json:"item_name"`
+	ItemDescription    *string `json:"item_description"`
+	ItemCategoryID     *string `json:"item_category_id"`
+	ItemCategoryName   *string `json:"item_category_name"`
+	ItemPicture        *string `json:"item_picture"`
+	Qty                *string `json:"item_qty"`
+	UomID              *string `json:"uom_id"`
+	UomName            *string `json:"uom_name"`
+	ItemPrice          *string `json:"item_price"`
+	PriceListVersionID *string `json:"price_list_version_id"`
+	GlobalMaxQty       *string `json:"global_max_qty"`
+	CustomerMaxQty     *string `json:"customer_max_qty"`
+	DiscPercent        *string `json:"disc_percent"`
+	DiscAmount         *string `json:"disc_amount"`
+	MinValue           *string `json:"min_value"`
+	MinQty             *string `json:"min_qty"`
+	Description        *string `json:"description"`
+	Multiply           *string `json:"multiply"`
+	MinQtyUomID        *string `json:"min_qty_uom_id"`
+	PromoType          *string `json:"promo_type"`
+	Strata             *string `json:"strata"`
+	StartDate          *string `json:"start_date"`
+	EndDate            *string `json:"end_date"`
 }
 
 // PromoItemLine ...
@@ -44,6 +49,7 @@ type PromoItemLineParameter struct {
 	PromoLineID string `json:"promo_line_id"`
 	ItemID      string `json:"item_id"`
 	CustomerID  string `json:"customer_id"`
+	UomID       string `json:"uom_id"`
 	ItemName    string `json:"item_name"`
 	StartDate   string `json:"start_date"`
 	EndDate     string `json:"end_date"`
@@ -73,36 +79,41 @@ var (
 	PromoItemLineSelectStatement = `
 	SELECT 
 		PIL.ID AS ID,
+		I.ID AS ITEM_ID,
 		PR.ID AS PROMO_ID,
+		PL.ID AS PROMO_LINE_ID,
 		PR._NAME AS PROMO_NAME,
-		PRL.ID AS PROMO_LINE_ID,
-		PIL.ITEM_ID AS ITEM_ID,
-		PIL.QTY AS ITEM_LINE_QTY,
-		I._NAME AS ITEM_NAME,
 		I.CODE AS ITEM_CODE,
-		I.DESCRIPTION AS I_DESCRIPTION,
+		I._NAME AS ITEM_NAME,
+		I.DESCRIPTION AS ITEM_DESCRIPTION,
 		IC.ID AS I_CATEGORY_ID,
 		IC._NAME AS I_CATEGORY_NAME,
 		I.ITEM_PICTURE AS ITEM_PICTURE,
-		U.ID AS UOM_ID,
-		U._NAME AS UOM_NAME,
-		COALESCE (IP.PRICE, 0) AS ITEM_PRICE,
-		PRL.DISC_PCT AS DISC_PERCENT,
-		PRL.DISC_AMT AS DISC_AMOUNT,
-		PRL.MINIMUM_VALUE AS MINIMUM_VALUE,
-		PRL.MINIMUM_QTY AS MINIMUM_QTY,
-		PRL.CUSTOMER_MAX_QTY AS CUS_MAX_QTY,
-		PRL.GLOBAL_MAX_QTY AS GLOBAL_MAX_QTY,
-		PRL.DESCRIPTION AS DESCRIPTION,
+		PIL.QTY AS ITEM_LINE_QTY,
+		PIL.UOM_ID AS UOM_ID,
+		UOM._NAME AS UOM_NAME,
+		IP.PRICE AS ITEM_PRICE,
+		IP.PRICE_LIST_VERSION_ID AS PRICE_LIST_VERSION_ID,
+		PL.GLOBAL_MAX_QTY AS GLOBAL_MAX_QTY,
+		PL.CUSTOMER_MAX_QTY AS CUSTOMER_MAX_QTY,
+		PL.DISC_PCT AS DISC_PERCENT,
+		PL.DISC_AMT AS DISC_AMOUNT,
+		PL.MINIMUM_VALUE AS MINIMUM_VALUE,
+		PL.MINIMUM_QTY AS PL_MIN_QTY,
+		PL.DESCRIPTION AS PL_DESC,
+		PL.MULTIPLY AS MULTIPLY,
+		PL.MINIMUM_QTY_UOM_ID AS PL_MIN_QTY_UOM_ID,
+		PL.PROMO_TYPE AS PL_PROMO_TYPE,
+		PL.STRATA AS PL_STRATA,
 		PR.START_DATE AS START_DATE,
 		PR.END_DATE AS END_DATE
-	FROM PROMO_ITEM_LINE PIL
-	LEFT JOIN PROMO_LINE PRL ON PRL.ID = PIL.PROMO_LINE_ID	
-	LEFT JOIN PROMO PR ON PR.ID = PRL.PROMO_ID
-	LEFT JOIN ITEM I ON I.ID = PIL.ITEM_ID
-	LEFT JOIN UOM U ON U.ID = PIL.UOM_ID
+	FROM ITEM I 
+	LEFT JOIN PROMO_ITEM_LINE PIL ON PIL.ITEM_ID = I.ID 
+	LEFT JOIN UOM UOM ON UOM.ID = PIL.UOM_ID
 	LEFT JOIN ITEM_CATEGORY IC ON IC.ID = I.ITEM_CATEGORY_ID
-	LEFT JOIN ITEM_UOM_LINE IUL ON IUL.ITEM_ID = PIL.ITEM_ID AND IUL.UOM_ID = PIL.UOM_ID 
+	JOIN ITEM_PRICE IP ON IP.ITEM_ID = PIL.ITEM_ID
+	LEFT JOIN PROMO_LINE PL ON PL.ID = PIL.PROMO_LINE_ID
+	LEFT JOIN PROMO PR ON PR.ID = PL.PROMO_ID 
 	`
 
 	// PromoItemLineWhereStatement ...

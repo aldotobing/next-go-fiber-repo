@@ -34,27 +34,32 @@ func NewPromoItemLineRepository(DB *sql.DB) IPromoItemLineRepository {
 func (repository PromoItemLineRepository) scanRows(rows *sql.Rows) (res models.PromoItemLine, err error) {
 	err = rows.Scan(
 		&res.ID,
-		&res.PromoID,
-		&res.PromoName,
-		&res.PromoLineID,
 		&res.ItemID,
-		&res.Qty,
-		&res.ItemName,
+		&res.PromoID,
+		&res.PromoLineID,
+		&res.PromoName,
 		&res.ItemCode,
+		&res.ItemName,
 		&res.ItemDescription,
 		&res.ItemCategoryID,
 		&res.ItemCategoryName,
 		&res.ItemPicture,
+		&res.Qty,
 		&res.UomID,
 		&res.UomName,
 		&res.ItemPrice,
+		&res.PriceListVersionID,
+		&res.GlobalMaxQty,
+		&res.CustomerMaxQty,
 		&res.DiscPercent,
 		&res.DiscAmount,
 		&res.MinValue,
 		&res.MinQty,
-		&res.CustMaxQty,
-		&res.GlobalMaxQty,
 		&res.Description,
+		&res.Multiply,
+		&res.MinQtyUomID,
+		&res.PromoType,
+		&res.Strata,
 		&res.StartDate,
 		&res.EndDate,
 	)
@@ -70,27 +75,32 @@ func (repository PromoItemLineRepository) scanRows(rows *sql.Rows) (res models.P
 func (repository PromoItemLineRepository) scanRow(row *sql.Row) (res models.PromoItemLine, err error) {
 	err = row.Scan(
 		&res.ID,
-		&res.PromoID,
-		&res.PromoName,
-		&res.PromoLineID,
 		&res.ItemID,
-		&res.Qty,
-		&res.ItemName,
+		&res.PromoID,
+		&res.PromoLineID,
+		&res.PromoName,
 		&res.ItemCode,
+		&res.ItemName,
 		&res.ItemDescription,
 		&res.ItemCategoryID,
 		&res.ItemCategoryName,
 		&res.ItemPicture,
+		&res.Qty,
 		&res.UomID,
 		&res.UomName,
 		&res.ItemPrice,
+		&res.PriceListVersionID,
+		&res.GlobalMaxQty,
+		&res.CustomerMaxQty,
 		&res.DiscPercent,
 		&res.DiscAmount,
 		&res.MinValue,
 		&res.MinQty,
-		&res.CustMaxQty,
-		&res.GlobalMaxQty,
 		&res.Description,
+		&res.Multiply,
+		&res.MinQtyUomID,
+		&res.PromoType,
+		&res.Strata,
 		&res.StartDate,
 		&res.EndDate,
 	)
@@ -106,16 +116,10 @@ func (repository PromoItemLineRepository) scanRow(row *sql.Row) (res models.Prom
 // SelectAll ...
 func (repository PromoItemLineRepository) SelectAll(c context.Context, parameter models.PromoItemLineParameter) (data []models.PromoItemLine, err error) {
 	conditionString := ``
-	joinString := ``
 
-	// if parameter.CustomerID != "" {
-	// 	joinString += ` LEFT JOIN PRICE_LIST_VERSION PLV ON PLV.PRICE_LIST_ID = (SELECT PRICE_LIST_ID FROM CUSTOMER C
-	// 		WHERE C.ID = ` + parameter.CustomerID + `) ` +
-	// 		`LEFT JOIN ITEM_PRICE IP ON IP.UOM_ID = PIL.UOM_ID AND IP.ITEM_ID = PIL.ITEM_ID AND IP.PRICE_LIST_VERSION_ID = PLV.ID `
-	// }
-
-	if parameter.StartDate != "" && parameter.EndDate != "" {
-		conditionString += ` AND pr.start_date = '` + parameter.StartDate + `' AND pr.end_date = '` + parameter.EndDate + `'`
+	if parameter.CustomerID != "" {
+		conditionString += `AND IP.PRICE_LIST_VERSION_ID =
+	(SELECT id FROM price_list_version WHERE price_list_id = (SELECT price_list_id FROM customer WHERE id = ` + parameter.CustomerID + `` + `))` + ` `
 	}
 
 	if parameter.StartDate != "" && parameter.EndDate != "" {
@@ -132,7 +136,11 @@ func (repository PromoItemLineRepository) SelectAll(c context.Context, parameter
 		conditionString += ` AND PIL.ID = '` + parameter.ID + `'`
 	}
 
-	statement := models.PromoItemLineSelectStatement + ` ` + joinString + ` ` + models.PromoItemLineWhereStatement +
+	if parameter.UomID != "" {
+		conditionString += ` AND PIL.UOM_ID = '` + parameter.UomID + `'`
+	}
+
+	statement := models.PromoItemLineSelectStatement + ` ` + models.PromoItemLineWhereStatement +
 		` AND (LOWER(i."_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 
@@ -158,13 +166,10 @@ func (repository PromoItemLineRepository) SelectAll(c context.Context, parameter
 // FindAll ...
 func (repository PromoItemLineRepository) FindAll(ctx context.Context, parameter models.PromoItemLineParameter) (data []models.PromoItemLine, count int, err error) {
 	conditionString := ``
-	joinString := ``
 
-	// if parameter.CustomerID != "" {
-	// 	joinString += ` LEFT JOIN PRICE_LIST_VERSION PLV ON PLV.PRICE_LIST_ID = (SELECT PRICE_LIST_ID FROM CUSTOMER C
-	// 		WHERE C.ID = ` + parameter.CustomerID + `) ` +
-	// 		`LEFT JOIN ITEM_PRICE IP ON IP.UOM_ID = PIL.UOM_ID AND IP.ITEM_ID = PIL.ITEM_ID AND IP.PRICE_LIST_VERSION_ID = PLV.ID `
-	// }
+	if parameter.CustomerID != "" {
+		conditionString += ` AND IP.PRICE_LIST_VERSION_ID = (SELECT id FROM price_list_version WHERE price_list_id = (SELECT price_list_id FROM customer WHERE id = ` + parameter.CustomerID + `` + `))` + ` `
+	}
 
 	if parameter.StartDate != "" || parameter.EndDate != "" {
 		conditionString += ` AND pr.start_date = '` + parameter.StartDate + `AND pr.end_date` + parameter.EndDate + `'`
@@ -182,9 +187,12 @@ func (repository PromoItemLineRepository) FindAll(ctx context.Context, parameter
 		conditionString += ` AND PIL.ID = '` + parameter.ID + `'`
 	}
 
-	query := models.PromoItemLineSelectStatement + ` ` + joinString + ` ` + models.PromoItemLineWhereStatement + ` ` +
-		` ` + conditionString + `
-		AND (LOWER(i."_name") LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
+	if parameter.UomID != "" {
+		conditionString += ` AND PIL.UOM_ID = '` + parameter.UomID + `'`
+	}
+
+	query := models.PromoItemLineSelectStatement + ` ` + models.PromoItemLineWhereStatement + ` ` +
+		`AND (LOWER(i."_name") LIKE $1)` + conditionString + ` ` + `ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
 	if err != nil {
 		return data, count, err
@@ -208,15 +216,12 @@ func (repository PromoItemLineRepository) FindAll(ctx context.Context, parameter
 	query = `SELECT count(*)
 		FROM
 			promo_item_line pil 
-				LEFT JOIN promo_line prl 
-				ON prl.id = pil.promo_line_id 
-					LEFT JOIN promo pr 
-					ON pr.id = prl.promo_id 
-						LEFT JOIN item i 
-						ON i.id = pil.item_id 
-							LEFT JOIN uom u 
-							ON u.id = pil.uom_id ` +
-
+				LEFT JOIN promo_line prl ON prl.id = pil.promo_line_id 
+				LEFT JOIN promo pr ON pr.id = prl.promo_id 
+				LEFT JOIN item i ON i.id = pil.item_id 
+				LEFT JOIN uom u ON u.id = pil.uom_id 
+				JOIN ITEM_PRICE IP ON IP.ITEM_ID = PIL.ITEM_ID
+				` +
 		models.PromoItemLineWhereStatement + ` ` +
 		conditionString + ` AND (LOWER(i."_name") LIKE $1)`
 	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
