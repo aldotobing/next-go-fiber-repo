@@ -25,7 +25,7 @@ func (uc FCMUC) SendMessage(c context.Context, data *models.FireBaseCloudMessage
 		"type":  data.Type,
 	}
 
-	fmt.Println(uc.ContractUC.Fcm.APIKey)
+	// fmt.Println("Token ", data.Token)
 
 	// token := `f687FAOTQnapQ6BjnKNFEA:APA91bF1rlfor8mKYID9MSESvbkyaGi4bt4KDkwCP39XNMD6WyKIx79qEuvrQxIHEO6P5_neRoVj6M44pEQn4S6FicSQCkP9GLD4tRkJwtqclmWgIkVDs5Z1ieaaW_sDkh15en1GSnr4`
 	res, err = uc.ContractUC.Fcm.SendAndroid([]string{data.Token}, data.Title, data.Body, dataInterface)

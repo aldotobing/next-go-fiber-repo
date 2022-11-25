@@ -152,12 +152,12 @@ func (uc IncomeUC) Delete(c context.Context, id string) (res viewmodel.IncomeVM,
 
 }
 
-func (uc IncomeUC) Send(c context.Context) (res string, err error) {
+func (uc IncomeUC) Send(c context.Context, fcmToken, text string) (res string, err error) {
 	fcmUc := FCMUC{ContractUC: uc.ContractUC}
 	fireBaseMessage := models.FireBaseCloudMessage{
-		Body:  "Fcm Structure",
+		Body:  text,
 		Title: "Fcm Structure",
-		Token: "cI5dKxAGSSyGPC5qDNoacn:APA91bEP3GokGS6nFxITK16TgeKoBxQStlkkmY-A1ZqRdJVWbSVBrBJGUy5jPmYrTCuAGFgUhKUoutEanCygm-IVbtletnlR39F9r31suL0D9-_D7hmroCHcmCJ-3hlMcqiPAZJnYqEk",
+		Token: fcmToken,
 		Type:  "Pesan",
 	}
 
