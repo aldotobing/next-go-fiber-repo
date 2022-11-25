@@ -94,6 +94,11 @@ func (uc UserAccountUC) Login(c context.Context, data *requests.UserAccountLogin
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "token_request", uc.ContractUC.ReqID)
 		return res, err
 	}
+
+	repo := repository.NewUserAccountRepository(uc.DB)
+	_, errfcm := repo.FCMUpdate(c, &models.UserAccount{ID: chkuser.ID, FCMToken: &data.FCMToken})
+	if errfcm != nil {
+	}
 	res.Token = tokens.Token
 	res.ExpiredDate = tokens.ExpiredDate
 	res.RefreshToken = tokens.RefreshToken
