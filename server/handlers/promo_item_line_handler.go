@@ -35,7 +35,7 @@ func (h *PromoItemLineHandler) SelectAll(ctx *fiber.Ctx) error {
 	res, err := uc.SelectAll(c, parameter)
 
 	if parameter.CustomerID == "" {
-		cus_id_err := " : customer_id is mandatory"
+		cus_id_err := " : param customer_id is mandatory"
 		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter+cus_id_err, http.StatusBadRequest)
 	}
 
@@ -71,7 +71,7 @@ func (h *PromoItemLineHandler) FindAll(ctx *fiber.Ctx) error {
 	res, meta, err := uc.FindAll(c, parameter)
 
 	if parameter.CustomerID == "" {
-		cus_id_err := " : customer_id is mandatory"
+		cus_id_err := " : param customer_id is mandatory"
 		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter+cus_id_err, http.StatusBadRequest)
 	}
 

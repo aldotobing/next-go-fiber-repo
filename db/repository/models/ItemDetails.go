@@ -19,6 +19,7 @@ type ItemDetails struct {
 // ItemDetailsParameter ...
 type ItemDetailsParameter struct {
 	ID                    string `json:"item_id"`
+	UomID                 string `json:"uom_id"`
 	Code                  string `json:"item_code"`
 	Name                  string `json:"item_name"`
 	ItemDetailsCategoryId string `json:"item_category_id"`

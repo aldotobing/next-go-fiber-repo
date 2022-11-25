@@ -22,6 +22,7 @@ func (h *ItemDetailsHandler) SelectAll(ctx *fiber.Ctx) error {
 
 	parameter := models.ItemDetailsParameter{
 		ItemDetailsCategoryId: ctx.Query("item_category_id"),
+		UomID:                 ctx.Query("uom_id"),
 		PriceListVersionId:    ctx.Query("price_list_version_id"),
 		Search:                ctx.Query("search"),
 		By:                    ctx.Query("by"),
@@ -51,6 +52,7 @@ func (h *ItemDetailsHandler) FindAll(ctx *fiber.Ctx) error {
 	parameter := models.ItemDetailsParameter{
 		ItemDetailsCategoryId: ctx.Query("item_category_id"),
 		PriceListVersionId:    ctx.Query("price_list_version_id"),
+		UomID:                 ctx.Query("uom_id"),
 		Search:                ctx.Query("search"),
 		Page:                  str.StringToInt(ctx.Query("page")),
 		Limit:                 str.StringToInt(ctx.Query("limit")),
@@ -81,6 +83,7 @@ func (h *ItemDetailsHandler) FindByID(ctx *fiber.Ctx) error {
 	parameter := models.ItemDetailsParameter{
 		ID:                 ctx.Params("id"),
 		PriceListVersionId: ctx.Query("price_list_version_id"),
+		UomID:              ctx.Query("uom_id"),
 	}
 	if parameter.ID == "" {
 		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
