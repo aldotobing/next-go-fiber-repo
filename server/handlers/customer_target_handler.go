@@ -42,7 +42,7 @@ func (h *CustomerTargetHandler) SelectAll(ctx *fiber.Ctx) error {
 	if res != nil {
 		target := h.FetchClientDataTarget(parameter)
 		if target != "" {
-			for i, _ := range res {
+			for i := range res {
 				res[i].CustomerTarget = &target
 			}
 		}

@@ -34,7 +34,6 @@ var (
 	}
 
 	// CustomerTargetQuarterSelectStatement ...
-
 	CustomerTargetQuarterSelectStatement = `
 	SELECT
 	CUS.ID AS CUSTOMER_ID,
