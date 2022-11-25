@@ -49,7 +49,7 @@ var (
 		LEFT JOIN BRANCH_YEARLY_TARGET BYT ON BYT.ID = BMT.BRANCH_YEARLY_TARGET_ID
 	`
 	// CustomerTargetYearWhereStatement ...
-	CustomerTargetYearWhereStatement = ` WHERE BYT._YEAR = 2021 AND COALESCE(CUS.ACTIVE, 1) = 1 `
+	CustomerTargetYearWhereStatement = ` WHERE BYT._YEAR = (SELECT DATE_PART('year', now()::date)) AND COALESCE(CUS.ACTIVE, 1) = 1 `
 )
 
 //and cus.id = 5317 and bmt._month in (1, 2, 3)
