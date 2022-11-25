@@ -60,7 +60,7 @@ func (repository CustomerRepository) scanRows(rows *sql.Rows) (res models.Custom
 		&res.CustomerTypeId,
 		&res.CustomerTypeName,
 		&res.CustomerPhone,
-		&res.Point,
+		&res.CustomerPoint,
 		&res.GiftName,
 		&res.Loyalty,
 	)
@@ -104,7 +104,7 @@ func (repository CustomerRepository) scanRow(row *sql.Row) (res models.Customer,
 		&res.CustomerTypeId,
 		&res.CustomerTypeName,
 		&res.CustomerPhone,
-		&res.Point,
+		&res.CustomerPoint,
 		&res.GiftName,
 		&res.Loyalty,
 	)
