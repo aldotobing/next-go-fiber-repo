@@ -2,10 +2,11 @@ package config
 
 import (
 	"database/sql"
-	"fmt"
 
 	"nextbasis-service-v-0.1/pkg/aes"
 	"nextbasis-service-v-0.1/pkg/aesfront"
+	"nextbasis-service-v-0.1/pkg/aws"
+	"nextbasis-service-v-0.1/pkg/fcm"
 	"nextbasis-service-v-0.1/pkg/jwe"
 	"nextbasis-service-v-0.1/pkg/jwt"
 	"nextbasis-service-v-0.1/pkg/mail"
@@ -17,6 +18,7 @@ import (
 	"log"
 	"time"
 
+	firesorepkg "nextbasis-service-v-0.1/pkg/firestore"
 	miniopkg "nextbasis-service-v-0.1/pkg/minio"
 	"nextbasis-service-v-0.1/pkg/mssqldb"
 	postgresqlPkg "nextbasis-service-v-0.1/pkg/postgresql"
@@ -24,6 +26,9 @@ import (
 	redisPkg "nextbasis-service-v-0.1/pkg/redis"
 	"nextbasis-service-v-0.1/pkg/str"
 	twilioPkg "nextbasis-service-v-0.1/pkg/twilio"
+
+	awsConf "github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 
 	"cloud.google.com/go/firestore"
 	"github.com/go-redis/redis/v7"
@@ -42,6 +47,7 @@ type Configs struct {
 	Aes          aes.Credential
 	AesFront     aesfront.Credential
 	Minio        *minio.Client
+	Aws          aws.AWSS3
 	Firestore    *firestore.Client
 	Mandrill     mandrill.Credential
 	Recaptcha    recaptcha.Credential
@@ -49,6 +55,7 @@ type Configs struct {
 	Mailing      mailing.GoMailConfig
 	TwilioClient *twilioPkg.Client
 	WooWAClient  *whatsapp.Client
+	FCM          fcm.Connection
 }
 
 var (
@@ -142,6 +149,30 @@ func LoadConfigs() (res Configs, err error) {
 		return res, err
 	}
 
+	//Firestore
+
+	firesoreInfo := firesorepkg.Credential{
+		Key: res.EnvConfig["FIRESTORE_KEY"],
+		DB:  res.EnvConfig["FIRESTORE_PROJECT"],
+	}
+
+	res.Firestore, err = firesoreInfo.CreateClientWithCredentialFile()
+	if err != nil {
+		return res, err
+	}
+
+	// Aws connection
+	// awsInfo := awspkg.AWSS3{
+	// 	Region:    res.EnvConfig["AWS_REGION"],
+	// 	AccessKey: res.EnvConfig["AWS_ACCESS_KEY_ID"],
+	// 	SecretKey: res.EnvConfig["AWS_SECRET_ACCESS_KEY"],
+	// 	Bucket:    res.EnvConfig["BUCKET_NAME"],
+	// }
+	// res.Aws, err = awsInfo.
+	// if err != nil {
+	// 	return res, err
+	// }
+
 	res.Mandrill = mandrill.Credential{
 		Key:      res.EnvConfig["MANDRILL_KEY"],
 		FromMail: res.EnvConfig["MANDRILL_FROM_MAIL"],
@@ -167,10 +198,33 @@ func LoadConfigs() (res Configs, err error) {
 		Password: res.EnvConfig["SMTP_PASSWORD"],
 	}
 
+	region := res.EnvConfig["AWS_REGION"]
+	// AccessKey := res.EnvConfig["AWS_ACCESS_KEY_ID"]
+	// SecretKey := res.EnvConfig["AWS_SECRET_ACCESS_KEY"]
+	// Bucket := res.EnvConfig["AWS_BUCKET_NAME"]
+	ACredentials := credentials.NewStaticCredentials(res.EnvConfig["AWS_ACCESS_KEY_ID"], res.EnvConfig["AWS_SECRET_ACCESS_KEY"], "")
+	checkForbs := true
+	awsCon := awsConf.Config{
+		Region:                        &region,
+		CredentialsChainVerboseErrors: &checkForbs,
+		Credentials:                   ACredentials,
+	}
+
+	res.Aws = aws.AWSS3{
+		AWSConfig: awsCon,
+		Region:    res.EnvConfig["AWS_REGION"],
+		AccessKey: res.EnvConfig["AWS_ACCESS_KEY_ID"],
+		SecretKey: res.EnvConfig["AWS_SECRET_ACCESS_KEY"],
+		Bucket:    res.EnvConfig["AWS_BUCKET_NAME"],
+	}
+
 	// setup twilio
 	res.TwilioClient = twilioPkg.NewTwilioClient(res.EnvConfig["TWILIO_SID"], res.EnvConfig["TWILIO_TOKEN"], res.EnvConfig["TWILIO_SEND_FROM"])
 	res.WooWAClient = whatsapp.NewWooWAClient(res.EnvConfig["WA_URL"], res.EnvConfig["WA_KEY"])
-	fmt.Printf("+%v", res.TwilioClient)
-	fmt.Printf("+%v", res.WooWAClient)
+
+	// fmt.Printf("+%v", res.Aws)
+	res.FCM.APIKey = res.EnvConfig["FCM_API_KEY"]
+	// fmt.Printf("+%v", res.TwilioClient)
+	// fmt.Printf("+%v", res.WooWAClient)
 	return res, err
 }

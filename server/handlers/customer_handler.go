@@ -1,8 +1,11 @@
 package handlers
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -26,6 +29,7 @@ func (h *CustomerHandler) SelectAll(ctx *fiber.Ctx) error {
 	parameter := models.CustomerParameter{
 		ID:             ctx.Query("customer_id"),
 		CustomerTypeId: ctx.Query("customer_type_id"),
+		UserId:         ctx.Query("admin_user_id"),
 		Search:         ctx.Query("search"),
 		By:             ctx.Query("by"),
 		Sort:           ctx.Query("sort"),
@@ -34,16 +38,16 @@ func (h *CustomerHandler) SelectAll(ctx *fiber.Ctx) error {
 	res, err := uc.SelectAll(c, parameter)
 
 	type StructObject struct {
-		ListObjcet []models.Customer `json:"list_customer"`
+		ListObject []models.Customer `json:"list_customer"`
 	}
 
-	ObjcetData := new(StructObject)
+	ObjectData := new(StructObject)
 
 	if res != nil {
-		ObjcetData.ListObjcet = res
+		ObjectData.ListObject = res
 	}
 
-	return h.SendResponse(ctx, ObjcetData, nil, err, 0)
+	return h.SendResponse(ctx, ObjectData, nil, err, 0)
 }
 
 // FindAll ...
@@ -53,6 +57,7 @@ func (h *CustomerHandler) FindAll(ctx *fiber.Ctx) error {
 	parameter := models.CustomerParameter{
 		ID:             ctx.Query("customer_id"),
 		CustomerTypeId: ctx.Query("customer_type_id"),
+		UserId:         ctx.Query("admin_user_id"),
 		Search:         ctx.Query("search"),
 		Page:           str.StringToInt(ctx.Query("page")),
 		Limit:          str.StringToInt(ctx.Query("limit")),
@@ -95,9 +100,12 @@ func (h *CustomerHandler) FindByID(ctx *fiber.Ctx) error {
 
 	ObjectData := new(StructObject)
 
-	// if res != nil {
 	ObjectData.ListObject = res
-	// }
+
+	target := h.FetchVisitDay(parameter)
+	if target != "" {
+		ObjectData.ListObject.VisitDay = &target
+	}
 
 	return h.SendResponse(ctx, ObjectData, nil, err, 0)
 }
@@ -149,4 +157,40 @@ func (h *CustomerHandler) EditAddress(ctx *fiber.Ctx) error {
 	res, err := uc.EditAddress(c, id, input)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *CustomerHandler) FetchVisitDay(params models.CustomerParameter) string {
+	jsonReq, err := json.Marshal(params)
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrv/rest/customer/visitday/1", bytes.NewBuffer(jsonReq))
+	if err != nil {
+		fmt.Println("client err")
+		fmt.Print(err.Error())
+	}
+
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer C2A5CE6A2292E7745CE5A3F7E68A9")
+
+	resp, err := client.Do(req)
+	if err != nil {
+
+		fmt.Print(err.Error())
+	}
+	defer resp.Body.Close()
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Print(err.Error())
+	}
+
+	type resutlData struct {
+		VisitDay string `json:"visit_day"`
+	}
+
+	ObjectData := new(resutlData)
+
+	// var responseObject http.Response
+	json.Unmarshal(bodyBytes, &ObjectData)
+
+	return ObjectData.VisitDay
 }

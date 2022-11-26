@@ -14,6 +14,8 @@ type UserAccount struct {
 	SalesmanID         *string `json:"salesman_id"`
 	SalesmanName       *string `json:"salesman_name"`
 	SalesmanCode       *string `json:"salesman_code"`
+	FireStoreUID       *string `json:"firestore_uid"`
+	FCMToken           *string `json:"fcm_token"`
 }
 
 type UserAccountParameter struct {
@@ -66,6 +68,17 @@ var (
 	left join price_list pl on pl.id = cus.price_list_id
 	left join customer_level cl on cl.id = cus.customer_level_id
 	left join salesman s on s.id = cus.salesman_id
+	`
+
+	// UserAccountSelectStatement ...
+	AdminUserAccountSelectStatement = ` select def.id as user_id,null as cus_id,
+	def.login,
+	null,null,
+	null,
+	null,
+	null,null,null,
+	null,null,null
+	from _user def
 	`
 
 	// UserAccountWhereStatement ...

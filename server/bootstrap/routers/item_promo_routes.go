@@ -3,11 +3,10 @@ package routers
 import (
 	"time"
 
+	"github.com/gofiber/fiber/v2"
 	"nextbasis-service-v-0.1/pkg/str"
 	"nextbasis-service-v-0.1/server/handlers"
 	"nextbasis-service-v-0.1/server/middlewares"
-
-	"github.com/gofiber/fiber/v2"
 )
 
 // ItemPromoRoutes ...

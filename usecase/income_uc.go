@@ -151,3 +151,17 @@ func (uc IncomeUC) Delete(c context.Context, id string) (res viewmodel.IncomeVM,
 	return res, err
 
 }
+
+func (uc IncomeUC) Send(c context.Context, fcmToken, text string) (res string, err error) {
+	fcmUc := FCMUC{ContractUC: uc.ContractUC}
+	fireBaseMessage := models.FireBaseCloudMessage{
+		Body:  text,
+		Title: "Fcm Structure",
+		Token: fcmToken,
+		Type:  "Pesan",
+	}
+
+	fcmmesage, _ := fcmUc.SendMessage(c, &fireBaseMessage)
+
+	return fcmmesage, err
+}

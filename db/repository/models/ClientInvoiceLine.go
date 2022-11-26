@@ -7,8 +7,10 @@ type CilentInvoiceLine struct {
 	LineNo           *string `json:"line_no"`
 	CategoryID       *string `json:"category_id"`
 	ItemID           *string `json:"item_id"`
+	ItemCode         *string `json:"item_code"`
 	Qty              *string `json:"qty"`
 	UomID            *string `json:"uom_id"`
+	UomCode          *string `json:"uom_code"`
 	StockQty         *string `json:"stock_qty"`
 	UnitPrice        *string `json:"unit_price"`
 	GrossAmount      *string `json:"gross_amount"`

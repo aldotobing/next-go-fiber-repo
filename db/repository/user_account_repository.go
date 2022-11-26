@@ -11,6 +11,9 @@ import (
 type IUserAccountRepository interface {
 	FindByID(c context.Context, parameter models.UserAccountParameter) (models.UserAccount, error)
 	FindByPhoneNo(c context.Context, parameter models.UserAccountParameter) (models.UserAccount, error)
+	FindByEmailAndPass(c context.Context, parameter models.UserAccountParameter) (models.UserAccount, error)
+	FIreStoreIDSync(c context.Context, model *models.UserAccount) (*string, error)
+	FCMUpdate(c context.Context, model *models.UserAccount) (*string, error)
 }
 
 type UserAccountRepository struct {
@@ -75,4 +78,46 @@ func (repository UserAccountRepository) FindByID(c context.Context, parameter mo
 	}
 
 	return data, nil
+}
+
+func (repository UserAccountRepository) FindByEmailAndPass(c context.Context, parameter models.UserAccountParameter) (data models.UserAccount, err error) {
+	statement := models.AdminUserAccountSelectStatement + ` WHERE def.created_date is not null AND def._password = $1 AND lower(def.login) = $2`
+	row := repository.DB.QueryRowContext(c, statement, parameter.Password, strings.ToLower(parameter.Email))
+
+	data, err = repository.scanRow(row)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
+}
+
+// Edit ...
+func (repository UserAccountRepository) FCMUpdate(c context.Context, model *models.UserAccount) (res *string, err error) {
+	statement := `UPDATE _user SET
+	fcm_token = $1
+	WHERE id = $2
+	RETURNING id`
+
+	err = repository.DB.QueryRowContext(c, statement,
+		model.FCMToken,
+		model.ID).Scan(&res)
+	if err != nil {
+		return res, err
+	}
+	return res, err
+}
+
+func (repository UserAccountRepository) FIreStoreIDSync(c context.Context, model *models.UserAccount) (res *string, err error) {
+	statement := `UPDATE _user SET
+	firestoreuid = $1
+	WHERE id = $2
+	RETURNING id`
+	err = repository.DB.QueryRowContext(c, statement,
+		model.FireStoreUID,
+		model.ID).Scan(&res)
+	if err != nil {
+		return res, err
+	}
+	return res, err
 }

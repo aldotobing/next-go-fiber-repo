@@ -2,6 +2,8 @@ package models
 
 // ItemPromoPromo ...
 type ItemPromo struct {
+	PromoID            *string `json:"promo_id"`
+	PromoLineID        *string `json:"promo_line_id"`
 	ItemID             *string `json:"item_id"`
 	ItemCode           *string `json:"item_code"`
 	ItemName           *string `json:"item_name"`
@@ -26,8 +28,8 @@ type ItemPromo struct {
 }
 
 // ItemPromoParameter ...
-
 type ItemPromoParameter struct {
+	PromoID   string `json:"promo_id"`
 	ItemID    string `json:"item_id"`
 	ItemName  string `json:"item_name"`
 	StartDate string `json:"start_date"`
@@ -57,6 +59,8 @@ var (
 	*/
 	ItemPromoSelectStatement = `
 	SELECT 
+		PR.ID AS PROMO_ID,
+		PRL.ID AS PROMO_LINE_ID,
 		PIL.ITEM_ID AS ITEM_ID,
 		I._NAME AS ITEM_NAME,
 		I.CODE AS ITEM_CODE,
@@ -79,7 +83,7 @@ var (
 		PR.START_DATE AS START_DATE,
 		PR.END_DATE AS END_DATE
 	FROM PROMO_ITEM_LINE PIL
-	LEFT JOIN PROMO_LINE PRL ON PRL.ID = PIL.PROMO_LINE_ID
+	LEFT JOIN PROMO_LINE PRL ON PRL.ID = PIL.PROMO_LINE_ID	
 	LEFT JOIN PROMO PR ON PR.ID = PRL.PROMO_ID
 	LEFT JOIN ITEM I ON I.ID = PIL.ITEM_ID
 	LEFT JOIN UOM U ON U.ID = PIL.UOM_ID

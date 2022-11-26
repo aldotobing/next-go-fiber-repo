@@ -78,7 +78,7 @@ func (h *CilentInvoiceHandler) FindByID(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
-func (h *CilentInvoiceHandler) SelectAll3RD(ctx *fiber.Ctx) error {
+func (h *CilentInvoiceHandler) DataSync(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.CilentInvoiceParameter{
@@ -88,7 +88,7 @@ func (h *CilentInvoiceHandler) SelectAll3RD(ctx *fiber.Ctx) error {
 		Sort:       ctx.Query("sort"),
 	}
 	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
-	res, err := uc.SelectAll3RD(c, parameter)
+	res, err := uc.DataSync(c, parameter)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }

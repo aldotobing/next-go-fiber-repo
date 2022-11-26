@@ -7,8 +7,10 @@ import (
 	"time"
 
 	conf "nextbasis-service-v-0.1/config"
+	"nextbasis-service-v-0.1/helper"
 	"nextbasis-service-v-0.1/pkg/str"
 	"nextbasis-service-v-0.1/server/bootstrap"
+	_ "nextbasis-service-v-0.1/server/docs"
 	"nextbasis-service-v-0.1/server/middlewares"
 	"nextbasis-service-v-0.1/usecase"
 
@@ -24,6 +26,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
+	"github.com/gofiber/swagger"
 	"github.com/rs/xid"
 )
 
@@ -53,6 +56,40 @@ func main() {
 		BodyLimit:    str.StringToInt(configs.EnvConfig["FILE_MAX_UPLOAD_SIZE"]),
 		ErrorHandler: middlewares.InternalServer,
 	})
+	app.Get("/swagger/*", swagger.New(swagger.Config{ // custom
+		URL:         "/swagger/doc.json",
+		DeepLinking: false,
+	}))
+
+	// // Certificate manager
+	// m := &autocert.Manager{
+	// 	Prompt: autocert.AcceptTOS,
+	// 	// Replace with your domain
+	// 	HostPolicy: autocert.HostWhitelist("mysidomuncul.sidomuncul.co.id"),
+	// 	// Folder to store the certificates
+	// 	Cache: autocert.DirCache("../cert"),
+	// }
+
+	// // TLS Config
+	// cfg := &tls.Config{
+	// 	// Get Certificate from Let's Encrypt
+	// 	GetCertificate: m.GetCertificate,
+	// 	// By default NextProtos contains the "h2"
+	// 	// This has to be removed since Fasthttp does not support HTTP/2
+	// 	// Or it will cause a flood of PRI method logs
+	// 	// http://webconcepts.info/concepts/http-method/PRI
+	// 	NextProtos: []string{
+	// 		"http/1.1", "acme-tls/1",
+	// 	},
+	// }
+
+	// ln, err := tls.Listen("tcp", ":8443", cfg)
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	// Start server
+	// log.Fatal(app.Listener(ln))
 
 	ContractUC := usecase.ContractUC{
 		ReqID:       xid.New().String(),
@@ -73,6 +110,8 @@ func main() {
 		Mail:        configs.Mail,
 		Mailing:     configs.Mailing,
 		WhatsApp:    configs.WooWAClient,
+		AWSS3:       configs.Aws,
+		Fcm:         configs.FCM,
 	}
 
 	boot := bootstrap.Bootstrap{
@@ -91,6 +130,7 @@ func main() {
 			return c.SendStatus(fiber.StatusTooManyRequests)
 		},
 	}))
+
 	boot.App.Use(recover.New())
 	boot.App.Use(requestid.New())
 	boot.App.Use(cors.New(cors.Config{
@@ -104,7 +144,7 @@ func main() {
 		TimeFormat: time.RFC3339,
 		TimeZone:   "Asia/Jakarta",
 	}))
-
+	helper.SetCronJobs()
 	boot.RegisterRouters()
 	log.Fatal(boot.App.Listen(configs.EnvConfig["APP_HOST"]))
 

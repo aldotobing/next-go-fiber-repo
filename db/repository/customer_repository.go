@@ -38,9 +38,20 @@ func (repository CustomerRepository) scanRows(rows *sql.Rows) (res models.Custom
 		&res.CustomerAddress,
 		&res.CustomerProfilePicture,
 		&res.CustomerEmail,
+		&res.CustomerActiveStatus,
+		&res.CustomerLatitude,
+		&res.CustomerLongitude,
+		&res.CustomerBranchCode,
+		&res.CustomerBranchName,
+		&res.CustomerRegionCode,
+		&res.CustomerRegionName,
+		&res.CustomerProvinceID,
 		&res.CustomerProvinceName,
+		&res.CustomerCityID,
 		&res.CustomerCityName,
+		&res.CustomerDistrictID,
 		&res.CustomerDistrictName,
+		&res.CustomerSubdistrictID,
 		&res.CustomerSubdistrictName,
 		&res.CustomerSalesmanCode,
 		&res.CustomerSalesmanName,
@@ -49,7 +60,7 @@ func (repository CustomerRepository) scanRows(rows *sql.Rows) (res models.Custom
 		&res.CustomerTypeId,
 		&res.CustomerTypeName,
 		&res.CustomerPhone,
-		&res.Point,
+		&res.CustomerPoint,
 		&res.GiftName,
 		&res.Loyalty,
 	)
@@ -71,9 +82,20 @@ func (repository CustomerRepository) scanRow(row *sql.Row) (res models.Customer,
 		&res.CustomerAddress,
 		&res.CustomerProfilePicture,
 		&res.CustomerEmail,
+		&res.CustomerActiveStatus,
+		&res.CustomerLatitude,
+		&res.CustomerLongitude,
+		&res.CustomerBranchCode,
+		&res.CustomerBranchName,
+		&res.CustomerRegionCode,
+		&res.CustomerRegionName,
+		&res.CustomerProvinceID,
 		&res.CustomerProvinceName,
+		&res.CustomerCityID,
 		&res.CustomerCityName,
+		&res.CustomerDistrictID,
 		&res.CustomerDistrictName,
+		&res.CustomerSubdistrictID,
 		&res.CustomerSubdistrictName,
 		&res.CustomerSalesmanCode,
 		&res.CustomerSalesmanName,
@@ -82,7 +104,7 @@ func (repository CustomerRepository) scanRow(row *sql.Row) (res models.Customer,
 		&res.CustomerTypeId,
 		&res.CustomerTypeName,
 		&res.CustomerPhone,
-		&res.Point,
+		&res.CustomerPoint,
 		&res.GiftName,
 		&res.Loyalty,
 	)
@@ -101,12 +123,16 @@ func (repository CustomerRepository) SelectAll(c context.Context, parameter mode
 		conditionString += ` AND c.id = '` + parameter.ID + `'`
 	}
 
+	if parameter.UserId != "" {
+		conditionString += ` AND C.BRANCH_ID IN (SELECT BRANCH_ID FROM USER_BRANCH UB WHERE UB.USER_ID = ` + parameter.UserId + `) `
+	}
+
 	statement := models.CustomerSelectStatement + ` ` + models.CustomerWhereStatement +
 		` AND (LOWER(c."customer_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 
 	//print
-	//fmt.Println(statement)
+	fmt.Println(statement)
 
 	if err != nil {
 		return data, err
@@ -133,12 +159,17 @@ func (repository CustomerRepository) FindAll(ctx context.Context, parameter mode
 		conditionString += ` AND c.id = '` + parameter.ID + `'`
 	}
 
+	if parameter.UserId != "" {
+		conditionString += ` AND C.BRANCH_ID IN (SELECT BRANCH_ID FROM USER_BRANCH UB WHERE UB.USER_ID = ` + parameter.UserId + `) `
+	}
+
 	query := models.CustomerSelectStatement + ` ` + models.CustomerWhereStatement + ` ` + conditionString + `
 		AND (LOWER(c."customer_name") LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
 	if err != nil {
 		return data, count, err
 	}
+	fmt.Println(query)
 
 	defer rows.Close()
 	for rows.Next() {
@@ -163,6 +194,8 @@ func (repository CustomerRepository) FindAll(ctx context.Context, parameter mode
 func (repository CustomerRepository) FindByID(c context.Context, parameter models.CustomerParameter) (data models.Customer, err error) {
 	statement := models.CustomerSelectStatement + ` WHERE c.id = $1`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
+
+	fmt.Println(statement)
 
 	data, err = repository.scanRow(row)
 	if err != nil {

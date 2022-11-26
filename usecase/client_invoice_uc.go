@@ -91,17 +91,16 @@ func (uc CilentInvoiceUC) FindByDocumentNo(c context.Context, parameter models.C
 }
 
 // SelectAll ...
-func (uc CilentInvoiceUC) SelectAll3RD(c context.Context, parameter models.CilentInvoiceParameter) (res []models.CilentInvoice, err error) {
+func (uc CilentInvoiceUC) DataSync(c context.Context, parameter models.CilentInvoiceParameter) (res []models.CilentInvoice, err error) {
 	repo := repository.NewCilentInvoiceRepository(uc.DB)
 
 	loc, _ := time.LoadLocation("Asia/Jakarta")
-	now := time.Now().In(loc).Add(
-		time.Minute * time.Duration(-15))
+	now := time.Now().In(loc).Add(time.Minute * time.Duration(-15))
 	strnow := now.Format(time.RFC3339)
 	parameter.DateParam = strnow
 	jsonReq, err := json.Marshal(parameter)
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "http://localhost:8084/NEXTbasis-service-agon/rest/salesInvoice/data/2", bytes.NewBuffer(jsonReq))
+	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrv/rest/salesInvoice/data/2", bytes.NewBuffer(jsonReq))
 	if err != nil {
 		fmt.Println("client err")
 		fmt.Print(err.Error())
@@ -127,13 +126,16 @@ func (uc CilentInvoiceUC) SelectAll3RD(c context.Context, parameter models.Cilen
 
 	var resBuilder []models.CilentInvoice
 	for _, invoiceObject := range res {
+		fmt.Printf("%s\n", *invoiceObject.ID)
 
 		_, errinsert := repo.InsertDataWithLine(c, &invoiceObject)
+
 		if errinsert != nil {
-			fmt.Print(err.Error())
+			fmt.Print(errinsert)
 		}
 
 		resBuilder = append(resBuilder, invoiceObject)
+
 	}
 
 	return resBuilder, err

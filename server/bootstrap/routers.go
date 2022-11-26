@@ -24,6 +24,7 @@ func (boot Bootstrap) RegisterRouters() {
 	})
 
 	apiV1 := boot.App.Group("/v1")
+	//http.ListenAndServeTLS(":5000", "../fullchain.pem", "../privkey.pem", nil)
 
 	// auth routes
 	authRoutes := routers.AuthRoutes{RouterGroup: apiV1, Handler: handler}
@@ -124,6 +125,7 @@ func (boot Bootstrap) RegisterRouters() {
 	//SalesInvoice Routes
 	SalesInvoiceRoutes := routers.SalesInvoiceRoutes{RouterGroup: apiV1, Handler: handler}
 	SalesInvoiceRoutes.RegisterRoute()
+
 	//Customer routes
 	CustomerRoutes := routers.CustomerRoutes{RouterGroup: apiV1, Handler: handler}
 	CustomerRoutes.RegisterRoute()
@@ -156,4 +158,37 @@ func (boot Bootstrap) RegisterRouters() {
 	//News Routes
 	NewsRoutes := routers.NewsRoutes{RouterGroup: apiV1, Handler: handler}
 	NewsRoutes.RegisterRoute()
+
+	//Item Details Routes
+	ItemDetailsRoutes := routers.ItemDetailsRoutes{RouterGroup: apiV1, Handler: handler}
+	ItemDetailsRoutes.RegisterRoute()
+
+	//Item Details Routes
+	ItemSearchRoutes := routers.ItemSearchRoutes{RouterGroup: apiV1, Handler: handler}
+	ItemSearchRoutes.RegisterRoute()
+
+	//Data Sync Routes
+	DataSyncRoutes := routers.DataSyncRoutes{RouterGroup: apiV1, Handler: handler}
+	DataSyncRoutes.RegisterRoute()
+
+	CustomerTargetRoutes := routers.CustomerTargetRoutes{RouterGroup: apiV1, Handler: handler}
+	CustomerTargetRoutes.RegisterRoute()
+
+	CustomerAchievementRoutes := routers.CustomerAchievementRoutes{RouterGroup: apiV1, Handler: handler}
+	CustomerAchievementRoutes.RegisterRoute()
+
+	PromoContentRoutes := routers.PromoContentRoutes{RouterGroup: apiV1, Handler: handler}
+	PromoContentRoutes.RegisterRoute()
+
+	BranchRoutes := routers.BranchRoutes{RouterGroup: apiV1, Handler: handler}
+	BranchRoutes.RegisterRoute()
+
+	FireBaseUIDRoutes := routers.FireBaseUIDRoutes{RouterGroup: apiV1, Handler: handler}
+	FireBaseUIDRoutes.RegisterRoute()
+
+	PromoLineRoutes := routers.PromoLineRoutes{RouterGroup: apiV1, Handler: handler}
+	PromoLineRoutes.RegisterRoute()
+
+	PromoItemLineRoutes := routers.PromoItemLineRoutes{RouterGroup: apiV1, Handler: handler}
+	PromoItemLineRoutes.RegisterRoute()
 }

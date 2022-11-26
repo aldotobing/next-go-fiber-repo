@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -32,7 +31,7 @@ func NewCilentInvoiceRepository(DB *sql.DB) ICilentInvoiceRepository {
 // Scan rows
 func (repository CilentInvoiceRepository) scanRows(rows *sql.Rows) (res models.CilentInvoice, err error) {
 	err = rows.Scan(
-		&res.ID, &res.DocumentNo, &res.CustomerID,
+		&res.ID, &res.DocumentNo, &res.CustomerCode,
 	)
 	if err != nil {
 
@@ -45,7 +44,7 @@ func (repository CilentInvoiceRepository) scanRows(rows *sql.Rows) (res models.C
 // Scan row
 func (repository CilentInvoiceRepository) scanRow(row *sql.Row) (res models.CilentInvoice, err error) {
 	err = row.Scan(
-		&res.ID, &res.DocumentNo, &res.CustomerID,
+		&res.ID, &res.DocumentNo, &res.CustomerCode,
 	)
 	if err != nil {
 		return res, err
@@ -165,13 +164,15 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 		tax_calc_method ,salesman_id ,payment_terms_id ,sales_order_id ,company_id ,
 		branch_id ,price_list_id ,price_list_version_id ,status ,gross_amount ,
 		disc_amount ,taxable_amount ,tax_amount ,rounding_amount ,net_amount ,
-		outstanding_amount ,paid_amount ,due_date ,no_ppn ,global_disc_amount 
+		outstanding_amount ,paid_amount ,due_date ,no_ppn ,global_disc_amount,
+		transaction_point 
 		)values(
-		$1, $2, $3, $4, $5,
-		$6, $7, $8, $9, $10,
+		$1, $2, $3, $4, (select id from customer where customer_code = $5),
+		$6, (select id from salesman where partner_id =(select id from partner where code = $7)), $8, $9, $10,
 		$11 ,$12, $13, $14, $15,
 		$16, $17, $18, $19, $20,
-		$21, $22, $23, $24, $25
+		$21, $22, $23, $24, $25,
+		$26
 		)
 	RETURNING id`
 	transaction, err := repository.DB.BeginTx(c, nil)
@@ -195,11 +196,12 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 	}
 
 	err = transaction.QueryRowContext(c, statement,
-		model.DocumentNo, model.DocumentTypeID, model.TransactionDate, model.TransactionTime, model.CustomerID,
-		model.TaxCalcMethod, model.SalesmanID, model.PaymentTermsID, model.SalesOrderID, model.CompanyID,
+		model.DocumentNo, model.DocumentTypeID, model.TransactionDate, model.TransactionTime, model.CustomerCode,
+		model.TaxCalcMethod, model.SalesmanCode, model.PaymentTermsID, model.SalesOrderID, model.CompanyID,
 		model.BranchID, model.PriceLIstID, model.PriceLIstVersionID, str.EmptyString(*model.Status), str.EmptyString(*model.GrossAmount),
 		model.DiscAmount, model.TaxableAmount, model.TaxAmount, model.RoundingAmount, model.NetAmount,
 		str.EmptyString(*model.OutstandingAmount), str.EmptyString(*model.PaidAmount), model.DueDate, model.NoPPN, model.GlobalDiscAmount,
+		str.EmptyString(*model.TransactionPoint),
 	).Scan(&res)
 
 	if err != nil {
@@ -210,7 +212,6 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 
 	if model.ListLine != nil && len(*model.ListLine) > 0 {
 		for _, lineObject := range *model.ListLine {
-			fmt.Println(lineObject.CategoryID)
 			line_statement := `
 			insert into sales_invoice_line(
 				header_id ,line_no ,category_id ,item_id ,qty ,
@@ -219,8 +220,8 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 				disc_amount ,taxable_amount ,tax_amount ,rounding_amount ,net_amount ,
 				sales_order_line_id ,debt ,paid 
 				)values(
-				$1 ,$2 ,$3 ,$4 ,$5 ,
-				$6 ,$7 ,$8 ,$9 ,$10 ,
+				$1 ,$2 ,$3 ,( select id from item where code = $4 ) ,$5 ,
+				( select id from uom where code =$6 ) ,$7 ,$8 ,$9 ,$10 ,
 				$11 ,$12 ,$13 ,$14 ,$15 ,
 				$16 ,$17 ,$18 ,$19 ,$20 ,
 				$21 ,$22 ,$23
@@ -228,8 +229,8 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 			`
 			var resLine string
 			err = transaction.QueryRowContext(c, line_statement,
-				model.ID, lineObject.LineNo, lineObject.CategoryID, lineObject.ItemID, lineObject.Qty,
-				lineObject.UomID, lineObject.StockQty, lineObject.UnitPrice, str.EmptyStringToZero(*lineObject.GrossAmount), str.EmptyStringToZero(*lineObject.UseDiscAmount),
+				model.ID, lineObject.LineNo, lineObject.CategoryID, lineObject.ItemCode, lineObject.Qty,
+				lineObject.UomCode, lineObject.StockQty, lineObject.UnitPrice, str.EmptyStringToZero(*lineObject.GrossAmount), str.EmptyStringToZero(*lineObject.UseDiscAmount),
 				str.EmptyStringToZero(*lineObject.DiscPercent1), str.EmptyStringToZero(*lineObject.DiscPercent2), str.EmptyStringToZero(*lineObject.DiscPercent3), str.EmptyStringToZero(*lineObject.DiscPercent4), str.EmptyStringToZero(*lineObject.DiscPercent5),
 				str.EmptyStringToZero(*lineObject.DiscountAmount), str.EmptyStringToZero(*lineObject.TaxableAmount), str.EmptyStringToZero(*lineObject.TaxAmount), str.EmptyStringToZero(*lineObject.RoundingAmount), str.EmptyStringToZero(*lineObject.NetAmount),
 				str.NullString(lineObject.SalesOrderLineID), str.NullString(lineObject.Debt), str.NullString(lineObject.Paid),
@@ -243,6 +244,14 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 				return res, err
 			}
 		}
+	}
+
+	if model.SalesRequestCode != nil {
+
+		updatechecoutstatus := ` update customer_order_header set status= 'finish' where document_no = $1 `
+		updateCOStatusRow, _ := transaction.QueryContext(c, updatechecoutstatus, model.SalesRequestCode)
+		updateCOStatusRow.Close()
+
 	}
 
 	if err = transaction.Commit(); err != nil {

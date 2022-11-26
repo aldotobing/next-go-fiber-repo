@@ -22,6 +22,7 @@ func (h *ItemHandler) SelectAll(ctx *fiber.Ctx) error {
 
 	parameter := models.ItemParameter{
 		ItemCategoryId:     ctx.Query("item_category_id"),
+		UomID:              ctx.Query("uom_id"),
 		PriceListVersionId: ctx.Query("price_list_version_id"),
 		Search:             ctx.Query("search"),
 		By:                 ctx.Query("by"),
@@ -32,16 +33,16 @@ func (h *ItemHandler) SelectAll(ctx *fiber.Ctx) error {
 	res, err := uc.SelectAll(c, parameter)
 
 	type StructObject struct {
-		ListObjcet []models.Item `json:"list_item"`
+		ListObject []models.Item `json:"list_item"`
 	}
 
-	ObjcetData := new(StructObject)
+	ObjectData := new(StructObject)
 
 	if res != nil {
-		ObjcetData.ListObjcet = res
+		ObjectData.ListObject = res
 	}
 
-	return h.SendResponse(ctx, ObjcetData, nil, err, 0)
+	return h.SendResponse(ctx, ObjectData, nil, err, 0)
 }
 
 // FindAll ...
@@ -51,6 +52,7 @@ func (h *ItemHandler) FindAll(ctx *fiber.Ctx) error {
 	parameter := models.ItemParameter{
 		ItemCategoryId:     ctx.Query("item_category_id"),
 		PriceListVersionId: ctx.Query("price_list_version_id"),
+		UomID:              ctx.Query("uom_id"),
 		Search:             ctx.Query("search"),
 		Page:               str.StringToInt(ctx.Query("page")),
 		Limit:              str.StringToInt(ctx.Query("limit")),
@@ -62,16 +64,16 @@ func (h *ItemHandler) FindAll(ctx *fiber.Ctx) error {
 	res, meta, err := uc.FindAll(c, parameter)
 
 	type StructObject struct {
-		ListObjcet []models.Item `json:"list_item"`
+		ListObject []models.Item `json:"list_item"`
 	}
 
-	ObjcetData := new(StructObject)
+	ObjectData := new(StructObject)
 
 	if res != nil {
-		ObjcetData.ListObjcet = res
+		ObjectData.ListObject = res
 	}
 
-	return h.SendResponse(ctx, ObjcetData, meta, err, 0)
+	return h.SendResponse(ctx, ObjectData, meta, err, 0)
 }
 
 // FindByID ...

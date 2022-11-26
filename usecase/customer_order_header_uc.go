@@ -1,7 +1,13 @@
 package usecase
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"time"
 
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -109,4 +115,55 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 	}
 
 	return res, err
+}
+
+func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter models.CustomerOrderHeaderParameter) (res []models.CustomerOrderHeader, err error) {
+	repo := repository.NewCustomerOrderHeaderRepository(uc.DB)
+
+	loc, _ := time.LoadLocation("Asia/Jakarta")
+	now := time.Now().In(loc).Add(time.Minute * time.Duration(-15))
+
+	strnow := now.Format(time.RFC3339)
+	fmt.Println(strnow)
+	parameter.DateParam = strnow
+	jsonReq, err := json.Marshal(parameter)
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrv/rest/salesRequest/voideddata/2", bytes.NewBuffer(jsonReq))
+	if err != nil {
+		fmt.Println("client err")
+		fmt.Print(err.Error())
+	}
+
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer C2A5CE6A2292E7745CE5A3F7E68A9")
+
+	resp, err := client.Do(req)
+	if err != nil {
+
+		fmt.Print(err.Error())
+	}
+	defer resp.Body.Close()
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Print(err.Error())
+	}
+	// var responseObject http.Response
+	json.Unmarshal(bodyBytes, &res)
+	// fmt.Printf("API Response as struct %+v\n", &responseObject)
+
+	var resBuilder []models.CustomerOrderHeader
+	for _, invoiceObject := range res {
+
+		_, errinsert := repo.SyncVoid(c, &invoiceObject)
+
+		if errinsert != nil {
+			fmt.Print(errinsert)
+		}
+
+		resBuilder = append(resBuilder, invoiceObject)
+
+	}
+
+	return resBuilder, err
 }

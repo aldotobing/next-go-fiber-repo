@@ -15,7 +15,7 @@ type Item struct {
 	UomName            *string          `json:"uom_name"`
 	UomLineConversion  *string          `json:"uom_line_conversion"`
 	ItemPrice          *string          `json:"item_price"`
-	PriceListVersionId *string          `json:"price_list_verison_id"`
+	PriceListVersionId *string          `json:"price_list_version_id"`
 	Uom                *json.RawMessage `json:"item_uom"`
 }
 
@@ -26,6 +26,7 @@ type ItemParameter struct {
 	Name               string `json:"item_name"`
 	ItemCategoryId     string `json:"item_category_id"`
 	PriceListVersionId string `json:"price_list_version_id"`
+	UomID              string `json:"uom_id"`
 	Search             string `json:"search"`
 	Page               int    `json:"page"`
 	Offset             int    `json:"offset"`

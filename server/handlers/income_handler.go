@@ -127,3 +127,14 @@ func (h *IncomeHandler) Delete(ctx *fiber.Ctx) error {
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
+
+// Delete ...
+func (h *IncomeHandler) Send(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+	token := ctx.Query("fcm_token")
+	text := ctx.Query("text")
+	uc := usecase.IncomeUC{ContractUC: h.ContractUC}
+	res, err := uc.Send(c, token, text)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
