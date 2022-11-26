@@ -152,4 +152,8 @@ func (boot Bootstrap) RegisterRouters() {
 	//Item MostSold Routes
 	ItemMostSoldRoutes := routers.ItemMostSoldRoutes{RouterGroup: apiV1, Handler: handler}
 	ItemMostSoldRoutes.RegisterRoute()
+
+	//News Routes
+	NewsRoutes := routers.NewsRoutes{RouterGroup: apiV1, Handler: handler}
+	NewsRoutes.RegisterRoute()
 }
