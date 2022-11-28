@@ -5,6 +5,8 @@ type News struct {
 	ID          *string `json:"id"`
 	Title       *string `json:"title"`
 	Description *string `json:"description"`
+	StartDate   *string `json:"start_date"`
+	EndDate     *string `json:"end_date"`
 }
 
 // NewsParameter ...
@@ -31,10 +33,13 @@ var (
 	}
 
 	// NewsSelectStatement ...
-	NewsSelectStatement = `SELECT DEF.ID AS ID,
-									DEF.TITLE AS TITLE,
-									DEF.DESCRIPTION AS DESCRIPTION
-									FROM NEWS DEF`
+	NewsSelectStatement = `
+	SELECT DEF.ID AS ID,
+		DEF.TITLE AS TITLE,
+		DEF.DESCRIPTION AS DESCRIPTION,
+		DEF.START_DATE AS NEWS_START_DATE,
+		DEF.END_DATE AS NEWS_END_DATE 
+	FROM NEWS DEF`
 
 	// NewsWhereStatement ...
 	NewsWhereStatement = ` where def.id is not null `
