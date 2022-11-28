@@ -13,6 +13,7 @@ import (
 type INewsRepository interface {
 	SelectAll(c context.Context, parameter models.NewsParameter) ([]models.News, error)
 	FindAll(ctx context.Context, parameter models.NewsParameter) ([]models.News, int, error)
+	Add(c context.Context, model *models.News) (*string, error)
 	// FindByID(c context.Context, parameter models.SalesInvoiceParameter) (models.SalesInvoice, error)
 	// FindByDocumentNo(c context.Context, parameter models.SalesInvoiceParameter) (models.SalesInvoice, error)
 	// FindByCustomerId(c context.Context, parameter models.SalesInvoiceParameter) (models.SalesInvoice, error)
@@ -34,7 +35,7 @@ func NewNewsRepository(DB *sql.DB) INewsRepository {
 // Scan rows
 func (repository NewsRepository) scanRows(rows *sql.Rows) (res models.News, err error) {
 	err = rows.Scan(
-		&res.ID, &res.Title, &res.Description,
+		&res.ID, &res.Title, &res.Description, &res.StartDate, &res.EndDate,
 	)
 	if err != nil {
 
@@ -47,7 +48,7 @@ func (repository NewsRepository) scanRows(rows *sql.Rows) (res models.News, err 
 // Scan row
 func (repository NewsRepository) scanRow(row *sql.Row) (res models.News, err error) {
 	err = row.Scan(
-		&res.ID, &res.Title, &res.Description,
+		&res.ID, &res.Title, &res.Description, &res.StartDate, &res.StartDate,
 	)
 	if err != nil {
 		return res, err
@@ -120,4 +121,16 @@ func (repository NewsRepository) FindAll(ctx context.Context, parameter models.N
 	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
 	return data, count, err
 
+}
+
+func (repository NewsRepository) Add(c context.Context, model *models.News) (res *string, err error) {
+	statement := `INSERT INTO news (start_date, end_date,title,description)
+	VALUES ($1, $2, $3, $4) RETURNING id`
+
+	err = repository.DB.QueryRowContext(c, statement, model.Title, model.Description, model.StartDate, model.EndDate).Scan(&res)
+
+	if err != nil {
+		return res, err
+	}
+	return res, err
 }
