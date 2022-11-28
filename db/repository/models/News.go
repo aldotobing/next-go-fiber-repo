@@ -7,6 +7,7 @@ type News struct {
 	Description *string `json:"description"`
 	StartDate   *string `json:"start_date"`
 	EndDate     *string `json:"end_date"`
+	Active      *string `json:"active"`
 }
 
 // NewsParameter ...
@@ -42,5 +43,5 @@ var (
 	FROM NEWS DEF`
 
 	// NewsWhereStatement ...
-	NewsWhereStatement = ` where def.id is not null `
+	NewsWhereStatement = ` where def.id is not null and def.active = 1 `
 )

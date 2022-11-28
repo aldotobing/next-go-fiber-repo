@@ -7,4 +7,5 @@ type NewsRequest struct {
 	EndDate     string `json:"end_date"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
+	Active      string `json:"active"`
 }
