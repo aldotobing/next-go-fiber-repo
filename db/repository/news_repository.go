@@ -124,10 +124,10 @@ func (repository NewsRepository) FindAll(ctx context.Context, parameter models.N
 }
 
 func (repository NewsRepository) Add(c context.Context, model *models.News) (res *string, err error) {
-	statement := `INSERT INTO news (start_date, end_date,title,description)
+	statement := `INSERT INTO news (start_date, end_date, title, description)
 	VALUES ($1, $2, $3, $4) RETURNING id`
 
-	err = repository.DB.QueryRowContext(c, statement, model.Title, model.Description, model.StartDate, model.EndDate).Scan(&res)
+	err = repository.DB.QueryRowContext(c, statement, model.StartDate, model.EndDate, model.Title, model.Description).Scan(&res)
 
 	if err != nil {
 		return res, err
