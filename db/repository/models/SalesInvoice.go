@@ -12,6 +12,7 @@ type SalesInvoice struct {
 	Status         *string          `json:"status"`
 	NetAmount      *string          `json:"net_amount"`
 	InvoiceLine    *json.RawMessage `json:"invoice_line"`
+	ModifiedDate   *string          `json:"modified_date"`
 }
 
 // SalesInvoiceParameter ...
@@ -46,6 +47,7 @@ var (
 	DEF.DOCUMENT_NO AS NO_INVOICE,
 	SOH.DOCUMENT_NO AS NO_ORDER,
 	DEF.TRANSACTION_DATE,
+	DEF.MODIFIED_DATE,
 	DEF.STATUS,
 	DEF.NET_AMOUNT,
 				(SELECT JSON_AGG(T) AS INVOICE_LINE
