@@ -10,22 +10,21 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// NewsRoutes ...
-type NewsRoutes struct {
+// UomRoutes ...
+type UomRoutes struct {
 	RouterGroup fiber.Router
 	Handler     handlers.Handler
 }
 
-// RegisterRoute register News routes
-func (route NewsRoutes) RegisterRoute() {
-	handler := handlers.NewsHandler{Handler: route.Handler}
+// RegisterRoute register Uom routes
+func (route UomRoutes) RegisterRoute() {
+	handler := handlers.UomHandler{Handler: route.Handler}
 	// jwtMiddleware := middlewares.JwtMiddleware{ContractUC: handler.ContractUC}
 
-	r := route.RouterGroup.Group("/api/apps/news")
+	r := route.RouterGroup.Group("/api/apps/uom")
 	// r.Use(jwtMiddleware.VerifyUser)
 	r.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
 	r.Get("/", handler.FindAll)
 	r.Get("/select", handler.SelectAll)
-	r.Post("/add", handler.Add)
-
+	r.Get("/id/:id", handler.FindByID)
 }

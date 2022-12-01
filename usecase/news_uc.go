@@ -70,6 +70,7 @@ func (uc NewsUC) Add(c context.Context, data *requests.NewsRequest) (res models.
 		Description: &data.Description,
 		StartDate:   &data.StartDate,
 		EndDate:     &data.EndDate,
+		Active:      &data.Active,
 	}
 	res.ID, err = repo.Add(c, &res)
 	if err != nil {
