@@ -9,10 +9,10 @@ type SalesInvoice struct {
 	NoInvoice      *string          `json:"no_invoice"`
 	NoOrder        *string          `json:"no_order"`
 	TrasactionDate *string          `json:"transaction_date"`
+	ModifiedDate   *string          `json:"modified_date"`
 	Status         *string          `json:"status"`
 	NetAmount      *string          `json:"net_amount"`
 	InvoiceLine    *json.RawMessage `json:"invoice_line"`
-	ModifiedDate   *string          `json:"modified_date"`
 }
 
 // SalesInvoiceParameter ...

@@ -32,6 +32,7 @@ type CustomerOrderHeader struct {
 	CustomerCode         *string             `json:"customer_code"`
 	SalesmanCode         *string             `json:"salesman_code"`
 	CustomerAddress      *string             `json:"customer_address"`
+	ModifiedDate         *string             `json:"modified_date"`
 }
 
 // CustomerOrderHeaderParameter ...
@@ -65,7 +66,7 @@ var (
 	pl.id as pl_id,pl._name as pl_name, plv.id as plv_id,plv.description,
 	def.status,def.gross_amount,def.taxable_amount, def.tax_amount,
 	def.rounding_amount, def.net_amount,def.disc_amount,
-	cus.customer_code as c_code, s.salesman_code as s_code, cus.customer_address
+	cus.customer_code as c_code, s.salesman_code as s_code, cus.customer_address,to_char(def.modified_date,'YYYY-MM-DD') as modified_date
 	from customer_order_header def
 	join customer cus on cus.id = def.cust_ship_to_id
 	left join salesman s on s.id = cus.salesman_id
