@@ -194,4 +194,8 @@ func (boot Bootstrap) RegisterRouters() {
 
 	UomRoutes := routers.UomRoutes{RouterGroup: apiV1, Handler: handler}
 	UomRoutes.RegisterRoute()
+
+	PriceListRoutes := routers.PriceListRoutes{RouterGroup: apiV1, Handler: handler}
+	PriceListRoutes.RegisterRoute()
+
 }
