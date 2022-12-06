@@ -33,10 +33,10 @@ type SalesInvoiceParameter struct {
 
 var (
 	// SalesInvoiceOrderBy ...
-	SalesInvoiceOrderBy = []string{"def.id", "def.document_no"}
+	SalesInvoiceOrderBy = []string{"def.id", "def.document_no", "def.created_date"}
 	// SalesInvoiceOrderByrByString ...
 	SalesInvoiceOrderByrByString = []string{
-		"def.document_no",
+		"def.created_date",
 	}
 
 	// SalesInvoiceSelectStatement ...
