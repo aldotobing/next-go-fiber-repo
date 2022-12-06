@@ -128,7 +128,6 @@ func (repository SalesInvoiceRepository) FindAll(ctx context.Context, parameter 
 
 	query = `SELECT COUNT(*) FROM "sales_invoice_header" def ` + models.SalesInvoiceWhereStatement + ` ` +
 		conditionString + ` AND (LOWER(def."document_no") LIKE $1)`
-	fmt.Println(query)
 	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
 	return data, count, err
 
