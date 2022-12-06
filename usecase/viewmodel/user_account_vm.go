@@ -12,10 +12,14 @@ type UserAccountVM struct {
 	RoGroupID          string  `json:"role_group_id"`
 	CustomerID         string  `json:"customer_id"`
 	CustomerName       string  `json:"customer_name"`
-	Code               string  `json:"customer_code"`
+	Code               *string `json:"customer_code"`
 	Phone              string  `json:"customer_phone"`
 	PriceListID        *string `json:"price_list_id"`
 	PriceListVersionID *string `json:"price_list_version_id"`
 	CustomerTypeID     *string `json:"customer_type_id"`
 	CustomerLevelName  *string `json:"customer_level_name"`
+	CustomerAddress    *string `json:"customer_address"`
+	SalesmanID         *string `json:"salesman_id"`
+	SalesmanName       *string `json:"salesman_name"`
+	SalesmanCode       *string `json:"salesman_code"`
 }

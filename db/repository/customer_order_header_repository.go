@@ -16,6 +16,7 @@ type ICustomerOrderHeaderRepository interface {
 	FindAll(ctx context.Context, parameter models.CustomerOrderHeaderParameter) ([]models.CustomerOrderHeader, int, error)
 	FindByID(c context.Context, parameter models.CustomerOrderHeaderParameter) (models.CustomerOrderHeader, error)
 	CheckOut(c context.Context, model *models.CustomerOrderHeader) (*string, error)
+	SyncVoid(c context.Context, model *models.CustomerOrderHeader) (*string, error)
 }
 
 // CustomerOrderHeaderRepository ...
@@ -38,6 +39,7 @@ func (repository CustomerOrderHeaderRepository) scanRows(rows *sql.Rows) (res mo
 		&res.PriceLIstID, &res.PriceLIstName, &res.PriceLIstVersionID, &res.PriceLIstVersionName,
 		&res.Status, &res.GrossAmount, &res.TaxableAmount, &res.TaxAmount,
 		&res.RoundingAmount, &res.NetAmount, &res.DiscAmount,
+		&res.CustomerCode, &res.SalesmanCode, &res.CustomerAddress, &res.ModifiedDate,
 	)
 	if err != nil {
 
@@ -57,6 +59,7 @@ func (repository CustomerOrderHeaderRepository) scanRow(row *sql.Row) (res model
 		&res.PriceLIstID, &res.PriceLIstName, &res.PriceLIstVersionID, &res.PriceLIstVersionName,
 		&res.Status, &res.GrossAmount, &res.TaxableAmount, &res.TaxAmount,
 		&res.RoundingAmount, &res.NetAmount, res.DiscAmount,
+		&res.CustomerCode, &res.SalesmanCode, &res.CustomerAddress, &res.ModifiedDate,
 	)
 	if err != nil {
 		return res, err
@@ -71,6 +74,14 @@ func (repository CustomerOrderHeaderRepository) SelectAll(c context.Context, par
 
 	if parameter.CustomerID != "" {
 		conditionString += ` AND def.cust_ship_to_id = '` + parameter.CustomerID + `'`
+	}
+
+	if parameter.DateParam != "" {
+		conditionString += ` AND def.modified_date > '` + parameter.DateParam + `'`
+	}
+
+	if parameter.UserID != "" {
+		conditionString += ` AND def.branch_id in ( select branch_id from user_branch where user_id = ` + parameter.UserID + `)`
 	}
 
 	statement := models.CustomerOrderHeaderSelectStatement + ` ` + models.CustomerOrderHeaderWhereStatement +
@@ -100,6 +111,10 @@ func (repository CustomerOrderHeaderRepository) FindAll(ctx context.Context, par
 
 	if parameter.CustomerID != "" {
 		conditionString += ` AND def.cust_ship_to_id = '` + parameter.CustomerID + `'`
+	}
+
+	if parameter.UserID != "" {
+		conditionString += ` AND def.branch_id in ( select branch_id from user_branch where user_id = ` + parameter.UserID + `)`
 	}
 
 	query := models.CustomerOrderHeaderSelectStatement + ` ` + models.CustomerOrderHeaderWhereStatement + ` ` + conditionString + `
@@ -156,13 +171,13 @@ func (repository CustomerOrderHeaderRepository) CheckOut(c context.Context, mode
 		payment_terms_id, expected_delivery_date, gross_amount,disc_amount,
 		taxable_amount, tax_amount, rounding_amount, net_amount,
 		tax_calc_method, salesman_id,
-		branch_id,price_list_id
+		branch_id,price_list_id,status
 		)values(
 			$1,$2,$3,$4,
 			$5,$6,$7,$8,
 			$9,$10,$11,$12,
-			$13,$14,
-			$15,$16
+			$13,(select salesman_id from customer where id = $14),
+			(select branch_id from customer where id = $15),$16,'draft'
 		)
 	RETURNING id`
 
@@ -176,8 +191,8 @@ func (repository CustomerOrderHeaderRepository) CheckOut(c context.Context, mode
 	err = transaction.QueryRowContext(c, statement, model.TransactionDate, model.TransactionTime, model.CustomerID, model.CustomerID,
 		model.PaymentTermsID, model.ExpectedDeliveryDate, model.GrossAmount, model.DiscAmount,
 		model.TaxableAmount, model.TaxAmount, model.RoundingAmount, model.NetAmount,
-		model.TaxCalcMethod, model.SalesmanID,
-		model.BranchID, model.PriceLIstID,
+		model.TaxCalcMethod, model.CustomerID,
+		model.CustomerID, model.PriceLIstID,
 	).Scan(&res)
 
 	if err != nil {
@@ -197,6 +212,19 @@ func (repository CustomerOrderHeaderRepository) CheckOut(c context.Context, mode
 	}
 
 	if err = transaction.Commit(); err != nil {
+		return res, err
+	}
+	return res, err
+}
+
+func (repository CustomerOrderHeaderRepository) SyncVoid(c context.Context, model *models.CustomerOrderHeader) (res *string, err error) {
+	statement := `UPDATE customer_order_header SET 
+	status = 'voided' 
+	WHERE document_no = $1 
+	RETURNING id`
+	err = repository.DB.QueryRowContext(c, statement,
+		model.DocumentNo).Scan(&res)
+	if err != nil {
 		return res, err
 	}
 	return res, err

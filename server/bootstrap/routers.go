@@ -24,6 +24,7 @@ func (boot Bootstrap) RegisterRouters() {
 	})
 
 	apiV1 := boot.App.Group("/v1")
+	//http.ListenAndServeTLS(":5000", "../fullchain.pem", "../privkey.pem", nil)
 
 	// auth routes
 	authRoutes := routers.AuthRoutes{RouterGroup: apiV1, Handler: handler}
@@ -117,6 +118,14 @@ func (boot Bootstrap) RegisterRouters() {
 	ItemRoutes := routers.ItemRoutes{RouterGroup: apiV1, Handler: handler}
 	ItemRoutes.RegisterRoute()
 
+	//ItemCategory Routes
+	ItemCategoryRoutes := routers.ItemCategoryRoutes{RouterGroup: apiV1, Handler: handler}
+	ItemCategoryRoutes.RegisterRoute()
+
+	//SalesInvoice Routes
+	SalesInvoiceRoutes := routers.SalesInvoiceRoutes{RouterGroup: apiV1, Handler: handler}
+	SalesInvoiceRoutes.RegisterRoute()
+
 	//Customer routes
 	CustomerRoutes := routers.CustomerRoutes{RouterGroup: apiV1, Handler: handler}
 	CustomerRoutes.RegisterRoute()
@@ -126,5 +135,67 @@ func (boot Bootstrap) RegisterRouters() {
 
 	CustomerOrderRoutes := routers.CustomerOrderHeaderRoutes{RouterGroup: apiV1, Handler: handler}
 	CustomerOrderRoutes.RegisterRoute()
+
+	ItemPromoRoutes := routers.ItemPromoRoutes{RouterGroup: apiV1, Handler: handler}
+	ItemPromoRoutes.RegisterRoute()
+
+	//ProductFocusCategory Routes
+	ProductFocusCategoryRoutes := routers.ProductFocusCategoryRoutes{RouterGroup: apiV1, Handler: handler}
+	ProductFocusCategoryRoutes.RegisterRoute()
+
+	//ItemProductFocus Routes
+	ItemProductFocusRoutes := routers.ItemProductFocusRoutes{RouterGroup: apiV1, Handler: handler}
+	ItemProductFocusRoutes.RegisterRoute()
+
+	//Invoice Routes
+	InvoiceRoutes := routers.CilentInvoiceRoutes{RouterGroup: apiV1, Handler: handler}
+	InvoiceRoutes.RegisterRoute()
+
+	//Item MostSold Routes
+	ItemMostSoldRoutes := routers.ItemMostSoldRoutes{RouterGroup: apiV1, Handler: handler}
+	ItemMostSoldRoutes.RegisterRoute()
+
+	//News Routes
+	NewsRoutes := routers.NewsRoutes{RouterGroup: apiV1, Handler: handler}
+	NewsRoutes.RegisterRoute()
+
+	//Item Details Routes
+	ItemDetailsRoutes := routers.ItemDetailsRoutes{RouterGroup: apiV1, Handler: handler}
+	ItemDetailsRoutes.RegisterRoute()
+
+	//Item Details Routes
+	ItemSearchRoutes := routers.ItemSearchRoutes{RouterGroup: apiV1, Handler: handler}
+	ItemSearchRoutes.RegisterRoute()
+
+	//Data Sync Routes
+	DataSyncRoutes := routers.DataSyncRoutes{RouterGroup: apiV1, Handler: handler}
+	DataSyncRoutes.RegisterRoute()
+
+	CustomerTargetRoutes := routers.CustomerTargetRoutes{RouterGroup: apiV1, Handler: handler}
+	CustomerTargetRoutes.RegisterRoute()
+
+	CustomerAchievementRoutes := routers.CustomerAchievementRoutes{RouterGroup: apiV1, Handler: handler}
+	CustomerAchievementRoutes.RegisterRoute()
+
+	PromoContentRoutes := routers.PromoContentRoutes{RouterGroup: apiV1, Handler: handler}
+	PromoContentRoutes.RegisterRoute()
+
+	BranchRoutes := routers.BranchRoutes{RouterGroup: apiV1, Handler: handler}
+	BranchRoutes.RegisterRoute()
+
+	FireBaseUIDRoutes := routers.FireBaseUIDRoutes{RouterGroup: apiV1, Handler: handler}
+	FireBaseUIDRoutes.RegisterRoute()
+
+	PromoLineRoutes := routers.PromoLineRoutes{RouterGroup: apiV1, Handler: handler}
+	PromoLineRoutes.RegisterRoute()
+
+	PromoItemLineRoutes := routers.PromoItemLineRoutes{RouterGroup: apiV1, Handler: handler}
+	PromoItemLineRoutes.RegisterRoute()
+
+	UomRoutes := routers.UomRoutes{RouterGroup: apiV1, Handler: handler}
+	UomRoutes.RegisterRoute()
+
+	PriceListRoutes := routers.PriceListRoutes{RouterGroup: apiV1, Handler: handler}
+	PriceListRoutes.RegisterRoute()
 
 }

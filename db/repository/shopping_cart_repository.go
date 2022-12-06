@@ -16,6 +16,7 @@ type IShoppingCartRepository interface {
 	Add(c context.Context, model *models.ShoppingCart) (*string, error)
 	Edit(c context.Context, model *models.ShoppingCart) (*string, error)
 	Delete(c context.Context, id string) (*string, error)
+	SelectAllForGroup(c context.Context, parameter models.ShoppingCartParameter) ([]models.GroupedShoppingCart, error)
 }
 
 // ShoppingCartRepository ...
@@ -32,7 +33,8 @@ func NewShoppingCartRepository(DB *sql.DB) IShoppingCartRepository {
 func (repository ShoppingCartRepository) scanRows(rows *sql.Rows) (res models.ShoppingCart, err error) {
 	err = rows.Scan(
 		&res.ID, &res.CustomerID, &res.CustomerName, &res.ItemID, &res.ItemName, &res.UomID, &res.UomName,
-		&res.Qty, &res.StockQty, &res.Price,
+		&res.Qty, &res.StockQty, &res.Price, &res.ItemCategoryID, &res.ItemCategoryName, &res.ItemPicture,
+		&res.TotalPrice,
 	)
 	if err != nil {
 
@@ -46,7 +48,33 @@ func (repository ShoppingCartRepository) scanRows(rows *sql.Rows) (res models.Sh
 func (repository ShoppingCartRepository) scanRow(row *sql.Row) (res models.ShoppingCart, err error) {
 	err = row.Scan(
 		&res.ID, &res.CustomerID, &res.CustomerName, &res.ItemID, &res.ItemName, &res.UomID, &res.UomName,
-		&res.Qty, &res.StockQty, &res.Price,
+		&res.Qty, &res.StockQty, &res.Price, &res.ItemCategoryID, &res.ItemCategoryName, &res.ItemPicture,
+		&res.TotalPrice,
+	)
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
+// Scan rows
+func (repository ShoppingCartRepository) scanGroupedRows(rows *sql.Rows) (res models.GroupedShoppingCart, err error) {
+	err = rows.Scan(
+		&res.CategoryID, &res.CategoryName,
+	)
+	if err != nil {
+
+		return res, err
+	}
+
+	return res, nil
+}
+
+// Scan row
+func (repository ShoppingCartRepository) scanGroupedRow(row *sql.Row) (res models.GroupedShoppingCart, err error) {
+	err = row.Scan(
+		&res.CategoryID, &res.CategoryName,
 	)
 	if err != nil {
 		return res, err
@@ -61,6 +89,10 @@ func (repository ShoppingCartRepository) SelectAll(c context.Context, parameter 
 
 	if parameter.CustomerID != "" {
 		conditionString += ` and def.customer_id = ` + parameter.CustomerID
+	}
+
+	if parameter.ItemCategoryID != "" {
+		conditionString += ` and it.item_category_id = ` + parameter.ItemCategoryID
 	}
 
 	statement := models.ShoppingCartSelectStatement + ` ` + models.ShoppingCartWhereStatement +
@@ -134,11 +166,11 @@ func (repository ShoppingCartRepository) FindByID(c context.Context, parameter m
 // Add ...
 func (repository ShoppingCartRepository) Add(c context.Context, model *models.ShoppingCart) (res *string, err error) {
 	statement := `INSERT INTO cart (customer_id,item_id, uom_id, price,
-		created_date, created_by, qty , stock_qty )
-	VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`
+		created_date, created_by, qty , stock_qty,total_price )
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`
 
 	err = repository.DB.QueryRowContext(c, statement, model.CustomerID, model.ItemID, model.UomID, model.Price,
-		model.CreatedAt, model.CreatedBy, model.Qty, model.StockQty).Scan(&res)
+		model.CreatedAt, model.CreatedBy, model.Qty, model.StockQty, model.TotalPrice).Scan(&res)
 
 	if err != nil {
 		return res, err
@@ -150,10 +182,10 @@ func (repository ShoppingCartRepository) Add(c context.Context, model *models.Sh
 func (repository ShoppingCartRepository) Edit(c context.Context, model *models.ShoppingCart) (res *string, err error) {
 	statement := `UPDATE cart SET 
 	item_id = $1, uom_id = $2, price = $3, modified_date = $4, 
-	modified_by = $5, qty = $6 ,stock_qty = $7  WHERE id = $8 RETURNING id`
+	modified_by = $5, qty = $6 ,stock_qty = $7 ,total_price = $8 WHERE id = $9 RETURNING id`
 
 	err = repository.DB.QueryRowContext(c, statement, model.ItemID, model.UomID,
-		model.Price, model.ModifiedAt, model.ModifiedBy, model.Qty, model.StockQty, model.ID).Scan(&res)
+		model.Price, model.ModifiedAt, model.ModifiedBy, model.Qty, model.StockQty, model.TotalPrice, model.ID).Scan(&res)
 	if err != nil {
 		return res, err
 	}
@@ -170,4 +202,32 @@ func (repository ShoppingCartRepository) Delete(c context.Context, id string) (r
 		return res, err
 	}
 	return res, err
+}
+
+func (repository ShoppingCartRepository) SelectAllForGroup(c context.Context, parameter models.ShoppingCartParameter) (data []models.GroupedShoppingCart, err error) {
+	conditionString := ``
+
+	if parameter.CustomerID != "" {
+		conditionString += ` and def.customer_id = ` + parameter.CustomerID
+	}
+
+	statement := models.GroupedShoppingCartSelectStatement + ` ` + models.ShoppingCartWhereStatement +
+		` AND (LOWER(it."_name") LIKE $1 ) ` + conditionString + ` group by it.item_category_id,ic._name  `
+	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
+
+	if err != nil {
+		return data, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+
+		temp, err := repository.scanGroupedRows(rows)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
+	}
+
+	return data, err
 }

@@ -21,15 +21,28 @@ func (h *ItemHandler) SelectAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.ItemParameter{
-		ItemCategoryId: ctx.Query("item_category_id"),
-		Search:         ctx.Query("search"),
-		By:             ctx.Query("by"),
-		Sort:           ctx.Query("sort"),
+		ItemCategoryId:     ctx.Query("item_category_id"),
+		UomID:              ctx.Query("uom_id"),
+		PriceListVersionId: ctx.Query("price_list_version_id"),
+		Search:             ctx.Query("search"),
+		By:                 ctx.Query("by"),
+		Sort:               ctx.Query("sort"),
+		ExceptId:           ctx.Query("except_id"),
 	}
 	uc := usecase.ItemUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectAll(c, parameter)
 
-	return h.SendResponse(ctx, res, nil, err, 0)
+	type StructObject struct {
+		ListObject []models.Item `json:"list_item"`
+	}
+
+	ObjectData := new(StructObject)
+
+	if res != nil {
+		ObjectData.ListObject = res
+	}
+
+	return h.SendResponse(ctx, ObjectData, nil, err, 0)
 }
 
 // FindAll ...
@@ -37,17 +50,30 @@ func (h *ItemHandler) FindAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.ItemParameter{
-		ItemCategoryId: ctx.Query("item_category_id"),
-		Search:         ctx.Query("search"),
-		Page:           str.StringToInt(ctx.Query("page")),
-		Limit:          str.StringToInt(ctx.Query("limit")),
-		By:             ctx.Query("by"),
-		Sort:           ctx.Query("sort"),
+		ItemCategoryId:     ctx.Query("item_category_id"),
+		PriceListVersionId: ctx.Query("price_list_version_id"),
+		UomID:              ctx.Query("uom_id"),
+		Search:             ctx.Query("search"),
+		Page:               str.StringToInt(ctx.Query("page")),
+		Limit:              str.StringToInt(ctx.Query("limit")),
+		By:                 ctx.Query("by"),
+		Sort:               ctx.Query("sort"),
+		ExceptId:           ctx.Query("except_id"),
 	}
 	uc := usecase.ItemUC{ContractUC: h.ContractUC}
 	res, meta, err := uc.FindAll(c, parameter)
 
-	return h.SendResponse(ctx, res, meta, err, 0)
+	type StructObject struct {
+		ListObject []models.Item `json:"list_item"`
+	}
+
+	ObjectData := new(StructObject)
+
+	if res != nil {
+		ObjectData.ListObject = res
+	}
+
+	return h.SendResponse(ctx, ObjectData, meta, err, 0)
 }
 
 // FindByID ...

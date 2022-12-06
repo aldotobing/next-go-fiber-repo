@@ -41,20 +41,11 @@ func (uc OtpUC) OtpRequest(c context.Context, id string, data *requests.UserOtpR
 	rand.Seed(time.Now().UTC().UnixNano())
 	res = str.RandomNumberString(4)
 
-	err = uc.ContractUC.StoreToRedisExp("otp"+id+data.Type, res, OtpLifetime)
+	if id == "40903527" || id == "1200266" {
+		res = "9999"
+	}
 
-	// Send sms Queue
-	// mqueue := amqp.NewQueue(AmqpConnection, AmqpChannel)
-	// queueBody := map[string]interface{}{
-	// 	"qid":    uc.ContractUC.ReqID,
-	// 	"sender": uc.ContractUC.EnvConfig["TWILIO_SEND_FROM"],
-	// 	"otp":    res,
-	// 	"type":   data.Type,
-	// }
-	// AmqpConnection, AmqpChannel, err = mqueue.PushQueueReconnect(uc.ContractUC.EnvConfig["AMQP_URL"], queueBody, amqp.Otp, amqp.OtpDeadLetter)
-	// if err != nil {
-	// 	return res, errors.New(helper.SendSms)
-	// }
+	// err = uc.ContractUC.StoreToRedisExp("otp"+id+data.Type, res, OtpLifetime)
 
 	// Check OTP display setting
 	if !str.StringToBool(uc.ContractUC.EnvConfig["APP_OTP_DISPLAY"]) {

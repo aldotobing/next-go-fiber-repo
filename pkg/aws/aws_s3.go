@@ -16,6 +16,7 @@ import (
 
 type AWSS3 struct {
 	AWSConfig aws.Config
+	Region    string
 	Bucket    string
 	Directory string
 	AccessKey string

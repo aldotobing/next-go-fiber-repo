@@ -2,39 +2,46 @@ package models
 
 // CustomerOrderHeader ...
 type CustomerOrderHeader struct {
-	ID                   *string `json:"id_customer_order_header"`
-	DocumentNo           *string `json:"document_no"`
-	TransactionDate      *string `json:"transaction_date"`
-	TransactionTime      *string `json:"transaction_time"`
-	CustomerID           *string `json:"customer_id"`
-	CustomerName         *string `json:"customer_name"`
-	TaxCalcMethod        *string `json:"tax_calc_method"`
-	SalesmanID           *string `json:"salesman_id"`
-	SalesmanName         *string `json:"salesman_name"`
-	PaymentTermsID       *string `json:"payment_terms_id"`
-	PaymentTermsName     *string `json:"payment_terms_name"`
-	ExpectedDeliveryDate *string `json:"expected_delivery_date"`
-	BranchID             *string `json:"branch_id"`
-	BranchName           *string `json:"branch_name"`
-	PriceLIstID          *string `json:"price_list_id"`
-	PriceLIstName        *string `json:"price_list_name"`
-	PriceLIstVersionID   *string `json:"price_list_version_id"`
-	PriceLIstVersionName *string `json:"price_list_version_name"`
-	Status               *string `json:"status"`
-	GrossAmount          *string `json:"gross_amount"`
-	TaxableAmount        *string `json:"taxable_amount"`
-	TaxAmount            *string `json:"tax_amount"`
-	RoundingAmount       *string `json:"rounding_amount"`
-	NetAmount            *string `json:"net_amount"`
-	DiscAmount           *string `json:"disc_amount"`
-	LineList             *string `json:"line_list"`
+	ID                   *string             `json:"id_customer_order_header"`
+	DocumentNo           *string             `json:"document_no"`
+	TransactionDate      *string             `json:"transaction_date"`
+	TransactionTime      *string             `json:"transaction_time"`
+	CustomerID           *string             `json:"customer_id"`
+	CustomerName         *string             `json:"customer_name"`
+	TaxCalcMethod        *string             `json:"tax_calc_method"`
+	SalesmanID           *string             `json:"salesman_id"`
+	SalesmanName         *string             `json:"salesman_name"`
+	PaymentTermsID       *string             `json:"payment_terms_id"`
+	PaymentTermsName     *string             `json:"payment_terms_name"`
+	ExpectedDeliveryDate *string             `json:"expected_delivery_date"`
+	BranchID             *string             `json:"branch_id"`
+	BranchName           *string             `json:"branch_name"`
+	PriceLIstID          *string             `json:"price_list_id"`
+	PriceLIstName        *string             `json:"price_list_name"`
+	PriceLIstVersionID   *string             `json:"price_list_version_id"`
+	PriceLIstVersionName *string             `json:"price_list_version_name"`
+	Status               *string             `json:"status"`
+	GrossAmount          *string             `json:"gross_amount"`
+	TaxableAmount        *string             `json:"taxable_amount"`
+	TaxAmount            *string             `json:"tax_amount"`
+	RoundingAmount       *string             `json:"rounding_amount"`
+	NetAmount            *string             `json:"net_amount"`
+	DiscAmount           *string             `json:"disc_amount"`
+	LineList             *string             `json:"line_list"`
+	ListLine             []CustomerOrderLine `json:"list_line"`
+	CustomerCode         *string             `json:"customer_code"`
+	SalesmanCode         *string             `json:"salesman_code"`
+	CustomerAddress      *string             `json:"customer_address"`
+	ModifiedDate         *string             `json:"modified_date"`
 }
 
 // CustomerOrderHeaderParameter ...
 type CustomerOrderHeaderParameter struct {
 	ID         string `json:"id_customer_order_header"`
+	UserID     string `json:"admin_user_id"`
 	CustomerID string `json:"id_customer"`
 	Search     string `json:"search"`
+	DateParam  string `json:"date_param"`
 	Page       int    `json:"page"`
 	Offset     int    `json:"offset"`
 	Limit      int    `json:"limit"`
@@ -53,15 +60,16 @@ var (
 	// CustomerOrderHeaderSelectStatement ...
 	CustomerOrderHeaderSelectStatement = ` select 
 	def.id as id_customer_order, def.document_no,to_char(def.transaction_date,'YYYY-MM-DD') as transaction_date ,to_char(def.transaction_time,'HH:MI:SS') as transaction_time,
-	 def.cust_ship_to_id,cus.customer_name, def.tax_calc_method,
-	def.salesman_id, s.salesman_name, def.payment_terms_id,top._name as top_name,
+	def.cust_ship_to_id,cus.customer_name, def.tax_calc_method,
+	cus.salesman_id, s.salesman_name, def.payment_terms_id,top._name as top_name,
 	to_char(def.expected_delivery_date,'YYYY-MM-DD') as expected_d_date,b.id as b_id,b._name as b_name,
 	pl.id as pl_id,pl._name as pl_name, plv.id as plv_id,plv.description,
 	def.status,def.gross_amount,def.taxable_amount, def.tax_amount,
-	def.rounding_amount, def.net_amount,def.disc_amount
+	def.rounding_amount, def.net_amount,def.disc_amount,
+	cus.customer_code as c_code, s.salesman_code as s_code, cus.customer_address,to_char(def.modified_date,'YYYY-MM-DD') as modified_date
 	from customer_order_header def
 	join customer cus on cus.id = def.cust_ship_to_id
-	left join salesman s on s.id = def.salesman_id
+	left join salesman s on s.id = cus.salesman_id
 	left join term_of_payment top on top.id = def.payment_terms_id
 	left join branch b on b.id = def.branch_id
 	left join price_list pl on pl.id = def.price_list_id

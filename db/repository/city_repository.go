@@ -60,11 +60,11 @@ func (repository CityRepository) SelectAll(c context.Context, parameter models.C
 	conditionString := ``
 
 	if parameter.ProvinceID != "" {
-		conditionString += ` AND def.id_province = '` + parameter.ProvinceID + `'`
+		conditionString += ` AND def.province_id = '` + parameter.ProvinceID + `'`
 	}
 
 	statement := models.CitySelectStatement + ` ` + models.CityWhereStatement +
-		` AND (LOWER(def."name_city") LIKE $1 OR LOWER(p."name_province") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+		` AND (LOWER(def."_name") LIKE $1 OR LOWER(prov."_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 
 	if err != nil {
@@ -88,9 +88,9 @@ func (repository CityRepository) SelectAll(c context.Context, parameter models.C
 func (repository CityRepository) FindAll(ctx context.Context, parameter models.CityParameter) (data []models.City, count int, err error) {
 	conditionString := ``
 
-	// if parameter.ProvinceID != "" {
-	// 	conditionString += ` AND def.id_province = '` + parameter.ProvinceID + `'`
-	// }
+	if parameter.ProvinceID != "" {
+		conditionString += ` AND def.province_id = '` + parameter.ProvinceID + `'`
+	}
 
 	query := models.CitySelectStatement + ` ` + models.CityWhereStatement + ` ` + conditionString + `
 		AND (LOWER(def."_name") LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
@@ -120,7 +120,7 @@ func (repository CityRepository) FindAll(ctx context.Context, parameter models.C
 
 // FindByID ...
 func (repository CityRepository) FindByID(c context.Context, parameter models.CityParameter) (data models.City, err error) {
-	statement := models.CitySelectStatement + ` WHERE def.deleted_at_city IS NULL AND def.id_city = $1`
+	statement := models.CitySelectStatement + ` WHERE def.created_date IS NOT NULL AND def.id = $1`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
 
 	data, err = repository.scanRow(row)

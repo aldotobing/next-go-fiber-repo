@@ -10,4 +10,5 @@ type ShoppingCartRequest struct {
 	Price        string `json:"item_price"`
 	Qty          string `json:"qty"`
 	StockQty     string `json:"stock_qty"`
+	TotalPrice   string `json:"total_price"`
 }

@@ -8,8 +8,9 @@ type UserAccountRegisterRequest struct {
 }
 
 type UserAccountLoginRequest struct {
-	PhoneNo string `json:"phone_no" validate:"required"`
-	Code    string `json:"code" validate:"required"`
+	PhoneNo  string `json:"phone_no" validate:"required"`
+	Code     string `json:"code" validate:"required"`
+	FCMToken string `json:"fcm_token"`
 }
 
 type UserAccountLoginBackEndRequest struct {
@@ -27,4 +28,9 @@ type UserAccountRequest struct {
 	Telepon   string `json:"phone_number" validate:"required"`
 	Address   string `json:"address"`
 	UpdatedBy int    `json:"updated_by"`
+}
+
+type UserAccountBackendLoginRequest struct {
+	Email    string `json:"email" validate:"required"`
+	Password string `json:"password" validate:"required"`
 }

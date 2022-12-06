@@ -27,4 +27,16 @@ func (route CustomerOrderHeaderRoutes) RegisterRoute() {
 	r.Get("/:customer_id", handler.FindAll)
 	r.Get("/select/:customer_id", handler.SelectAll)
 	r.Get("/id/:id", handler.FindByID)
+
+	r2 := route.RouterGroup.Group("/api/rest/customerorder")
+	// r.Use(jwtMiddleware.VerifyUser)
+	r2.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
+	r2.Get("/select", handler.RestSelectAll)
+
+	r3 := route.RouterGroup.Group("/api/web/customerorder")
+	// r.Use(jwtMiddleware.VerifyUser)
+	r3.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
+	r3.Get("/", handler.FindAllForWeb)
+	r3.Get("/select", handler.SelectAll)
+	r3.Get("/id/:id", handler.FindByID)
 }

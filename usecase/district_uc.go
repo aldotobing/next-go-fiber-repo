@@ -96,14 +96,14 @@ func (uc DistrictUC) Add(c context.Context, data *requests.DistrictRequest) (res
 	}
 
 	repo := repository.NewDistrictRepository(uc.DB)
-	now := time.Now().UTC()
+	// now := time.Now().UTC()
 	res = models.District{
-		CityID:    data.CityID,
-		Code:      data.Code,
-		Name:      data.Name,
-		Status:    data.Status,
-		CreatedAt: now.Format(time.RFC3339),
-		UpdatedAt: now.Format(time.RFC3339),
+		// CityID:    data.CityID,
+		Code: data.Code,
+		Name: data.Name,
+		// Status:    data.Status,
+		// CreatedAt: now.Format(time.RFC3339),
+		// UpdatedAt: now.Format(time.RFC3339),
 	}
 	res.ID, err = repo.Add(c, &res)
 	if err != nil {
@@ -117,14 +117,14 @@ func (uc DistrictUC) Add(c context.Context, data *requests.DistrictRequest) (res
 // Edit ,...
 func (uc DistrictUC) Edit(c context.Context, id string, data *requests.DistrictRequest) (res models.District, err error) {
 	repo := repository.NewDistrictRepository(uc.DB)
-	now := time.Now().UTC()
+	// now := time.Now().UTC()
 	res = models.District{
-		ID:        id,
-		CityID:    data.CityID,
-		Code:      data.Code,
-		Name:      data.Name,
-		Status:    data.Status,
-		UpdatedAt: now.Format(time.RFC3339),
+		ID: id,
+		// CityID:    data.CityID,
+		Code: data.Code,
+		Name: data.Name,
+		// Status:    data.Status,
+		// UpdatedAt: now.Format(time.RFC3339),
 	}
 
 	res.ID, err = repo.Edit(c, &res)

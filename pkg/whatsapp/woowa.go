@@ -30,7 +30,7 @@ func (cl Client) SendWA(phoneNo, txtMessages string) (err error) {
 
 	Waconf := new(confi)
 	Waconf.Key = cl.apikey
-	Waconf.Phone = "081329998633"
+	Waconf.Phone = phoneNo
 	Waconf.Pesan = "Your Otp is " + txtMessages
 	jsonReq, err := json.Marshal(Waconf)
 

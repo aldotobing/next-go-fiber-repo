@@ -10,6 +10,12 @@ type UserAccount struct {
 	PriceListVersionID *string `json:"price_list_version_id"`
 	CustomerTypeID     *string `json:"customer_type_id"`
 	CustomerLevelName  *string `json:"customer_level_name"`
+	CustomerAddress    *string `json:"customer_address"`
+	SalesmanID         *string `json:"salesman_id"`
+	SalesmanName       *string `json:"salesman_name"`
+	SalesmanCode       *string `json:"salesman_code"`
+	FireStoreUID       *string `json:"firestore_uid"`
+	FCMToken           *string `json:"fcm_token"`
 }
 
 type UserAccountParameter struct {
@@ -50,16 +56,29 @@ var (
 	}
 
 	// UserAccountSelectStatement ...
-	UserAccountSelectStatement = `select def.id as user_id,cus.id as cus_id,
+	UserAccountSelectStatement = ` select def.id as user_id,cus.id as cus_id,
 	cus.customer_name,
 	cus.customer_code,cus.customer_phone,
 	cus.price_list_id,
 	(select plv.id from price_list_version plv where plv.price_list_id = pl.id and now()::date between plv.start_date and plv.end_date) as version_id,
-	cus.customer_type_id,cl._name cus_level_name
+	cus.customer_type_id,cl._name cus_level_name,cus.customer_address,
+	s.id as salesman_id,s.salesman_code,s.salesman_name
 	from _user def 
 	join customer cus on cus.id = def.partner_id 
 	left join price_list pl on pl.id = cus.price_list_id
-	left join customer_level cl on cl.id = cus.customer_level_id 
+	left join customer_level cl on cl.id = cus.customer_level_id
+	left join salesman s on s.id = cus.salesman_id
+	`
+
+	// UserAccountSelectStatement ...
+	AdminUserAccountSelectStatement = ` select def.id as user_id,null as cus_id,
+	def.login,
+	null,null,
+	null,
+	null,
+	null,null,null,
+	null,null,null
+	from _user def
 	`
 
 	// UserAccountWhereStatement ...

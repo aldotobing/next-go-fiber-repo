@@ -69,3 +69,21 @@ func (h *UserAccountHandler) SubmitOtp(ctx *fiber.Ctx) error {
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
+
+func (h *UserAccountHandler) LoginBackend(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	input := new(requests.UserAccountBackendLoginRequest)
+	if err := ctx.BodyParser(input); err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+	if err := h.Validator.Struct(input); err != nil {
+		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
+		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+	}
+
+	uc := usecase.UserAccountUC{ContractUC: h.ContractUC}
+	res, err := uc.LoginBackEnd(c, input)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
