@@ -51,12 +51,16 @@ func (h *SalesInvoiceHandler) FindAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.SalesInvoiceParameter{
-		NoInvoice: ctx.Query("document_no"),
-		Search:    ctx.Query("search"),
-		Page:      str.StringToInt(ctx.Query("page")),
-		Limit:     str.StringToInt(ctx.Query("limit")),
-		By:        ctx.Query("by"),
-		Sort:      ctx.Query("sort"),
+		NoInvoice:  ctx.Query("document_no"),
+		CustomerID: ctx.Query("customer_id"),
+		StartDate:  ctx.Query("start_date"),
+		EndDate:    ctx.Query("end_date"),
+		UserId:     ctx.Query("user_id"),
+		Search:     ctx.Query("search"),
+		Page:       str.StringToInt(ctx.Query("page")),
+		Limit:      str.StringToInt(ctx.Query("limit")),
+		By:         ctx.Query("by"),
+		Sort:       ctx.Query("sort"),
 	}
 	uc := usecase.SalesInvoiceUC{ContractUC: h.ContractUC}
 	res, meta, err := uc.FindAll(c, parameter)
