@@ -92,7 +92,15 @@ func (h *SalesInvoiceHandler) FindByID(ctx *fiber.Ctx) error {
 	uc := usecase.SalesInvoiceUC{ContractUC: h.ContractUC}
 	res, err := uc.FindByID(c, parameter)
 
-	return h.SendResponse(ctx, res, nil, err, 0)
+	type StructObject struct {
+		ListObject models.SalesInvoice `json:"invoice"`
+	}
+
+	ObjectData := new(StructObject)
+
+	ObjectData.ListObject = res
+
+	return h.SendResponse(ctx, ObjectData, nil, err, 0)
 }
 
 // FindByDocumentNo ...
