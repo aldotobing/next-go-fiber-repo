@@ -4,7 +4,7 @@ import "encoding/json"
 
 // SalesInvoice ...
 type SalesInvoice struct {
-	ID             *string          `json:"id"`
+	ID             *string          `json:"invoice_id"`
 	CustomerName   *string          `json:"customer_name"`
 	NoInvoice      *string          `json:"no_invoice"`
 	NoOrder        *string          `json:"no_order"`
@@ -17,7 +17,7 @@ type SalesInvoice struct {
 
 // SalesInvoiceParameter ...
 type SalesInvoiceParameter struct {
-	ID         string `json:"id"`
+	ID         string `json:"invoice_id"`
 	NoInvoice  string `json:"no_invoice"`
 	CustomerID string `json:"customer_id"`
 	StartDate  string `json:"start_date"`
