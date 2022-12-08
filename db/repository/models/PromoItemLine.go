@@ -4,6 +4,7 @@ package models
 type PromoItemLine struct {
 	ID                 *string `json:"id"`
 	ItemID             *string `json:"item_id"`
+	UomLineConversion  *string `json:"uom_line_conversion"`
 	PromoID            *string `json:"promo_id"`
 	PromoLineID        *string `json:"promo_line_id"`
 	PromoName          *string `json:"promo_name"`
@@ -80,6 +81,7 @@ var (
 	SELECT 
 		PIL.ID AS ID,
 		I.ID AS ITEM_ID,
+		IUL.CONVERSION AS IUL_CONVERSION,
 		PR.ID AS PROMO_ID,
 		PL.ID AS PROMO_LINE_ID,
 		PR._NAME AS PROMO_NAME,
@@ -114,6 +116,7 @@ var (
 	JOIN ITEM_PRICE IP ON IP.ITEM_ID = PIL.ITEM_ID
 	LEFT JOIN PROMO_LINE PL ON PL.ID = PIL.PROMO_LINE_ID
 	LEFT JOIN PROMO PR ON PR.ID = PL.PROMO_ID 
+	LEFT JOIN ITEM_UOM_LINE IUL ON IUL.ITEM_ID = PIL.ITEM_ID AND IUL.UOM_ID = PIL.UOM_ID
 	`
 
 	// PromoItemLineWhereStatement ...

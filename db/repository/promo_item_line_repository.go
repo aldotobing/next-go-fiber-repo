@@ -35,6 +35,7 @@ func (repository PromoItemLineRepository) scanRows(rows *sql.Rows) (res models.P
 	err = rows.Scan(
 		&res.ID,
 		&res.ItemID,
+		&res.UomLineConversion,
 		&res.PromoID,
 		&res.PromoLineID,
 		&res.PromoName,
@@ -76,6 +77,7 @@ func (repository PromoItemLineRepository) scanRow(row *sql.Row) (res models.Prom
 	err = row.Scan(
 		&res.ID,
 		&res.ItemID,
+		&res.UomLineConversion,
 		&res.PromoID,
 		&res.PromoLineID,
 		&res.PromoName,
