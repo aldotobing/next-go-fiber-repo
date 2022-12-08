@@ -36,5 +36,5 @@ var (
 	`
 
 	// ItemCategoryWhereStatement ...
-	ItemCategoryWhereStatement = ` WHERE def.created_date IS not NULL `
+	ItemCategoryWhereStatement = ` WHERE def.created_date IS not NULL AND def.active = 1 `
 )
