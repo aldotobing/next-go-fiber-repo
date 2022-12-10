@@ -7,12 +7,15 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/pkg/functioncaller"
 	"nextbasis-service-v-0.1/pkg/logruslogger"
+	"nextbasis-service-v-0.1/pkg/number"
 	"nextbasis-service-v-0.1/server/requests"
 	"nextbasis-service-v-0.1/usecase/viewmodel"
 )
@@ -112,6 +115,58 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
+	}
+
+	userrepo := repository.NewUserAccountRepository(uc.DB)
+
+	useraccount, erruser := userrepo.FindByID(c, models.UserAccountParameter{CustomerID: *res.CustomerID})
+
+	if erruser == nil {
+		FcmUc := FCMUC{ContractUC: uc.ContractUC}
+		orderrepo := repository.NewCustomerOrderHeaderRepository(uc.DB)
+		orderlinerepo := repository.NewCustomerOrderLineRepository(uc.DB)
+		order, errorder := orderrepo.FindByID(c, models.CustomerOrderHeaderParameter{ID: *res.ID})
+		if errorder == nil {
+			bayar, _ := strconv.ParseFloat(*order.NetAmount, 0)
+			harga := strings.ReplaceAll(number.FormatCurrency(bayar, "IDR", ".", "", 0), "Rp", "")
+			msgtitle := "Checkout " + *order.DocumentNo
+			msgbody := `Kepada Yang Terhormat ` + *useraccount.Name + `\nCheckout anda dengan nomor ` + *order.DocumentNo + ` telah diterima dan akan segera diproses\nBerikut merupakan rincian pesanan anda:`
+			orderline, errline := orderlinerepo.SelectAll(c, models.CustomerOrderLineParameter{
+				HeaderID: *order.ID,
+				By:       "def.created_date",
+			})
+			if errline == nil {
+				for i := range orderline {
+					msgbody += `\n ` + *orderline[i].QTY + ` ` + *orderline[i].UomName + ` ` + *orderline[i].ItemName + `\n`
+
+				}
+				ordercount := len(orderline)
+				msgbody += `\n`
+				msgbody += `Total ` + strconv.Itoa(ordercount) + ` item, senilai ` + harga + ` (belum termasuk potongan/diskon bila ada program potongan/diskon) `
+				msgbody += `\n`
+				msgbody += `\nTerima kasih atas pemesanan anda`
+				msgbody += `\n`
+				msgbody += `\nSalam Sehat`
+				msgbody += `\n`
+				msgbody += `\nAutogenerate Whatsapp`
+			}
+
+			if useraccount.FCMToken != nil && *useraccount.FCMToken != "" {
+
+				_, errfcm := FcmUc.SendFCMMessage(c, msgtitle, msgbody, *useraccount.FCMToken)
+				if errfcm == nil {
+
+				}
+
+			}
+			if useraccount.Phone != nil && *useraccount.Phone != "" {
+				senDwaMessage := uc.ContractUC.WhatsApp.SendWA(*useraccount.Phone, msgtitle)
+				if senDwaMessage != nil {
+					fmt.Println("sukses")
+				}
+			}
+		}
+
 	}
 
 	return res, err

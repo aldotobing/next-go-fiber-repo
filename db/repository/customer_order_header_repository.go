@@ -219,11 +219,11 @@ func (repository CustomerOrderHeaderRepository) CheckOut(c context.Context, mode
 
 func (repository CustomerOrderHeaderRepository) SyncVoid(c context.Context, model *models.CustomerOrderHeader) (res *string, err error) {
 	statement := `UPDATE customer_order_header SET 
-	status = 'voided' 
-	WHERE document_no = $1 
+	status = $1 
+	WHERE document_no = $2 
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
-		model.DocumentNo).Scan(&res)
+		model.Status, model.DocumentNo).Scan(&res)
 	if err != nil {
 		return res, err
 	}
