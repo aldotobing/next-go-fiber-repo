@@ -132,13 +132,13 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 			bayar, _ := strconv.ParseFloat(*order.NetAmount, 0)
 			harga := strings.ReplaceAll(number.FormatCurrency(bayar, "IDR", ".", "", 0), "Rp", "")
 			msgtitle := "Checkout " + *order.DocumentNo
-			msgbody := `Kepada Yang Terhormat ` + *useraccount.Name + `\nCheckout anda dengan nomor ` + *order.DocumentNo + ` telah diterima dan akan segera diproses\nBerikut merupakan rincian pesanan anda:`
+			msgbody := `Kepada Yang Terhormat ` + *useraccount.Name + `\n\nCheckout anda dengan nomor ` + *order.DocumentNo + ` telah diterima dan akan segera diproses\n\nBerikut merupakan rincian pesanan anda:`
 			orderline, errline := orderlinerepo.SelectAll(c, models.CustomerOrderLineParameter{
 				HeaderID: *order.ID,
 				By:       "def.created_date",
 			})
 			if errline == nil {
-				fmt.Println("Order line ada")
+				msgbody += `\n`
 				for i := range orderline {
 					msgbody += `\n ` + *orderline[i].QTY + ` ` + *orderline[i].UomName + ` ` + *orderline[i].ItemName + `\n`
 
@@ -164,7 +164,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 			}
 			if useraccount.Phone != nil && *useraccount.Phone != "" {
 				fmt.Println(useraccount.Phone)
-				senDwaMessage := uc.ContractUC.WhatsApp.SendWA(*useraccount.Phone, msgbody)
+				senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.Phone, msgbody)
 				if senDwaMessage != nil {
 					fmt.Println("sukses")
 				}
