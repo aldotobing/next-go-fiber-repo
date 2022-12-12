@@ -77,7 +77,7 @@ var (
 	null,
 	null,
 	null,null,null,
-	null,null,null
+	null,null,null,null,null
 	from _user def
 	`
 
