@@ -225,7 +225,8 @@ func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter mode
 			fmt.Print(errinsert)
 		}
 		if errcurrent == nil {
-			if currentOrder.Status != nil && currentOrder.Status != invoiceObject.Status {
+
+			if currentOrder.Status != nil && *currentOrder.Status != *invoiceObject.Status {
 				userrepo := repository.NewUserAccountRepository(uc.DB)
 
 				useraccount, erruser := userrepo.FindByID(c, models.UserAccountParameter{CustomerID: *currentOrder.CustomerID})
@@ -254,6 +255,7 @@ func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter mode
 								if senDwaMessage != nil {
 									fmt.Println("sukses")
 								}
+
 							}
 
 						}
