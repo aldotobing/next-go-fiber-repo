@@ -7,7 +7,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"nextbasis-service-v-0.1/db/repository/models"
-	"nextbasis-service-v-0.1/helper"
 	"nextbasis-service-v-0.1/pkg/str"
 	"nextbasis-service-v-0.1/server/requests"
 	"nextbasis-service-v-0.1/usecase"
@@ -34,10 +33,10 @@ func (h *PromoItemLineHandler) SelectAll(ctx *fiber.Ctx) error {
 	uc := usecase.PromoItemLineUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectAll(c, parameter)
 
-	if parameter.CustomerID == "" {
-		cus_id_err := " : param customer_id is mandatory"
-		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter+cus_id_err, http.StatusBadRequest)
-	}
+	// if parameter.CustomerID == "" {
+	// 	cus_id_err := " : param customer_id is mandatory"
+	// 	return h.SendResponse(ctx, nil, nil, helper.InvalidParameter+cus_id_err, http.StatusBadRequest)
+	// }
 
 	type StructObject struct {
 		ListObject []models.PromoItemLine `json:"list_promo_item_line"`
@@ -70,10 +69,10 @@ func (h *PromoItemLineHandler) FindAll(ctx *fiber.Ctx) error {
 	uc := usecase.PromoItemLineUC{ContractUC: h.ContractUC}
 	res, meta, err := uc.FindAll(c, parameter)
 
-	if parameter.CustomerID == "" {
-		cus_id_err := " : param customer_id is mandatory"
-		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter+cus_id_err, http.StatusBadRequest)
-	}
+	// if parameter.CustomerID == "" {
+	// 	cus_id_err := " : param customer_id is mandatory"
+	// 	return h.SendResponse(ctx, nil, nil, helper.InvalidParameter+cus_id_err, http.StatusBadRequest)
+	// }
 
 	type StructObject struct {
 		ListObject []models.PromoItemLine `json:"list_promo_item_line"`
