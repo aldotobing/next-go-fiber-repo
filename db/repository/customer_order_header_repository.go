@@ -167,7 +167,7 @@ func (repository CustomerOrderHeaderRepository) FindByID(c context.Context, para
 
 // FindByID ...
 func (repository CustomerOrderHeaderRepository) FindByCode(c context.Context, parameter models.CustomerOrderHeaderParameter) (data models.CustomerOrderHeader, err error) {
-	statement := models.CustomerOrderHeaderSelectStatement + ` WHERE def.created_date IS not NULL AND def.def.document_no = $1`
+	statement := models.CustomerOrderHeaderSelectStatement + ` WHERE def.created_date IS not NULL AND def.document_no = $1`
 	row := repository.DB.QueryRowContext(c, statement, parameter.DocumentNo)
 
 	data, err = repository.scanRow(row)

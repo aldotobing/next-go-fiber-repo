@@ -33,7 +33,7 @@ func BuildProcessTransactionTemplate(customerOrderHeader models.CustomerOrderHea
 		msgbody += `\nAutogenerate Whatsapp`
 	}
 
-	return res
+	return msgbody
 }
 
 func BuildVoidTransactionTemplate(customerOrderHeader models.CustomerOrderHeader, lineData []models.CustomerOrderLine, userData models.UserAccount) (res string) {
@@ -61,5 +61,5 @@ func BuildVoidTransactionTemplate(customerOrderHeader models.CustomerOrderHeader
 		msgbody += `\nAutogenerate Whatsapp`
 	}
 
-	return res
+	return msgbody
 }
