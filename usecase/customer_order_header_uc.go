@@ -116,17 +116,19 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
 	}
-
+	fmt.Println("Save checkout sukeses")
 	userrepo := repository.NewUserAccountRepository(uc.DB)
 
 	useraccount, erruser := userrepo.FindByID(c, models.UserAccountParameter{CustomerID: *res.CustomerID})
 
 	if erruser == nil {
+		fmt.Println("User Ada")
 		FcmUc := FCMUC{ContractUC: uc.ContractUC}
 		orderrepo := repository.NewCustomerOrderHeaderRepository(uc.DB)
 		orderlinerepo := repository.NewCustomerOrderLineRepository(uc.DB)
 		order, errorder := orderrepo.FindByID(c, models.CustomerOrderHeaderParameter{ID: *res.ID})
 		if errorder == nil {
+			fmt.Println("Order Ada")
 			bayar, _ := strconv.ParseFloat(*order.NetAmount, 0)
 			harga := strings.ReplaceAll(number.FormatCurrency(bayar, "IDR", ".", "", 0), "Rp", "")
 			msgtitle := "Checkout " + *order.DocumentNo
@@ -136,6 +138,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 				By:       "def.created_date",
 			})
 			if errline == nil {
+				fmt.Println("Order line ada")
 				for i := range orderline {
 					msgbody += `\n ` + *orderline[i].QTY + ` ` + *orderline[i].UomName + ` ` + *orderline[i].ItemName + `\n`
 
@@ -160,7 +163,8 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 
 			}
 			if useraccount.Phone != nil && *useraccount.Phone != "" {
-				senDwaMessage := uc.ContractUC.WhatsApp.SendWA(*useraccount.Phone, msgtitle)
+				fmt.Println(useraccount.Phone)
+				senDwaMessage := uc.ContractUC.WhatsApp.SendWA(*useraccount.Phone, msgbody)
 				if senDwaMessage != nil {
 					fmt.Println("sukses")
 				}
