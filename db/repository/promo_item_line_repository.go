@@ -132,7 +132,7 @@ func (repository PromoItemLineRepository) SelectAll(c context.Context, parameter
 		conditionString += ` AND PR.ID = '` + parameter.PromoID + `'`
 	}
 	if parameter.PromoLineID != "" {
-		conditionString += ` AND PRL.ID = '` + parameter.PromoLineID + `'`
+		conditionString += ` AND PIL.PROMO_LINE_ID = '` + parameter.PromoLineID + `'`
 	}
 	if parameter.ID != "" {
 		conditionString += ` AND PIL.ID = '` + parameter.ID + `'`
@@ -182,7 +182,7 @@ func (repository PromoItemLineRepository) FindAll(ctx context.Context, parameter
 	}
 
 	if parameter.PromoLineID != "" {
-		conditionString += ` AND PRL.ID = '` + parameter.PromoLineID + `'`
+		conditionString += ` AND PIL.PROMO_LINE_ID = '` + parameter.PromoLineID + `'`
 	}
 
 	if parameter.ID != "" {
