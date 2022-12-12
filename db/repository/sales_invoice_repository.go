@@ -34,7 +34,7 @@ func NewSalesInvoiceRepository(DB *sql.DB) ISalesInvoiceRepository {
 // Scan rows
 func (repository SalesInvoiceRepository) scanRows(rows *sql.Rows) (res models.SalesInvoice, err error) {
 	err = rows.Scan(
-		&res.ID, &res.CustomerName, &res.NoInvoice, &res.NoOrder, &res.TrasactionDate, &res.ModifiedDate, &res.Status, &res.NetAmount, &res.InvoiceLine,
+		&res.ID, &res.CustomerName, &res.NoInvoice, &res.NoOrder, &res.TrasactionDate, &res.ModifiedDate, &res.Status, &res.NetAmount, &res.OutStandingAmount, &res.InvoiceLine,
 	)
 	if err != nil {
 
@@ -47,7 +47,7 @@ func (repository SalesInvoiceRepository) scanRows(rows *sql.Rows) (res models.Sa
 // Scan row
 func (repository SalesInvoiceRepository) scanRow(row *sql.Row) (res models.SalesInvoice, err error) {
 	err = row.Scan(
-		&res.ID, &res.CustomerName, &res.NoInvoice, &res.NoOrder, &res.TrasactionDate, &res.ModifiedDate, &res.Status, &res.NetAmount, &res.InvoiceLine,
+		&res.ID, &res.CustomerName, &res.NoInvoice, &res.NoOrder, &res.TrasactionDate, &res.ModifiedDate, &res.Status, &res.NetAmount, &res.OutStandingAmount, &res.InvoiceLine,
 	)
 	if err != nil {
 		return res, err

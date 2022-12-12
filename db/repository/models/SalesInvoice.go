@@ -4,15 +4,16 @@ import "encoding/json"
 
 // SalesInvoice ...
 type SalesInvoice struct {
-	ID             *string          `json:"invoice_id"`
-	CustomerName   *string          `json:"customer_name"`
-	NoInvoice      *string          `json:"no_invoice"`
-	NoOrder        *string          `json:"no_order"`
-	TrasactionDate *string          `json:"transaction_date"`
-	ModifiedDate   *string          `json:"modified_date"`
-	Status         *string          `json:"status"`
-	NetAmount      *string          `json:"net_amount"`
-	InvoiceLine    *json.RawMessage `json:"invoice_line"`
+	ID                *string          `json:"invoice_id"`
+	CustomerName      *string          `json:"customer_name"`
+	NoInvoice         *string          `json:"no_invoice"`
+	NoOrder           *string          `json:"no_order"`
+	TrasactionDate    *string          `json:"transaction_date"`
+	ModifiedDate      *string          `json:"modified_date"`
+	Status            *string          `json:"status"`
+	NetAmount         *string          `json:"net_amount"`
+	OutStandingAmount *string          `json:"outstanding_amount"`
+	InvoiceLine       *json.RawMessage `json:"invoice_line"`
 }
 
 // SalesInvoiceParameter ...
@@ -50,6 +51,7 @@ var (
 	DEF.MODIFIED_DATE,
 	DEF.STATUS,
 	DEF.NET_AMOUNT,
+	DEF.OUTSTANDING_AMOUNT,
 				(SELECT JSON_AGG(T) AS INVOICE_LINE
 					FROM
 									(SELECT I._NAME::VARCHAR(255) AS ITEM_NAME,
