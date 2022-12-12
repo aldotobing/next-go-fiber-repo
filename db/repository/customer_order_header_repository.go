@@ -214,7 +214,7 @@ func (repository CustomerOrderHeaderRepository) CheckOut(c context.Context, mode
 	if err = transaction.Commit(); err != nil {
 		return res, err
 	}
-	return res, err
+	return model.ID, err
 }
 
 func (repository CustomerOrderHeaderRepository) SyncVoid(c context.Context, model *models.CustomerOrderHeader) (res *string, err error) {
