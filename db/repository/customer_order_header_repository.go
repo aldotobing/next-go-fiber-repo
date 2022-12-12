@@ -15,6 +15,7 @@ type ICustomerOrderHeaderRepository interface {
 	SelectAll(c context.Context, parameter models.CustomerOrderHeaderParameter) ([]models.CustomerOrderHeader, error)
 	FindAll(ctx context.Context, parameter models.CustomerOrderHeaderParameter) ([]models.CustomerOrderHeader, int, error)
 	FindByID(c context.Context, parameter models.CustomerOrderHeaderParameter) (models.CustomerOrderHeader, error)
+	FindByCode(c context.Context, parameter models.CustomerOrderHeaderParameter) (models.CustomerOrderHeader, error)
 	CheckOut(c context.Context, model *models.CustomerOrderHeader) (*string, error)
 	SyncVoid(c context.Context, model *models.CustomerOrderHeader) (*string, error)
 }
@@ -155,6 +156,19 @@ func (repository CustomerOrderHeaderRepository) FindAll(ctx context.Context, par
 func (repository CustomerOrderHeaderRepository) FindByID(c context.Context, parameter models.CustomerOrderHeaderParameter) (data models.CustomerOrderHeader, err error) {
 	statement := models.CustomerOrderHeaderSelectStatement + ` WHERE def.created_date IS not NULL AND def.id = $1`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
+
+	data, err = repository.scanRow(row)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
+}
+
+// FindByID ...
+func (repository CustomerOrderHeaderRepository) FindByCode(c context.Context, parameter models.CustomerOrderHeaderParameter) (data models.CustomerOrderHeader, err error) {
+	statement := models.CustomerOrderHeaderSelectStatement + ` WHERE def.created_date IS not NULL AND def.def.document_no = $1`
+	row := repository.DB.QueryRowContext(c, statement, parameter.DocumentNo)
 
 	data, err = repository.scanRow(row)
 	if err != nil {
