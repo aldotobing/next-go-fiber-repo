@@ -13,6 +13,7 @@ import (
 
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
+	"nextbasis-service-v-0.1/helper"
 	"nextbasis-service-v-0.1/pkg/functioncaller"
 	"nextbasis-service-v-0.1/pkg/logruslogger"
 	"nextbasis-service-v-0.1/pkg/number"
@@ -116,19 +117,19 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
 	}
-	fmt.Println("Save checkout sukeses")
+
 	userrepo := repository.NewUserAccountRepository(uc.DB)
 
 	useraccount, erruser := userrepo.FindByID(c, models.UserAccountParameter{CustomerID: *res.CustomerID})
 
 	if erruser == nil {
-		fmt.Println("User Ada")
+
 		FcmUc := FCMUC{ContractUC: uc.ContractUC}
 		orderrepo := repository.NewCustomerOrderHeaderRepository(uc.DB)
 		orderlinerepo := repository.NewCustomerOrderLineRepository(uc.DB)
 		order, errorder := orderrepo.FindByID(c, models.CustomerOrderHeaderParameter{ID: *res.ID})
 		if errorder == nil {
-			fmt.Println("Order Ada")
+
 			bayar, _ := strconv.ParseFloat(*order.NetAmount, 0)
 			harga := strings.ReplaceAll(number.FormatCurrency(bayar, "IDR", ".", "", 0), "Rp", "")
 			msgtitle := "Checkout " + *order.DocumentNo
@@ -214,10 +215,53 @@ func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter mode
 	var resBuilder []models.CustomerOrderHeader
 	for _, invoiceObject := range res {
 
+		orderrepo := repository.NewCustomerOrderHeaderRepository(uc.DB)
+
+		currentOrder, errcurrent := orderrepo.FindByCode(c, models.CustomerOrderHeaderParameter{DocumentNo: *invoiceObject.DocumentNo})
+
 		_, errinsert := repo.SyncVoid(c, &invoiceObject)
 
 		if errinsert != nil {
 			fmt.Print(errinsert)
+		}
+		if errcurrent == nil {
+			if currentOrder.Status != nil && currentOrder.Status != invoiceObject.Status {
+				userrepo := repository.NewUserAccountRepository(uc.DB)
+
+				useraccount, erruser := userrepo.FindByID(c, models.UserAccountParameter{CustomerID: *currentOrder.CustomerID})
+				if erruser == nil {
+					orderlinerepo := repository.NewCustomerOrderLineRepository(uc.DB)
+					orderline, errline := orderlinerepo.SelectAll(c, models.CustomerOrderLineParameter{
+						HeaderID: *currentOrder.ID,
+						By:       "def.created_date",
+					})
+
+					if errline == nil {
+						messageTemplate := ""
+						if *invoiceObject.Status == "voided" {
+							messageTemplate = helper.BuildVoidTransactionTemplate(currentOrder, orderline, useraccount)
+						} else if *invoiceObject.Status == "submitted" {
+							messageTemplate = helper.BuildProcessTransactionTemplate(currentOrder, orderline, useraccount)
+						}
+
+						if useraccount.FCMToken != nil && *useraccount.FCMToken != "" {
+
+						}
+
+						if useraccount.Phone != nil && *useraccount.Phone != "" {
+							if messageTemplate != "" {
+								senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.Phone, messageTemplate)
+								if senDwaMessage != nil {
+									fmt.Println("sukses")
+								}
+							}
+
+						}
+					}
+
+				}
+
+			}
 		}
 
 		resBuilder = append(resBuilder, invoiceObject)
