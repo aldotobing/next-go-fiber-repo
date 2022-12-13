@@ -129,7 +129,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 		orderlinerepo := repository.NewCustomerOrderLineRepository(uc.DB)
 		order, errorder := orderrepo.FindByID(c, models.CustomerOrderHeaderParameter{ID: *res.ID})
 		if errorder == nil {
-
+			messageType := "1"
 			bayar, _ := strconv.ParseFloat(*order.NetAmount, 0)
 			harga := strings.ReplaceAll(number.FormatCurrency(bayar, "IDR", ".", "", 0), "Rp", "")
 			msgtitle := "Checkout " + *order.DocumentNo
@@ -159,6 +159,18 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 
 				_, errfcm := FcmUc.SendFCMMessage(c, msgtitle, msgbody, *useraccount.FCMToken)
 				if errfcm == nil {
+
+				}
+
+				userNotificationRepo := repository.NewUserNotificationRepository(uc.DB)
+				_, errnotifinsert := userNotificationRepo.Add(c, &models.UserNotification{
+					Title:  &msgtitle,
+					Text:   &msgbody,
+					Type:   &messageType,
+					UserID: order.CustomerID,
+					RowID:  order.ID,
+				})
+				if errnotifinsert == nil {
 
 				}
 
@@ -239,13 +251,34 @@ func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter mode
 
 					if errline == nil {
 						messageTemplate := ""
+						messageTitle := ""
+						messageType := "1"
 						if *invoiceObject.Status == "voided" {
 							messageTemplate = helper.BuildVoidTransactionTemplate(currentOrder, orderline, useraccount)
+							messageTitle = "Transaksi " + *currentOrder.DocumentNo + " dibatalkan."
 						} else if *invoiceObject.Status == "submitted" {
 							messageTemplate = helper.BuildProcessTransactionTemplate(currentOrder, orderline, useraccount)
+							messageTitle = "Transaksi " + *currentOrder.DocumentNo + " diproses."
 						}
 
 						if useraccount.FCMToken != nil && *useraccount.FCMToken != "" {
+							FcmUc := FCMUC{ContractUC: uc.ContractUC}
+							_, errfcm := FcmUc.SendFCMMessage(c, messageTitle, messageTemplate, *useraccount.FCMToken)
+							if errfcm == nil {
+
+							}
+
+							userNotificationRepo := repository.NewUserNotificationRepository(uc.DB)
+							_, errnotifinsert := userNotificationRepo.Add(c, &models.UserNotification{
+								Title:  &messageTitle,
+								Text:   &messageTemplate,
+								Type:   &messageType,
+								UserID: currentOrder.CustomerID,
+								RowID:  currentOrder.ID,
+							})
+							if errnotifinsert == nil {
+
+							}
 
 						}
 

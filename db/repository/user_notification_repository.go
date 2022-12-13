@@ -132,8 +132,8 @@ func (repository UserNotificationRepository) FindByID(c context.Context, paramet
 
 func (repository UserNotificationRepository) Add(c context.Context, model *models.UserNotification) (res *string, err error) {
 	statement := `INSERT INTO user_notification (user_id, row_id, type_notification, notification_text,
-		created_date, created_by,notification_title)
-	VALUES ($1, $2, $3, $4, $5, $6,$7) RETURNING id`
+		created_date, created_by,notification_title,notification_status)
+	VALUES ($1, $2, $3, $4, $5, $6,$7,"unread") RETURNING id`
 
 	println(statement)
 
