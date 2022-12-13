@@ -76,7 +76,7 @@ var (
 						JOIN ITEM_PRICE IP ON IP.UOM_ID = UOM.ID
 						AND IP.ITEM_ID = IUL.ITEM_ID
 						WHERE IUL.ITEM_ID = DEF.ID 
-							AND IUL.CONVERSION::integer > 1
+							AND IUL.VISIBILITY = 1
 							ORDER BY IUL.CONVERSION 
 							 ) T) AS ITEM_UOM
 	FROM ITEM_UOM_LINE IUL
@@ -87,5 +87,5 @@ var (
 	`
 
 	// ItemWhereStatement ...
-	ItemWhereStatement = ` WHERE def.created_date IS not NULL AND IUL.CONVERSION > 1 `
+	ItemWhereStatement = ` WHERE def.created_date IS not NULL AND IUL.VISIBILITY = 1`
 )
