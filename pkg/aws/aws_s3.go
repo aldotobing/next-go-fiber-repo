@@ -35,7 +35,7 @@ func (awss3 AWSS3) UploadManager(fileToBeUploaded *multipart.FileHeader) (s3path
 	size := fileToBeUploaded.Size
 	buffer := make([]byte, size)
 	file.Read(buffer)
-	fileName = bson.NewObjectId().Hex() + fileToBeUploaded.Filename
+	fileName = bson.NewObjectId().Hex() + "_" + fileToBeUploaded.Filename
 	//fileName = fileToBeUploaded.Filename + bson.NewObjectId().Hex() + filepath.Ext(fileToBeUploaded.Filename)
 
 	tempFile := awss3.Directory + "/" + fileName
