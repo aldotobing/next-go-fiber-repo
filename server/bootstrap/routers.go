@@ -203,4 +203,8 @@ func (boot Bootstrap) RegisterRouters() {
 
 	UserNotificationRoutes := routers.UserNotificationRoutes{RouterGroup: apiV1, Handler: handler}
 	UserNotificationRoutes.RegisterRoute()
+
+	VideoPromoteRoutes := routers.VideoPromoteRoutes{RouterGroup: apiV1, Handler: handler}
+	VideoPromoteRoutes.RegisterRoute()
+
 }
