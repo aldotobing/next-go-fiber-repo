@@ -38,6 +38,7 @@ func (repository PromoContent) scanRows(rows *sql.Rows) (res models.PromoContent
 		&res.PromoUrlBanner,
 		&res.StartDate,
 		&res.EndDate,
+		&res.Active,
 	)
 	if err != nil {
 
@@ -56,6 +57,7 @@ func (repository PromoContent) scanRow(row *sql.Row) (res models.PromoContent, e
 		&res.PromoUrlBanner,
 		&res.StartDate,
 		&res.EndDate,
+		&res.Active,
 	)
 	if err != nil {
 		return res, err
@@ -175,13 +177,16 @@ func (repository PromoContent) FindByID(c context.Context, parameter models.Prom
 
 func (repository PromoContent) Add(c context.Context, model *models.PromoContent) (res *string, err error) {
 	statement := `INSERT INTO promo (code, _name, description, url_banner,
-		start_date, end_date)
-	VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`
+		start_date, end_date, active)
+	VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`
 
 	err = repository.DB.QueryRowContext(c, statement, model.Code, model.PromoName, model.PromoDescription, model.PromoUrlBanner,
-		model.StartDate, model.EndDate).Scan(&res)
+		model.StartDate, model.EndDate, 1).Scan(&res)
+
+	fmt.Println("PROMO INSERT : " + statement)
 
 	if err != nil {
+		fmt.Println("INSERT PROMO BERHASIL! :)")
 		return res, err
 	}
 	return res, err
