@@ -10,6 +10,7 @@ type SalesInvoice struct {
 	NoOrder           *string          `json:"no_order"`
 	TrasactionDate    *string          `json:"transaction_date"`
 	ModifiedDate      *string          `json:"modified_date"`
+	JatuhTempo        *string          `json:"jatuh_tempo"`
 	Status            *string          `json:"status"`
 	NetAmount         *string          `json:"net_amount"`
 	OutStandingAmount *string          `json:"outstanding_amount"`
@@ -49,6 +50,7 @@ var (
 	SOH.DOCUMENT_NO AS NO_ORDER,
 	DEF.TRANSACTION_DATE,
 	DEF.MODIFIED_DATE,
+	DEF.TRANSACTION_DATE + top.DAYS AS JATUH_TEMPO,
 	DEF.STATUS,
 	DEF.NET_AMOUNT,
 	DEF.OUTSTANDING_AMOUNT,
@@ -69,7 +71,8 @@ var (
 FROM SALES_INVOICE_HEADER DEF
 left JOIN SALES_ORDER_HEADER SOH ON SOH.ID = DEF.SALES_ORDER_ID
 JOIN CUSTOMER C ON C.ID = DEF.CUST_BILL_TO_ID
-JOIN PARTNER P ON P.ID = C.PARTNER_ID `
+JOIN PARTNER P ON P.ID = C.PARTNER_ID 
+JOIN TERM_OF_PAYMENT TOP ON TOP.ID = DEF.PAYMENT_TERMS_ID`
 
 	// SalesInvoiceWhereStatement ...
 	SalesInvoiceWhereStatement = ` where def.id is not null `
