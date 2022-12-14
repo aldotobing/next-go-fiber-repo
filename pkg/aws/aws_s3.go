@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"mime/multipart"
 	"net/http"
-	"path/filepath"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -36,7 +35,8 @@ func (awss3 AWSS3) UploadManager(fileToBeUploaded *multipart.FileHeader) (s3path
 	size := fileToBeUploaded.Size
 	buffer := make([]byte, size)
 	file.Read(buffer)
-	fileName = bson.NewObjectId().Hex() + filepath.Ext(fileToBeUploaded.Filename)
+	fileName = bson.NewObjectId().Hex() + fileToBeUploaded.Filename
+	//fileName = fileToBeUploaded.Filename + bson.NewObjectId().Hex() + filepath.Ext(fileToBeUploaded.Filename)
 
 	tempFile := awss3.Directory + "/" + fileName
 	_, err = s3.New(session).PutObject(&s3.PutObjectInput{
