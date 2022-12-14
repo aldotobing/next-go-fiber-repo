@@ -53,6 +53,6 @@ var (
 	`
 	// PromoContentWhereStatement ...
 	PromoContentWhereStatement = ` 
-	WHERE PC.ID IS NOT NULL
+	WHERE PC.ID IS NOT NULL AND PC.ACTIVE = 1
 	`
 )
