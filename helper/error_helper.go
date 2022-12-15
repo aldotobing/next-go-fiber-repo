@@ -145,4 +145,6 @@ var (
 	AttendanceScheduleNotExist = "Attendace schedule not exist"
 
 	WrongEmailOrPassword = "Email or password is wrong"
+
+	InvalidMinimumAmountOrder = "Order Minimal "
 )
