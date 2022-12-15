@@ -17,6 +17,7 @@ type IShoppingCartRepository interface {
 	Edit(c context.Context, model *models.ShoppingCart) (*string, error)
 	Delete(c context.Context, id string) (*string, error)
 	SelectAllForGroup(c context.Context, parameter models.ShoppingCartParameter) ([]models.GroupedShoppingCart, error)
+	GetTotal(c context.Context, parameter models.ShoppingCartParameter) (models.ShoppingCheckouAble, error)
 }
 
 // ShoppingCartRepository ...
@@ -50,6 +51,18 @@ func (repository ShoppingCartRepository) scanRow(row *sql.Row) (res models.Shopp
 		&res.ID, &res.CustomerID, &res.CustomerName, &res.ItemID, &res.ItemName, &res.UomID, &res.UomName,
 		&res.Qty, &res.StockQty, &res.Price, &res.ItemCategoryID, &res.ItemCategoryName, &res.ItemPicture,
 		&res.TotalPrice,
+	)
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
+// Scan row
+func (repository ShoppingCartRepository) scanIsAbleRow(row *sql.Row) (res models.ShoppingCheckouAble, err error) {
+	err = row.Scan(
+		&res.IsAble, &res.MinOmzet,
 	)
 	if err != nil {
 		return res, err
@@ -230,4 +243,20 @@ func (repository ShoppingCartRepository) SelectAllForGroup(c context.Context, pa
 	}
 
 	return data, err
+}
+
+// FindByID ...
+func (repository ShoppingCartRepository) GetTotal(c context.Context, parameter models.ShoppingCartParameter) (data models.ShoppingCheckouAble, err error) {
+	statement := ` 
+	select ((case when ( (select sum(price*qty) from cart where id in(select  unnest(ARRAY(select string_to_array($1,',')))::integer))<( select coalesce(min_omzet_amount,0) from branch where id = (select branch_id from customer where id = $2) )) then 0 else 1 end))
+as total_amount,( select coalesce(min_omzet_amount,0) from branch where id = (select branch_id from customer where id = $3) ) as min_amount
+	`
+	row := repository.DB.QueryRowContext(c, statement, parameter.ListLine, parameter.CustomerID, parameter.CustomerID)
+
+	data, err = repository.scanIsAbleRow(row)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }

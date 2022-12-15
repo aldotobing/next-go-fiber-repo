@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -86,6 +87,14 @@ func (uc CustomerOrderHeaderUC) FindByID(c context.Context, parameter models.Cus
 func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.CustomerOrderHeaderRequest) (res models.CustomerOrderHeader, err error) {
 
 	repo := repository.NewCustomerOrderHeaderRepository(uc.DB)
+
+	chekablerepo := repository.NewShoppingCartRepository(uc.DB)
+
+	checkAble, errcheck := chekablerepo.GetTotal(c, models.ShoppingCartParameter{
+		CustomerID: data.CustomerID,
+		ListLine:   data.LineList,
+	})
+
 	// now := time.Now().UTC()
 	// strnow := now.Format(time.RFC3339)
 	round_amount := "0"
@@ -112,6 +121,15 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 		PriceLIstID:          &data.PriceLIstID,
 		LineList:             &data.LineList,
 	}
+
+	if checkAble.IsAble == nil || *checkAble.IsAble == "0" {
+		return res, errors.New(helper.InvalidMinimumAmountOrder + *checkAble.MinOmzet + ` rupiah.`)
+	}
+
+	if errcheck != nil {
+		return res, errors.New("Try Again Latter")
+	}
+
 	res.ID, err = repo.CheckOut(c, &res)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))

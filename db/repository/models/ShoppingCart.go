@@ -22,6 +22,12 @@ type ShoppingCart struct {
 	TotalPrice       *string `json:"total_price"`
 }
 
+// ShoppingCartTotalPrice ...
+type ShoppingCheckouAble struct {
+	IsAble   *string `json:"is_able"`
+	MinOmzet *string `json:"min_omzet"`
+}
+
 type GroupedShoppingCart struct {
 	CategoryID        string         `json:"category_id"`
 	CategoryName      string         `json:"CategoryName"`
@@ -31,6 +37,7 @@ type GroupedShoppingCart struct {
 // ShoppingCartParameter ...
 type ShoppingCartParameter struct {
 	ID             string `json:"shopping_cart_id"`
+	ListLine       string `json:"list_line"`
 	CustomerID     string `json:"customer_id"`
 	ItemCategoryID string `json:"item_category_id"`
 	ItemID         string `json:"item_id"`
