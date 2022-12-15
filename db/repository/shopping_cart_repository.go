@@ -249,7 +249,7 @@ func (repository ShoppingCartRepository) SelectAllForGroup(c context.Context, pa
 func (repository ShoppingCartRepository) GetTotal(c context.Context, parameter models.ShoppingCartParameter) (data models.ShoppingCheckouAble, err error) {
 	statement := ` 
 	select ((case when ( (select sum(price*qty) from cart where id in(select  unnest(ARRAY(select string_to_array($1,',')))::integer))<( select coalesce(min_omzet_amount,0) from branch where id = (select branch_id from customer where id = $2) )) then 0 else 1 end))
-as total_amount,( select coalesce(min_omzet_amount,0) from branch where id = (select branch_id from customer where id = $3) ) as min_amount
+as total_amount,( select coalesce(min_omzet_amount,0) from branch where id = (select branch_id from customer where id = $3) )::integer as min_amount
 	`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ListLine, parameter.CustomerID, parameter.CustomerID)
 

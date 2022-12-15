@@ -123,7 +123,9 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 	}
 
 	if checkAble.IsAble == nil || *checkAble.IsAble == "0" {
-		return res, errors.New(helper.InvalidMinimumAmountOrder + *checkAble.MinOmzet + ` rupiah.`)
+		bayar, _ := strconv.ParseFloat(*checkAble.MinOmzet, 0)
+		minOrder := strings.ReplaceAll(number.FormatCurrency(bayar, "IDR", ".", "", 0), "Rp", "")
+		return res, errors.New(helper.InvalidMinimumAmountOrder + minOrder + ` rupiah.`)
 	}
 
 	if errcheck != nil {
