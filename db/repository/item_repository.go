@@ -85,6 +85,7 @@ func (repository ItemRepository) SelectAll(c context.Context, parameter models.I
 	conditionString := ``
 
 	if parameter.ItemCategoryId == "2" {
+		//KHUSUS TAC sendiri, tampilkan semua item dengan category TAC (TAC ANAK, BEBAS GULA, DLL)
 		conditionString += ` AND def.item_category_id IN (SELECT id FROM item_category WHERE lower (_name) LIKE '%tac%') `
 	} else {
 		conditionString += ` AND def.item_category_id = '` + parameter.ItemCategoryId + `'`
