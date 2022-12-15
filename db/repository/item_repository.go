@@ -83,7 +83,10 @@ func (repository ItemRepository) scanRow(row *sql.Row) (res models.Item, err err
 // SelectAll ...
 func (repository ItemRepository) SelectAll(c context.Context, parameter models.ItemParameter) (data []models.Item, err error) {
 	conditionString := ``
-	if parameter.ItemCategoryId != "" {
+
+	if parameter.ItemCategoryId == "2" {
+		conditionString += ` AND def.item_category_id IN (SELECT id FROM item_category WHERE lower (_name) LIKE '%tac%') `
+	} else {
 		conditionString += ` AND def.item_category_id = '` + parameter.ItemCategoryId + `'`
 	}
 
