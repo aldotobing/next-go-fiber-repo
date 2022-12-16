@@ -91,6 +91,16 @@ func (repository ItemRepository) SelectAll(c context.Context, parameter models.I
 		conditionString += ` AND def.item_category_id = '` + parameter.ItemCategoryId + `'`
 	}
 
+	/*
+		customerType 7 = Apotek Lokal
+		customerType 15 = MT LOKAL INDEPENDEN
+		defId 83 = TOLAK ANGIN CAIR /D5
+		Tampilkan TAC D5 hanya pada kedua customerType di atas
+	*/
+	if parameter.CustomerTypeId != "" && (parameter.CustomerTypeId != "7" && parameter.CustomerTypeId != "15") {
+		conditionString += ` AND def.id <> 83 `
+	}
+
 	if parameter.PriceListVersionId != "" {
 		conditionString += ` AND ip.price_list_version_id = '` + parameter.PriceListVersionId + `'`
 	}

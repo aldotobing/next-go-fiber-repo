@@ -27,6 +27,7 @@ type ItemParameter struct {
 	ItemCategoryId     string `json:"item_category_id"`
 	PriceListVersionId string `json:"price_list_version_id"`
 	UomID              string `json:"uom_id"`
+	CustomerTypeId     string `json:"customer_type_id"`
 	Search             string `json:"search"`
 	Page               int    `json:"page"`
 	Offset             int    `json:"offset"`
