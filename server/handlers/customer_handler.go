@@ -128,8 +128,6 @@ func (h *CustomerHandler) Edit(ctx *fiber.Ctx) error {
 		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
 	}
 
-	fmt.Println("aedit")
-
 	uc := usecase.CustomerUC{ContractUC: h.ContractUC}
 	res, err := uc.Edit(c, id, input)
 
@@ -193,4 +191,51 @@ func (h *CustomerHandler) FetchVisitDay(params models.CustomerParameter) string 
 	json.Unmarshal(bodyBytes, &ObjectData)
 
 	return ObjectData.VisitDay
+}
+
+// Edit ...
+func (h *CustomerHandler) BackendEdit(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	id := ctx.Params("customer_id")
+	if id == "" {
+		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
+	}
+
+	input := new(requests.CustomerRequest)
+	err := json.Unmarshal([]byte(ctx.FormValue("form_data")), input)
+	if err := ctx.BodyParser(input); err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+	if err := h.Validator.Struct(input); err != nil {
+		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
+		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+	}
+
+	imgProfile, _ := ctx.FormFile("img_profile")
+	uc := usecase.CustomerUC{ContractUC: h.ContractUC}
+	res, err := uc.BackendEdit(c, id, input, imgProfile)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+// Edit ...
+func (h *CustomerHandler) BackendAdd(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	input := new(requests.CustomerRequest)
+	err := json.Unmarshal([]byte(ctx.FormValue("form_data")), input)
+	if err := ctx.BodyParser(input); err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+	if err := h.Validator.Struct(input); err != nil {
+		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
+		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+	}
+
+	imgProfile, _ := ctx.FormFile("img_profile")
+	uc := usecase.CustomerUC{ContractUC: h.ContractUC}
+	res, err := uc.BackendAdd(c, input, imgProfile)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
 }

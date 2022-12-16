@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"mime/multipart"
 
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -114,6 +115,97 @@ func (uc CustomerUC) EditAddress(c context.Context, id string, data *requests.Cu
 	}
 
 	res.ID, err = repo.EditAddress(c, &res)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	return res, err
+}
+
+func (uc CustomerUC) BackendEdit(c context.Context, id string, data *requests.CustomerRequest, imgProfile *multipart.FileHeader) (res models.Customer, err error) {
+
+	// currentObjectUc, err := uc.FindByID(c, models.MpBankParameter{ID: id})
+	ctx := "FileUC.Upload"
+	awsUc := AwsUC{ContractUC: uc.ContractUC}
+
+	var strImgprofile = ""
+
+	if imgProfile != nil {
+
+		awsUc.AWSS3.Directory = "image/customer"
+		imgBannerFile, err := awsUc.Upload("image/customer", imgProfile)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "upload_file", c.Value("requestid"))
+			return res, err
+		}
+		strImgprofile = imgBannerFile.FilePath
+
+	}
+	repo := repository.NewCustomerRepository(uc.DB)
+	// now := time.Now().UTC()
+	// strnow := now.Format(time.RFC3339)
+	res = models.Customer{
+		ID:                     &id,
+		Code:                   &data.Code,
+		CustomerName:           &data.CustomerName,
+		CustomerAddress:        &data.CustomerAddress,
+		CustomerPhone:          &data.CustomerPhone,
+		CustomerEmail:          &data.CustomerEmail,
+		CustomerCpName:         &data.CustomerCpName,
+		CustomerProfilePicture: &strImgprofile,
+		CustomerTaxCalcMethod:  &data.CustomerTaxCalcMethod,
+		CustomerActiveStatus:   &data.CustomerActiveStatus,
+		CustomerSalesmanID:     &data.CustomerSalesmanID,
+		CustomerBranchID:       &data.CustomerBranchID,
+	}
+
+	res.ID, err = repo.BackendEdit(c, &res)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	return res, err
+}
+
+func (uc CustomerUC) BackendAdd(c context.Context, data *requests.CustomerRequest, imgProfile *multipart.FileHeader) (res models.Customer, err error) {
+
+	// currentObjectUc, err := uc.FindByID(c, models.MpBankParameter{ID: id})
+	ctx := "FileUC.Upload"
+	awsUc := AwsUC{ContractUC: uc.ContractUC}
+
+	var strImgprofile = ""
+
+	if imgProfile != nil {
+
+		awsUc.AWSS3.Directory = "image/customer"
+		imgBannerFile, err := awsUc.Upload("image/customer", imgProfile)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "upload_file", c.Value("requestid"))
+			return res, err
+		}
+		strImgprofile = imgBannerFile.FilePath
+
+	}
+	repo := repository.NewCustomerRepository(uc.DB)
+	// now := time.Now().UTC()
+	// strnow := now.Format(time.RFC3339)
+	res = models.Customer{
+		Code:                   &data.Code,
+		CustomerName:           &data.CustomerName,
+		CustomerAddress:        &data.CustomerAddress,
+		CustomerPhone:          &data.CustomerPhone,
+		CustomerEmail:          &data.CustomerEmail,
+		CustomerCpName:         &data.CustomerCpName,
+		CustomerProfilePicture: &strImgprofile,
+		CustomerTaxCalcMethod:  &data.CustomerTaxCalcMethod,
+		CustomerActiveStatus:   &data.CustomerActiveStatus,
+		CustomerSalesmanID:     &data.CustomerSalesmanID,
+		CustomerBranchID:       &data.CustomerBranchID,
+	}
+
+	res.ID, err = repo.BackendAdd(c, &res)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err

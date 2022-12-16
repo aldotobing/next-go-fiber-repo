@@ -39,6 +39,9 @@ type Customer struct {
 	GiftName                *string `json:"customer_gift_name"`
 	Loyalty                 *string `json:"customer_loyalty"`
 	VisitDay                *string `json:"visit_day"`
+	CustomerTaxCalcMethod   *string `json:"customer_tax_calc_method"`
+	CustomerBranchID        *string `json:"customer_branch_id"`
+	CustomerSalesmanID      *string `json:"customer_salesman_id"`
 }
 
 // CustomerParameter ...
@@ -105,7 +108,10 @@ var (
 		'+62' || regexp_replace(SUBSTRING (customer_phone, 2, length(customer_phone)),'[^\w]+','','g' )  AS CUSTOMER_PHONE,
 		(SELECT SUM(SIH.TRANSACTION_POINT) FROM SALES_INVOICE_HEADER SIH WHERE SIH.CUST_BILL_TO_ID = C.ID) AS CUSTOMER_POINT,
 		CG.GIFT_NAME AS CUST_GIFT_NAME,
-		LOY.LOYALTY_NAME AS CUST_LOYALTY_NAME
+		LOY.LOYALTY_NAME AS CUST_LOYALTY_NAME,
+		C.tax_calc_method as tax_calc_method,
+		C.branch_id as c_branch_id,
+		C.salesman_id as c_salesman_id
 	FROM CUSTOMER C
 	LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
 	LEFT JOIN REGION REG ON REG.ID = B.REGION_ID
