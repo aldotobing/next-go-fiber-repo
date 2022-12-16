@@ -32,7 +32,7 @@ var (
 	// CustomerTypeSelectStatement ...
 
 	CustomerTypeSelectStatement = `
-	select def.id,def._name,def.code 
+	select def.id,def.code,def._name 
 	from customer_type def
 		`
 
