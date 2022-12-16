@@ -124,8 +124,8 @@ func (repository VideoPromoteRepository) FindAll(ctx context.Context, parameter 
 }
 
 func (repository VideoPromoteRepository) Add(c context.Context, model *models.VideoPromote) (res *string, err error) {
-	statement := `INSERT INTO video_promote (start_date, end_date, title, description, active)
-	VALUES ($1, $2, $3, $4, $5) RETURNING id`
+	statement := `INSERT INTO video_promote (start_date, end_date, title, description, active,url)
+	VALUES ($1, $2, $3, $4, $5,$6) RETURNING id`
 
 	err = repository.DB.QueryRowContext(c, statement, model.StartDate, model.EndDate, model.Title, model.Description, 1).Scan(&res)
 
