@@ -283,8 +283,9 @@ func (repository CustomerRepository) BackendEdit(c context.Context, model *model
 	customer_profile_picture = $6,
 	tax_calc_method = $7,
 	branch_id = $8,
-	customer_code =$9 
-	WHERE id = $10 
+	customer_code =$9,
+	salesman_id = $10 
+	WHERE id = $11 
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		model.CustomerName,
@@ -296,6 +297,7 @@ func (repository CustomerRepository) BackendEdit(c context.Context, model *model
 		model.CustomerTaxCalcMethod,
 		model.CustomerBranchID,
 		model.Code,
+		model.CustomerSalesmanID,
 		model.ID).Scan(&res)
 	if err != nil {
 		return res, err
@@ -306,14 +308,15 @@ func (repository CustomerRepository) BackendEdit(c context.Context, model *model
 // Add ...
 func (repository CustomerRepository) BackendAdd(c context.Context, model *models.Customer) (res *string, err error) {
 	statement := `INSERT INTO customer (customer_name,customer_address, customer_phone, customer_email,
-		customer_cp_name, customer_profile_picture, created_date, modified_date,tax_calc_method, branch_id,customer_code,device_id)
-	VALUES ($1, $2, $3, $4, $5, $6, now(), now() ,$7, $8, $9,99) RETURNING id`
+		customer_cp_name, customer_profile_picture, created_date, modified_date,tax_calc_method, branch_id,customer_code,device_id,
+		salesman_id)
+	VALUES ($1, $2, $3, $4, $5, $6, now(), now() ,$7, $8, $9,99, $10) RETURNING id`
 
 	fmt.Println(statement)
 
 	err = repository.DB.QueryRowContext(c, statement, model.CustomerName, model.CustomerAddress,
 		model.CustomerPhone, model.CustomerEmail, model.CustomerCpName, model.CustomerProfilePicture,
-		model.CustomerTaxCalcMethod, model.CustomerBranchID, model.Code,
+		model.CustomerTaxCalcMethod, model.CustomerBranchID, model.Code, model.CustomerSalesmanID,
 	).Scan(&res)
 
 	if err != nil {
