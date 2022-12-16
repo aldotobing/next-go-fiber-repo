@@ -97,7 +97,7 @@ func (repository ItemRepository) SelectAll(c context.Context, parameter models.I
 		defId 83 = TOLAK ANGIN CAIR /D5
 		Tampilkan TAC D5 hanya pada kedua customerType di atas
 	*/
-	if parameter.CustomerTypeId != "7" && parameter.CustomerTypeId != "15" {
+	if parameter.CustomerTypeId != "" && (parameter.CustomerTypeId != "7" && parameter.CustomerTypeId != "15") {
 		conditionString += ` AND def.id <> 83 `
 	}
 
