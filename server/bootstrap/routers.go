@@ -209,4 +209,7 @@ func (boot Bootstrap) RegisterRouters() {
 
 	DashboardWebRoutes := routers.DashboardWebRoutes{RouterGroup: apiV1, Handler: handler}
 	DashboardWebRoutes.RegisterRoute()
+
+	SalesmanRoutes := routers.SalesmanRoutes{RouterGroup: apiV1, Handler: handler}
+	SalesmanRoutes.RegisterRoute()
 }
