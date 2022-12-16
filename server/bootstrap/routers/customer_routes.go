@@ -36,8 +36,8 @@ func (route CustomerRoutes) RegisterRoute() {
 	r2.Get("/", handler.FindAll)
 	r2.Get("/select", handler.SelectAll)
 	r2.Get("/id/:customer_id", handler.FindByID)
-	r2.Put("/id/:customer_id", handler.Edit)
-	r2.Put("/address/id/:customer_id", handler.EditAddress)
+	r2.Put("/id/:customer_id", handler.BackendEdit)
+	r2.Post("/", handler.BackendAdd)
 
 	//AWS UPLOAD IMG ROUTE
 	handlerAws := handlers.AwsHandler{Handler: route.Handler}
