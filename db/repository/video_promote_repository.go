@@ -97,7 +97,7 @@ func (repository VideoPromoteRepository) FindAll(ctx context.Context, parameter 
 	// 	conditionString += ` AND def.start_date between '` + parameter.StartDate + `' AND '` + parameter.EndDate + `'`
 	// }
 	query := models.VideoPromoteSelectStatement + ` ` + models.VideoPromoteWhereStatement + ` ` + conditionString + `
-		AND (LOWER(def."title") LIKE $4  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $5 LIMIT $6`
+		AND (LOWER(def."title") LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
 	if err != nil {
 		return data, count, err
@@ -117,7 +117,7 @@ func (repository VideoPromoteRepository) FindAll(ctx context.Context, parameter 
 	}
 
 	query = `SELECT COUNT(*) FROM "video_promote" def ` + models.SalesInvoiceWhereStatement + ` ` +
-		conditionString + ` AND (LOWER(def."title") LIKE $4)`
+		conditionString + ` AND (LOWER(def."title") LIKE $1)`
 	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
 	return data, count, err
 

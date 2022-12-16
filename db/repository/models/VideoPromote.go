@@ -46,5 +46,5 @@ var (
 	FROM video_promote DEF`
 
 	// VideoPromoteWhereStatement ...
-	VideoPromoteWhereStatement = ` where def.id is not null and def.active = 1 `
+	VideoPromoteWhereStatement = ` where def.id is not null `
 )
