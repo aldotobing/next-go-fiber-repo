@@ -71,6 +71,7 @@ func (uc VideoPromoteUC) Add(c context.Context, data *requests.VideoPromoteReque
 		StartDate:   &data.StartDate,
 		EndDate:     &data.EndDate,
 		Active:      &data.Active,
+		Url:         &data.Url,
 	}
 	res.ID, err = repo.Add(c, &res)
 	if err != nil {
