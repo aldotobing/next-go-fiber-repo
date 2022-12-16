@@ -35,7 +35,7 @@ func NewVideoPromoteRepository(DB *sql.DB) IVideoPromoteRepository {
 // Scan rows
 func (repository VideoPromoteRepository) scanRows(rows *sql.Rows) (res models.VideoPromote, err error) {
 	err = rows.Scan(
-		&res.ID, &res.Title, &res.Description, &res.StartDate, &res.EndDate, &res.Url,
+		&res.ID, &res.Title, &res.Description, &res.StartDate, &res.EndDate, &res.Active, &res.Url,
 	)
 	if err != nil {
 
@@ -48,7 +48,7 @@ func (repository VideoPromoteRepository) scanRows(rows *sql.Rows) (res models.Vi
 // Scan row
 func (repository VideoPromoteRepository) scanRow(row *sql.Row) (res models.VideoPromote, err error) {
 	err = row.Scan(
-		&res.ID, &res.Title, &res.Description, &res.StartDate, &res.StartDate, &res.Url,
+		&res.ID, &res.Title, &res.Description, &res.StartDate, &res.StartDate, &res.Active, &res.Url,
 	)
 	if err != nil {
 		return res, err
