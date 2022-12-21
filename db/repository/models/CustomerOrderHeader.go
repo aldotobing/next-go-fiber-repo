@@ -33,6 +33,9 @@ type CustomerOrderHeader struct {
 	SalesmanCode         *string             `json:"salesman_code"`
 	CustomerAddress      *string             `json:"customer_address"`
 	ModifiedDate         *string             `json:"modified_date"`
+	VoidReasonCode       *string             `json:"reason_code"`
+	VoidReasonID         *string             `json:"reason_id"`
+	VoidReasonText       *string             `json:"reason_text"`
 }
 
 // CustomerOrderHeaderParameter ...
@@ -67,7 +70,8 @@ var (
 	pl.id as pl_id,pl._name as pl_name, plv.id as plv_id,plv.description,
 	def.status,def.gross_amount,def.taxable_amount, def.tax_amount,
 	def.rounding_amount, def.net_amount,def.disc_amount,
-	cus.customer_code as c_code, s.salesman_code as s_code, cus.customer_address,to_char(def.modified_date,'YYYY-MM-DD') as modified_date
+	cus.customer_code as c_code, s.salesman_code as s_code, cus.customer_address,to_char(def.modified_date,'YYYY-MM-DD') as modified_date,
+	mtp._name as void_reason
 	from customer_order_header def
 	join customer cus on cus.id = def.cust_ship_to_id
 	left join salesman s on s.id = cus.salesman_id
@@ -75,6 +79,7 @@ var (
 	left join branch b on b.id = def.branch_id
 	left join price_list pl on pl.id = def.price_list_id
 	left join price_list_version plv on plv.id = def.price_list_version_id
+	left join master_type mtp on mtp.id = def.void_reason_id and mtp._header ='Void Reason'sssssss
  	
 	`
 

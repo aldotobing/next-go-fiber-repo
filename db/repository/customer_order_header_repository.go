@@ -41,6 +41,7 @@ func (repository CustomerOrderHeaderRepository) scanRows(rows *sql.Rows) (res mo
 		&res.Status, &res.GrossAmount, &res.TaxableAmount, &res.TaxAmount,
 		&res.RoundingAmount, &res.NetAmount, &res.DiscAmount,
 		&res.CustomerCode, &res.SalesmanCode, &res.CustomerAddress, &res.ModifiedDate,
+		&res.VoidReasonText,
 	)
 	if err != nil {
 
@@ -61,6 +62,7 @@ func (repository CustomerOrderHeaderRepository) scanRow(row *sql.Row) (res model
 		&res.Status, &res.GrossAmount, &res.TaxableAmount, &res.TaxAmount,
 		&res.RoundingAmount, &res.NetAmount, &res.DiscAmount,
 		&res.CustomerCode, &res.SalesmanCode, &res.CustomerAddress, &res.ModifiedDate,
+		&res.VoidReasonText,
 	)
 	if err != nil {
 		return res, err
@@ -233,11 +235,11 @@ func (repository CustomerOrderHeaderRepository) CheckOut(c context.Context, mode
 
 func (repository CustomerOrderHeaderRepository) SyncVoid(c context.Context, model *models.CustomerOrderHeader) (res *string, err error) {
 	statement := `UPDATE customer_order_header SET 
-	status = $1 
-	WHERE document_no = $2 
+	status = $1 ,void_reason_id =( select id from master_type where code = $2 )
+	WHERE document_no = $3 
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
-		model.Status, model.DocumentNo).Scan(&res)
+		model.Status, model.VoidReasonCode, model.DocumentNo).Scan(&res)
 	if err != nil {
 		return res, err
 	}
