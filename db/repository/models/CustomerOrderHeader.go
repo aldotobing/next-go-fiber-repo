@@ -79,7 +79,7 @@ var (
 	left join branch b on b.id = def.branch_id
 	left join price_list pl on pl.id = def.price_list_id
 	left join price_list_version plv on plv.id = def.price_list_version_id
-	left join master_type mtp on mtp.id = def.void_reason_id and mtp._header ='Void Reason'sssssss
+	left join master_type mtp on mtp.id = def.void_reason_id and mtp._header ='Void Reason'
  	
 	`
 
