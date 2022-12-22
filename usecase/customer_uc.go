@@ -75,7 +75,35 @@ func (uc CustomerUC) FindByID(c context.Context, parameter models.CustomerParame
 }
 
 // Edit ,...
-func (uc CustomerUC) Edit(c context.Context, id string, data *requests.CustomerRequest) (res models.Customer, err error) {
+func (uc CustomerUC) Edit(c context.Context, id string, data *requests.CustomerRequest, imgProfile *multipart.FileHeader, imgKtp *multipart.FileHeader) (res models.Customer, err error) {
+
+	ctx := "FileUC.Upload"
+	awsUc := AwsUC{ContractUC: uc.ContractUC}
+
+	var strImgprofile = ""
+	var strImgktp = ""
+	if imgProfile != nil {
+
+		imgProfileFile, err := awsUc.Upload("image/customer", imgProfile)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "upload_file", c.Value("requestid"))
+			return res, err
+		}
+		strImgprofile = imgProfileFile.FilePath
+
+	}
+
+	if imgKtp != nil {
+
+		imgKtpFile, err := awsUc.Upload("image/customer", imgKtp)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "upload_file", c.Value("requestid"))
+			return res, err
+		}
+		strImgktp = imgKtpFile.FilePath
+
+	}
+
 	repo := repository.NewCustomerRepository(uc.DB)
 	// now := time.Now().UTC()
 	// strnow := now.Format(time.RFC3339)
@@ -87,7 +115,11 @@ func (uc CustomerUC) Edit(c context.Context, id string, data *requests.CustomerR
 		CustomerPhone:          &data.CustomerPhone,
 		CustomerEmail:          &data.CustomerEmail,
 		CustomerCpName:         &data.CustomerCpName,
-		CustomerProfilePicture: &data.CustomerProfilePicture,
+		CustomerProfilePicture: &strImgprofile,
+		CustomerNik:            &data.CustomerNik,
+		CustomerReligion:       &data.CustomerReligion,
+		CustomerPhotoKtp:       &strImgktp,
+		CustomerBirthDate:      &data.CustomerBirthDate,
 	}
 
 	res.ID, err = repo.Edit(c, &res)
@@ -158,6 +190,7 @@ func (uc CustomerUC) BackendEdit(c context.Context, id string, data *requests.Cu
 		CustomerActiveStatus:   &data.CustomerActiveStatus,
 		CustomerSalesmanID:     &data.CustomerSalesmanID,
 		CustomerBranchID:       &data.CustomerBranchID,
+		CustomerNik:            &data.CustomerNik,
 	}
 
 	res.ID, err = repo.BackendEdit(c, &res)

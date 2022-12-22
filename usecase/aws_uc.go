@@ -16,6 +16,7 @@ type AwsUC struct {
 func (uc AwsUC) Upload(filePath string, f *multipart.FileHeader) (res viewmodel.AwsVM, err error) {
 	ctx := "AwsUC.Upload"
 	// uc.ContractUC.EnvConfig["AWS_BUCKET_NAME"]
+	uc.AWSS3.Directory = filePath
 	s3path, fileName, err := uc.AWSS3.UploadManager(f)
 	//data, err := AwsModel.Upload(defaultBucket, filePath, f)
 	if err != nil {
