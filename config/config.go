@@ -60,7 +60,7 @@ type Configs struct {
 
 var (
 	envConfig, _ = godotenv.Read("../.env")
-	ImagePath    = envConfig["MINIO_BASE_URL"] + `/` + envConfig["MINIO_DEFAULT_BUCKET"] + `/`
+	ImagePath    = envConfig["AWS_IMAGE_BASE_URL"]
 )
 
 // LoadConfigs ...

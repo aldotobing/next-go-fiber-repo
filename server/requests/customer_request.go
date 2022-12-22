@@ -19,6 +19,9 @@ type CustomerRequest struct {
 	CustomerBranchID       string `json:"customer_branch_id"`
 	CustomerSalesmanID     string `json:"customer_salesman_id"`
 	CustomerActiveStatus   string `json:"customer_active_status"`
+	CustomerNik            string `json:"customer_nik"`
+	CustomerBirthDate      string `json:"customer_birthdate"`
+	CustomerReligion       string `json:"customer_religion"`
 }
 
 type MpCustomerDataBreakDownRequest struct {
