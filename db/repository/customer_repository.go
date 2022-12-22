@@ -229,10 +229,10 @@ func (repository CustomerRepository) Edit(c context.Context, model *models.Custo
 	customer_phone = $3, 
 	customer_email = $4,
 	customer_cp_name = $5,
-	customer_profile_picture = $6 
+	customer_profile_picture = $6, 
 	customer_photo_ktp = $7,
 	customer_religion = $8,
-	customer_birthdate = $9,
+	customer_birthdate = $9
 	WHERE id = $10 
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
