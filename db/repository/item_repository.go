@@ -84,11 +84,11 @@ func (repository ItemRepository) scanRow(row *sql.Row) (res models.Item, err err
 func (repository ItemRepository) SelectAll(c context.Context, parameter models.ItemParameter) (data []models.Item, err error) {
 	conditionString := ``
 
-	if parameter.ItemCategoryId == "2" {
+	if parameter.CustomerTypeId != "" && parameter.ItemCategoryId == "2" {
 		//KHUSUS TAC sendiri, tampilkan semua item dengan category TAC (TAC ANAK, BEBAS GULA, DLL)
 		conditionString += ` AND def.item_category_id IN (SELECT id FROM item_category WHERE lower (_name) LIKE '%tac%') `
 	} else {
-		conditionString += ` AND def.item_category_id = '` + parameter.ItemCategoryId + `'`
+		conditionString += ` AND def.item_category_id = ` + parameter.ItemCategoryId + ``
 	}
 
 	/*
@@ -140,8 +140,21 @@ func (repository ItemRepository) SelectAll(c context.Context, parameter models.I
 func (repository ItemRepository) FindAll(ctx context.Context, parameter models.ItemParameter) (data []models.Item, count int, err error) {
 	conditionString := ``
 
-	if parameter.ItemCategoryId != "" {
+	if parameter.CustomerTypeId != "" && parameter.ItemCategoryId == "2" {
+		//KHUSUS TAC sendiri, tampilkan semua item dengan category TAC (TAC ANAK, BEBAS GULA, DLL)
+		conditionString += ` AND def.item_category_id IN (SELECT id FROM item_category WHERE lower (_name) LIKE '%tac%') `
+	} else if parameter.CustomerTypeId != "" {
 		conditionString += ` AND def.item_category_id = '` + parameter.ItemCategoryId + `'`
+	}
+
+	/*
+		customerType 7 = Apotek Lokal
+		customerType 15 = MT LOKAL INDEPENDEN
+		defId 83 = TOLAK ANGIN CAIR /D5
+		Tampilkan TAC D5 hanya pada kedua customerType di atas
+	*/
+	if parameter.CustomerTypeId != "" && (parameter.CustomerTypeId != "7" && parameter.CustomerTypeId != "15") {
+		conditionString += ` AND def.id <> 83 `
 	}
 
 	if parameter.PriceListVersionId != "" {
@@ -178,7 +191,9 @@ func (repository ItemRepository) FindAll(ctx context.Context, parameter models.I
 		return data, count, err
 	}
 
-	query = `SELECT COUNT(*) FROM "item" def ` + models.ItemWhereStatement + ` ` +
+	query = `SELECT COUNT(*) FROM "item" DEF ` +
+		`JOIN ITEM_UOM_LINE IUL ON IUL.ITEM_ID = DEF.ID ` +
+		models.ItemWhereStatement + ` ` +
 		conditionString + ` AND (LOWER(def."_name") LIKE $1)`
 	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
 	return data, count, err
