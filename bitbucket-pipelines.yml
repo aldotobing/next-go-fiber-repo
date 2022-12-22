@@ -11,4 +11,6 @@ pipelines:
       - step:
           name: TestBuild
           script:
-            - echo "This step will run on a self hosted runner with 128 GB of memory.";
+            - cd server
+            - go build main.go
+            - go run .
