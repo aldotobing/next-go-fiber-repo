@@ -1,5 +1,2 @@
 version: 0.0
 os: linux 
-files:
-  - source: /
-    destination: /home/ec-2-user/nextbasis-service-golang/test

@@ -25,4 +25,16 @@ pipelines:
                 COMMAND: 'upload'
                 ZIP_FILE: 'application1.zip'
                 VERSION_LABEL: 'my-app-1.0.0'
-             
+            - pipe: atlassian/aws-code-deploy:0.2.5
+              variables:
+                AWS_DEFAULT_REGION: 'ap-southeast-3'
+                AWS_ACCESS_KEY_ID: 'AKIAZHPE6M33S22UMA3R'
+                AWS_SECRET_ACCESS_KEY: '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'
+                APPLICATION_NAME: 'sido-app-deploy'
+                DEPLOYMENT_GROUP: 'sido-api-app-deploy-group'
+                S3_BUCKET: 'api-sido'
+                COMMAND: 'deploy'
+                WAIT: 'true'
+                VERSION_LABEL: 'my-app-1.0.0'
+                IGNORE_APPLICATION_STOP_FAILURES: 'true'
+                FILE_EXISTS_BEHAVIOR: 'OVERWRITE'
