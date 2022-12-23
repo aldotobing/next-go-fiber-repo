@@ -21,6 +21,7 @@ func (h *ItemHandler) SelectAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.ItemParameter{
+		ID:                 ctx.Query("item_id"),
 		ItemCategoryId:     ctx.Query("item_category_id"),
 		UomID:              ctx.Query("uom_id"),
 		PriceListVersionId: ctx.Query("price_list_version_id"),
@@ -51,6 +52,7 @@ func (h *ItemHandler) FindAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.ItemParameter{
+		ID:                 ctx.Query("item_id"),
 		ItemCategoryId:     ctx.Query("item_category_id"),
 		PriceListVersionId: ctx.Query("price_list_version_id"),
 		UomID:              ctx.Query("uom_id"),
