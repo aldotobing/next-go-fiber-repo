@@ -88,11 +88,13 @@ func (repository ItemRepository) SelectAll(c context.Context, parameter models.I
 		conditionString += ` AND DEF.ID = '` + parameter.ID + `'`
 	}
 
-	if parameter.CustomerTypeId != "" && parameter.ItemCategoryId == "2" {
-		//KHUSUS TAC sendiri, tampilkan semua item dengan category TAC (TAC ANAK, BEBAS GULA, DLL)
-		conditionString += ` AND def.item_category_id IN (SELECT id FROM item_category WHERE lower (_name) LIKE '%tac%') `
-	} else {
-		conditionString += ` AND def.item_category_id = ` + parameter.ItemCategoryId + ``
+	if parameter.ItemCategoryId != "" {
+		if parameter.ItemCategoryId == "2" {
+			//KHUSUS TAC sendiri, tampilkan semua item dengan category TAC (TAC ANAK, BEBAS GULA, DLL)
+			conditionString += ` AND def.item_category_id IN (SELECT id FROM item_category WHERE lower (_name) LIKE '%tac%') `
+		} else {
+			conditionString += ` AND def.item_category_id = ` + parameter.ItemCategoryId + ``
+		}
 	}
 
 	/*
@@ -102,7 +104,7 @@ func (repository ItemRepository) SelectAll(c context.Context, parameter models.I
 		Tampilkan TAC D5 hanya pada kedua customerType di atas
 	*/
 	if parameter.CustomerTypeId != "" && (parameter.CustomerTypeId != "7" && parameter.CustomerTypeId != "15") {
-		conditionString += ` AND def.id <> 83 `
+		conditionString += ` AND def.id NOT IN (83, 307, 393) `
 	}
 
 	if parameter.PriceListVersionId != "" {
@@ -148,11 +150,13 @@ func (repository ItemRepository) FindAll(ctx context.Context, parameter models.I
 		conditionString += ` AND DEF.ID = '` + parameter.ID + `'`
 	}
 
-	if parameter.CustomerTypeId != "" && parameter.ItemCategoryId == "2" {
-		//KHUSUS TAC sendiri, tampilkan semua item dengan category TAC (TAC ANAK, BEBAS GULA, DLL)
-		conditionString += ` AND def.item_category_id IN (SELECT id FROM item_category WHERE lower (_name) LIKE '%tac%') `
-	} else if parameter.CustomerTypeId != "" {
-		conditionString += ` AND def.item_category_id = '` + parameter.ItemCategoryId + `'`
+	if parameter.ItemCategoryId != "" {
+		if parameter.ItemCategoryId == "2" {
+			//KHUSUS TAC sendiri, tampilkan semua item dengan category TAC (TAC ANAK, BEBAS GULA, DLL)
+			conditionString += ` AND def.item_category_id IN (SELECT id FROM item_category WHERE lower (_name) LIKE '%tac%') `
+		} else {
+			conditionString += ` AND def.item_category_id = ` + parameter.ItemCategoryId + ``
+		}
 	}
 
 	/*
@@ -162,7 +166,7 @@ func (repository ItemRepository) FindAll(ctx context.Context, parameter models.I
 		Tampilkan TAC D5 hanya pada kedua customerType di atas
 	*/
 	if parameter.CustomerTypeId != "" && (parameter.CustomerTypeId != "7" && parameter.CustomerTypeId != "15") {
-		conditionString += ` AND def.id <> 83 `
+		conditionString += ` AND def.id NOT IN (83, 307, 393) `
 	}
 
 	if parameter.PriceListVersionId != "" {
