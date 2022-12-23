@@ -84,6 +84,10 @@ func (repository ItemRepository) scanRow(row *sql.Row) (res models.Item, err err
 func (repository ItemRepository) SelectAll(c context.Context, parameter models.ItemParameter) (data []models.Item, err error) {
 	conditionString := ``
 
+	if parameter.ID != "" {
+		conditionString += ` AND DEF.ID = '` + parameter.ID + `'`
+	}
+
 	if parameter.CustomerTypeId != "" && parameter.ItemCategoryId == "2" {
 		//KHUSUS TAC sendiri, tampilkan semua item dengan category TAC (TAC ANAK, BEBAS GULA, DLL)
 		conditionString += ` AND def.item_category_id IN (SELECT id FROM item_category WHERE lower (_name) LIKE '%tac%') `
@@ -140,6 +144,10 @@ func (repository ItemRepository) SelectAll(c context.Context, parameter models.I
 func (repository ItemRepository) FindAll(ctx context.Context, parameter models.ItemParameter) (data []models.Item, count int, err error) {
 	conditionString := ``
 
+	if parameter.ID != "" {
+		conditionString += ` AND DEF.ID = '` + parameter.ID + `'`
+	}
+
 	if parameter.CustomerTypeId != "" && parameter.ItemCategoryId == "2" {
 		//KHUSUS TAC sendiri, tampilkan semua item dengan category TAC (TAC ANAK, BEBAS GULA, DLL)
 		conditionString += ` AND def.item_category_id IN (SELECT id FROM item_category WHERE lower (_name) LIKE '%tac%') `
@@ -193,6 +201,9 @@ func (repository ItemRepository) FindAll(ctx context.Context, parameter models.I
 
 	query = `SELECT COUNT(*) FROM "item" DEF ` +
 		`JOIN ITEM_UOM_LINE IUL ON IUL.ITEM_ID = DEF.ID ` +
+		`LEFT JOIN ITEM_CATEGORY IC ON IC.ID = DEF.ITEM_CATEGORY_ID ` +
+		`LEFT JOIN UOM UOM ON UOM.ID = IUL.UOM_ID ` +
+		`JOIN ITEM_PRICE IP ON IP.UOM_ID = UOM.ID AND IP.ITEM_ID = IUL.ITEM_ID` +
 		models.ItemWhereStatement + ` ` +
 		conditionString + ` AND (LOWER(def."_name") LIKE $1)`
 	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
