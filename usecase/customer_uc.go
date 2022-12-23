@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"mime/multipart"
+	"strings"
 
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -75,10 +76,59 @@ func (uc CustomerUC) FindByID(c context.Context, parameter models.CustomerParame
 }
 
 // Edit ,...
-func (uc CustomerUC) Edit(c context.Context, id string, data *requests.CustomerRequest) (res models.Customer, err error) {
+func (uc CustomerUC) Edit(c context.Context, id string, data *requests.CustomerRequest, imgProfile *multipart.FileHeader, imgKtp *multipart.FileHeader) (res models.Customer, err error) {
+
+	currentObjectUc, err := uc.FindByID(c, models.CustomerParameter{ID: id})
+	ctx := "FileUC.Upload"
+	awsUc := AwsUC{ContractUC: uc.ContractUC}
+
+	var strImgprofile = ""
+	var strImgktp = ""
+	if currentObjectUc.CustomerPhotoKtp != nil && *currentObjectUc.CustomerPhotoKtp != "" {
+		strImgktp = strings.ReplaceAll(*currentObjectUc.CustomerPhotoKtp, models.CustomerImagePath, "")
+	}
+	if currentObjectUc.CustomerProfilePicture != nil && *currentObjectUc.CustomerProfilePicture != "" {
+		strImgprofile = strings.ReplaceAll(*currentObjectUc.CustomerProfilePicture, models.CustomerImagePath, "")
+	}
+
+	if imgProfile != nil {
+
+		if &strImgprofile != nil && strings.Trim(strImgprofile, " ") != "" {
+			_, err = awsUc.Delete("image/customer", strImgprofile)
+			if err != nil {
+				logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "s3", uc.ReqID)
+			}
+		}
+
+		imgProfileFile, err := awsUc.Upload("image/customer", imgProfile)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "upload_file", c.Value("requestid"))
+			return res, err
+		}
+		strImgprofile = imgProfileFile.FileName
+
+	}
+
+	if imgKtp != nil {
+
+		if &strImgktp != nil && strings.Trim(strImgktp, " ") != "" {
+			_, err = awsUc.Delete("image/customer", strImgktp)
+			if err != nil {
+				logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "s3", uc.ReqID)
+			}
+		}
+
+		imgKtpFile, err := awsUc.Upload("image/customer", imgKtp)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "upload_file", c.Value("requestid"))
+			return res, err
+		}
+		strImgktp = imgKtpFile.FileName
+
+	}
+
 	repo := repository.NewCustomerRepository(uc.DB)
-	// now := time.Now().UTC()
-	// strnow := now.Format(time.RFC3339)
+
 	res = models.Customer{
 		ID:                     &id,
 		Code:                   &data.Code,
@@ -87,7 +137,11 @@ func (uc CustomerUC) Edit(c context.Context, id string, data *requests.CustomerR
 		CustomerPhone:          &data.CustomerPhone,
 		CustomerEmail:          &data.CustomerEmail,
 		CustomerCpName:         &data.CustomerCpName,
-		CustomerProfilePicture: &data.CustomerProfilePicture,
+		CustomerProfilePicture: &strImgprofile,
+		CustomerNik:            &data.CustomerNik,
+		CustomerReligion:       &data.CustomerReligion,
+		CustomerPhotoKtp:       &strImgktp,
+		CustomerBirthDate:      &data.CustomerBirthDate,
 	}
 
 	res.ID, err = repo.Edit(c, &res)
@@ -126,12 +180,23 @@ func (uc CustomerUC) EditAddress(c context.Context, id string, data *requests.Cu
 func (uc CustomerUC) BackendEdit(c context.Context, id string, data *requests.CustomerRequest, imgProfile *multipart.FileHeader) (res models.Customer, err error) {
 
 	// currentObjectUc, err := uc.FindByID(c, models.MpBankParameter{ID: id})
+	currentObjectUc, err := uc.FindByID(c, models.CustomerParameter{ID: id})
 	ctx := "FileUC.Upload"
 	awsUc := AwsUC{ContractUC: uc.ContractUC}
 
 	var strImgprofile = ""
 
+	if currentObjectUc.CustomerProfilePicture != nil && *currentObjectUc.CustomerProfilePicture != "" {
+		strImgprofile = strings.ReplaceAll(*currentObjectUc.CustomerProfilePicture, models.CustomerImagePath, "")
+	}
+
 	if imgProfile != nil {
+		if &strImgprofile != nil && strings.Trim(strImgprofile, " ") != "" {
+			_, err = awsUc.Delete("image/customer", strImgprofile)
+			if err != nil {
+				logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "s3", uc.ReqID)
+			}
+		}
 
 		awsUc.AWSS3.Directory = "image/customer"
 		imgBannerFile, err := awsUc.Upload("image/customer", imgProfile)
@@ -158,6 +223,7 @@ func (uc CustomerUC) BackendEdit(c context.Context, id string, data *requests.Cu
 		CustomerActiveStatus:   &data.CustomerActiveStatus,
 		CustomerSalesmanID:     &data.CustomerSalesmanID,
 		CustomerBranchID:       &data.CustomerBranchID,
+		CustomerNik:            &data.CustomerNik,
 	}
 
 	res.ID, err = repo.BackendEdit(c, &res)

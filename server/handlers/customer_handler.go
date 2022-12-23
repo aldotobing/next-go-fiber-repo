@@ -120,6 +120,7 @@ func (h *CustomerHandler) Edit(ctx *fiber.Ctx) error {
 	}
 
 	input := new(requests.CustomerRequest)
+	err := json.Unmarshal([]byte(ctx.FormValue("form_data")), input)
 	if err := ctx.BodyParser(input); err != nil {
 		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
 	}
@@ -127,9 +128,11 @@ func (h *CustomerHandler) Edit(ctx *fiber.Ctx) error {
 		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
 		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
 	}
+	imgProfile, _ := ctx.FormFile("img_profile")
+	imgKtp, _ := ctx.FormFile("img_ktp")
 
 	uc := usecase.CustomerUC{ContractUC: h.ContractUC}
-	res, err := uc.Edit(c, id, input)
+	res, err := uc.Edit(c, id, input, imgProfile, imgKtp)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }

@@ -2,6 +2,7 @@ package aws
 
 import (
 	"bytes"
+	"fmt"
 	"mime/multipart"
 	"net/http"
 	"time"
@@ -76,4 +77,26 @@ func (cred *AWSS3) GetURL(key string) (res string, err error) {
 	res, err = req.Presign(15 * time.Minute)
 
 	return res, err
+}
+
+func (awss3 AWSS3) DeleteManager(fileToBeRemoved string) (s3path string, fileName string, err error) {
+	session, err := awsSession.NewSession(&awss3.AWSConfig)
+	if err != nil {
+		return s3path, fileName, err
+	}
+
+	fmt.Println("Data gambar = "+fileToBeRemoved, awss3)
+	fmt.Println(awss3.Bucket)
+
+	_, err = s3.New(session).DeleteObject(&s3.DeleteObjectInput{
+		Key:    aws.String(fileToBeRemoved),
+		Bucket: &awss3.Bucket,
+	})
+	if err != nil {
+		return s3path, fileName, err
+	}
+
+	s3path = awss3.Directory + "/" + fileName
+
+	return s3path, fileName, err
 }

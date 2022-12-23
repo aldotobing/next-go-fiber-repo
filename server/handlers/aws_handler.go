@@ -22,19 +22,23 @@ func (h *AwsHandler) Upload(ctx *fiber.Ctx) error {
 	c = context.WithValue(c, "user_id", ctx.Locals("user_id"))
 	defer cancel()
 
-	// // Read Aws type
-	// AwsType := ctx.FormValue("type")
-	// if !str.Contains(models.FileWhitelist, AwsType) {
-	// 	return h.SendResponse(ctx, nil, nil, errors.New(helper.InvalidFileType), 0)
-	// }
-
-	// Upload Aws to local temporary
 	AwsHeader, err := ctx.FormFile("upload_image")
 	if err != nil {
 		return h.SendResponse(ctx, nil, nil, err, 0)
 	}
 	AwsUc := usecase.AwsUC{ContractUC: h.ContractUC}
 	res, err := AwsUc.Upload("customer", AwsHeader)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *AwsHandler) Delete(ctx *fiber.Ctx) error {
+
+	FileToDelete := ctx.Query("str_delete_file")
+	FilePath := ctx.Query("file_path")
+
+	AwsUc := usecase.AwsUC{ContractUC: h.ContractUC}
+	res, err := AwsUc.Delete(FilePath, FileToDelete)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }

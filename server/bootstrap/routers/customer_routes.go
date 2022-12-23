@@ -47,5 +47,6 @@ func (route CustomerRoutes) RegisterRoute() {
 	// r.Use(jwtMiddleware.VerifyUser)
 	raws.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
 	raws.Post("/", handlerAws.Upload)
+	raws.Delete("/", handlerAws.Delete)
 
 }

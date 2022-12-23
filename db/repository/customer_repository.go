@@ -71,6 +71,8 @@ func (repository CustomerRepository) scanRows(rows *sql.Rows) (res models.Custom
 		&res.CustomerTaxCalcMethod,
 		&res.CustomerBranchID,
 		&res.CustomerSalesmanID,
+		&res.CustomerPhotoKtp,
+		&res.CustomerNik,
 	)
 	if err != nil {
 
@@ -121,6 +123,8 @@ func (repository CustomerRepository) scanRow(row *sql.Row) (res models.Customer,
 		&res.CustomerTaxCalcMethod,
 		&res.CustomerBranchID,
 		&res.CustomerSalesmanID,
+		&res.CustomerPhotoKtp,
+		&res.CustomerNik,
 	)
 	if err != nil {
 		return res, err
@@ -179,11 +183,11 @@ func (repository CustomerRepository) FindAll(ctx context.Context, parameter mode
 
 	query := models.CustomerSelectStatement + ` ` + models.CustomerWhereStatement + ` ` + conditionString + `
 		AND (LOWER(c."customer_name") LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
+	// fmt.Println(query)
 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
 	if err != nil {
 		return data, count, err
 	}
-	// fmt.Println(query)
 
 	defer rows.Close()
 	for rows.Next() {
@@ -227,8 +231,12 @@ func (repository CustomerRepository) Edit(c context.Context, model *models.Custo
 	customer_phone = $3, 
 	customer_email = $4,
 	customer_cp_name = $5,
-	customer_profile_picture = $6 
-	WHERE id = $7 
+	customer_profile_picture = $6, 
+	customer_photo_ktp = $7,
+	customer_religion = $8,
+	customer_birthdate = $9,
+	customer_nik =$10
+	WHERE id = $11 
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		model.CustomerName,
@@ -237,6 +245,10 @@ func (repository CustomerRepository) Edit(c context.Context, model *models.Custo
 		model.CustomerEmail,
 		model.CustomerCpName,
 		model.CustomerProfilePicture,
+		model.CustomerPhotoKtp,
+		model.CustomerReligion,
+		model.CustomerBirthDate,
+		model.CustomerNik,
 		model.ID).Scan(&res)
 	if err != nil {
 		return res, err

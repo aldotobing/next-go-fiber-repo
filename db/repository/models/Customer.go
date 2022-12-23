@@ -42,6 +42,8 @@ type Customer struct {
 	CustomerTaxCalcMethod   *string `json:"customer_tax_calc_method"`
 	CustomerBranchID        *string `json:"customer_branch_id"`
 	CustomerSalesmanID      *string `json:"customer_salesman_id"`
+	CustomerNik             *string `json:"customer_nik"`
+	CustomerPhotoKtp        *string `json:"customer_photo_ktp"`
 }
 
 // CustomerParameter ...
@@ -76,7 +78,7 @@ var (
 		C.CUSTOMER_NAME AS CUST_NAME,
 		C.CUSTOMER_CP_NAME AS CUST_CP_NAME,
 		C.CUSTOMER_ADDRESS AS CUST_ADDRESS,
-		C.CUSTOMER_PROFILE_PICTURE AS CUST_PROFILE_PICTURE,
+		concat('` + CustomerImagePath + `',C.CUSTOMER_PROFILE_PICTURE) AS CUST_PROFILE_PICTURE,
 		C.CUSTOMER_EMAIL AS CUST_EMAIL,
 		C.CUSTOMER_BIRTHDATE AS BIRTHDATE,
 		C.CUSTOMER_RELIGION AS RELIGION,
@@ -111,15 +113,17 @@ var (
 		LOY.LOYALTY_NAME AS CUST_LOYALTY_NAME,
 		C.tax_calc_method as tax_calc_method,
 		C.branch_id as c_branch_id,
-		C.salesman_id as c_salesman_id
+		C.salesman_id as c_salesman_id,
+		concat('` + CustomerImagePath + `',C.customer_photo_ktp) AS CUST_KTP_PICTURE
+
 	FROM CUSTOMER C
 	LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
 	LEFT JOIN REGION REG ON REG.ID = B.REGION_ID
 	LEFT JOIN CUSTOMER_TYPE CT ON CT.ID = C.CUSTOMER_TYPE_ID
-	JOIN PROVINCE PRV ON PRV.ID = C.CUSTOMER_PROVINCE_ID
-	JOIN CITY CTY ON CTY.ID = C.CUSTOMER_CITY_ID
-	JOIN DISTRICT DIST ON DIST.ID = C.CUSTOMER_DISTRICT_ID
-	JOIN SUBDISTRICT SDIST ON SDIST.ID = C.CUSTOMER_SUBDISTRICT_ID
+	left JOIN PROVINCE PRV ON PRV.ID = C.CUSTOMER_PROVINCE_ID
+	left JOIN CITY CTY ON CTY.ID = C.CUSTOMER_CITY_ID
+	left JOIN DISTRICT DIST ON DIST.ID = C.CUSTOMER_DISTRICT_ID
+	left JOIN SUBDISTRICT SDIST ON SDIST.ID = C.CUSTOMER_SUBDISTRICT_ID
 	LEFT JOIN SALESMAN S ON S.ID = C.SALESMAN_ID
 	LEFT JOIN PARTNER PS ON PS.ID = S.PARTNER_ID
 	LEFT JOIN CUSTOMER_GIFT CG ON CG.CUSTOMER_ID = C.ID
