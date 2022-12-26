@@ -24,9 +24,9 @@ func (route CustomerOrderHeaderRoutes) RegisterRoute() {
 	r := route.RouterGroup.Group("/api/apps/customerorder")
 	// r.Use(jwtMiddleware.VerifyUser)
 	r.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
-	r.Get("/:customer_id", handler.FindAll)
-	r.Get("/select/:customer_id", handler.SelectAll)
-	r.Get("/id/:id", handler.FindByID)
+	r.Get("/:customer_id", handler.AppsFindAll)
+	r.Get("/select/:customer_id", handler.AppsSelectAll)
+	r.Get("/id/:id", handler.AppsFindByID)
 
 	r2 := route.RouterGroup.Group("/api/rest/customerorder")
 	// r.Use(jwtMiddleware.VerifyUser)

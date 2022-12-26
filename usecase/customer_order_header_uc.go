@@ -325,3 +325,57 @@ func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter mode
 
 	return resBuilder, err
 }
+
+// apps
+
+// SelectAll ...
+func (uc CustomerOrderHeaderUC) AppsSelectAll(c context.Context, parameter models.CustomerOrderHeaderParameter) (res []models.CustomerOrderHeader, err error) {
+	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(0, 0, parameter.By, parameter.Sort, models.CustomerOrderHeaderOrderBy, models.CustomerOrderHeaderOrderByrByString)
+
+	repo := repository.NewCustomerOrderHeaderRepository(uc.DB)
+	res, err = repo.AppsSelectAll(c, parameter)
+
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	for i := range res {
+		uc.BuildBody(&res[i])
+	}
+
+	return res, err
+}
+
+// FindAll ...
+func (uc CustomerOrderHeaderUC) AppsFindAll(c context.Context, parameter models.CustomerOrderHeaderParameter) (res []models.CustomerOrderHeader, p viewmodel.PaginationVM, err error) {
+	parameter.Offset, parameter.Limit, parameter.Page, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.CustomerOrderHeaderOrderBy, models.CustomerOrderHeaderOrderByrByString)
+
+	var count int
+	repo := repository.NewCustomerOrderHeaderRepository(uc.DB)
+	res, count, err = repo.FindAll(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, p, err
+	}
+
+	p = uc.setPaginationResponse(parameter.Page, parameter.Limit, count)
+	for i := range res {
+		uc.BuildBody(&res[i])
+	}
+
+	return res, p, err
+}
+
+// FindByID ...
+func (uc CustomerOrderHeaderUC) AppsFindByID(c context.Context, parameter models.CustomerOrderHeaderParameter) (res models.CustomerOrderHeader, err error) {
+	repo := repository.NewCustomerOrderHeaderRepository(uc.DB)
+	res, err = repo.FindByID(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+	uc.BuildBody(&res)
+
+	return res, err
+}
