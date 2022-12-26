@@ -70,3 +70,22 @@ func (uc CustomerOrderLineUC) FindByID(c context.Context, parameter models.Custo
 
 	return res, err
 }
+
+// SelectAll ...
+func (uc CustomerOrderLineUC) SFASelectAll(c context.Context, parameter models.CustomerOrderLineParameter) (res []models.CustomerOrderLine, err error) {
+	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(0, 0, parameter.By, parameter.Sort, models.CustomerOrderLineOrderBy, models.CustomerOrderLineOrderByrByString)
+
+	repo := repository.NewCustomerOrderLineRepository(uc.DB)
+	res, err = repo.SFASelectAll(c, parameter)
+
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	for i := range res {
+		uc.BuildBody(&res[i])
+	}
+
+	return res, err
+}

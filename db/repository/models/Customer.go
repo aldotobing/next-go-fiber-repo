@@ -114,7 +114,8 @@ var (
 		C.tax_calc_method as tax_calc_method,
 		C.branch_id as c_branch_id,
 		C.salesman_id as c_salesman_id,
-		concat('` + CustomerImagePath + `',C.customer_photo_ktp) AS CUST_KTP_PICTURE
+		concat('` + CustomerImagePath + `',C.customer_photo_ktp) AS CUST_KTP_PICTURE,
+		c.customer_nik
 
 	FROM CUSTOMER C
 	LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID

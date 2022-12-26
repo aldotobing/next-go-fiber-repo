@@ -88,14 +88,14 @@ func (repository SalesOrderCustomerSyncRepository) InsertDataWithLine(c context.
 		tax_calc_method ,salesman_id ,payment_terms_id ,company_id ,
 		branch_id ,price_list_id ,price_list_version_id ,status ,gross_amount ,
 		disc_amount ,taxable_amount ,tax_amount ,rounding_amount ,net_amount ,
-		global_disc_amount,cust_ship_to_id,expected_delivery_date
+		global_disc_amount,cust_ship_to_id,expected_delivery_date,void_reason_notes
 		)values(
 		$1, $2, $3, $4, (select id from customer where customer_code = $5),
 		$6, (select id from salesman where partner_id =(select id from partner where code = $7)), $8, $9, $10,
 		$11 ,$12, $13, $14, $15,
 		$16, $17, $18, $19, $20,
 		(select id from customer where customer_code = $21),
-		$22
+		$22, $23
 		)
 	RETURNING id`
 	transaction, err := repository.DB.BeginTx(c, nil)
@@ -123,7 +123,7 @@ func (repository SalesOrderCustomerSyncRepository) InsertDataWithLine(c context.
 		model.TaxCalcMethod, model.SalesmanCode, model.PaymentTermsID, model.CompanyID,
 		model.BranchID, model.PriceLIstID, model.PriceLIstVersionID, str.EmptyString(*model.Status), str.EmptyString(*model.GrossAmount),
 		model.DiscAmount, model.TaxableAmount, model.TaxAmount, model.RoundingAmount, model.NetAmount,
-		model.GlobalDiscAmount, model.CustomerCode, model.ExpectedDeliveryDate,
+		model.GlobalDiscAmount, model.CustomerCode, model.ExpectedDeliveryDate, model.VoidReasonNotes,
 	).Scan(&res)
 
 	if err != nil {
@@ -189,7 +189,7 @@ func (repository SalesOrderCustomerSyncRepository) InsertDataWithLine(c context.
 func (repository SalesOrderCustomerSyncRepository) RevisedSync(c context.Context, model *models.SalesOrderCustomerSync) (res string, err error) {
 
 	statement := `
-	update sales_order_header set status ='revised' where document_no = $1
+	update sales_order_header set status = $1, void_reason_notes = $2 where document_no = $3
 	RETURNING id`
 	transaction, err := repository.DB.BeginTx(c, nil)
 	if err != nil {
@@ -197,7 +197,7 @@ func (repository SalesOrderCustomerSyncRepository) RevisedSync(c context.Context
 	}
 	defer transaction.Rollback()
 
-	err = transaction.QueryRowContext(c, statement,
+	err = transaction.QueryRowContext(c, statement, model.Status, model.VoidReasonNotes,
 		model.DocumentNo,
 	).Scan(&res)
 
