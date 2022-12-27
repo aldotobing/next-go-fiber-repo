@@ -53,7 +53,7 @@ var (
 		--ITEM CONVERSION > 1 (HIGHEST UOM)
 	*/
 	ItemSelectStatement = `
-	SELECT IUL.id as uomline_id,DEF.ID AS DEF_ID,
+	SELECT IP.id as uomline_id,DEF.ID AS DEF_ID,
 		DEF.CODE AS DEF_CODE,
 		DEF._NAME AS DEF_NAME,
 		DEF.DESCRIPTION as DEF_DESCRIPTION,
