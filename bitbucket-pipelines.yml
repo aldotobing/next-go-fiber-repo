@@ -17,7 +17,7 @@ pipelines:
               # Build compiles the packages
               - go build server/main.go
         - step:
-            name: Lint code
+            name: Lint Code
             image: golangci/golangci-lint:v1.31.0
             script:
               #- golangci-lint run -v
