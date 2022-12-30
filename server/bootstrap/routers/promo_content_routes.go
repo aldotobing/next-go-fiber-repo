@@ -26,5 +26,6 @@ func (route PromoContentRoutes) RegisterRoute() {
 	r.Get("/", handler.FindAll)
 	r.Get("/select", handler.SelectAll)
 	r.Post("/", handler.Add)
+	r.Delete("/id/:id", handler.Delete)
 
 }

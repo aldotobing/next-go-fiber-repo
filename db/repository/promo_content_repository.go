@@ -14,6 +14,7 @@ type IPromoContent interface {
 	SelectAll(c context.Context, parameter models.PromoContentParameter) ([]models.PromoContent, error)
 	FindAll(ctx context.Context, parameter models.PromoContentParameter) ([]models.PromoContent, int, error)
 	Add(c context.Context, parameter *models.PromoContent) (*string, error)
+	Delete(c context.Context, id string) (string, error)
 	// 	Edit(c context.Context, model *models.PromoContent) (*string, error)
 	// 	EditAddress(c context.Context, model *models.PromoContent) (*string, error)
 }
@@ -187,6 +188,18 @@ func (repository PromoContent) Add(c context.Context, model *models.PromoContent
 
 	if err != nil {
 		fmt.Println("INSERT PROMO BERHASIL! :)")
+		return res, err
+	}
+	return res, err
+}
+
+// Delete ...
+func (repository PromoContent) Delete(c context.Context, id string) (res string, err error) {
+	statement := `UPDATE promo set active = 0 where id= $1 RETURNING id `
+
+	err = repository.DB.QueryRowContext(c, statement, id).Scan(&res)
+
+	if err != nil {
 		return res, err
 	}
 	return res, err

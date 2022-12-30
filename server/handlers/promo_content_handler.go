@@ -8,6 +8,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"nextbasis-service-v-0.1/db/repository/models"
+	"nextbasis-service-v-0.1/helper"
 	"nextbasis-service-v-0.1/pkg/str"
 	"nextbasis-service-v-0.1/server/requests"
 	"nextbasis-service-v-0.1/usecase"
@@ -94,6 +95,21 @@ func (h *PromoContentHandler) Add(ctx *fiber.Ctx) error {
 
 	uc := usecase.PromoContentUC{ContractUC: h.ContractUC}
 	res, err := uc.Add(c, input, imgBanner)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+// Delete ...
+func (h *PromoContentHandler) Delete(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	id := ctx.Params("id")
+	if id == "" {
+		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
+	}
+
+	uc := usecase.PromoContentUC{ContractUC: h.ContractUC}
+	res, err := uc.Delete(c, id)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
