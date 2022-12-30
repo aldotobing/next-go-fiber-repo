@@ -27,5 +27,6 @@ func (route VideoPromoteRoutes) RegisterRoute() {
 	r.Get("/", handler.FindAll)
 	r.Get("/select", handler.SelectAll)
 	r.Post("/add", handler.Add)
+	r.Delete("/id/:id", handler.Delete)
 
 }

@@ -25,7 +25,7 @@ func NewDashboardWebRepository(DB *sql.DB) IDashboardWebRepository {
 // Scan row
 func (repository DashboardWebRepository) scanRow(row *sql.Row) (res models.DashboardWeb, err error) {
 	err = row.Scan(
-		&res.RegionName, &res.TotalActiveUser, &res.TotalRepeatUser, &res.TotalOrderUser, &res.TotalInvoice,
+		&res.RegionID, &res.RegionName, &res.TotalRegisteredUser, &res.TotalRepeatUser, &res.TotalOrderUser, &res.TotalInvoice, &res.TotalActiveUser,
 	)
 
 	if err != nil {
@@ -38,7 +38,7 @@ func (repository DashboardWebRepository) scanRow(row *sql.Row) (res models.Dashb
 // Scan rows
 func (repository DashboardWebRepository) scanRows(rows *sql.Rows) (res models.DashboardWeb, err error) {
 	err = rows.Scan(
-		&res.RegionName, &res.TotalActiveUser, &res.TotalRepeatUser, &res.TotalOrderUser, &res.TotalInvoice,
+		&res.RegionID, &res.RegionName, &res.TotalRegisteredUser, &res.TotalRepeatUser, &res.TotalOrderUser, &res.TotalInvoice, &res.TotalActiveUser,
 	)
 	if err != nil {
 
