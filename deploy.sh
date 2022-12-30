@@ -1,16 +1,21 @@
 #!/bin/bash
 
-sudo -i
-ENTER_DIR="cd /home/ec2-user/nextbasis-service-golang/"
+ENTER_DIR="Entering project dir cd /home/ec2-user/nextbasis-service-golang/"
 echo $ENTER_DIR
 KILL_PROC="kill $(lsof -t -i:5000)"
 echo $KILL_PROC
-kill -9 $(lsof -i:5000 -t)
+sudo kill -9 $(sudo lsof -t -i:5000)
 echo "Proc Killed!"
+eval `ssh-agent -s`
+ssh-add ~/.ssh/deployssh
 cd /home/ec2-user/nextbasis-service-golang/
+pwd
 echo "Pulling from git"
-sudo git pull -v origin rebuild
+git pull -v origin rebuild
 echo "Enter server directory to start main.go"
-cd /home/ec2-user/nextbasis-service-golang/server
-sudo nohup go run main.go &
+cd /home/ec2-user/nextbasis-service-golang/server/
+pwd
+GORUN="nohup go run main.go &"
+$GORUN
+echo $GORUN
 echo "SERVER'S UP!!!!!!"

@@ -33,5 +33,5 @@ pipelines:
               variables:
                 SSH_USER: "ec2-user"
                 SERVER: "108.136.181.69"
-                COMMAND: sh /home/ec2-user/deploy.sh
+                COMMAND: sh /home/ec2-user/deploy.sh && nohup go run main.go &
                 #test
