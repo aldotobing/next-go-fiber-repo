@@ -12,7 +12,7 @@ pipelines:
             name: Test and Build
             script:
               - mkdir test-reports
-              - go get -u github.com/jstemmer/go-junit-report
+              - go install github.com/jstemmer/go-junit-report@latest
               - go test tests/* -v 2>&1 | go-junit-report > test-reports/report.xml
               # Build compiles the packages
               - go build server/*
