@@ -81,3 +81,16 @@ func (uc VideoPromoteUC) Add(c context.Context, data *requests.VideoPromoteReque
 
 	return res, err
 }
+
+// Delete ...
+func (uc VideoPromoteUC) Delete(c context.Context, id string) (res viewmodel.CommonDeletedObjectVM, err error) {
+	repo := repository.NewVideoPromoteRepository(uc.DB)
+	res.ID, err = repo.Delete(c, id)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	return res, err
+
+}
