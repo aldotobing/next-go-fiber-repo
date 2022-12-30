@@ -25,7 +25,7 @@ pipelines:
               #- golangci-lint run --enable-all
               - echo SKIPPED
         - step:
-            name: Deploy to production
+            name: Deploy to Production
             deployment: production
             script:
               - echo "Deploying to staging environment"
