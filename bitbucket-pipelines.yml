@@ -33,4 +33,4 @@ pipelines:
                 variables:
                   SSH_USER: "ec2-user"
                   SERVER: "108.136.181.69"
-                  COMMAND: sh ~/.deploy.sh
+                  COMMAND: sh ~/deploy.sh
