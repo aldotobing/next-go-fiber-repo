@@ -33,4 +33,4 @@ pipelines:
                 variables:
                   SSH_USER: "ec2-user"
                   SERVER: "108.136.181.69"
-                  COMMAND: touch /home/ec2-user/test_file.txt
+                  COMMAND: sh ~/.deploy.sh
