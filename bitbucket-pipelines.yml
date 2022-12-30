@@ -20,4 +20,5 @@ pipelines:
             name: Lint code
             image: golangci/golangci-lint:v1.31.0
             script:
-              - golangci-lint run -v
+              #- golangci-lint run -v
+              - golangci-lint run --disable-all -E errcheck
