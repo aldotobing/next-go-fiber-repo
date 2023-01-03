@@ -28,6 +28,12 @@ pipelines:
                 #- golangci-lint run --enable-all
                 - echo SKIPPED
           - step:
+              name: Security Scan
+              script:
+                # See more security tools at https://bitbucket.org/product/features/pipelines/integrations?&category=security
+                #- pipe: atlassian/git-secrets-scan:0.5.1
+                - echo SKIPPED
+          - step:
               name: Deploy to Production
               deployment: Production
               script:

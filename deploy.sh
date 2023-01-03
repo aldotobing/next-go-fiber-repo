@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 ENTER_DIR="Entering project dir cd /home/ec2-user/nextbasis-service-golang/"
@@ -15,7 +16,6 @@ git pull -v origin rebuild
 echo "Enter server directory to start main.go"
 cd /home/ec2-user/nextbasis-service-golang/server/
 pwd
-GORUN="nohup go run main.go &"
-$GORUN
-echo $GORUN
-echo "SERVER'S UP!!!!!!"
+nohup go run main.go & > nohup.out
+echo $?
+exit 0
