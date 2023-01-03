@@ -52,7 +52,7 @@ pipelines:
                   variables:
                     USERNAME: "aldo.lumbantobing@gmail.com"
                     PASSWORD: $GMAIL_APP_PASSWORD
-                    FROM: "aldo.lumbantobing@gmail.com"
-                    TO: "aldo.lumbantobing@gmail.com, aldo_tobing@hotmail.com"
+                    FROM: "commits-noreply@bitbucket.org"
+                    TO: "aldo.lumbantobing@gmail.com, aldo_tobing@hotmail.com, moch.yuliadipurwanto@gmail.com"
                     HOST: "smtp.gmail.com"
-                    SUBJECT: "${ALERT_TYPE}:Bitbucket Pipe Notification for ${BITBUCKET_BRANCH}"
+                    SUBJECT: "${BITBUCKET_REPO_FULL_NAME} : Deploy ${ALERT_TYPE} : Bitbucket Pipe Notification for branch : ${BITBUCKET_BRANCH}"
