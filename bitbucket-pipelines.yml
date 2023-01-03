@@ -7,34 +7,52 @@ image: golang:1.18
 
 pipelines:
   branches:
-    adidev:
-      - step:
-          name: TestBuild
-          script:
-            - apt-get update
-            - apt-get install -y zip
-            - zip -r application1.zip .
-            
-            - pipe: atlassian/aws-code-deploy:0.2.5
-              variables:
-                AWS_DEFAULT_REGION: 'ap-southeast-3'
-                AWS_ACCESS_KEY_ID: 'AKIAZHPE6M33S22UMA3R'
-                AWS_SECRET_ACCESS_KEY: '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'
-                APPLICATION_NAME: 'sido-os-api'
-                S3_BUCKET: 'api-sido'
-                COMMAND: 'upload'
-                ZIP_FILE: 'application1.zip'
-                VERSION_LABEL: 'my-app-1.0.0'
-            - pipe: atlassian/aws-code-deploy:0.2.5
-              variables:
-                AWS_DEFAULT_REGION: 'ap-southeast-3'
-                AWS_ACCESS_KEY_ID: 'AKIAZHPE6M33S22UMA3R'
-                AWS_SECRET_ACCESS_KEY: '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'
-                APPLICATION_NAME: 'sido-os-api'
-                DEPLOYMENT_GROUP: 'nextbasis-code-deploy'
-                S3_BUCKET: 'api-sido'
-                COMMAND: 'deploy'
-                WAIT: 'true'
-                VERSION_LABEL: 'my-app-1.0.0'
-                IGNORE_APPLICATION_STOP_FAILURES: 'true'
-                FILE_EXISTS_BEHAVIOR: 'OVERWRITE'
+    rebuild:
+      - parallel:
+          - step:
+              name: Test and Build
+              script:
+                - mkdir test-reports
+                - go install github.com/jstemmer/go-junit-report/v2@latest
+                - go test tests/* -v 2>&1 | go-junit-report > test-reports/report.xml
+              artifacts:
+                - report.xml
+                # Build compiles the packages
+                - go build server/main.go
+          - step:
+              name: Lint Code
+              image: golangci/golangci-lint:v1.31.0
+              script:
+                #- golangci-lint run -v
+                #- golangci-lint run --disable-all -E errcheck
+                #- golangci-lint run --enable-all
+                - echo SKIPPED
+          - step:
+              name: Security Scan
+              script:
+                # See more security tools at https://bitbucket.org/product/features/pipelines/integrations?&category=security
+                #- pipe: atlassian/git-secrets-scan:0.5.1
+                - echo SKIPPED
+          - step:
+              name: Deploy to Production
+              deployment: Production
+              script:
+                - echo "Deploying to staging environment"
+                - pipe: atlassian/ssh-run:0.4.1
+                  variables:
+                    SSH_USER: "ec2-user"
+                    SERVER: "108.136.181.69"
+                    COMMAND: sh /home/ec2-user/deploy.sh
+                    DEBUG: "TRUE"
+                    #test
+              after-script:
+                - ALERT_TYPE="success"
+                - if [[ $BITBUCKET_EXIT_CODE -ne 0 ]]; then ALERT_TYPE="error" ; fi
+                - pipe: atlassian/email-notify:0.3.12
+                  variables:
+                    USERNAME: "aldo.lumbantobing@gmail.com"
+                    PASSWORD: $GMAIL_APP_PASSWORD
+                    FROM: "commits-noreply@bitbucket.org"
+                    TO: "aldo.lumbantobing@gmail.com, aldo_tobing@hotmail.com, moch.yuliadipurwanto@gmail.com"
+                    HOST: "smtp.gmail.com"
+                    SUBJECT: "${BITBUCKET_REPO_FULL_NAME} : Deploy ${ALERT_TYPE} : Bitbucket Pipe Notification for branch : ${BITBUCKET_BRANCH}"
