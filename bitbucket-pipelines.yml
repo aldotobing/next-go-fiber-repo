@@ -56,4 +56,4 @@ pipelines:
                     TO: "$EMAIL_1_TO, $EMAIL_2_TO, $EMAIL_3_TO"
                     HOST: "$EMAIL_HOST"
                     SUBJECT: "${BITBUCKET_REPO_FULL_NAME} : Deploy ${ALERT_TYPE} : Bitbucket Pipe Notification for branch : ${BITBUCKET_BRANCH}"
-                    BODY_HTML: "mail_template.html"
+                    BODY_HTML: "$EMAIL_TEMPLATE"
