@@ -44,6 +44,7 @@ type Customer struct {
 	CustomerSalesmanID      *string `json:"customer_salesman_id"`
 	CustomerNik             *string `json:"customer_nik"`
 	CustomerPhotoKtp        *string `json:"customer_photo_ktp"`
+	CustomerLevel           *string `json:"customer_level_name"`
 }
 
 // CustomerParameter ...
@@ -115,7 +116,8 @@ var (
 		C.branch_id as c_branch_id,
 		C.salesman_id as c_salesman_id,
 		concat('` + CustomerImagePath + `',C.customer_photo_ktp) AS CUST_KTP_PICTURE,
-		c.customer_nik
+		c.customer_nik,
+		cl._name as cus_level_name
 
 	FROM CUSTOMER C
 	LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
@@ -130,8 +132,9 @@ var (
 	LEFT JOIN CUSTOMER_GIFT CG ON CG.CUSTOMER_ID = C.ID
 	LEFT JOIN CUSTOMER_POINT CP ON CP.CUSTOMER_ID = C.ID
 	LEFT JOIN LOYALTY LOY ON LOY.CUSTOMER_ID = C.ID
+	left join customer_level cl on cl.id = c.customer_level_id
 	`
 
 	// CustomerWhereStatement ...
-	CustomerWhereStatement = ` WHERE c.created_date IS not NULL `
+	CustomerWhereStatement = ` WHERE c.created_date IS not NULL and c.show_in_apps = 1 `
 )
