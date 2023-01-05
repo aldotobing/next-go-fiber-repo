@@ -42,7 +42,7 @@ pipelines:
               variables:
                 SSH_USER: "$SSH_USER"
                 SERVER: "$SSH_ADDR"
-                COMMAND: sh /home/$SSH_USER/deploy.sh
+                COMMAND: sh /home/ec2-user/deploy.sh
                 DEBUG: "TRUE"
                 #test
           after-script:
