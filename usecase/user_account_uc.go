@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -72,7 +73,12 @@ func (uc UserAccountUC) FindByID(c context.Context, parameter models.UserAccount
 }
 
 func (uc UserAccountUC) Login(c context.Context, data *requests.UserAccountLoginRequest) (res viewmodel.UserAccountVM, err error) {
-	chkuser, _ := uc.FindByPhoneNo(c, models.UserAccountParameter{PhoneNo: data.PhoneNo, Code: data.Code})
+	parts := strings.Split(data.PhoneNo, "--*")
+	EmailUser := ""
+	if len(parts) >= 1 {
+		EmailUser = parts[0]
+	}
+	chkuser, _ := uc.FindByPhoneNo(c, models.UserAccountParameter{PhoneNo: EmailUser, Code: data.Code})
 	if chkuser.ID == "" {
 		logruslogger.Log(logruslogger.WarnLevel, helper.NameAlreadyExist, functioncaller.PrintFuncName(), "email", c.Value("requestid"))
 		return res, errors.New(helper.InvalidEmail)
@@ -83,7 +89,13 @@ func (uc UserAccountUC) Login(c context.Context, data *requests.UserAccountLogin
 	}
 	res.CustomerID = *chkuser.CustomerID
 	otpUc := OtpUC{ContractUC: uc.ContractUC}
-	res.Otp, err = otpUc.OtpRequest(c, res.CustomerID, &userOtpRequest)
+	if len(parts) > 1 {
+		res.Otp, err = otpUc.OtpAnonumousRequest(c, res.CustomerID, &userOtpRequest)
+
+	} else {
+		res.Otp, err = otpUc.OtpRequest(c, res.CustomerID, &userOtpRequest)
+	}
+
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "otp_request", uc.ContractUC.ReqID)
 		return res, err
@@ -117,9 +129,11 @@ func (uc UserAccountUC) Login(c context.Context, data *requests.UserAccountLogin
 	res.SalesmanName = chkuser.SalesmanName
 	res.SalesmanCode = chkuser.SalesmanCode
 
-	senDwaMessage := uc.ContractUC.WhatsApp.SendWA(res.Phone, res.Otp)
-	if senDwaMessage != nil {
-		fmt.Println("sukses")
+	if len(parts) == 1 {
+		senDwaMessage := uc.ContractUC.WhatsApp.SendWA(res.Phone, res.Otp)
+		if senDwaMessage != nil {
+			fmt.Println("sukses")
+		}
 	}
 	return res, nil
 }
