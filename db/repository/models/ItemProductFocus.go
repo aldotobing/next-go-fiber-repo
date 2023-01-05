@@ -23,6 +23,7 @@ type ItemProductFocusParameter struct {
 	Name               string `json:"item_name"`
 	ItemCategoryId     string `json:"item_category_id"`
 	PriceListVersionId string `json:"price_list_version_id"`
+	CustomerTypeId     string `json:"customer_type_id"`
 	Search             string `json:"search"`
 	Page               int    `json:"page"`
 	Offset             int    `json:"offset"`

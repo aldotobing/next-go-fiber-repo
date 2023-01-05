@@ -68,6 +68,16 @@ func (repository ItemProductFocusRepository) SelectAll(c context.Context, parame
 		conditionString += ` AND ip.price_list_version_id = '` + parameter.PriceListVersionId + `'`
 	}
 
+	/*
+		customerType 7 = Apotek Lokal
+		customerType 15 = MT LOKAL INDEPENDEN
+		defId 83 = TOLAK ANGIN CAIR /D5
+		Tampilkan TAC D5 hanya pada kedua customerType di atas
+	*/
+	if parameter.CustomerTypeId != "" && (parameter.CustomerTypeId != "7" && parameter.CustomerTypeId != "15") {
+		conditionString += ` AND i.id NOT IN (83, 307, 393) `
+	}
+
 	statement := models.ItemProductFocusSelectStatement + ` ` + models.ItemProductFocusWhereStatement +
 		` AND (LOWER(i."_name") LIKE $1)  AND IUL.CONVERSION > 1 ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	fmt.Println(statement)
@@ -100,6 +110,16 @@ func (repository ItemProductFocusRepository) FindAll(ctx context.Context, parame
 
 	if parameter.PriceListVersionId != "" {
 		conditionString += ` AND ip.price_list_version_id = '` + parameter.PriceListVersionId + `'`
+	}
+
+	/*
+		customerType 7 = Apotek Lokal
+		customerType 15 = MT LOKAL INDEPENDEN
+		defId 83 = TOLAK ANGIN CAIR /D5
+		Tampilkan TAC D5 hanya pada kedua customerType di atas
+	*/
+	if parameter.CustomerTypeId != "" && (parameter.CustomerTypeId != "7" && parameter.CustomerTypeId != "15") {
+		conditionString += ` AND i.id NOT IN (83, 307, 393) `
 	}
 
 	query := models.ItemProductFocusSelectStatement + ` ` + models.ItemProductFocusWhereStatement + ` ` + conditionString + `
