@@ -73,12 +73,12 @@ func (uc UserAccountUC) FindByID(c context.Context, parameter models.UserAccount
 }
 
 func (uc UserAccountUC) Login(c context.Context, data *requests.UserAccountLoginRequest) (res viewmodel.UserAccountVM, err error) {
-	parts := strings.Split(data.PhoneNo, "--*")
-	EmailUser := ""
+	parts := strings.Split(data.Code, "--*")
+	CodeUser := ""
 	if len(parts) >= 1 {
-		EmailUser = parts[0]
+		CodeUser = parts[0]
 	}
-	chkuser, _ := uc.FindByPhoneNo(c, models.UserAccountParameter{PhoneNo: EmailUser, Code: data.Code})
+	chkuser, _ := uc.FindByPhoneNo(c, models.UserAccountParameter{PhoneNo: data.PhoneNo, Code: CodeUser})
 	if chkuser.ID == "" {
 		logruslogger.Log(logruslogger.WarnLevel, helper.NameAlreadyExist, functioncaller.PrintFuncName(), "email", c.Value("requestid"))
 		return res, errors.New(helper.InvalidEmail)
