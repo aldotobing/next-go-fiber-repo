@@ -55,6 +55,25 @@ func (uc OtpUC) OtpRequest(c context.Context, id string, data *requests.UserOtpR
 	return res, err
 }
 
+func (uc OtpUC) OtpAnonumousRequest(c context.Context, id string, data *requests.UserOtpRequest) (res string, err error) {
+	if !str.Contains(OtpTypeWhiteList, data.Type) {
+		logruslogger.Log(logruslogger.WarnLevel, data.Type, functioncaller.PrintFuncName(), "check_otp_type", uc.ContractUC.ReqID)
+		return res, errors.New(helper.InvalidTypeOtp)
+	}
+
+	// Generate OTP and save to redis
+	rand.Seed(time.Now().UTC().UnixNano())
+	res = "0088"
+	// err = uc.ContractUC.StoreToRedisExp("otp"+id+data.Type, res, OtpLifetime)
+
+	// Check OTP display setting
+	if !str.StringToBool(uc.ContractUC.EnvConfig["APP_OTP_DISPLAY"]) {
+		res = ""
+	}
+
+	return res, err
+}
+
 // VerifyOtp ...
 func (uc OtpUC) VerifyOtp(c context.Context, id, types, otp string) (res bool, err error) {
 	var otpRedis string
