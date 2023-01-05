@@ -8,52 +8,52 @@ image: golang:1.18
 pipelines:
   branches:
     rebuild:
-      - parallel:
-          - step:
-              name: Test and Build
-              script:
-                - mkdir test-reports
-                - go install github.com/jstemmer/go-junit-report/v2@latest
-                - go test tests/* -v 2>&1 | go-junit-report > test-reports/report.xml
-                # Build compiles the packages
-                - go build server/main.go
-              artifacts:
-                - report.xml
-          - step:
-              name: Lint Code
-              image: golangci/golangci-lint:v1.31.0
-              script:
-                #- golangci-lint run -v
-                #- golangci-lint run --disable-all -E errcheck
-                #- golangci-lint run --enable-all
-                - echo SKIPPED
-          - step:
-              name: Security Scan
-              script:
-                # See more security tools at https://bitbucket.org/product/features/pipelines/integrations?&category=security
-                #- pipe: atlassian/git-secrets-scan:0.5.1
-                - echo SKIPPED
-          - step:
-              name: Deploy to Production
-              deployment: Production
-              script:
-                - echo "Deploying to Production environment"
-                - pipe: atlassian/ssh-run:0.4.1
-                  variables:
-                    SSH_USER: "$SSH_USER"
-                    SERVER: "$SSH_ADDR"
-                    COMMAND: sh /home/$SSH_USER/deploy.sh
-                    DEBUG: "TRUE"
-                    #test
-              after-script:
-                - ALERT_TYPE="success"
-                - if [[ $BITBUCKET_EXIT_CODE -ne 0 ]]; then ALERT_TYPE="error" ; fi
-                - pipe: atlassian/email-notify:0.3.12
-                  variables:
-                    USERNAME: "$EMAIL_USERNAME"
-                    PASSWORD: $EMAIL_APP_PASSWORD
-                    FROM: "commits-noreply@bitbucket.org"
-                    TO: "$EMAIL_1_TO, $EMAIL_2_TO, $EMAIL_3_TO"
-                    HOST: "$EMAIL_HOST"
-                    SUBJECT: "${BITBUCKET_REPO_FULL_NAME} : Deploy ${ALERT_TYPE} : Bitbucket Pipe Notification for branch : ${BITBUCKET_BRANCH}"
-                    BODY_HTML: "mail_template.html"
+      #- parallel:
+      - step:
+          name: Test and Build
+          script:
+            - mkdir test-reports
+            - go install github.com/jstemmer/go-junit-report/v2@latest
+            - go test tests/* -v 2>&1 | go-junit-report > test-reports/report.xml
+            - go build server/main.go
+          artifacts:
+            - report.xml
+            # Build compiles the packages
+      - step:
+          name: Lint Code
+          image: golangci/golangci-lint:v1.31.0
+          script:
+            #- golangci-lint run -v
+            #- golangci-lint run --disable-all -E errcheck
+            #- golangci-lint run --enable-all
+            - echo SKIPPED
+      - step:
+          name: Security Scan
+          script:
+            # See more security tools at https://bitbucket.org/product/features/pipelines/integrations?&category=security
+            #- pipe: atlassian/git-secrets-scan:0.5.1
+            - echo SKIPPED
+      - step:
+          name: Deploy to Production
+          deployment: Production
+          script:
+            - echo "Deploying to staging environment"
+            - pipe: atlassian/ssh-run:0.4.1
+              variables:
+                SSH_USER: "$SSH_USER"
+                SERVER: "$SSH_ADDR"
+                COMMAND: sh /home/$SSH_USER/deploy.sh
+                DEBUG: "TRUE"
+                #test
+          after-script:
+            - ALERT_TYPE="success"
+            - if [[ $BITBUCKET_EXIT_CODE -ne 0 ]]; then ALERT_TYPE="error" ; fi
+            - pipe: atlassian/email-notify:0.3.12
+              variables:
+                USERNAME: "$EMAIL_USERNAME"
+                PASSWORD: $EMAIL_APP_PASSWORD
+                FROM: "commits-noreply@bitbucket.org"
+                TO: "$EMAIL_1_TO, $EMAIL_2_TO, $EMAIL_3_TO"
+                HOST: "$EMAIL_HOST"
+                SUBJECT: "${BITBUCKET_REPO_FULL_NAME} : Deploy ${ALERT_TYPE} : Bitbucket Pipe Notification for branch : ${BITBUCKET_BRANCH}"
+                BODY_HTML: "mail_template.html"
