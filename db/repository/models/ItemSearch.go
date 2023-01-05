@@ -64,7 +64,7 @@ var (
 	`
 
 	// ItemSearchWhereStatement ...
-	ItemSearchWhereStatement = ` WHERE def.created_date IS not NULL AND IUL.VISIBILITY = 1 `
+	ItemSearchWhereStatement = ` WHERE def.created_date IS not NULL AND IUL.VISIBILITY = 1 AND DEF.HIDE = 0 `
 
 	//before
 	//ItemSearchWhereStatement = ` WHERE def.created_date IS not NULL AND IUL.CONVERSION > 1 AND IUL.VISIBILITY = 1 `

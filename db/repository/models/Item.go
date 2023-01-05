@@ -86,5 +86,5 @@ var (
 	`
 
 	// ItemWhereStatement ...
-	ItemWhereStatement = ` WHERE def.created_date IS NOT NULL AND IUL.VISIBILITY = 1 AND DEF.ACTIVE = 1 `
+	ItemWhereStatement = ` WHERE def.created_date IS NOT NULL AND IUL.VISIBILITY = 1 AND DEF.ACTIVE = 1 AND DEF.HIDE = 0`
 )
