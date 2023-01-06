@@ -141,8 +141,7 @@ func (repository WebItemUomLineRepository) FindAll(ctx context.Context, paramete
 		return data, count, err
 	}
 
-	query = `SELECT COUNT(*) FROM "ITEM_UOM_LINE" DEF ` +
-		`
+	query = `SELECT COUNT(*) FROM ITEM_UOM_LINE DEF 
 		left join item i on i.id = def.item_id
 		left join uom u on u.id = def.uom_id
 		LEFT JOIN ITEM_CATEGORY IC ON IC.ID = I.ITEM_CATEGORY_ID
