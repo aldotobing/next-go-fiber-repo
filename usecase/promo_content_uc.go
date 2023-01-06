@@ -67,7 +67,7 @@ func (uc PromoContentUC) Add(c context.Context, data *requests.PromoContentReque
 	awsUc := AwsUC{ContractUC: uc.ContractUC}
 	var strImgBanner = ""
 	if imgBanner != nil {
-		imgProfileFile, err := awsUc.Upload("image/package", imgBanner)
+		imgProfileFile, err := awsUc.Upload("image/promo", imgBanner)
 		if err != nil {
 			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "upload_file", c.Value("requestid"))
 			return res, err
