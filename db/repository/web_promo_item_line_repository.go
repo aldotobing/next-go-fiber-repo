@@ -164,8 +164,7 @@ func (repository WebPromoItemLineRepository) FindAll(ctx context.Context, parame
 				LEFT JOIN promo_line prl ON prl.id = pil.promo_line_id 
 				LEFT JOIN promo pr ON pr.id = prl.promo_id 
 				LEFT JOIN item i ON i.id = pil.item_id 
-				LEFT JOIN uom u ON u.id = pil.uom_id 
-				JOIN ITEM_PRICE IP ON IP.ITEM_ID = PIL.ITEM_ID
+				LEFT JOIN uom u ON u.id = pil.uom_id
 				` +
 		models.WebPromoItemLineWhereStatement + ` ` +
 		conditionString + ` AND (LOWER(i."_name") LIKE $1)`
