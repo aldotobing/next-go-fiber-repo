@@ -67,5 +67,5 @@ JOIN ITEM_PRICE IP ON IP.UOM_ID = UOM.ID
 AND IP.ITEM_ID = IUL.ITEM_ID`
 
 	// ItemProductFocusWhereStatement ...
-	ItemProductFocusWhereStatement = ` WHERE def.created_date IS not NULL `
+	ItemProductFocusWhereStatement = ` WHERE def.created_date IS not NULL AND I.HIDE = 0 `
 )
