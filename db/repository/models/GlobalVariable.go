@@ -7,4 +7,5 @@ var (
 	ImagePath         = baseenvConfig["AWS_IMAGE_BASE_URL"]
 	CustomerImagePath = ImagePath + "image/customer/"
 	SalesmanImagePath = ImagePath
+	PromoImagePath    = ImagePath + "image/promo/"
 )
