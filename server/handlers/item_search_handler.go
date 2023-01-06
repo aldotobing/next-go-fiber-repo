@@ -23,6 +23,7 @@ func (h *ItemSearchHandler) SelectAll(ctx *fiber.Ctx) error {
 	parameter := models.ItemSearchParameter{
 		Name:               ctx.Query("item_name"),
 		PriceListVersionId: ctx.Query("price_list_version_id"),
+		CustomerTypeId:     ctx.Query("customer_type_id"),
 		Search:             ctx.Query("search"),
 		By:                 ctx.Query("by"),
 		Sort:               ctx.Query("sort"),
@@ -55,6 +56,7 @@ func (h *ItemSearchHandler) FindAll(ctx *fiber.Ctx) error {
 	parameter := models.ItemSearchParameter{
 		Name:               ctx.Query("item_name"),
 		PriceListVersionId: ctx.Query("price_list_version_id"),
+		CustomerTypeId:     ctx.Query("customer_type_id"),
 		Search:             ctx.Query("search"),
 		Page:               str.StringToInt(ctx.Query("page")),
 		Limit:              str.StringToInt(ctx.Query("limit")),
