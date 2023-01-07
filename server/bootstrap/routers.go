@@ -224,4 +224,7 @@ func (boot Bootstrap) RegisterRouters() {
 
 	WebItemUomLineRoutes := routers.WebItemUomLineRoutes{RouterGroup: apiV1, Handler: handler}
 	WebItemUomLineRoutes.RegisterRoute()
+
+	WebPromoRoutes := routers.WebPromoRoutes{RouterGroup: apiV1, Handler: handler}
+	WebPromoRoutes.RegisterRoute()
 }
