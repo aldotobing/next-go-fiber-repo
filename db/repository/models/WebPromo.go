@@ -1,7 +1,7 @@
 package models
 
-// PromoContent ...
-type PromoContent struct {
+// WebPromo ...
+type WebPromo struct {
 	ID               *string `json:"promo_id"`
 	Code             *string `json:"promo_code"`
 	PromoName        *string `json:"promo_name"`
@@ -10,10 +10,11 @@ type PromoContent struct {
 	StartDate        *string `json:"start_date"`
 	EndDate          *string `json:"end_date"`
 	Active           *string `json:"active"`
+	ShowInApp        *string `json:"show_in_app"`
 }
 
-// PromoContentParameter ...
-type PromoContentParameter struct {
+// WebPromoParameter ...
+type WebPromoParameter struct {
 	ID               string `json:"promo_id"`
 	Code             string `json:"promo_code"`
 	PromoName        string `json:"promo_name"`
@@ -30,16 +31,16 @@ type PromoContentParameter struct {
 }
 
 var (
-	// PromoContentOrderBy ...
-	PromoContentOrderBy = []string{"pc.id", "pc._name", "pc.created_date"}
-	// PromoContentOrderByrByString ...
-	PromoContentOrderByrByString = []string{
+	// WebPromoOrderBy ...
+	WebPromoOrderBy = []string{"pc.id", "pc._name", "pc.created_date"}
+	// WebPromoOrderByrByString ...
+	WebPromoOrderByrByString = []string{
 		"pc._name",
 	}
 
-	// PromoContentSelectStatement ...
+	// WebPromoSelectStatement ...
 
-	PromoContentSelectStatement = `
+	WebPromoSelectStatement = `
 	SELECT 
 		PC.ID AS PROMO_ID,
 		PC.CODE AS PROMO_CODE,
@@ -48,11 +49,12 @@ var (
 		(concat('` + PromoImagePath + `',PC.URL_BANNER)) AS PROMO_URL_BANNER,
 		PC.START_DATE AS PROMO_START_DATE,
 		PC.END_DATE AS PROMO_END_DATE,
-		PC.ACTIVE AS ACTIVE 
+		PC.ACTIVE AS ACTIVE,
+		PC.show_in_app 
 	FROM PROMO PC
 	`
-	// PromoContentWhereStatement ...
-	PromoContentWhereStatement = ` 
-	WHERE PC.ID IS NOT NULL AND PC.ACTIVE = 1 and pc.show_in_app = 1
+	// WebPromoWhereStatement ...
+	WebPromoWhereStatement = ` 
+	WHERE PC.ID IS NOT NULL AND PC.ACTIVE = 1
 	`
 )
