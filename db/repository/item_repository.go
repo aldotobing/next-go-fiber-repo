@@ -32,20 +32,18 @@ func NewItemRepository(DB *sql.DB) IItemRepository {
 // Scan rows
 func (repository ItemRepository) scanRows(rows *sql.Rows) (res models.Item, err error) {
 	err = rows.Scan(
-		&res.UOMLineID,
 		&res.ID,
 		&res.Code,
 		&res.Name,
 		&res.Description,
 		&res.ItemCategoryId,
 		&res.ItemCategoryName,
-		&res.ItemPicture,
 		&res.UomID,
 		&res.UomName,
 		&res.UomLineConversion,
 		&res.ItemPrice,
 		&res.PriceListVersionId,
-		&res.Uom,
+		&res.ItemPicture,
 	)
 	if err != nil {
 
@@ -58,20 +56,18 @@ func (repository ItemRepository) scanRows(rows *sql.Rows) (res models.Item, err 
 // Scan row
 func (repository ItemRepository) scanRow(row *sql.Row) (res models.Item, err error) {
 	err = row.Scan(
-		&res.UOMLineID,
 		&res.ID,
 		&res.Code,
 		&res.Name,
 		&res.Description,
 		&res.ItemCategoryId,
 		&res.ItemCategoryName,
-		&res.ItemPicture,
 		&res.UomID,
 		&res.UomName,
 		&res.UomLineConversion,
 		&res.ItemPrice,
 		&res.PriceListVersionId,
-		&res.Uom,
+		&res.ItemPicture,
 	)
 
 	fmt.Println(err)
@@ -109,10 +105,6 @@ func (repository ItemRepository) SelectAll(c context.Context, parameter models.I
 		conditionString += ` AND def.id NOT IN (83, 307, 393) `
 	}
 
-	if parameter.PriceListVersionId != "" {
-		conditionString += ` AND ip.price_list_version_id = '` + parameter.PriceListVersionId + `'`
-	}
-
 	if parameter.UomID != "" {
 		conditionString += ` AND IUL.UOM_ID = '` + parameter.UomID + `'`
 	}
@@ -122,8 +114,8 @@ func (repository ItemRepository) SelectAll(c context.Context, parameter models.I
 	}
 
 	statement := models.ItemSelectStatement + ` ` + models.ItemWhereStatement +
-		` AND (LOWER(def."_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
-	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
+		` AND (LOWER(def."_name") LIKE $2) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+	rows, err := repository.DB.QueryContext(c, statement, parameter.PriceListVersionId, "%"+strings.ToLower(parameter.Search)+"%")
 
 	fmt.Println(statement)
 

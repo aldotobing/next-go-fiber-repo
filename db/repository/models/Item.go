@@ -52,7 +52,7 @@ var (
 		--ALL STRING VALUE
 		--ITEM CONVERSION > 1 (HIGHEST UOM)
 	*/
-	ItemSelectStatement = `
+	ItemSelectStatement2 = `
 	SELECT IP.id as uomline_id,DEF.ID AS DEF_ID,
 		DEF.CODE AS DEF_CODE,
 		DEF._NAME AS DEF_NAME,
@@ -84,6 +84,22 @@ var (
 	LEFT JOIN UOM UOM ON UOM.ID = IUL.UOM_ID
 	JOIN ITEM_PRICE IP ON IP.UOM_ID = UOM.ID AND IP.ITEM_ID = IUL.ITEM_ID
 	`
+
+	ItemSelectStatement = ` select def.id,def.code as item_code, def._name,def.description as i_descript,
+	def.item_category_id as cat_id, ic._name as ic_name,
+	u.id as uom_id, u._name as uom_name, 
+	iul.conversion as konversi, (x.price * iul.conversion) as harga,
+	x.plv_id as price_list_version_id, def.item_picture
+	from item def
+	LEFT JOIN ITEM_CATEGORY IC ON IC.ID = def.ITEM_CATEGORY_ID
+	join item_uom_line iul on def.id = iul.item_id
+	join uom u on u.id = iul.uom_id
+	join 
+	( select ip.item_id as i_id, iuls.uom_id as u_uom,  ip.price ,ip.price_list_version_id as plv_id
+	 from item_price ip 
+	 join item_uom_line iuls on iuls.item_id = ip.item_id and iuls.uom_id = ip.uom_id
+	 where iuls.conversion = 1 and ip.price_list_version_id = $1
+	 )x on x.i_id = def.id  `
 
 	// ItemWhereStatement ...
 	ItemWhereStatement = ` WHERE def.created_date IS NOT NULL AND IUL.VISIBILITY = 1 AND DEF.ACTIVE = 1 AND DEF.HIDE = 0`
