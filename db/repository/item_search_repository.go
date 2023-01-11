@@ -84,7 +84,7 @@ func (repository ItemSearchRepository) SelectAll(c context.Context, parameter mo
 	conditionStringPriceListVersion := ``
 
 	if parameter.Name != "" {
-		conditionString += ` or (LOWER (ic."_name") like ` + `'%` + parameter.Name + `%'))`
+		conditionString += ` or (LOWER (ic."_name") like ` + `'%` + strings.ToLower(parameter.Name) + `%')`
 	}
 
 	// if parameter.PriceListVersionId != "" {
@@ -102,7 +102,7 @@ func (repository ItemSearchRepository) SelectAll(c context.Context, parameter mo
 	}
 
 	statement := models.ItemSearchSelectStatement + ` ` + models.ItemSearchWhereStatement +
-		` AND ((LOWER(def."_name") LIKE $1) ` + conditionString + conditionStringPriceListVersion + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+		` AND ((LOWER(def."_name") LIKE $2 )) ` + conditionString + conditionStringPriceListVersion + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, parameter.PriceListVersionId, "%"+strings.ToLower(parameter.Name)+"%")
 
 	fmt.Println("select ALL : " + statement)
