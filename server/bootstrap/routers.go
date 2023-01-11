@@ -227,4 +227,7 @@ func (boot Bootstrap) RegisterRouters() {
 
 	WebPromoRoutes := routers.WebPromoRoutes{RouterGroup: apiV1, Handler: handler}
 	WebPromoRoutes.RegisterRoute()
+
+	WebPromoBonusItemLineRoutes := routers.WebPromoBonusItemLineRoutes{RouterGroup: apiV1, Handler: handler}
+	WebPromoBonusItemLineRoutes.RegisterRoute()
 }
