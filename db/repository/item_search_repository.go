@@ -87,9 +87,9 @@ func (repository ItemSearchRepository) SelectAll(c context.Context, parameter mo
 		conditionString += ` or (LOWER (ic."_name") like ` + `'%` + parameter.Name + `%'))`
 	}
 
-	if parameter.PriceListVersionId != "" {
-		conditionStringPriceListVersion += ` AND ip.price_list_version_id = '` + parameter.PriceListVersionId + `'`
-	}
+	// if parameter.PriceListVersionId != "" {
+	// 	conditionStringPriceListVersion += ` AND ip.price_list_version_id = '` + parameter.PriceListVersionId + `'`
+	// }
 
 	/*
 		customerType 7 = Apotek Lokal
@@ -103,7 +103,7 @@ func (repository ItemSearchRepository) SelectAll(c context.Context, parameter mo
 
 	statement := models.ItemSearchSelectStatement + ` ` + models.ItemSearchWhereStatement +
 		` AND ((LOWER(def."_name") LIKE $1) ` + conditionString + conditionStringPriceListVersion + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
-	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Name)+"%")
+	rows, err := repository.DB.QueryContext(c, statement, parameter.PriceListVersionId, "%"+strings.ToLower(parameter.Name)+"%")
 
 	fmt.Println("select ALL : " + statement)
 	// fmt.Println("select ALL PARAM : " + parameter.Name)
