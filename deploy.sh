@@ -17,10 +17,10 @@ pwd && echo OK || echo Failed
 echo "Pulling from git repository ..." 
 sleep 1
 git pull -v origin rebuild && echo OK || echo Failed
-echo "Entering server directory to start main.go" && echo OK || echo Failed
+echo "Entering server directory to start main.go" 
 sleep 2
-cd /home/ec2-user/nextbasis-service-golang/server/
-pwd && echo OK || echo Failed
+cd /home/ec2-user/nextbasis-service-golang/server && echo OK || echo Failed
+pwd 
 echo "Starting Service ..."
 sleep 2
 nohup bash -c "go run main.go 2>&1 &"
