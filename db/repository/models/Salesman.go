@@ -2,8 +2,9 @@ package models
 
 // Salesman ...
 type Salesman struct {
-	ID   *string `json:"salesman_id"`
-	Name *string `json:"salesman_name"`
+	ID      *string `json:"salesman_id"`
+	Name    *string `json:"salesman_name"`
+	PhoneNo *string `json:"phone_no"`
 }
 
 // SalesmanParameter ...
@@ -30,7 +31,7 @@ var (
 	// SalesmanSelectStatement ...
 
 	SalesmanSelectStatement = `
-	select def.id,p._name
+	select def.id,p._name, def.salesman_phone_no
 	from salesman def
 	join partner p on p.id = def.partner_id
 		`
