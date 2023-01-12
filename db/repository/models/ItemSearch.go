@@ -22,6 +22,7 @@ type ItemSearchParameter struct {
 	Code               string `json:"item_code"`
 	Name               string `json:"item_name"`
 	ItemCategoryId     string `json:"item_category_id"`
+	ItemCategoryName   string `json:"item_category_name"`
 	PriceListVersionId string `json:"price_list_version_id"`
 	CustomerTypeId     string `json:"customer_type_id"`
 	Search             string `json:"search"`
