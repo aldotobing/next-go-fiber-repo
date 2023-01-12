@@ -53,7 +53,7 @@ func (repository DashboardWebRepository) scanRows(rows *sql.Rows) (res models.Da
 // Scan rows
 func (repository DashboardWebRepository) scanRegionDetailRows(rows *sql.Rows) (res models.DashboardWebRegionDetail, err error) {
 	err = rows.Scan(
-		&res.BranchID, &res.BranchName, &res.RegionID, &res.RegionGroupName,
+		&res.BranchID, &res.BranchName, &res.RegionID, &res.RegionName,
 		&res.RegionGroupID, &res.RegionGroupName,
 		&res.TotalRegisteredUser, &res.TotalRepeatUser, &res.TotalOrderUser,
 		&res.TotalInvoice, &res.TotalActiveUser,
