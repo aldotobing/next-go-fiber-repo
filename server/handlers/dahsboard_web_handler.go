@@ -22,5 +22,13 @@ func (h *DashboardWebHandler) GetData(ctx *fiber.Ctx) error {
 	uc := usecase.DashboardWebUC{ContractUC: h.ContractUC}
 	res, err := uc.GetData(c, parameter)
 
+	for i, object := range res {
+		detail, errdetail := uc.GetRegionDetailData(c, models.DashboardWebRegionParameter{GroupID: *object.RegionGroupID})
+		if errdetail == nil {
+			res[i].DetailData = detail
+		}
+
+	}
+
 	return h.SendResponse(ctx, res, nil, err, 0)
 }

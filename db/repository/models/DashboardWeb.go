@@ -2,8 +2,23 @@ package models
 
 // DashboardWeb ...
 type DashboardWeb struct {
+	RegionGroupID       *string                    `json:"region_id"`
+	RegionGroupName     *string                    `json:"region_name"`
+	TotalActiveUser     *string                    `json:"total_active_user"`
+	TotalRepeatUser     *string                    `json:"total_repeat_order_user"`
+	TotalOrderUser      *string                    `json:"total_order_user"`
+	TotalInvoice        *string                    `json:"total_invoice_user"`
+	TotalRegisteredUser *string                    `json:"total_registered_user"`
+	DetailData          []DashboardWebRegionDetail `json:"detailed_data"`
+}
+
+type DashboardWebRegionDetail struct {
 	RegionID            *string `json:"region_id"`
 	RegionName          *string `json:"region_name"`
+	RegionGroupID       *string `json:"region_group_id"`
+	RegionGroupName     *string `json:"region_group_name"`
+	BranchID            *string `json:"branch_id"`
+	BranchName          *string `json:"branch_name"`
 	TotalActiveUser     *string `json:"total_active_user"`
 	TotalRepeatUser     *string `json:"total_repeat_order_user"`
 	TotalOrderUser      *string `json:"total_order_user"`
@@ -20,6 +35,16 @@ type DashboardWebParameter struct {
 	Limit  int    `json:"limit"`
 	By     string `json:"by"`
 	Sort   string `json:"sort"`
+}
+
+type DashboardWebRegionParameter struct {
+	GroupID string `json:"group_id"`
+	Search  string `json:"search"`
+	Page    int    `json:"page"`
+	Offset  int    `json:"offset"`
+	Limit   int    `json:"limit"`
+	By      string `json:"by"`
+	Sort    string `json:"sort"`
 }
 
 var (
@@ -52,4 +77,23 @@ var (
 	)x order by x.group_id
 		)y
  	`
+
+	DashboardWebRegionDetailSelectStatement = `
+	 
+	 select 
+		def.id as b_id,def._name as b_name,
+		r.id as region_id, r._name as region_name, r.group_id as region_group_id, r.group_name as region_group_name,
+		(select count(*) from _user us join customer c on c.id=us.partner_id where us.fcm_token is not null and length(trim(us.fcm_token))>0 and c.branch_id = def.id  ) as total_register_user,
+		(select count(*) from (select count(*) as total_transaksi,cust_bill_to_id from customer_order_header where (date_part('month', now()::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP)) and branch_id in (select br.id from branch br where br.region_id =def.id )  group by cust_bill_to_id) x where x.total_transaksi>1) as total_repeat_order,
+		(select count(*) from customer_order_header where (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', now()::TIMESTAMP)=date_part('year', transaction_date::TIMESTAMP))  and branch_id =def.id ) as total_transaction,
+		(select count(*) from sales_invoice_header where cust_bill_to_id in(select distinct(cust_bill_to_id) from customer_order_header) 
+				and (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP)) 
+				and branch_id =def.id ) as total_invoice,
+		(select count(*) from (select distinct(cust_bill_to_id) from customer_order_header where (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP)) and branch_id =def.id  group by cust_bill_to_id) x) as total_active_user
+
+
+		from branch def
+		left join region r on r.id = def.region_id
+		
+	 `
 )
