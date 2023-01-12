@@ -5,6 +5,7 @@ type WebItem struct {
 	ID               *string `json:"item_id"`
 	Code             *string `json:"item_code"`
 	Name             *string `json:"item_name"`
+	ItemPicture      *string `json:"item_picture"`
 	ItemCategoryId   *string `json:"item_category_id"`
 	ItemCategoryName *string `json:"item_category_name"`
 	ItemActive       *string `json:"item_active"`
@@ -41,9 +42,15 @@ var (
 		--WEBITEM CONVERSION > 1 (HIGHEST UOM)
 	*/
 	WebItemSelectStatement = `
-	SELECT def.id as item_id, ic.id as category_id,
-	def.code as item_code,def._name as item_name,ic._name as category_name,
-	def.active as item_active,def.description
+	SELECT 
+		def.id as item_id, 
+		ic.id as category_id,
+		def.code as item_code,
+		def._name as item_name,
+		(concat('` + ItemImagePath + `',def.item_picture)) AS item_picture,
+		ic._name as category_name,
+	def.active as item_active,
+	def.description as description 
 	FROM ITEM def
 	LEFT JOIN ITEM_CATEGORY IC ON IC.ID = DEF.ITEM_CATEGORY_ID
 	`

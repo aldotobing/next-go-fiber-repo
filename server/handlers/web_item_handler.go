@@ -2,12 +2,15 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/helper"
 	"nextbasis-service-v-0.1/pkg/str"
+	"nextbasis-service-v-0.1/server/requests"
 	"nextbasis-service-v-0.1/usecase"
 )
 
@@ -87,6 +90,32 @@ func (h *WebItemHandler) FindByID(ctx *fiber.Ctx) error {
 
 	uc := usecase.WebItemUC{ContractUC: h.ContractUC}
 	res, err := uc.FindByID(c, parameter)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+// Edit ...
+func (h *WebItemHandler) Edit(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	id := ctx.Params("item_id")
+	if id == "" {
+		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
+	}
+
+	input := new(requests.WebItemRequest)
+	err := json.Unmarshal([]byte(ctx.FormValue("form_data")), input)
+	if err := ctx.BodyParser(input); err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+	if err := h.Validator.Struct(input); err != nil {
+		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
+		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+	}
+
+	imgProfile, _ := ctx.FormFile("item_image")
+	uc := usecase.WebItemUC{ContractUC: h.ContractUC}
+	res, err := uc.Edit(c, id, input, imgProfile)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }

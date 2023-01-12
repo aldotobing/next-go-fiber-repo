@@ -8,4 +8,5 @@ var (
 	CustomerImagePath = ImagePath + "image/customer/"
 	SalesmanImagePath = ImagePath
 	PromoImagePath    = ImagePath + "image/promo/"
+	ItemImagePath     = ImagePath + "image/item/"
 )
