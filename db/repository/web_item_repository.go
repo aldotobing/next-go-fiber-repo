@@ -15,7 +15,7 @@ type IWebItemRepository interface {
 	FindAll(ctx context.Context, parameter models.WebItemParameter) ([]models.WebItem, int, error)
 	FindByID(c context.Context, parameter models.WebItemParameter) (models.WebItem, error)
 	// Add(c context.Context, model *models.Item) (*string, error)
-	// Edit(c context.Context, model *models.Item) (*string, error)
+	Edit(c context.Context, model *models.WebItem) (*string, error)
 	// Delete(c context.Context, id string, now time.Time) (string, error)
 }
 
@@ -36,6 +36,7 @@ func (repository WebItemRepository) scanRows(rows *sql.Rows) (res models.WebItem
 		&res.ItemCategoryId,
 		&res.Code,
 		&res.Name,
+		&res.ItemPicture,
 		&res.ItemCategoryName,
 		&res.ItemActive,
 		&res.Description,
@@ -55,6 +56,7 @@ func (repository WebItemRepository) scanRow(row *sql.Row) (res models.WebItem, e
 		&res.ItemCategoryId,
 		&res.Code,
 		&res.Name,
+		&res.ItemPicture,
 		&res.ItemCategoryName,
 		&res.ItemActive,
 		&res.Description,
@@ -178,4 +180,21 @@ func (repository WebItemRepository) FindByCategoryID(c context.Context, paramete
 	}
 
 	return data, nil
+}
+
+// Edit ...
+func (repository WebItemRepository) Edit(c context.Context, model *models.WebItem) (res *string, err error) {
+	statement := `UPDATE item SET 
+	_name = $1, 
+	item_picture = $2
+	WHERE id = $3 
+	RETURNING id`
+	err = repository.DB.QueryRowContext(c, statement,
+		model.Name,
+		model.ItemPicture,
+		model.ID).Scan(&res)
+	if err != nil {
+		return res, err
+	}
+	return res, err
 }
