@@ -128,8 +128,8 @@ func (repository ItemSearchRepository) SelectAll(c context.Context, parameter mo
 func (repository ItemSearchRepository) FindAll(ctx context.Context, parameter models.ItemSearchParameter) (data []models.ItemSearch, count int, err error) {
 	conditionString := ``
 
-	if parameter.Name != "" {
-		conditionString += ` or LOWER (ic."_name") like` + `'%` + parameter.Name + `%'` + `'`
+	if parameter.ItemCategoryName != "" {
+		conditionString += ` or (LOWER (ic."_name") like ` + `'%` + strings.ToLower(parameter.ItemCategoryName) + `%')`
 	}
 
 	/*
