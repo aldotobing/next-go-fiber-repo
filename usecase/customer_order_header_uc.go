@@ -201,6 +201,18 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 				if senDwaMessage != nil {
 					fmt.Println("sukses")
 				}
+				if useraccount.SalesmanID != nil {
+					salesmannRepo := repository.NewSalesmanRepository(uc.DB)
+					customerSales, errcustsales := salesmannRepo.FindByID(c, models.SalesmanParameter{ID: *useraccount.SalesmanID})
+					if errcustsales == nil {
+						if customerSales.PhoneNo != nil {
+							senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*customerSales.PhoneNo, msgbody)
+							if senDwaMessage != nil {
+								fmt.Println("sukses")
+							}
+						}
+					}
+				}
 			}
 		}
 

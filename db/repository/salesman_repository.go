@@ -30,6 +30,7 @@ func (repository SalesmanRepository) scanRows(rows *sql.Rows) (res models.Salesm
 	err = rows.Scan(
 		&res.ID,
 		&res.Name,
+		&res.PhoneNo,
 	)
 	if err != nil {
 
@@ -44,6 +45,7 @@ func (repository SalesmanRepository) scanRow(row *sql.Row) (res models.Salesman,
 	err = row.Scan(
 		&res.ID,
 		&res.Name,
+		&res.PhoneNo,
 	)
 
 	if err != nil {
