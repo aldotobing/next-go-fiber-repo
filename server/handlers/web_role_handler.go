@@ -14,25 +14,25 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// WebRoleGroupHandler ...
-type WebRoleGroupHandler struct {
+// WeebRoleHandler ...
+type WeebRoleHandler struct {
 	Handler
 }
 
 // SelectAll ...
-func (h *WebRoleGroupHandler) SelectAll(ctx *fiber.Ctx) error {
+func (h *WeebRoleHandler) SelectAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
-	parameter := models.WebRoleGroupParameter{
+	parameter := models.WeebRoleParameter{
 		Search: ctx.Query("search"),
 		By:     ctx.Query("by"),
 		Sort:   ctx.Query("sort"),
 	}
-	uc := usecase.WebRoleGroupUC{ContractUC: h.ContractUC}
+	uc := usecase.WeebRoleUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectAll(c, parameter)
 
 	type StructObject struct {
-		ListObjcet []models.WebRoleGroup `json:"list_role_group"`
+		ListObjcet []models.WeebRole `json:"list_role_group"`
 	}
 
 	ObjcetData := new(StructObject)
@@ -45,21 +45,21 @@ func (h *WebRoleGroupHandler) SelectAll(ctx *fiber.Ctx) error {
 }
 
 // FindAll ...
-func (h *WebRoleGroupHandler) FindAll(ctx *fiber.Ctx) error {
+func (h *WeebRoleHandler) FindAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
-	parameter := models.WebRoleGroupParameter{
+	parameter := models.WeebRoleParameter{
 		Search: ctx.Query("search"),
 		Page:   str.StringToInt(ctx.Query("page")),
 		Limit:  str.StringToInt(ctx.Query("limit")),
 		By:     ctx.Query("by"),
 		Sort:   ctx.Query("sort"),
 	}
-	uc := usecase.WebRoleGroupUC{ContractUC: h.ContractUC}
+	uc := usecase.WeebRoleUC{ContractUC: h.ContractUC}
 	res, meta, err := uc.FindAll(c, parameter)
 
 	type StructObject struct {
-		ListObjcet []models.WebRoleGroup `json:"list_role_group"`
+		ListObjcet []models.WeebRole `json:"list_role_group"`
 	}
 
 	ObjcetData := new(StructObject)
@@ -72,27 +72,27 @@ func (h *WebRoleGroupHandler) FindAll(ctx *fiber.Ctx) error {
 }
 
 // FindByID ...
-func (h *WebRoleGroupHandler) FindByID(ctx *fiber.Ctx) error {
+func (h *WeebRoleHandler) FindByID(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
-	parameter := models.WebRoleGroupParameter{
+	parameter := models.WeebRoleParameter{
 		ID: ctx.Params("id"),
 	}
 	if parameter.ID == "" {
 		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
 	}
 
-	uc := usecase.WebRoleGroupUC{ContractUC: h.ContractUC}
+	uc := usecase.WeebRoleUC{ContractUC: h.ContractUC}
 	res, err := uc.FindByID(c, parameter)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
 // Add ...
-func (h *WebRoleGroupHandler) Add(ctx *fiber.Ctx) error {
+func (h *WeebRoleHandler) Add(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
-	input := new(requests.WebRoleGroupRequest)
+	input := new(requests.WeebRoleRequest)
 	if err := ctx.BodyParser(input); err != nil {
 		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
 	}
@@ -101,14 +101,14 @@ func (h *WebRoleGroupHandler) Add(ctx *fiber.Ctx) error {
 		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
 	}
 
-	uc := usecase.WebRoleGroupUC{ContractUC: h.ContractUC}
+	uc := usecase.WeebRoleUC{ContractUC: h.ContractUC}
 	res, err := uc.Add(c, input)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
 // Edit ...
-func (h *WebRoleGroupHandler) Edit(ctx *fiber.Ctx) error {
+func (h *WeebRoleHandler) Edit(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	id := ctx.Params("id")
@@ -116,7 +116,7 @@ func (h *WebRoleGroupHandler) Edit(ctx *fiber.Ctx) error {
 		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
 	}
 
-	input := new(requests.WebRoleGroupRequest)
+	input := new(requests.WeebRoleRequest)
 	if err := ctx.BodyParser(input); err != nil {
 		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
 	}
@@ -125,14 +125,14 @@ func (h *WebRoleGroupHandler) Edit(ctx *fiber.Ctx) error {
 		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
 	}
 
-	uc := usecase.WebRoleGroupUC{ContractUC: h.ContractUC}
+	uc := usecase.WeebRoleUC{ContractUC: h.ContractUC}
 	res, err := uc.Edit(c, id, input)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
 // Delete ...
-func (h *WebRoleGroupHandler) Delete(ctx *fiber.Ctx) error {
+func (h *WeebRoleHandler) Delete(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	id := ctx.Params("id")
@@ -140,7 +140,7 @@ func (h *WebRoleGroupHandler) Delete(ctx *fiber.Ctx) error {
 		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
 	}
 
-	uc := usecase.WebRoleGroupUC{ContractUC: h.ContractUC}
+	uc := usecase.WeebRoleUC{ContractUC: h.ContractUC}
 	res, err := uc.Delete(c, id)
 
 	return h.SendResponse(ctx, res, nil, err, 0)

@@ -233,4 +233,10 @@ func (boot Bootstrap) RegisterRouters() {
 
 	WebRoleGroupRoutes := routers.WebRoleGroupRoutes{RouterGroup: apiV1, Handler: handler}
 	WebRoleGroupRoutes.RegisterRoute()
+
+	WebRoleGroupRoleLineRoutes := routers.WebRoleGroupRoleLineRoutes{RouterGroup: apiV1, Handler: handler}
+	WebRoleGroupRoleLineRoutes.RegisterRoute()
+
+	WebRoleRoutes := routers.WeebRoleRoutes{RouterGroup: apiV1, Handler: handler}
+	WebRoleRoutes.RegisterRoute()
 }

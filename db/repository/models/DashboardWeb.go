@@ -13,7 +13,7 @@ type DashboardWeb struct {
 }
 
 type DashboardWebRegionDetail struct {
-	RegionID            *string `json:"region_id"`
+	RegionID            *string `json:"region_detail_id"`
 	RegionName          *string `json:"region_name"`
 	RegionGroupID       *string `json:"region_group_id"`
 	RegionGroupName     *string `json:"region_group_name"`
