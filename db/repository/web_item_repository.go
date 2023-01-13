@@ -186,12 +186,14 @@ func (repository WebItemRepository) FindByCategoryID(c context.Context, paramete
 func (repository WebItemRepository) Edit(c context.Context, model *models.WebItem) (res *string, err error) {
 	statement := `UPDATE item SET 
 	_name = $1, 
-	item_picture = $2
-	WHERE id = $3 
+	item_picture = $2,
+	item_category_id = $3
+	WHERE id = $4 
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		model.Name,
 		model.ItemPicture,
+		model.ItemCategoryId,
 		model.ID).Scan(&res)
 	if err != nil {
 		return res, err
