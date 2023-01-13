@@ -39,7 +39,7 @@ func (h *WebPromoBonusItemLineHandler) SelectAll(ctx *fiber.Ctx) error {
 	// }
 
 	type StructObject struct {
-		ListObject []models.WebPromoBonusItemLine `json:"list_promo_item_line"`
+		ListObject []models.WebPromoBonusItemLine `json:"list_promo_bonus_item_line"`
 	}
 
 	ObjcetData := new(StructObject)
@@ -75,7 +75,7 @@ func (h *WebPromoBonusItemLineHandler) FindAll(ctx *fiber.Ctx) error {
 	// }
 
 	type StructObject struct {
-		ListObject []models.WebPromoBonusItemLine `json:"list_promo_item_line"`
+		ListObject []models.WebPromoBonusItemLine `json:"list_promo_bonus_item_line"`
 	}
 
 	ObjectData := new(StructObject)
