@@ -2,19 +2,23 @@ package models
 
 // WebRoleGroupRoleLine ...
 type WebRoleGroupRoleLine struct {
-	ID   *string `json:"id"`
-	Name *string `json:"name_webrolegrouproleline"`
+	ID            *string `json:"id"`
+	RoleID        *string `json:"role_id"`
+	RoleName      *string `json:"role_name"`
+	RoleGroupID   *string `json:"role_group_id"`
+	RoleGroupName *string `json:"role_group_name"`
 }
 
 // WebRoleGroupRoleLineParameter ...
 type WebRoleGroupRoleLineParameter struct {
-	ID     string `json:"id"`
-	Search string `json:"search"`
-	Page   int    `json:"page"`
-	Offset int    `json:"offset"`
-	Limit  int    `json:"limit"`
-	By     string `json:"by"`
-	Sort   string `json:"sort"`
+	ID          string `json:"id"`
+	RoleGroupID string `json:"role__group_id"`
+	Search      string `json:"search"`
+	Page        int    `json:"page"`
+	Offset      int    `json:"offset"`
+	Limit       int    `json:"limit"`
+	By          string `json:"by"`
+	Sort        string `json:"sort"`
 }
 
 var (
@@ -35,5 +39,5 @@ var (
 	`
 
 	// WebRoleGroupRoleLineWhereStatement ...
-	WebRoleGroupRoleLineWhereStatement = `WHERE def._name IS not NULL and def.deleted_at is null `
+	WebRoleGroupRoleLineWhereStatement = ` WHERE rl._name IS not NULL and rg.is_mysm = 1  and rl.is_mysm = 1 `
 )

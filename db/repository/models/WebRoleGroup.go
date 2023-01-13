@@ -3,7 +3,7 @@ package models
 // WebRoleGroup ...
 type WebRoleGroup struct {
 	ID   *string `json:"id"`
-	Name *string `json:"name_webrolegroup"`
+	Name *string `json:"name"`
 }
 
 // WebRoleGroupParameter ...
@@ -31,5 +31,5 @@ var (
 	`
 
 	// WebRoleGroupWhereStatement ...
-	WebRoleGroupWhereStatement = `WHERE def._name IS not NULL and def.deleted_at is null `
+	WebRoleGroupWhereStatement = `WHERE def._name IS not NULL and def.deleted_at is null and def.is_mysm = 1 `
 )
