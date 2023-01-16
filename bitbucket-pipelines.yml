@@ -26,13 +26,19 @@ pipelines:
             #- golangci-lint run -v
             #- golangci-lint run --disable-all -E errcheck
             #- golangci-lint run --enable-all
-            - echo PASSED
+            - echo "PASSED"
       - step:
           name: Security Scan
           script:
             # See more security tools at https://bitbucket.org/product/features/pipelines/integrations?&category=security
             - pipe: atlassian/git-secrets-scan:1.2.1
-            - echo PASSED
+              variables:
+                # FILES: '<string>' # Optional.
+                # FILES_IGNORED: '<string>' # Optional.
+                # CUSTOM_PATTERN_ARGS: '<list>' of strings # Optional.
+                # ANNOTATION_SUMMARY: '<string>' # Optional.
+                # ANNOTATION_DESCRIPTION: '<string>' # Optional.
+                DEBUG: "TRUE" # Optional.
       - step:
           name: Deploy to Production
           deployment: Production
