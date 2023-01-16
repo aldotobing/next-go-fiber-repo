@@ -12,20 +12,20 @@ import (
 	"nextbasis-service-v-0.1/usecase/viewmodel"
 )
 
-// WebRoleGroupUC ...
-type WebRoleGroupUC struct {
+// WebUserUC ...
+type WebUserUC struct {
 	*ContractUC
 }
 
 // BuildBody ...
-func (uc WebRoleGroupUC) BuildBody(res *models.WebRoleGroup) {
+func (uc WebUserUC) BuildBody(res *models.WebUser) {
 }
 
 // SelectAll ...
-func (uc WebRoleGroupUC) SelectAll(c context.Context, parameter models.WebRoleGroupParameter) (res []models.WebRoleGroup, err error) {
-	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(0, 0, parameter.By, parameter.Sort, models.WebRoleGroupOrderBy, models.WebRoleGroupOrderByrByString)
+func (uc WebUserUC) SelectAll(c context.Context, parameter models.WebUserParameter) (res []models.WebUser, err error) {
+	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(0, 0, parameter.By, parameter.Sort, models.WebUserOrderBy, models.WebUserOrderByrByString)
 
-	repo := repository.NewWebRoleGroupRepository(uc.DB)
+	repo := repository.NewWebUserRepository(uc.DB)
 	res, err = repo.SelectAll(c, parameter)
 
 	if err != nil {
@@ -41,11 +41,11 @@ func (uc WebRoleGroupUC) SelectAll(c context.Context, parameter models.WebRoleGr
 }
 
 // FindAll ...
-func (uc WebRoleGroupUC) FindAll(c context.Context, parameter models.WebRoleGroupParameter) (res []models.WebRoleGroup, p viewmodel.PaginationVM, err error) {
-	parameter.Offset, parameter.Limit, parameter.Page, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.WebRoleGroupOrderBy, models.WebRoleGroupOrderByrByString)
+func (uc WebUserUC) FindAll(c context.Context, parameter models.WebUserParameter) (res []models.WebUser, p viewmodel.PaginationVM, err error) {
+	parameter.Offset, parameter.Limit, parameter.Page, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.WebUserOrderBy, models.WebUserOrderByrByString)
 
 	var count int
-	repo := repository.NewWebRoleGroupRepository(uc.DB)
+	repo := repository.NewWebUserRepository(uc.DB)
 	res, count, err = repo.FindAll(c, parameter)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
@@ -61,8 +61,8 @@ func (uc WebRoleGroupUC) FindAll(c context.Context, parameter models.WebRoleGrou
 }
 
 // FindByID ...
-func (uc WebRoleGroupUC) FindByID(c context.Context, parameter models.WebRoleGroupParameter) (res models.WebRoleGroup, err error) {
-	repo := repository.NewWebRoleGroupRepository(uc.DB)
+func (uc WebUserUC) FindByID(c context.Context, parameter models.WebUserParameter) (res models.WebUser, err error) {
+	repo := repository.NewWebUserRepository(uc.DB)
 	res, err = repo.FindByID(c, parameter)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
@@ -74,13 +74,14 @@ func (uc WebRoleGroupUC) FindByID(c context.Context, parameter models.WebRoleGro
 }
 
 // Add ...
-func (uc WebRoleGroupUC) Add(c context.Context, data *requests.WebRoleGroupRequest) (res models.WebRoleGroup, err error) {
+func (uc WebUserUC) Add(c context.Context, data *requests.WebUserRequest) (res models.WebUser, err error) {
 
-	repo := repository.NewWebRoleGroupRepository(uc.DB)
+	repo := repository.NewWebUserRepository(uc.DB)
 
-	res = models.WebRoleGroup{
-		Name:       &data.Name,
-		RoleListID: &data.RoleListID,
+	res = models.WebUser{
+		Login:               &data.Login,
+		Password:            &data.Password,
+		UserRoleGroupIDList: &data.UserRoleGroupIDList,
 	}
 	res.ID, err = repo.Add(c, &res)
 	if err != nil {
@@ -92,13 +93,14 @@ func (uc WebRoleGroupUC) Add(c context.Context, data *requests.WebRoleGroupReque
 }
 
 // Edit ,...
-func (uc WebRoleGroupUC) Edit(c context.Context, id string, data *requests.WebRoleGroupRequest) (res models.WebRoleGroup, err error) {
-	repo := repository.NewWebRoleGroupRepository(uc.DB)
+func (uc WebUserUC) Edit(c context.Context, id string, data *requests.WebUserRequest) (res models.WebUser, err error) {
+	repo := repository.NewWebUserRepository(uc.DB)
 
-	res = models.WebRoleGroup{
-		ID:         &id,
-		Name:       &data.Name,
-		RoleListID: &data.RoleListID,
+	res = models.WebUser{
+		ID:                  &id,
+		Login:               &data.Login,
+		Password:            &data.Password,
+		UserRoleGroupIDList: &data.UserRoleGroupIDList,
 	}
 
 	res.ID, err = repo.Edit(c, &res)
@@ -111,9 +113,9 @@ func (uc WebRoleGroupUC) Edit(c context.Context, id string, data *requests.WebRo
 }
 
 // Delete ...
-func (uc WebRoleGroupUC) Delete(c context.Context, id string) (res models.WebRoleGroup, err error) {
+func (uc WebUserUC) Delete(c context.Context, id string) (res models.WebUser, err error) {
 	now := time.Now().UTC()
-	repo := repository.NewWebRoleGroupRepository(uc.DB)
+	repo := repository.NewWebUserRepository(uc.DB)
 	res.ID, err = repo.Delete(c, id, now)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))

@@ -124,12 +124,37 @@ func (repository WebRoleGroupRepository) FindByID(c context.Context, parameter m
 
 // Add ...
 func (repository WebRoleGroupRepository) Add(c context.Context, model *models.WebRoleGroup) (res *string, err error) {
+
+	transaction, err := repository.DB.BeginTx(c, nil)
+	if err != nil {
+		return res, err
+	}
+	defer transaction.Rollback()
+
 	statement := `INSERT INTO role_group (_name,created_date, modified_date ,is_mysm)
 	VALUES ($1, now(),now(),1) RETURNING id`
 
-	err = repository.DB.QueryRowContext(c, statement, model.Name).Scan(&res)
+	err = transaction.QueryRowContext(c, statement, model.Name).Scan(&res)
 
 	if err != nil {
+		return res, err
+	}
+	ReleGroupID := &res
+
+	parts := strings.Split(*model.RoleListID, ",")
+	if len(parts) >= 1 {
+		for pi, _ := range parts {
+			linestatement := `INSERT INTO role_group_role_line (role_group_id,role_id,created_date, modified_date)
+					VALUES ($1,$2, now(),now()) RETURNING id`
+			var resLine string
+			err = transaction.QueryRowContext(c, linestatement, ReleGroupID, parts[pi]).Scan(&resLine)
+			if err != nil {
+				return res, err
+			}
+		}
+	}
+
+	if err = transaction.Commit(); err != nil {
 		return res, err
 	}
 	return res, err
@@ -137,15 +162,47 @@ func (repository WebRoleGroupRepository) Add(c context.Context, model *models.We
 
 // Edit ...
 func (repository WebRoleGroupRepository) Edit(c context.Context, model *models.WebRoleGroup) (res *string, err error) {
+	transaction, err := repository.DB.BeginTx(c, nil)
+	if err != nil {
+		return res, err
+	}
+	defer transaction.Rollback()
+
 	statement := `UPDATE role_group SET 
 	_name = $1, modified_date = now()
 	 WHERE id = $2 RETURNING id`
 
-	err = repository.DB.QueryRowContext(c, statement, model.Name,
+	err = transaction.QueryRowContext(c, statement, model.Name,
 		model.ID).Scan(&res)
 	if err != nil {
 		return res, err
 	}
+
+	ReleGroupID := &res
+
+	parts := strings.Split(*model.RoleListID, ",")
+
+	if len(parts) >= 1 {
+		deletelinestatement := `delete from role_group_role_line WHERE role_group_id = $1`
+
+		deletedRow, _ := transaction.QueryContext(c, deletelinestatement, ReleGroupID)
+		deletedRow.Close()
+
+		for pi, _ := range parts {
+			linestatement := `INSERT INTO role_group_role_line (role_group_id,role_id,created_date, modified_date)
+						VALUES ($1,$2, now(),now()) RETURNING id`
+			var resLine string
+			err = transaction.QueryRowContext(c, linestatement, ReleGroupID, parts[pi]).Scan(&resLine)
+			if err != nil {
+				return res, err
+			}
+		}
+	}
+
+	if err = transaction.Commit(); err != nil {
+		return res, err
+	}
+
 	return res, err
 }
 

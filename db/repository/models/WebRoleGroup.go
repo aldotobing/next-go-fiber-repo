@@ -2,8 +2,10 @@ package models
 
 // WebRoleGroup ...
 type WebRoleGroup struct {
-	ID   *string `json:"id"`
-	Name *string `json:"name"`
+	ID         *string                 `json:"id"`
+	Name       *string                 `json:"name"`
+	RoleListID *string                 `json:"role_list_id"`
+	RoleList   *[]WebRoleGroupRoleLine `json:"role_list"`
 }
 
 // WebRoleGroupParameter ...
