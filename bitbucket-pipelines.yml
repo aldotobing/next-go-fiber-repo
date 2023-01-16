@@ -31,7 +31,7 @@ pipelines:
           name: Security Scan
           script:
             # See more security tools at https://bitbucket.org/product/features/pipelines/integrations?&category=security
-            #- pipe: atlassian/git-secrets-scan:0.5.1
+            - pipe: atlassian/git-secrets-scan:1.2.1
             - echo PASSED
       - step:
           name: Deploy to Production
