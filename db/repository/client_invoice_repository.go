@@ -213,7 +213,7 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 	if model.ListLine != nil && len(*model.ListLine) > 0 {
 		for _, lineObject := range *model.ListLine {
 			line_statement := `
-			insert into sales_invoice_line(
+			insert into sales_invoice_line( 
 				header_id ,line_no ,category_id ,item_id ,qty ,
 				uom_id ,stock_qty ,unit_price ,gross_amount ,use_disc_percent ,
 				disc_percent1 ,disc_percent2 ,disc_percent3 ,disc_percent4 ,disc_percent5 ,
