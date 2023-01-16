@@ -68,4 +68,4 @@ pipelines:
             - pipe: atlassian/slack-notify:2.0.0
               variables:
                 WEBHOOK_URL: $SLACK_WEB_HOOK_URL
-                MESSAGE: '"[${BITBUCKET_REPO_FULL_NAME}] build has exited with status ${ALERT_TYPE}"'
+                MESSAGE: '"[${BITBUCKET_REPO_FULL_NAME}] build has exited with status ${ALERT_TYPE} Deployed to Production"'
