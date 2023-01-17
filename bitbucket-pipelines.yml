@@ -18,7 +18,6 @@ pipelines:
             - go build server/main.go
           artifacts:
             - report.xml
-            # Build compiles the packages
       - step:
           name: Lint Code
           image: golangci/golangci-lint:v1.31.0

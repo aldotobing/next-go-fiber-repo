@@ -27,7 +27,7 @@ func (h *AwsHandler) Upload(ctx *fiber.Ctx) error {
 		return h.SendResponse(ctx, nil, nil, err, 0)
 	}
 	AwsUc := usecase.AwsUC{ContractUC: h.ContractUC}
-	res, err := AwsUc.Upload("customer", AwsHeader)
+	res, err := AwsUc.Upload("", AwsHeader)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
