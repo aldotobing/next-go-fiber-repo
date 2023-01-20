@@ -88,7 +88,7 @@ func (repository WebItemRepository) SelectAll(c context.Context, parameter model
 	}
 
 	statement := models.WebItemSelectStatement + ` ` + models.WebItemWhereStatement +
-		` AND (LOWER(def."_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+		` AND (LOWER(def."_name") LIKE $1) OR (LOWER(def."code") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 
 	fmt.Println(statement)
@@ -128,7 +128,7 @@ func (repository WebItemRepository) FindAll(ctx context.Context, parameter model
 	}
 
 	query := models.WebItemSelectStatement + ` ` + models.WebItemWhereStatement + ` ` + conditionString + `
-		AND (LOWER(def."_name") LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
+		AND (LOWER(def."_name") LIKE $1) OR (LOWER(def."code") LIKE $1) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
 	if err != nil {
 		return data, count, err
