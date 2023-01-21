@@ -53,12 +53,13 @@ pipelines:
           after-script:
             - ALERT_TYPE="success"
             - if [[ $BITBUCKET_EXIT_CODE -ne 0 ]]; then ALERT_TYPE="error" ; fi
-            - pipe: atlassian/email-notify:0.3.12
+            # - pipe: atlassian/email-notify:0.3.12
+            - pipe: atlassian/email-notify:0.8.0
               variables:
                 USERNAME: "$EMAIL_USERNAME"
                 PASSWORD: $EMAIL_APP_PASSWORD
                 FROM: "commits-noreply@bitbucket.org"
-                TO: "$EMAIL_1_TO, $EMAIL_3_TO, $EMAIL_4_TO_TI"
+                TO: "$EMAIL_1_TO, $EMAIL_3_TO"
                 HOST: "$EMAIL_HOST"
                 SUBJECT: "${BITBUCKET_REPO_FULL_NAME} : Deploy ${ALERT_TYPE} : Bitbucket Pipe Notification for branch : ${BITBUCKET_BRANCH}"
                 BODY_HTML: "mail_template.html"
