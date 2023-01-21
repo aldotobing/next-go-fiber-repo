@@ -53,7 +53,8 @@ pipelines:
           after-script:
             - ALERT_TYPE="success"
             - if [[ $BITBUCKET_EXIT_CODE -ne 0 ]]; then ALERT_TYPE="error" ; fi
-            - pipe: atlassian/email-notify:0.3.12
+            # - pipe: atlassian/email-notify:0.3.12
+            - pipe: atlassian/email-notify:0.8.0
               variables:
                 USERNAME: "$EMAIL_USERNAME"
                 PASSWORD: $EMAIL_APP_PASSWORD
