@@ -81,19 +81,28 @@ func (repository ItemSearchRepository) scanRow(row *sql.Row) (res models.ItemSea
 // SelectAll ...
 func (repository ItemSearchRepository) SelectAll(c context.Context, parameter models.ItemSearchParameter) (data []models.ItemSearch, err error) {
 	conditionString := ``
-	conditionStringPriceListVersion := ``
 
-	if parameter.Name != "" {
-		conditionString += ` or (LOWER (ic."_name") like ` + `'%` + parameter.Name + `%'))`
+	if parameter.ItemCategoryName != "" {
+		conditionString += ` or (LOWER (ic."_name") like ` + `'%` + strings.ToLower(parameter.ItemCategoryName) + `%')`
 	}
 
-	if parameter.PriceListVersionId != "" {
-		conditionStringPriceListVersion += ` AND ip.price_list_version_id = '` + parameter.PriceListVersionId + `'`
+	// if parameter.PriceListVersionId != "" {
+	// 	conditionStringPriceListVersion += ` AND ip.price_list_version_id = '` + parameter.PriceListVersionId + `'`
+	// }
+
+	/*
+		customerType 7 = Apotek Lokal
+		customerType 15 = MT LOKAL INDEPENDEN
+		defId 83 = TOLAK ANGIN CAIR /D5
+		Tampilkan TAC D5 hanya pada kedua customerType di atas
+	*/
+	if parameter.CustomerTypeId != "" && (parameter.CustomerTypeId != "7" && parameter.CustomerTypeId != "15") {
+		conditionString += ` AND def.id NOT IN (83, 307, 393) `
 	}
 
 	statement := models.ItemSearchSelectStatement + ` ` + models.ItemSearchWhereStatement +
-		` AND ((LOWER(def."_name") LIKE $1) ` + conditionString + conditionStringPriceListVersion + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
-	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Name)+"%")
+		` AND ((LOWER(def."_name") LIKE $2 )) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+	rows, err := repository.DB.QueryContext(c, statement, parameter.PriceListVersionId, "%"+strings.ToLower(parameter.Name)+"%")
 
 	fmt.Println("select ALL : " + statement)
 	// fmt.Println("select ALL PARAM : " + parameter.Name)
@@ -119,8 +128,18 @@ func (repository ItemSearchRepository) SelectAll(c context.Context, parameter mo
 func (repository ItemSearchRepository) FindAll(ctx context.Context, parameter models.ItemSearchParameter) (data []models.ItemSearch, count int, err error) {
 	conditionString := ``
 
-	if parameter.Name != "" {
-		conditionString += ` or LOWER (ic."_name") like` + `'%` + parameter.Name + `%'` + `'`
+	if parameter.ItemCategoryName != "" {
+		conditionString += ` or (LOWER (ic."_name") like ` + `'%` + strings.ToLower(parameter.ItemCategoryName) + `%')`
+	}
+
+	/*
+		customerType 7 = Apotek Lokal
+		customerType 15 = MT LOKAL INDEPENDEN
+		defId 83 = TOLAK ANGIN CAIR /D5
+		Tampilkan TAC D5 hanya pada kedua customerType di atas
+	*/
+	if parameter.CustomerTypeId != "" && (parameter.CustomerTypeId != "7" && parameter.CustomerTypeId != "15") {
+		conditionString += ` AND def.id NOT IN (83, 307, 393) `
 	}
 
 	query := models.ItemSearchSelectStatement + ` ` + models.ItemSearchWhereStatement + ` ` + conditionString + `

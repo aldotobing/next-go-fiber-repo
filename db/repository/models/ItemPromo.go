@@ -94,5 +94,5 @@ var (
 	`
 
 	// ItemPromoWhereStatement ...
-	ItemPromoWhereStatement = ` WHERE i.created_date IS not NULL `
+	ItemPromoWhereStatement = ` WHERE i.created_date IS not NULL AND I.HIDE = 0 `
 )

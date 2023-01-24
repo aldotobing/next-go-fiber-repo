@@ -67,7 +67,7 @@ func (uc PromoContentUC) Add(c context.Context, data *requests.PromoContentReque
 	awsUc := AwsUC{ContractUC: uc.ContractUC}
 	var strImgBanner = ""
 	if imgBanner != nil {
-		imgProfileFile, err := awsUc.Upload("image/package", imgBanner)
+		imgProfileFile, err := awsUc.Upload("image/promo", imgBanner)
 		if err != nil {
 			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "upload_file", c.Value("requestid"))
 			return res, err
@@ -94,4 +94,17 @@ func (uc PromoContentUC) Add(c context.Context, data *requests.PromoContentReque
 	}
 
 	return res, err
+}
+
+// Delete ...
+func (uc PromoContentUC) Delete(c context.Context, id string) (res viewmodel.CommonDeletedObjectVM, err error) {
+	repo := repository.NewPromoContentRepository(uc.DB)
+	res.ID, err = repo.Delete(c, id)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	return res, err
+
 }

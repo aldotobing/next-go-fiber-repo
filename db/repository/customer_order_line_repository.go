@@ -13,6 +13,8 @@ type ICustomerOrderLineRepository interface {
 	SelectAll(c context.Context, parameter models.CustomerOrderLineParameter) ([]models.CustomerOrderLine, error)
 	FindAll(ctx context.Context, parameter models.CustomerOrderLineParameter) ([]models.CustomerOrderLine, int, error)
 	FindByID(c context.Context, parameter models.CustomerOrderLineParameter) (models.CustomerOrderLine, error)
+
+	SFASelectAll(c context.Context, parameter models.CustomerOrderLineParameter) ([]models.CustomerOrderLine, error)
 }
 
 // CustomerOrderLineRepository ...
@@ -142,4 +144,33 @@ func (repository CustomerOrderLineRepository) FindByID(c context.Context, parame
 	}
 
 	return data, nil
+}
+
+// SelectAll ...
+func (repository CustomerOrderLineRepository) SFASelectAll(c context.Context, parameter models.CustomerOrderLineParameter) (data []models.CustomerOrderLine, err error) {
+	conditionString := ``
+
+	if parameter.HeaderID != "" {
+		conditionString += ` AND def.header_id = '` + parameter.HeaderID + `'`
+	}
+
+	statement := models.SFACustomerOrderLineSelectStatement + ` ` + models.CustomerOrderLineWhereStatement +
+		` AND (LOWER(cus."customer_name") LIKE $1 ) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
+
+	if err != nil {
+		return data, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+
+		temp, err := repository.scanRows(rows)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
+	}
+
+	return data, err
 }

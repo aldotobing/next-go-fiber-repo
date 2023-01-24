@@ -34,10 +34,11 @@ var (
 	// ProductFocusCategorySelectStatement ...
 	ProductFocusCategorySelectStatement = `SELECT DISTINCT IC.ID AS IC_ID, IC.CODE AS IC_CODE,
 	IC._NAME AS IC_NAME,
-	null AS PICTURE
+	ICI.IMG AS PICTURE
 FROM PRODUCT_FOCUS DEF
 JOIN ITEM I ON I.ID = DEF.ITEM_ID
-JOIN ITEM_CATEGORY IC ON IC.ID = I.ITEM_CATEGORY_ID`
+JOIN ITEM_CATEGORY IC ON IC.ID = I.ITEM_CATEGORY_ID
+join item_category_img ici on ici.category_id = ic.id`
 
 	// ProductFocusCategoryWhereStatement ...
 	ProductFocusCategoryWhereStatement = ` WHERE def.created_date IS not NULL `

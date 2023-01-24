@@ -161,6 +161,7 @@ func (uc ShoppingCartUC) MultipleEdit(c context.Context, data *[]requests.Shoppi
 			Qty:        &input.Qty,
 			StockQty:   &input.StockQty,
 			Price:      &input.Price,
+			// TotalPrice: &input.TotalPrice,
 		}
 		ShoppingcartOject.ID, err = repo.Edit(c, &ShoppingcartOject)
 		if err != nil {

@@ -62,7 +62,7 @@ var (
 	cus.price_list_id,
 	(select plv.id from price_list_version plv where plv.price_list_id = pl.id and now()::date between plv.start_date and plv.end_date) as version_id,
 	cus.customer_type_id,cl._name cus_level_name,cus.customer_address,
-	s.id as salesman_id,s.salesman_code,s.salesman_name
+	s.id as salesman_id,s.salesman_code,s.salesman_name,cus.customer_phone,def.fcm_token
 	from _user def 
 	join customer cus on cus.id = def.partner_id 
 	left join price_list pl on pl.id = cus.price_list_id
@@ -77,7 +77,7 @@ var (
 	null,
 	null,
 	null,null,null,
-	null,null,null
+	null,null,null,null,null
 	from _user def
 	`
 

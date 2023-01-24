@@ -13,7 +13,7 @@ type ItemDetails struct {
 	UomName                 *string `json:"uom_name"`
 	UomLineConversion       *string `json:"uom_line_conversion"`
 	ItemDetailsPrice        *string `json:"item_price"`
-	PriceListVersionId      *string `json:"price_list_verison_id"`
+	PriceListVersionId      *string `json:"price_list_version_id"`
 }
 
 // ItemDetailsParameter ...

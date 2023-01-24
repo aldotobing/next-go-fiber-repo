@@ -30,7 +30,7 @@ func (repository UserAccountRepository) scanRows(rows *sql.Rows) (res models.Use
 		&res.ID, &res.CustomerID, &res.Name, &res.Code,
 		&res.Phone, &res.PriceListID, &res.PriceListVersionID,
 		&res.CustomerTypeID, &res.CustomerLevelName, &res.CustomerAddress,
-		&res.SalesmanID, &res.SalesmanCode, &res.SalesmanName,
+		&res.SalesmanID, &res.SalesmanCode, &res.SalesmanName, &res.Phone, &res.FCMToken,
 	)
 	if err != nil {
 		return res, err
@@ -45,7 +45,7 @@ func (repository UserAccountRepository) scanRow(row *sql.Row) (res models.UserAc
 		&res.ID, &res.CustomerID, &res.Name, &res.Code,
 		&res.Phone, &res.PriceListID, &res.PriceListVersionID,
 		&res.CustomerTypeID, &res.CustomerLevelName, &res.CustomerAddress,
-		&res.SalesmanID, &res.SalesmanCode, &res.SalesmanName,
+		&res.SalesmanID, &res.SalesmanCode, &res.SalesmanName, &res.Phone, &res.FCMToken,
 	)
 
 	if err != nil {

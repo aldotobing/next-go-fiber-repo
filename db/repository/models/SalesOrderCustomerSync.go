@@ -36,6 +36,7 @@ type SalesOrderCustomerSync struct {
 	GlobalDiscAmount     *string                       `json:"global_disc_amount"`
 	ListLine             *[]SalesOrderCustomerLineSync `json:"list_line"`
 	ExpectedDeliveryDate *string                       `json:"expected_delivery_date"`
+	VoidReasonNotes      *string                       `json:"void_reason_notes"`
 }
 
 // SalesOrderCustomerSyncParameter ...

@@ -15,8 +15,14 @@ type ICustomerOrderHeaderRepository interface {
 	SelectAll(c context.Context, parameter models.CustomerOrderHeaderParameter) ([]models.CustomerOrderHeader, error)
 	FindAll(ctx context.Context, parameter models.CustomerOrderHeaderParameter) ([]models.CustomerOrderHeader, int, error)
 	FindByID(c context.Context, parameter models.CustomerOrderHeaderParameter) (models.CustomerOrderHeader, error)
+	FindByCode(c context.Context, parameter models.CustomerOrderHeaderParameter) (models.CustomerOrderHeader, error)
 	CheckOut(c context.Context, model *models.CustomerOrderHeader) (*string, error)
 	SyncVoid(c context.Context, model *models.CustomerOrderHeader) (*string, error)
+
+	//apps
+	AppsSelectAll(c context.Context, parameter models.CustomerOrderHeaderParameter) ([]models.CustomerOrderHeader, error)
+	AppsFindAll(ctx context.Context, parameter models.CustomerOrderHeaderParameter) ([]models.CustomerOrderHeader, int, error)
+	AppsFindByID(c context.Context, parameter models.CustomerOrderHeaderParameter) (models.CustomerOrderHeader, error)
 }
 
 // CustomerOrderHeaderRepository ...
@@ -40,6 +46,7 @@ func (repository CustomerOrderHeaderRepository) scanRows(rows *sql.Rows) (res mo
 		&res.Status, &res.GrossAmount, &res.TaxableAmount, &res.TaxAmount,
 		&res.RoundingAmount, &res.NetAmount, &res.DiscAmount,
 		&res.CustomerCode, &res.SalesmanCode, &res.CustomerAddress, &res.ModifiedDate,
+		&res.VoidReasonText, &res.OrderSource,
 	)
 	if err != nil {
 
@@ -58,8 +65,9 @@ func (repository CustomerOrderHeaderRepository) scanRow(row *sql.Row) (res model
 		&res.ExpectedDeliveryDate, &res.BranchID, &res.BranchName,
 		&res.PriceLIstID, &res.PriceLIstName, &res.PriceLIstVersionID, &res.PriceLIstVersionName,
 		&res.Status, &res.GrossAmount, &res.TaxableAmount, &res.TaxAmount,
-		&res.RoundingAmount, &res.NetAmount, res.DiscAmount,
+		&res.RoundingAmount, &res.NetAmount, &res.DiscAmount,
 		&res.CustomerCode, &res.SalesmanCode, &res.CustomerAddress, &res.ModifiedDate,
+		&res.VoidReasonText, &res.OrderSource,
 	)
 	if err != nil {
 		return res, err
@@ -164,6 +172,19 @@ func (repository CustomerOrderHeaderRepository) FindByID(c context.Context, para
 	return data, nil
 }
 
+// FindByID ...
+func (repository CustomerOrderHeaderRepository) FindByCode(c context.Context, parameter models.CustomerOrderHeaderParameter) (data models.CustomerOrderHeader, err error) {
+	statement := models.CustomerOrderHeaderSelectStatement + ` WHERE def.created_date IS not NULL AND def.document_no = $1`
+	row := repository.DB.QueryRowContext(c, statement, parameter.DocumentNo)
+
+	data, err = repository.scanRow(row)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
+}
+
 func (repository CustomerOrderHeaderRepository) CheckOut(c context.Context, model *models.CustomerOrderHeader) (res *string, err error) {
 	statement := `
 		insert into customer_order_header(
@@ -214,18 +235,129 @@ func (repository CustomerOrderHeaderRepository) CheckOut(c context.Context, mode
 	if err = transaction.Commit(); err != nil {
 		return res, err
 	}
-	return res, err
+	return model.ID, err
 }
 
 func (repository CustomerOrderHeaderRepository) SyncVoid(c context.Context, model *models.CustomerOrderHeader) (res *string, err error) {
 	statement := `UPDATE customer_order_header SET 
-	status = 'voided' 
-	WHERE document_no = $1 
+	status = $1 ,void_reason_id =( select id from master_type where code = $2 )
+	WHERE document_no = $3 
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
-		model.DocumentNo).Scan(&res)
+		model.Status, model.VoidReasonCode, model.DocumentNo).Scan(&res)
 	if err != nil {
 		return res, err
 	}
 	return res, err
+}
+
+//apps select
+
+// SelectAll ...
+func (repository CustomerOrderHeaderRepository) AppsSelectAll(c context.Context, parameter models.CustomerOrderHeaderParameter) (data []models.CustomerOrderHeader, err error) {
+	conditionString := ``
+
+	if parameter.CustomerID != "" {
+		conditionString += ` AND def.cust_ship_to_id = '` + parameter.CustomerID + `'`
+	}
+
+	if parameter.DateParam != "" {
+		conditionString += ` AND def.modified_date > '` + parameter.DateParam + `'`
+	}
+
+	if parameter.UserID != "" {
+		conditionString += ` AND def.branch_id in ( select branch_id from user_branch where user_id = ` + parameter.UserID + `)`
+	}
+
+	queryBuilder := ` select * from ( `
+
+	queryBuilder += models.CustomerOrderHeaderSelectStatement + ` ` + models.CustomerOrderHeaderWhereStatement +
+		` AND (LOWER(cus."customer_name") LIKE $1 ) ` + conditionString
+
+	queryBuilder += ` union all `
+
+	queryBuilder += models.CustomerOrderHeaderSFASelectStatement + ` ` + models.CustomerOrderHeaderWhereStatement +
+		` AND (LOWER(cus."customer_name") LIKE $1 ) ` + conditionString
+
+	queryBuilder += ` )x ORDER BY x.transaction_date`
+
+	statement := queryBuilder
+
+	fmt.Println(statement)
+	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
+
+	if err != nil {
+		return data, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+
+		temp, err := repository.scanRows(rows)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
+	}
+
+	return data, err
+}
+
+// FindAll ...
+func (repository CustomerOrderHeaderRepository) AppsFindAll(ctx context.Context, parameter models.CustomerOrderHeaderParameter) (data []models.CustomerOrderHeader, count int, err error) {
+	conditionString := ``
+
+	if parameter.CustomerID != "" {
+		conditionString += ` AND def.cust_ship_to_id = '` + parameter.CustomerID + `'`
+	}
+
+	if parameter.UserID != "" {
+		conditionString += ` AND def.branch_id in ( select branch_id from user_branch where user_id = ` + parameter.UserID + `)`
+	}
+
+	query := models.CustomerOrderHeaderSelectStatement + ` ` + models.CustomerOrderHeaderWhereStatement + ` ` + conditionString + `
+		AND (LOWER(cus."customer_name") LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
+	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
+	if err != nil {
+		return data, count, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		temp, err := repository.scanRows(rows)
+		if err != nil {
+			return data, count, err
+		}
+		data = append(data, temp)
+	}
+	err = rows.Err()
+	if err != nil {
+		return data, count, err
+	}
+
+	query = `select 
+			count(*)
+			from customer_order_header def
+			join customer cus on cus.id = def.cust_ship_to_id
+			left join salesman s on s.id = def.salesman_id
+			left join term_of_payment top on top.id = def.payment_terms_id
+			left join branch b on b.id = def.branch_id
+			left join price_list pl on pl.id = def.price_list_id
+			left join price_list_version plv on plv.id = def.price_list_version_id ` + models.CustomerOrderHeaderWhereStatement + ` ` +
+		conditionString + ` AND (LOWER(cus."customer_name") LIKE $1)`
+	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
+	return data, count, err
+}
+
+// FindByID ...
+func (repository CustomerOrderHeaderRepository) AppsFindByID(c context.Context, parameter models.CustomerOrderHeaderParameter) (data models.CustomerOrderHeader, err error) {
+	statement := models.CustomerOrderHeaderSelectStatement + ` WHERE def.created_date IS not NULL AND def.id = $1`
+	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
+
+	data, err = repository.scanRow(row)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }

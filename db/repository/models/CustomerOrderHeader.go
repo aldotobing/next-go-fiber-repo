@@ -33,11 +33,16 @@ type CustomerOrderHeader struct {
 	SalesmanCode         *string             `json:"salesman_code"`
 	CustomerAddress      *string             `json:"customer_address"`
 	ModifiedDate         *string             `json:"modified_date"`
+	VoidReasonCode       *string             `json:"reason_code"`
+	VoidReasonID         *string             `json:"reason_id"`
+	VoidReasonText       *string             `json:"reason_text"`
+	OrderSource          *string             `json:"order_source"`
 }
 
 // CustomerOrderHeaderParameter ...
 type CustomerOrderHeaderParameter struct {
 	ID         string `json:"id_customer_order_header"`
+	DocumentNo string `json:"document_no"`
 	UserID     string `json:"admin_user_id"`
 	CustomerID string `json:"id_customer"`
 	Search     string `json:"search"`
@@ -66,8 +71,30 @@ var (
 	pl.id as pl_id,pl._name as pl_name, plv.id as plv_id,plv.description,
 	def.status,def.gross_amount,def.taxable_amount, def.tax_amount,
 	def.rounding_amount, def.net_amount,def.disc_amount,
-	cus.customer_code as c_code, s.salesman_code as s_code, cus.customer_address,to_char(def.modified_date,'YYYY-MM-DD') as modified_date
+	cus.customer_code as c_code, s.salesman_code as s_code, cus.customer_address,to_char(def.modified_date,'YYYY-MM-DD') as modified_date,
+	mtp._name as void_reason, 1 as order_source
 	from customer_order_header def
+	join customer cus on cus.id = def.cust_ship_to_id
+	left join salesman s on s.id = cus.salesman_id
+	left join term_of_payment top on top.id = def.payment_terms_id
+	left join branch b on b.id = def.branch_id
+	left join price_list pl on pl.id = def.price_list_id
+	left join price_list_version plv on plv.id = def.price_list_version_id
+	left join master_type mtp on mtp.id = def.void_reason_id and mtp._header ='Void Reason'
+ 	
+	`
+
+	CustomerOrderHeaderSFASelectStatement = ` select 
+	def.id as id_customer_order, def.document_no,to_char(def.transaction_date,'YYYY-MM-DD') as transaction_date ,to_char(def.transaction_time,'HH:MI:SS') as transaction_time,
+	def.cust_ship_to_id,cus.customer_name, def.tax_calc_method,
+	cus.salesman_id, s.salesman_name, def.payment_terms_id,top._name as top_name,
+	to_char(def.expected_delivery_date,'YYYY-MM-DD') as expected_d_date,b.id as b_id,b._name as b_name,
+	pl.id as pl_id,pl._name as pl_name, plv.id as plv_id,plv.description,
+	def.status,def.gross_amount,def.taxable_amount, def.tax_amount,
+	def.rounding_amount, def.net_amount,def.disc_amount,
+	cus.customer_code as c_code, s.salesman_code as s_code, cus.customer_address,to_char(def.modified_date,'YYYY-MM-DD') as modified_date,
+	def.void_reason_notes as void_reason , 2 as order_source
+	from sales_order_header def
 	join customer cus on cus.id = def.cust_ship_to_id
 	left join salesman s on s.id = cus.salesman_id
 	left join term_of_payment top on top.id = def.payment_terms_id

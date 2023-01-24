@@ -28,4 +28,12 @@ func (route BranchRoutes) RegisterRoute() {
 	r.Get("/select", handler.SelectAll)
 	r.Get("/id/:id", handler.FindByID)
 	r.Get("/except", handler.SelectAll)
+
+	r2 := route.RouterGroup.Group("/api/web/branch")
+	// r.Use(jwtMiddleware.VerifyUser)
+	r2.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
+	r2.Get("/", handler.FindAll)
+	r2.Get("/select", handler.SelectAll)
+	r2.Get("/id/:id", handler.FindByID)
+	r2.Get("/except", handler.SelectAll)
 }

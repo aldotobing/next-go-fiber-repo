@@ -198,4 +198,51 @@ func (boot Bootstrap) RegisterRouters() {
 	PriceListRoutes := routers.PriceListRoutes{RouterGroup: apiV1, Handler: handler}
 	PriceListRoutes.RegisterRoute()
 
+	ItemPriceRoutes := routers.ItemPriceRoutes{RouterGroup: apiV1, Handler: handler}
+	ItemPriceRoutes.RegisterRoute()
+
+	UserNotificationRoutes := routers.UserNotificationRoutes{RouterGroup: apiV1, Handler: handler}
+	UserNotificationRoutes.RegisterRoute()
+
+	VideoPromoteRoutes := routers.VideoPromoteRoutes{RouterGroup: apiV1, Handler: handler}
+	VideoPromoteRoutes.RegisterRoute()
+
+	DashboardWebRoutes := routers.DashboardWebRoutes{RouterGroup: apiV1, Handler: handler}
+	DashboardWebRoutes.RegisterRoute()
+
+	SalesmanRoutes := routers.SalesmanRoutes{RouterGroup: apiV1, Handler: handler}
+	SalesmanRoutes.RegisterRoute()
+
+	CustomerTypeRoutes := routers.CustomerTypeRoutes{RouterGroup: apiV1, Handler: handler}
+	CustomerTypeRoutes.RegisterRoute()
+
+	WebPromoItemLineRoutes := routers.WebPromoItemLineRoutes{RouterGroup: apiV1, Handler: handler}
+	WebPromoItemLineRoutes.RegisterRoute()
+
+	WebItemRoutes := routers.WebItemRoutes{RouterGroup: apiV1, Handler: handler}
+	WebItemRoutes.RegisterRoute()
+
+	WebItemUomLineRoutes := routers.WebItemUomLineRoutes{RouterGroup: apiV1, Handler: handler}
+	WebItemUomLineRoutes.RegisterRoute()
+
+	WebPromoRoutes := routers.WebPromoRoutes{RouterGroup: apiV1, Handler: handler}
+	WebPromoRoutes.RegisterRoute()
+
+	WebPromoBonusItemLineRoutes := routers.WebPromoBonusItemLineRoutes{RouterGroup: apiV1, Handler: handler}
+	WebPromoBonusItemLineRoutes.RegisterRoute()
+
+	WebRoleGroupRoutes := routers.WebRoleGroupRoutes{RouterGroup: apiV1, Handler: handler}
+	WebRoleGroupRoutes.RegisterRoute()
+
+	WebRoleGroupRoleLineRoutes := routers.WebRoleGroupRoleLineRoutes{RouterGroup: apiV1, Handler: handler}
+	WebRoleGroupRoleLineRoutes.RegisterRoute()
+
+	WebRoleRoutes := routers.WeebRoleRoutes{RouterGroup: apiV1, Handler: handler}
+	WebRoleRoutes.RegisterRoute()
+
+	WebUserRoutes := routers.WebUserRoutes{RouterGroup: apiV1, Handler: handler}
+	WebUserRoutes.RegisterRoute()
+
+	UserNotificationDetailRoutes := routers.UserNotificationDetailRoutes{RouterGroup: apiV1, Handler: handler}
+	UserNotificationDetailRoutes.RegisterRoute()
 }

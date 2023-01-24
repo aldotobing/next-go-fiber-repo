@@ -38,3 +38,16 @@ func (uc FCMUC) SendMessage(c context.Context, data *models.FireBaseCloudMessage
 
 	return res, err
 }
+func (uc FCMUC) SendFCMMessage(c context.Context, title, body, token string) (res string, err error) {
+	fcmUc := FCMUC{ContractUC: uc.ContractUC}
+	fireBaseMessage := models.FireBaseCloudMessage{
+		Body:  body,
+		Title: title,
+		Token: token,
+		Type:  "Pesan",
+	}
+
+	fcmmesage, _ := fcmUc.SendMessage(c, &fireBaseMessage)
+
+	return fcmmesage, err
+}

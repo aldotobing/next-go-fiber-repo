@@ -23,6 +23,7 @@ type ItemProductFocusParameter struct {
 	Name               string `json:"item_name"`
 	ItemCategoryId     string `json:"item_category_id"`
 	PriceListVersionId string `json:"price_list_version_id"`
+	CustomerTypeId     string `json:"customer_type_id"`
 	Search             string `json:"search"`
 	Page               int    `json:"page"`
 	Offset             int    `json:"offset"`
@@ -66,5 +67,5 @@ JOIN ITEM_PRICE IP ON IP.UOM_ID = UOM.ID
 AND IP.ITEM_ID = IUL.ITEM_ID`
 
 	// ItemProductFocusWhereStatement ...
-	ItemProductFocusWhereStatement = ` WHERE def.created_date IS not NULL `
+	ItemProductFocusWhereStatement = ` WHERE def.created_date IS not NULL AND I.HIDE = 0 `
 )

@@ -67,6 +67,23 @@ var (
 	
 	`
 
+	SFACustomerOrderLineSelectStatement = `select 
+	def.id as order_line_id, def.header_id, ic._name as cat_name, ic.id as ic_id,
+	i.id as item_id, i._name as i_name,uo.id as uom_id, uo._name as uom_name,
+	def.qty,def.stock_qty, def.unit_price,def.gross_amount,
+	def.use_disc_percent,def.disc_percent1,def.disc_percent2,def.disc_percent3,
+	def.disc_percent4,def.disc_percent5, def.taxable_amount, def.tax_amount,
+	def.rounding_amount, def.net_amount, s.salesman_name, s.salesman_code, i.item_picture
+	from sales_order_line def
+	join sales_order_header coh on coh.id = def.header_id
+	join customer cus on cus.id = coh.cust_ship_to_id
+	join item i on i.id = def.item_id
+	join item_category ic on ic.id = i.item_category_id
+	join uom uo on uo.id = def.uom_id
+	join salesman s on s.id =cus.salesman_id	
+	
+	`
+
 	// CustomerOrderLineWhereStatement ...
 	CustomerOrderLineWhereStatement = `WHERE def.created_date IS not NULL`
 )

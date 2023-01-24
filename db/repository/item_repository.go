@@ -38,13 +38,12 @@ func (repository ItemRepository) scanRows(rows *sql.Rows) (res models.Item, err 
 		&res.Description,
 		&res.ItemCategoryId,
 		&res.ItemCategoryName,
-		&res.ItemPicture,
 		&res.UomID,
 		&res.UomName,
 		&res.UomLineConversion,
 		&res.ItemPrice,
 		&res.PriceListVersionId,
-		&res.Uom,
+		&res.ItemPicture,
 	)
 	if err != nil {
 
@@ -63,13 +62,12 @@ func (repository ItemRepository) scanRow(row *sql.Row) (res models.Item, err err
 		&res.Description,
 		&res.ItemCategoryId,
 		&res.ItemCategoryName,
-		&res.ItemPicture,
 		&res.UomID,
 		&res.UomName,
 		&res.UomLineConversion,
 		&res.ItemPrice,
 		&res.PriceListVersionId,
-		&res.Uom,
+		&res.ItemPicture,
 	)
 
 	fmt.Println(err)
@@ -83,12 +81,28 @@ func (repository ItemRepository) scanRow(row *sql.Row) (res models.Item, err err
 // SelectAll ...
 func (repository ItemRepository) SelectAll(c context.Context, parameter models.ItemParameter) (data []models.Item, err error) {
 	conditionString := ``
-	if parameter.ItemCategoryId != "" {
-		conditionString += ` AND def.item_category_id = '` + parameter.ItemCategoryId + `'`
+
+	if parameter.ID != "" {
+		conditionString += ` AND DEF.ID = '` + parameter.ID + `'`
 	}
 
-	if parameter.PriceListVersionId != "" {
-		conditionString += ` AND ip.price_list_version_id = '` + parameter.PriceListVersionId + `'`
+	if parameter.ItemCategoryId != "" {
+		if parameter.ItemCategoryId == "2" {
+			//KHUSUS TAC sendiri, tampilkan semua item dengan category TAC (TAC ANAK, BEBAS GULA, DLL)
+			conditionString += ` AND def.item_category_id IN (SELECT id FROM item_category WHERE lower (_name) LIKE '%tac%') `
+		} else {
+			conditionString += ` AND def.item_category_id = ` + parameter.ItemCategoryId + ``
+		}
+	}
+
+	/*
+		customerType 7 = Apotek Lokal
+		customerType 15 = MT LOKAL INDEPENDEN
+		defId 83 = TOLAK ANGIN CAIR /D5
+		Tampilkan TAC D5 hanya pada kedua customerType di atas
+	*/
+	if parameter.CustomerTypeId != "" && (parameter.CustomerTypeId != "7" && parameter.CustomerTypeId != "15") {
+		conditionString += ` AND def.id NOT IN (83, 307, 393) `
 	}
 
 	if parameter.UomID != "" {
@@ -100,8 +114,8 @@ func (repository ItemRepository) SelectAll(c context.Context, parameter models.I
 	}
 
 	statement := models.ItemSelectStatement + ` ` + models.ItemWhereStatement +
-		` AND (LOWER(def."_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
-	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
+		` AND (LOWER(def."_name") LIKE $2) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+	rows, err := repository.DB.QueryContext(c, statement, parameter.PriceListVersionId, "%"+strings.ToLower(parameter.Search)+"%")
 
 	fmt.Println(statement)
 
@@ -126,8 +140,27 @@ func (repository ItemRepository) SelectAll(c context.Context, parameter models.I
 func (repository ItemRepository) FindAll(ctx context.Context, parameter models.ItemParameter) (data []models.Item, count int, err error) {
 	conditionString := ``
 
+	if parameter.ID != "" {
+		conditionString += ` AND DEF.ID = '` + parameter.ID + `'`
+	}
+
 	if parameter.ItemCategoryId != "" {
-		conditionString += ` AND def.item_category_id = '` + parameter.ItemCategoryId + `'`
+		if parameter.ItemCategoryId == "2" {
+			//KHUSUS TAC sendiri, tampilkan semua item dengan category TAC (TAC ANAK, BEBAS GULA, DLL)
+			conditionString += ` AND def.item_category_id IN (SELECT id FROM item_category WHERE lower (_name) LIKE '%tac%') `
+		} else {
+			conditionString += ` AND def.item_category_id = ` + parameter.ItemCategoryId + ``
+		}
+	}
+
+	/*
+		customerType 7 = Apotek Lokal
+		customerType 15 = MT LOKAL INDEPENDEN
+		defId 83 = TOLAK ANGIN CAIR /D5
+		Tampilkan TAC D5 hanya pada kedua customerType di atas
+	*/
+	if parameter.CustomerTypeId != "" && (parameter.CustomerTypeId != "7" && parameter.CustomerTypeId != "15") {
+		conditionString += ` AND def.id NOT IN (83, 307, 393) `
 	}
 
 	if parameter.PriceListVersionId != "" {
@@ -164,7 +197,12 @@ func (repository ItemRepository) FindAll(ctx context.Context, parameter models.I
 		return data, count, err
 	}
 
-	query = `SELECT COUNT(*) FROM "item" def ` + models.ItemWhereStatement + ` ` +
+	query = `SELECT COUNT(*) FROM "item" DEF ` +
+		`JOIN ITEM_UOM_LINE IUL ON IUL.ITEM_ID = DEF.ID ` +
+		`LEFT JOIN ITEM_CATEGORY IC ON IC.ID = DEF.ITEM_CATEGORY_ID ` +
+		`LEFT JOIN UOM UOM ON UOM.ID = IUL.UOM_ID ` +
+		`JOIN ITEM_PRICE IP ON IP.UOM_ID = UOM.ID AND IP.ITEM_ID = IUL.ITEM_ID` +
+		models.ItemWhereStatement + ` ` +
 		conditionString + ` AND (LOWER(def."_name") LIKE $1)`
 	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
 	return data, count, err
