@@ -43,7 +43,7 @@ func (h *DashboardWebHandler) GetBranchCustomerData(ctx *fiber.Ctx) error {
 		Limit:    str.StringToInt(ctx.Query("limit")),
 		By:       ctx.Query("by"),
 		Sort:     ctx.Query("sort"),
-		BarnchID: ctx.Params("branch_id"),
+		BarnchID: ctx.Query("branch_id"),
 	}
 
 	uc := usecase.DashboardWebUC{ContractUC: h.ContractUC}
