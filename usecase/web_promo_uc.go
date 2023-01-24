@@ -80,13 +80,14 @@ func (uc WebPromoUC) Add(c context.Context, data *requests.WebPromoRequest, imgB
 	// strNow := now.Format(time.RFC3339)
 	res = models.WebPromo{
 
-		Code:             &data.Code,
-		PromoName:        &data.PromoName,
-		PromoDescription: &data.PromoDescription,
-		PromoUrlBanner:   &strImgBanner,
-		StartDate:        &data.StartDate,
-		EndDate:          &data.EndDate,
-		ShowInApp:        &data.ShowInApp,
+		Code:               &data.Code,
+		PromoName:          &data.PromoName,
+		PromoDescription:   &data.PromoDescription,
+		PromoUrlBanner:     &strImgBanner,
+		StartDate:          &data.StartDate,
+		EndDate:            &data.EndDate,
+		ShowInApp:          &data.ShowInApp,
+		CustomerTypeIdList: &data.CustomerTypeIdList,
 	}
 	res.ID, err = repo.Add(c, &res)
 	if err != nil {
