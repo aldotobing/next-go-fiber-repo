@@ -26,6 +26,14 @@ type DashboardWebRegionDetail struct {
 	TotalRegisteredUser *string `json:"total_registered_user_detail"`
 }
 
+type DashboardWebBranchDetail struct {
+	CustomerID      *string `json:"customer_id_detail"`
+	CustomerName    *string `json:"customer_name_detail"`
+	TotalRepeatUser *string `json:"total_repeat_order_user_customer_detail"`
+	TotalOrderUser  *string `json:"total_order_user_customer_detail"`
+	TotalInvoice    *string `json:"total_invoice_user_customer_detail"`
+}
+
 // DashboardWebParameter ...
 type DashboardWebParameter struct {
 	ID     string `json:"id"`
@@ -45,6 +53,16 @@ type DashboardWebRegionParameter struct {
 	Limit   int    `json:"limit"`
 	By      string `json:"by"`
 	Sort    string `json:"sort"`
+}
+
+type DashboardWebBranchParameter struct {
+	BarnchID string `json:"branch_id"`
+	Search   string `json:"search"`
+	Page     int    `json:"page"`
+	Offset   int    `json:"offset"`
+	Limit    int    `json:"limit"`
+	By       string `json:"by"`
+	Sort     string `json:"sort"`
 }
 
 var (
@@ -96,4 +114,24 @@ var (
 		left join region r on r.id = def.region_id
 		
 	 `
+
+	DashboardWebBranchDetailOrderBy = []string{"def.id", "def.customer_name"}
+	// CustomerOrderLineOrderByrByString ...
+	DashboardWebBranchDetailOrderByrByString = []string{
+		"def.id",
+	}
+
+	DashboardWebBranchDetailSelectStatement = ` select 
+	def.id as cus_id,def.customer_name as cus_name,
+	(case when ( select count(*) from customer_order_header where (date_part('month', now()::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP)) and cust_bill_to_id = def.id)>0 then
+	( select count(*) from customer_order_header where (date_part('month', now()::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP)) and cust_bill_to_id = def.id) else 0 end
+	)as total_repeat_order,
+	(select count(*) from customer_order_header where cust_bill_to_id = def.id  and (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', now()::TIMESTAMP)=date_part('year', transaction_date::TIMESTAMP)) ) as total_transaction,
+	(select count(*) from sales_invoice_header where  cust_bill_to_id in (select distinct(cust_bill_to_id) from customer_order_header where (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP)) )  and cust_bill_to_id = def.id 
+			and (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP)) 
+	) as total_invoice
+	from customer def
+	left join branch b on b.id = def.branch_id
+	left join region r on r.id = b.region_id
+	   `
 )

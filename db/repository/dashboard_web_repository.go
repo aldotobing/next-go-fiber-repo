@@ -12,6 +12,7 @@ import (
 type IDashboardWebRepository interface {
 	GetData(c context.Context, parameter models.DashboardWebParameter) ([]models.DashboardWeb, error)
 	GetRegionDetailData(c context.Context, parameter models.DashboardWebRegionParameter) ([]models.DashboardWebRegionDetail, error)
+	GetBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.DashboardWebBranchDetail, int, error)
 }
 
 // DashboardWebRepository ...
@@ -57,6 +58,20 @@ func (repository DashboardWebRepository) scanRegionDetailRows(rows *sql.Rows) (r
 		&res.RegionGroupID, &res.RegionGroupName,
 		&res.TotalRegisteredUser, &res.TotalRepeatUser, &res.TotalOrderUser,
 		&res.TotalInvoice, &res.TotalActiveUser,
+	)
+	if err != nil {
+
+		return res, err
+	}
+
+	return res, nil
+}
+
+// Scan rows
+func (repository DashboardWebRepository) scanBranchCustomerDetailRows(rows *sql.Rows) (res models.DashboardWebBranchDetail, err error) {
+	err = rows.Scan(
+		&res.CustomerID, &res.CustomerName, &res.TotalRepeatUser, &res.TotalOrderUser,
+		&res.TotalInvoice,
 	)
 	if err != nil {
 
@@ -113,4 +128,41 @@ func (repository DashboardWebRepository) GetRegionDetailData(c context.Context, 
 	}
 
 	return data, err
+}
+
+func (repository DashboardWebRepository) GetBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) (data []models.DashboardWebBranchDetail, count int, err error) {
+	conditionString := ` WHERE def.created_date IS not NULL `
+
+	if parameter.BarnchID != "" {
+		conditionString += ` AND def.branch_id = '` + parameter.BarnchID + `'`
+	}
+
+	query := models.DashboardWebBranchDetailSelectStatement + ` ` + conditionString + `
+		AND (LOWER(def."customer_name") LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
+	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
+	if err != nil {
+		return data, count, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		temp, err := repository.scanBranchCustomerDetailRows(rows)
+		if err != nil {
+			return data, count, err
+		}
+		data = append(data, temp)
+	}
+	err = rows.Err()
+	if err != nil {
+		return data, count, err
+	}
+
+	query = `select 
+			count(*)
+			from customer def 
+			left join branch b on b.id = def.branch_id
+			left join region r on r.id = b.region_id ` + ` ` +
+		conditionString + ` AND (LOWER(def."customer_name") LIKE $1)`
+	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
+	return data, count, err
 }
