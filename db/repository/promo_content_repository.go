@@ -77,6 +77,11 @@ func (repository PromoContent) SelectAll(c context.Context, parameter models.Pro
 			` + INTERVAL ` + `'1 MONTH' `
 	}
 
+	if parameter.CustomerTypeId != "" {
+		conditionString += ` AND (PC.ID IN (SELECT promo_id FROM customer_type_eligible_promo ctep WHERE customer_type_id = ` + parameter.CustomerTypeId + `) ` +
+			` OR PC.ID NOT IN (SELECT promo_id FROM customer_type_eligible_promo)) `
+	}
+
 	statement := models.PromoContentSelectStatement + ` ` + models.PromoContentWhereStatement +
 		` AND (LOWER(pc._name) LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 
@@ -108,6 +113,11 @@ func (repository PromoContent) FindAll(ctx context.Context, parameter models.Pro
 
 	if parameter.ID != "" {
 		conditionString += ` AND cus.id = '` + parameter.ID + `'`
+	}
+
+	if parameter.CustomerTypeId != "" {
+		conditionString += ` AND (PC.ID IN (SELECT promo_id FROM customer_type_eligible_promo ctep WHERE customer_type_id = ` + parameter.CustomerTypeId + `) ` +
+			` OR PC.ID NOT IN (SELECT promo_id FROM customer_type_eligible_promo)) `
 	}
 
 	query := models.PromoContentSelectStatement + ` ` + models.PromoContentWhereStatement + ` ` + conditionString + `
@@ -177,17 +187,44 @@ func (repository PromoContent) FindByID(c context.Context, parameter models.Prom
 // }
 
 func (repository PromoContent) Add(c context.Context, model *models.PromoContent) (res *string, err error) {
+
+	transaction, err := repository.DB.BeginTx(c, nil)
+	if err != nil {
+		return res, err
+	}
+	defer transaction.Rollback()
+
 	statement := `INSERT INTO promo (code, _name, description, url_banner,
 		start_date, end_date, active)
 	VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`
 
-	err = repository.DB.QueryRowContext(c, statement, model.Code, model.PromoName, model.PromoDescription, model.PromoUrlBanner,
+	err = transaction.QueryRowContext(c, statement, model.Code, model.PromoName, model.PromoDescription, model.PromoUrlBanner,
 		model.StartDate, model.EndDate, 1).Scan(&res)
 
 	fmt.Println("PROMO INSERT : " + statement)
 
 	if err != nil {
 		fmt.Println("INSERT PROMO BERHASIL! :)")
+		return res, err
+	}
+
+	PromoId := &res
+
+	parts := strings.Split(*model.CustomerTypeIdList, ",")
+	if len(parts) >= 1 {
+		for pi, _ := range parts {
+			linestatement := `INSERT INTO customer_type_eligible_promo (
+				customer_type_id, promo_id, created_date, modified_date)
+					VALUES ($1, $2, now(), now()) RETURNING id`
+			var resLine string
+			err = transaction.QueryRowContext(c, linestatement, parts[pi], PromoId).Scan(&resLine)
+			if err != nil {
+				return res, err
+			}
+		}
+	}
+
+	if err = transaction.Commit(); err != nil {
 		return res, err
 	}
 	return res, err
