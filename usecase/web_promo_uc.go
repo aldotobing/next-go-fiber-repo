@@ -110,3 +110,16 @@ func (uc WebPromoUC) Delete(c context.Context, id string) (res viewmodel.CommonD
 	return res, err
 
 }
+
+// FindByID ...
+func (uc WebPromoUC) FindByID(c context.Context, parameter models.WebPromoParameter) (res models.WebPromo, err error) {
+	repo := repository.NewWebPromoRepository(uc.DB)
+	res, err = repo.FindByID(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+	uc.BuildBody(&res)
+
+	return res, err
+}
