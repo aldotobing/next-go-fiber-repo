@@ -119,9 +119,14 @@ func (repository PromoItemLineRepository) scanRow(row *sql.Row) (res models.Prom
 func (repository PromoItemLineRepository) SelectAll(c context.Context, parameter models.PromoItemLineParameter) (data []models.PromoItemLine, err error) {
 	conditionString := ``
 
+	// if parameter.CustomerID != "" {
+	// 	conditionString += `AND IP.PRICE_LIST_VERSION_ID =
+	// (SELECT id FROM price_list_version WHERE price_list_id = (SELECT price_list_id FROM customer WHERE id = ` + parameter.CustomerID + `` + `))` + ` `
+	// }
+
 	if parameter.CustomerID != "" {
 		conditionString += `AND IP.PRICE_LIST_VERSION_ID =
-	(SELECT id FROM price_list_version WHERE price_list_id = (SELECT price_list_id FROM customer WHERE id = ` + parameter.CustomerID + `` + `))` + ` `
+	(SELECT price_list_version_id FROM customer WHERE id = ` + parameter.CustomerID + `` + `)` + ` `
 	}
 
 	if parameter.StartDate != "" && parameter.EndDate != "" {
