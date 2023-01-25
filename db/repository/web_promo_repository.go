@@ -15,6 +15,7 @@ type IWebPromo interface {
 	FindAll(ctx context.Context, parameter models.WebPromoParameter) ([]models.WebPromo, int, error)
 	Add(c context.Context, parameter *models.WebPromo) (*string, error)
 	Delete(c context.Context, id string) (string, error)
+	FindByID(c context.Context, parameter models.WebPromoParameter) (models.WebPromo, error)
 	// 	Edit(c context.Context, model *models.WebPromo) (*string, error)
 	// 	EditAddress(c context.Context, model *models.WebPromo) (*string, error)
 }
@@ -140,10 +141,10 @@ func (repository WebPromo) FindAll(ctx context.Context, parameter models.WebProm
 
 // FindByID ...
 func (repository WebPromo) FindByID(c context.Context, parameter models.WebPromoParameter) (data models.WebPromo, err error) {
-	statement := models.WebPromoSelectStatement + ` WHERE pc.id = $1`
+	statement := models.WebPromoSelectStatement + ` WHERE PC.ID = $1 `
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
 
-	fmt.Println(statement)
+	fmt.Println("Promo find by ID : " + statement)
 
 	data, err = repository.scanRow(row)
 	if err != nil {
