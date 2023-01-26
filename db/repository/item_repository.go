@@ -102,7 +102,7 @@ func (repository ItemRepository) SelectAll(c context.Context, parameter models.I
 		Tampilkan TAC D5 hanya pada kedua customerType di atas
 	*/
 	if parameter.CustomerTypeId != "" && (parameter.CustomerTypeId != "7" && parameter.CustomerTypeId != "15") {
-		conditionString += ` AND def.id NOT IN (83, 307, 393, 441, 455, 652) `
+		conditionString += ` AND def.id NOT IN (SELECT item_id FROM item_exception) `
 	}
 
 	if parameter.UomID != "" {
@@ -160,7 +160,7 @@ func (repository ItemRepository) FindAll(ctx context.Context, parameter models.I
 		Tampilkan TAC D5 hanya pada kedua customerType di atas
 	*/
 	if parameter.CustomerTypeId != "" && (parameter.CustomerTypeId != "7" && parameter.CustomerTypeId != "15") {
-		conditionString += ` AND def.id NOT IN (83, 307, 393, 441, 455, 652) `
+		conditionString += ` AND def.id NOT IN (SELECT item_id FROM item_exception) `
 	}
 
 	if parameter.PriceListVersionId != "" {
