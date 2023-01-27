@@ -214,10 +214,27 @@ func (repository WebUserRepository) Edit(c context.Context, model *models.WebUse
 
 // Delete ...
 func (repository WebUserRepository) Delete(c context.Context, id string, now time.Time) (res *string, err error) {
+	transaction, err := repository.DB.BeginTx(c, nil)
+	if err != nil {
+		return res, err
+	}
+	defer transaction.Rollback()
+
+	userroleeletelinestatement := `delete from user_role_group WHERE user_id = $1`
+
+	deletedRoleGroupRow, _ := transaction.QueryContext(c, userroleeletelinestatement, id)
+
+	deletedRoleGroupRow.Close()
+
 	deletelinestatement := `delete from _user WHERE id = $1`
 
-	deletedRow, _ := repository.DB.QueryContext(c, deletelinestatement, id)
+	deletedRow, _ := transaction.QueryContext(c, deletelinestatement, id)
+
 	deletedRow.Close()
+
+	if err = transaction.Commit(); err != nil {
+		return res, err
+	}
 
 	res = &id
 	return res, err
