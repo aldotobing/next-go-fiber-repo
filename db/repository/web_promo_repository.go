@@ -204,7 +204,7 @@ func (repository WebPromo) Add(c context.Context, model *models.WebPromo) (res *
 	PromoId := &res
 
 	parts := strings.Split(*model.CustomerTypeIdList, ",")
-	if len(parts) >= 1 {
+	if len(parts) >= 1 && parts[0] != "" {
 		for pi, _ := range parts {
 			linestatement := `INSERT INTO customer_type_eligible_promo 
 			(customer_type_id, promo_id, created_date, modified_date)
