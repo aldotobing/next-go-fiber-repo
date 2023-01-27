@@ -10,6 +10,7 @@ type WebItem struct {
 	ItemCategoryName *string `json:"item_category_name"`
 	ItemActive       *string `json:"item_active"`
 	Description      *string `json:"item_description"`
+	ItemHide         *string `json:"item_hide"`
 }
 
 // WebItemParameter ...
@@ -18,6 +19,7 @@ type WebItemParameter struct {
 	Code           string `json:"item_code"`
 	Name           string `json:"item_name"`
 	ItemCategoryId string `json:"item_category_id"`
+	ItemHide       string `json:"item_hide"`
 	Search         string `json:"search"`
 	Page           int    `json:"page"`
 	Offset         int    `json:"offset"`
@@ -49,8 +51,9 @@ var (
 		def._name as item_name,
 		(concat('` + ItemImagePath + `',def.item_picture)) AS item_picture,
 		ic._name as category_name,
-	def.active as item_active,
-	def.description as description 
+		def.hide as item_hide,
+		def.active as item_active,
+		def.description as description 
 	FROM ITEM def
 	LEFT JOIN ITEM_CATEGORY IC ON IC.ID = DEF.ITEM_CATEGORY_ID
 	`
