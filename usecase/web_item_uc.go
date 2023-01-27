@@ -114,6 +114,7 @@ func (uc WebItemUC) Edit(c context.Context, id string, data *requests.WebItemReq
 		Name:           &data.Name,
 		ItemPicture:    &strImg,
 		ItemCategoryId: &data.ItemCategoryId,
+		ItemHide:       &data.ItemHide,
 	}
 
 	res.ID, err = repo.Edit(c, &res)
