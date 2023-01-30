@@ -240,13 +240,15 @@ func (repository WebCustomerRepository) Edit(c context.Context, model *models.We
 	statement := `UPDATE customer SET 
 	customer_name = $1, 
 	customer_address = $2, 
-	user_id = $3 
-	WHERE id = $4 
+	user_id = $3,
+	customer_phone = $4 
+	WHERE id = $5 
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		model.CustomerName,
 		model.CustomerAddress,
 		model.CustomerUserID,
+		model.CustomerPhone,
 		model.ID).Scan(&res)
 	if err != nil {
 		return res, err
