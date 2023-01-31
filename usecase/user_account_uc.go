@@ -181,12 +181,12 @@ func (uc UserAccountUC) Login(c context.Context, data *requests.UserAccountLogin
 	// res.SalesmanName = chkuser.SalesmanName
 	// res.SalesmanCode = chkuser.SalesmanCode
 
-	// if len(parts) == 1 {
-	// 	senDwaMessage := uc.ContractUC.WhatsApp.SendWA(res.Phone, res.Otp)
-	// 	if senDwaMessage != nil {
-	// 		fmt.Println("sukses")
-	// 	}
-	// }
+	if len(parts) == 1 {
+		senDwaMessage := uc.ContractUC.WhatsApp.SendWA(res.Phone, res.Otp)
+		if senDwaMessage != nil {
+			fmt.Println("sukses")
+		}
+	}
 	return res, nil
 }
 
