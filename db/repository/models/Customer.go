@@ -2,59 +2,62 @@ package models
 
 // Customer ...
 type Customer struct {
-	ID                      *string `json:"customer_id"`
-	Code                    *string `json:"customer_code"`
-	CustomerName            *string `json:"customer_name"`
-	CustomerProfilePicture  *string `json:"customer_profile_picture"`
-	CustomerActiveStatus    *string `json:"customer_active_status"`
-	CustomerBirthDate       *string `json:"customer_birthdate"`
-	CustomerReligion        *string `json:"customer_religion"`
-	CustomerLatitude        *string `json:"customer_latitude"`
-	CustomerLongitude       *string `json:"customer_longitude"`
-	CustomerBranchCode      *string `json:"customer_branch_code"`
-	CustomerBranchName      *string `json:"customer_branch_name"`
-	CustomerBranchArea      *string `json:"customer_branch_area"`
-	CustomerBranchAddress   *string `json:"customer_branch_address"`
-	CustomerBranchLat       *string `json:"customer_branch_lat"`
-	CustomerBranchLng       *string `json:"customer_branch_lng"`
-	CustomerRegionCode      *string `json:"customer_region_code"`
-	CustomerRegionName      *string `json:"customer_region_name"`
-	CustomerRegionGroup     *string `json:"customer_region_group"`
-	CustomerEmail           *string `json:"customer_email"`
-	CustomerCpName          *string `json:"customer_cp_name"`
-	CustomerAddress         *string `json:"customer_address"`
-	CustomerPostalCode      *string `json:"customer_postal_code"`
-	CustomerProvinceID      *string `json:"customer_province_id"`
-	CustomerProvinceName    *string `json:"customer_province_name"`
-	CustomerCityID          *string `json:"customer_city_id"`
-	CustomerCityName        *string `json:"customer_city_name"`
-	CustomerDistrictID      *string `json:"customer_district_id"`
-	CustomerDistrictName    *string `json:"customer_district_name"`
-	CustomerSubdistrictID   *string `json:"customer_subdistrict_id"`
-	CustomerSubdistrictName *string `json:"customer_subdistrict_name"`
-	CustomerSalesmanCode    *string `json:"customer_salesman_code"`
-	CustomerSalesmanName    *string `json:"customer_salesman_name"`
-	CustomerSalesmanPhone   *string `json:"customer_salesman_phone"`
-	CustomerSalesCycle      *string `json:"customer_sales_cycle"`
-	CustomerTypeId          *string `json:"customer_type_id"`
-	CustomerTypeName        *string `json:"customer_type_name"`
-	CustomerPhone           *string `json:"customer_phone"`
-	CustomerPoint           *string `json:"customer_point"`
-	GiftName                *string `json:"customer_gift_name"`
-	Loyalty                 *string `json:"customer_loyalty"`
-	VisitDay                *string `json:"visit_day"`
-	CustomerTaxCalcMethod   *string `json:"customer_tax_calc_method"`
-	CustomerBranchID        *string `json:"customer_branch_id"`
-	CustomerSalesmanID      *string `json:"customer_salesman_id"`
-	CustomerNik             *string `json:"customer_nik"`
-	CustomerPhotoKtp        *string `json:"customer_photo_ktp"`
-	CustomerLevel           *string `json:"customer_level_name"`
+	ID                         *string `json:"customer_id"`
+	Code                       *string `json:"customer_code"`
+	CustomerName               *string `json:"customer_name"`
+	CustomerProfilePicture     *string `json:"customer_profile_picture"`
+	CustomerActiveStatus       *string `json:"customer_active_status"`
+	CustomerBirthDate          *string `json:"customer_birthdate"`
+	CustomerReligion           *string `json:"customer_religion"`
+	CustomerLatitude           *string `json:"customer_latitude"`
+	CustomerLongitude          *string `json:"customer_longitude"`
+	CustomerBranchCode         *string `json:"customer_branch_code"`
+	CustomerBranchName         *string `json:"customer_branch_name"`
+	CustomerBranchArea         *string `json:"customer_branch_area"`
+	CustomerBranchAddress      *string `json:"customer_branch_address"`
+	CustomerBranchLat          *string `json:"customer_branch_lat"`
+	CustomerBranchLng          *string `json:"customer_branch_lng"`
+	CustomerRegionCode         *string `json:"customer_region_code"`
+	CustomerRegionName         *string `json:"customer_region_name"`
+	CustomerRegionGroup        *string `json:"customer_region_group"`
+	CustomerEmail              *string `json:"customer_email"`
+	CustomerCpName             *string `json:"customer_cp_name"`
+	CustomerAddress            *string `json:"customer_address"`
+	CustomerPostalCode         *string `json:"customer_postal_code"`
+	CustomerProvinceID         *string `json:"customer_province_id"`
+	CustomerProvinceName       *string `json:"customer_province_name"`
+	CustomerCityID             *string `json:"customer_city_id"`
+	CustomerCityName           *string `json:"customer_city_name"`
+	CustomerDistrictID         *string `json:"customer_district_id"`
+	CustomerDistrictName       *string `json:"customer_district_name"`
+	CustomerSubdistrictID      *string `json:"customer_subdistrict_id"`
+	CustomerSubdistrictName    *string `json:"customer_subdistrict_name"`
+	CustomerSalesmanCode       *string `json:"customer_salesman_code"`
+	CustomerSalesmanName       *string `json:"customer_salesman_name"`
+	CustomerSalesmanPhone      *string `json:"customer_salesman_phone"`
+	CustomerSalesCycle         *string `json:"customer_sales_cycle"`
+	CustomerTypeId             *string `json:"customer_type_id"`
+	CustomerTypeName           *string `json:"customer_type_name"`
+	CustomerPhone              *string `json:"customer_phone"`
+	CustomerPoint              *string `json:"customer_point"`
+	GiftName                   *string `json:"customer_gift_name"`
+	Loyalty                    *string `json:"customer_loyalty"`
+	VisitDay                   *string `json:"visit_day"`
+	CustomerTaxCalcMethod      *string `json:"customer_tax_calc_method"`
+	CustomerBranchID           *string `json:"customer_branch_id"`
+	CustomerSalesmanID         *string `json:"customer_salesman_id"`
+	CustomerNik                *string `json:"customer_nik"`
+	CustomerPhotoKtp           *string `json:"customer_photo_ktp"`
+	CustomerLevel              *string `json:"customer_level_name"`
+	CustomerPriceListID        *string `json:"customer_price_list_id"`
+	CustomerPriceListVersionID *string `json:"customer_price_list_verison_id"`
 }
 
 // CustomerParameter ...
 type CustomerParameter struct {
 	ID             string `json:"customer_id"`
 	Code           string `json:"customer_code"`
+	Phone          string `json:"customer_phone"`
 	Name           string `json:"customer_name"`
 	CustomerTypeId string `json:"custome_type_id"`
 	UserId         string `json:"admin_user_id"`
@@ -116,7 +119,7 @@ var (
 		C.SALES_CYCLE CUST_SALES_CYCLE,
 		C.CUSTOMER_TYPE_ID AS CUST_TYPE_ID,
 		CT._NAME CUST_TYPE_NAME,
-		'+62' || regexp_replace(SUBSTRING (customer_phone, 2, length(customer_phone)),'[^\w]+','','g' )  AS CUSTOMER_PHONE,
+		C.customer_phone AS CUSTOMER_PHONE,
 		(SELECT SUM(SIH.TRANSACTION_POINT) FROM SALES_INVOICE_HEADER SIH WHERE SIH.CUST_BILL_TO_ID = C.ID) AS CUSTOMER_POINT,
 		CG.GIFT_NAME AS CUST_GIFT_NAME,
 		LOY.LOYALTY_NAME AS CUST_LOYALTY_NAME,
@@ -125,7 +128,8 @@ var (
 		C.salesman_id as c_salesman_id,
 		concat('` + CustomerImagePath + `',C.customer_photo_ktp) AS CUST_KTP_PICTURE,
 		c.customer_nik,
-		cl._name as cus_level_name
+		cl._name as cus_level_name,
+		C.price_list_id,C.price_list_version_id
 
 	FROM CUSTOMER C
 	LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
@@ -146,3 +150,5 @@ var (
 	// CustomerWhereStatement ...
 	CustomerWhereStatement = ` WHERE c.created_date IS not NULL and c.show_in_apps = 1 `
 )
+
+// '+62' || regexp_replace(SUBSTRING (customer_phone, 2, length(customer_phone)),'[^\w]+','','g' )
