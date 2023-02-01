@@ -8,9 +8,9 @@ import (
 	"nextbasis-service-v-0.1/pkg/number"
 )
 
-func BuildProcessTransactionTemplate(customerOrderHeader models.CustomerOrderHeader, lineData []models.CustomerOrderLine, userData models.UserAccount) (res string) {
+func BuildProcessTransactionTemplate(customerOrderHeader models.CustomerOrderHeader, lineData []models.CustomerOrderLine, userData models.Customer) (res string) {
 
-	msgbody := `Kepada Yang Terhormat ` + *userData.Name + `\n\nCheckout anda dengan nomor ` + *customerOrderHeader.DocumentNo
+	msgbody := `Kepada Yang Terhormat ` + *userData.CustomerName + `\n\nCheckout anda dengan nomor ` + *customerOrderHeader.DocumentNo
 	msgbody += ` sedang dalam proses`
 	msgbody += `\n\nBerikut merupakan rincian pesanan anda:`
 
@@ -36,9 +36,9 @@ func BuildProcessTransactionTemplate(customerOrderHeader models.CustomerOrderHea
 	return msgbody
 }
 
-func BuildVoidTransactionTemplate(customerOrderHeader models.CustomerOrderHeader, lineData []models.CustomerOrderLine, userData models.UserAccount) (res string) {
+func BuildVoidTransactionTemplate(customerOrderHeader models.CustomerOrderHeader, lineData []models.CustomerOrderLine, userData models.Customer) (res string) {
 
-	msgbody := `Kepada Yang Terhormat ` + *userData.Name + `\n\nCheckout anda dengan nomor ` + *customerOrderHeader.DocumentNo
+	msgbody := `Kepada Yang Terhormat ` + *userData.CustomerName + `\n\nCheckout anda dengan nomor ` + *customerOrderHeader.DocumentNo
 	msgbody += ` telah dibatalkan`
 	msgbody += `\n\nBerikut merupakan rincian pesanan anda:`
 

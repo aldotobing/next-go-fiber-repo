@@ -248,4 +248,10 @@ func (boot Bootstrap) RegisterRouters() {
 
 	WebCustomerRoutes := routers.WebCustomerRoutes{RouterGroup: apiV1, Handler: handler}
 	WebCustomerRoutes.RegisterRoute()
+
+	WebPartnerRoutes := routers.WebPartnerRoutes{RouterGroup: apiV1, Handler: handler}
+	WebPartnerRoutes.RegisterRoute()
+
+	WebDoctorRoutes := routers.WebDoctorRoutes{RouterGroup: apiV1, Handler: handler}
+	WebDoctorRoutes.RegisterRoute()
 }

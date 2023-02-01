@@ -138,9 +138,9 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 		return res, err
 	}
 
-	userrepo := repository.NewUserAccountRepository(uc.DB)
+	userrepo := repository.NewCustomerRepository(uc.DB)
 
-	useraccount, erruser := userrepo.FindByID(c, models.UserAccountParameter{CustomerID: *res.CustomerID})
+	useraccount, erruser := userrepo.FindByID(c, models.CustomerParameter{ID: *res.CustomerID})
 
 	if erruser == nil {
 
@@ -153,7 +153,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 			bayar, _ := strconv.ParseFloat(*order.NetAmount, 0)
 			harga := strings.ReplaceAll(number.FormatCurrency(bayar, "IDR", ".", "", 0), "Rp", "")
 			msgtitle := "Checkout " + *order.DocumentNo
-			msgbody := `Kepada Yang Terhormat ` + *useraccount.Name + `\n\nCheckout anda dengan nomor ` + *order.DocumentNo + ` telah diterima dan akan segera diproses\n\nBerikut merupakan rincian pesanan anda:`
+			msgbody := `Kepada Yang Terhormat ` + *useraccount.CustomerName + `\n\nCheckout anda dengan nomor ` + *order.DocumentNo + ` telah diterima dan akan segera diproses\n\nBerikut merupakan rincian pesanan anda:`
 			orderline, errline := orderlinerepo.SelectAll(c, models.CustomerOrderLineParameter{
 				HeaderID: *order.ID,
 				By:       "def.created_date",
@@ -175,9 +175,9 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 				msgbody += `\nAutogenerate Whatsapp`
 			}
 
-			if useraccount.FCMToken != nil && *useraccount.FCMToken != "" {
+			if useraccount.CustomerFCMToken != nil && *useraccount.CustomerFCMToken != "" {
 
-				_, errfcm := FcmUc.SendFCMMessage(c, msgtitle, msgbody, *useraccount.FCMToken)
+				_, errfcm := FcmUc.SendFCMMessage(c, msgtitle, msgbody, *useraccount.CustomerFCMToken)
 				if errfcm == nil {
 
 				}
@@ -195,15 +195,15 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 				}
 
 			}
-			if useraccount.Phone != nil && *useraccount.Phone != "" {
-				fmt.Println(useraccount.Phone)
-				senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.Phone, msgbody)
+			if useraccount.CustomerPhone != nil && *useraccount.CustomerPhone != "" {
+
+				senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.CustomerPhone, msgbody)
 				if senDwaMessage != nil {
 					fmt.Println("sukses")
 				}
-				if useraccount.SalesmanID != nil {
+				if useraccount.CustomerSalesmanID != nil {
 					salesmannRepo := repository.NewSalesmanRepository(uc.DB)
-					customerSales, errcustsales := salesmannRepo.FindByID(c, models.SalesmanParameter{ID: *useraccount.SalesmanID})
+					customerSales, errcustsales := salesmannRepo.FindByID(c, models.SalesmanParameter{ID: *useraccount.CustomerSalesmanID})
 					if errcustsales == nil {
 						if customerSales.PhoneNo != nil {
 							senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*customerSales.PhoneNo, msgbody)
@@ -271,9 +271,9 @@ func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter mode
 		if errcurrent == nil {
 
 			if currentOrder.Status != nil && *currentOrder.Status != *invoiceObject.Status {
-				userrepo := repository.NewUserAccountRepository(uc.DB)
+				userrepo := repository.NewCustomerRepository(uc.DB)
 
-				useraccount, erruser := userrepo.FindByID(c, models.UserAccountParameter{CustomerID: *currentOrder.CustomerID})
+				useraccount, erruser := userrepo.FindByID(c, models.CustomerParameter{ID: *currentOrder.CustomerID})
 				if erruser == nil {
 					orderlinerepo := repository.NewCustomerOrderLineRepository(uc.DB)
 					orderline, errline := orderlinerepo.SelectAll(c, models.CustomerOrderLineParameter{
@@ -293,9 +293,9 @@ func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter mode
 							messageTitle = "Transaksi " + *currentOrder.DocumentNo + " diproses."
 						}
 
-						if useraccount.FCMToken != nil && *useraccount.FCMToken != "" {
+						if useraccount.CustomerFCMToken != nil && *useraccount.CustomerFCMToken != "" {
 							FcmUc := FCMUC{ContractUC: uc.ContractUC}
-							_, errfcm := FcmUc.SendFCMMessage(c, messageTitle, messageTemplate, *useraccount.FCMToken)
+							_, errfcm := FcmUc.SendFCMMessage(c, messageTitle, messageTemplate, *useraccount.CustomerFCMToken)
 							if errfcm == nil {
 
 							}
@@ -314,9 +314,9 @@ func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter mode
 
 						}
 
-						if useraccount.Phone != nil && *useraccount.Phone != "" {
+						if useraccount.CustomerPhone != nil && *useraccount.CustomerPhone != "" {
 							if messageTemplate != "" {
-								senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.Phone, messageTemplate)
+								senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.CustomerPhone, messageTemplate)
 								if senDwaMessage != nil {
 									fmt.Println("sukses")
 								}
