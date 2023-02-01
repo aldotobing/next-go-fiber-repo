@@ -118,7 +118,7 @@ var (
 		C.SALES_CYCLE CUST_SALES_CYCLE,
 		C.CUSTOMER_TYPE_ID AS CUST_TYPE_ID,
 		CT._NAME CUST_TYPE_NAME,
-		'+62' || regexp_replace(SUBSTRING (customer_phone, 2, length(customer_phone)),'[^\w]+','','g' )  AS CUSTOMER_PHONE,
+		customer_phone  AS CUSTOMER_PHONE,
 		(SELECT SUM(SIH.TRANSACTION_POINT) FROM SALES_INVOICE_HEADER SIH WHERE SIH.CUST_BILL_TO_ID = C.ID) AS CUSTOMER_POINT,
 		CG.GIFT_NAME AS CUST_GIFT_NAME,
 		LOY.LOYALTY_NAME AS CUST_LOYALTY_NAME,
@@ -151,3 +151,5 @@ var (
 	// CustomerWhereStatement ...
 	WebCustomerWhereStatement = ` WHERE c.created_date IS not NULL and c.show_in_apps = 1 `
 )
+
+// '+62' || regexp_replace(SUBSTRING (customer_phone, 2, length(customer_phone)),'[^\w]+','','g' )  AS CUSTOMER_PHONE,

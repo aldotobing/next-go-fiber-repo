@@ -51,6 +51,7 @@ type Customer struct {
 	CustomerLevel              *string `json:"customer_level_name"`
 	CustomerPriceListID        *string `json:"customer_price_list_id"`
 	CustomerPriceListVersionID *string `json:"customer_price_list_verison_id"`
+	CustomerFCMToken           *string `json:"customer_fcm_token"`
 }
 
 // CustomerParameter ...
@@ -129,7 +130,8 @@ var (
 		concat('` + CustomerImagePath + `',C.customer_photo_ktp) AS CUST_KTP_PICTURE,
 		c.customer_nik,
 		cl._name as cus_level_name,
-		C.price_list_id,C.price_list_version_id
+		C.price_list_id,C.price_list_version_id,
+		us.fcm_token
 
 	FROM CUSTOMER C
 	LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
@@ -145,6 +147,7 @@ var (
 	LEFT JOIN CUSTOMER_POINT CP ON CP.CUSTOMER_ID = C.ID
 	LEFT JOIN LOYALTY LOY ON LOY.CUSTOMER_ID = C.ID
 	left join customer_level cl on cl.id = c.customer_level_id
+	left join _user us on us.id = C.user_id
 	`
 
 	// CustomerWhereStatement ...
