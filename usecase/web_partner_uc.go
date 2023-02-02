@@ -85,6 +85,7 @@ func (uc WebPartnerUC) Edit(c context.Context, id string, data *requests.WebPart
 		PartnerAddress: &data.PartnerAddress,
 		PartnerPhone:   &data.PartnerPhone,
 		PartnerUserID:  &data.PartnerUserID,
+		PartnerEmail:   &data.PartnerEmail,
 	}
 
 	res.ID, err = repo.Edit(c, &res)
@@ -107,6 +108,7 @@ func (uc WebPartnerUC) Add(c context.Context, data *requests.WebPartnerRequest) 
 		PartnerAddress: &data.PartnerAddress,
 		PartnerPhone:   &data.PartnerPhone,
 		PartnerUserID:  &data.PartnerUserID,
+		PartnerEmail:   &data.PartnerEmail,
 	}
 
 	res.ID, err = repo.Add(c, &res)

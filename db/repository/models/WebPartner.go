@@ -9,6 +9,7 @@ type WebPartner struct {
 	PartnerAddress        *string `json:"partner_address"`
 	PartnerUserID         *string `json:"partner_user_id"`
 	PartnerUserName       *string `json:"partner_user_name"`
+	PartnerEmail          *string `json:"partner_email"`
 	PartnerProfilePicture *string `json:"partner_profile_picture"`
 }
 
@@ -39,8 +40,9 @@ var (
 
 	WebPartnerSelectStatement = `
 	select def.id,def.code, def._name, def.address,def.phone_no,
-	us.id,us.login
+	us.id,us.login, def.email
 		from partner def
+		left join _user us on us.id = def.user_id
 	`
 
 	// CustomerWhereStatement ...
