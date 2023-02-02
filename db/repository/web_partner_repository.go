@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
+	"nextbasis-service-v-0.1/pkg/str"
 )
 
 // ICustomerRepository ...
@@ -38,6 +39,7 @@ func (repository WebPartnerRepository) scanRows(rows *sql.Rows) (res models.WebP
 		&res.PartnerPhone,
 		&res.PartnerUserID,
 		&res.PartnerUserName,
+		&res.PartnerEmail,
 	)
 	if err != nil {
 
@@ -57,6 +59,7 @@ func (repository WebPartnerRepository) scanRow(row *sql.Row) (res models.WebPart
 		&res.PartnerPhone,
 		&res.PartnerUserID,
 		&res.PartnerUserName,
+		&res.PartnerEmail,
 	)
 	if err != nil {
 		return res, err
@@ -151,18 +154,21 @@ func (repository WebPartnerRepository) FindByID(c context.Context, parameter mod
 
 // Edit ...
 func (repository WebPartnerRepository) Edit(c context.Context, model *models.WebPartner) (res *string, err error) {
+	fmt.Println("user id nya", *model.PartnerUserID)
 	statement := `UPDATE partner SET 
 	_name = $1, 
 	address = $2, 
 	user_id = $3,
-	phone_no = $4 
-	WHERE id = $5 
+	phone_no = $4,
+	email = $5 
+	WHERE id = $6 
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		model.PartnerName,
 		model.PartnerAddress,
-		model.PartnerUserID,
+		str.NullOrEmtyString(model.PartnerUserID),
 		model.PartnerPhone,
+		model.PartnerEmail,
 		model.ID).Scan(&res)
 	if err != nil {
 		return res, err
@@ -173,13 +179,13 @@ func (repository WebPartnerRepository) Edit(c context.Context, model *models.Web
 // Add ...
 func (repository WebPartnerRepository) Add(c context.Context, model *models.WebPartner) (res *string, err error) {
 	statement := `INSERT INTO partner (code, _name,address, phone_no, 
-		company_id,device_id,created_date,modified_date)
-	VALUES ($1, $2, $3, $4, 2,99,now(),now()) RETURNING id`
+		company_id,device_id,created_date,modified_date,email, is_mysm,user_id)
+	VALUES ($1, $2, $3, $4, 2,99,now(),now(), $5,1,$6) RETURNING id`
 
 	fmt.Println(statement)
 
 	err = repository.DB.QueryRowContext(c, statement, model.Code, model.PartnerName,
-		model.PartnerAddress, model.PartnerPhone,
+		model.PartnerAddress, model.PartnerPhone, model.PartnerEmail, str.NullOrEmtyString(model.PartnerUserID),
 	).Scan(&res)
 
 	if err != nil {

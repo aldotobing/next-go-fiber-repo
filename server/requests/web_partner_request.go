@@ -8,4 +8,5 @@ type WebPartnerRequest struct {
 	PartnerAddress string `json:"partner_address"`
 	PartnerPhone   string `json:"partner_phone"`
 	PartnerUserID  string `json:"partner_user_id"`
+	PartnerEmail   string `json:"partner_email"`
 }
