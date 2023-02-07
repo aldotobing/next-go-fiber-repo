@@ -64,7 +64,7 @@ var (
 
 	// CustomerOrderHeaderSelectStatement ...
 	CustomerOrderHeaderSelectStatement = ` select 
-	def.id as id_customer_order, def.document_no,to_char(def.transaction_date,'YYYY-MM-DD') as transaction_date ,to_char(def.transaction_time,'HH:MI:SS') as transaction_time,
+	def.id as id_customer_order, def.document_no,to_char(def.transaction_date,'YYYY-MM-DD') as transaction_date ,to_char(def.transaction_time,'HH24:MI:SS') as transaction_time,
 	def.cust_ship_to_id,cus.customer_name, def.tax_calc_method,
 	cus.salesman_id, s.salesman_name, def.payment_terms_id,top._name as top_name,
 	to_char(def.expected_delivery_date,'YYYY-MM-DD') as expected_d_date,b.id as b_id,b._name as b_name,
