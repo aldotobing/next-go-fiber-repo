@@ -100,61 +100,63 @@ func (uc SalesOrderCustomerSyncUC) DataSync(c context.Context, parameter models.
 			if invoiceObject.Status != nil {
 				userrepo := repository.NewCustomerRepository(uc.DB)
 				salesorderHeaderrepo := repository.NewSalesOrderHeaderRepository(uc.DB)
+				salesorderHeader, errheader := salesorderHeaderrepo.FindByCode(c, models.SalesOrderHeaderParameter{DocumentNo: *invoiceObject.DocumentNo})
+				if errheader == nil {
+					useraccount, erruser := userrepo.FindByID(c, models.CustomerParameter{ID: *salesorderHeader.CustomerID})
 
-				useraccount, erruser := userrepo.FindByID(c, models.CustomerParameter{ID: *invoiceObject.CustomerID})
+					if erruser == nil && useraccount.CustomerFCMToken != nil && *useraccount.CustomerFCMToken != "" {
 
-				if erruser == nil && useraccount.CustomerFCMToken != nil && *useraccount.CustomerFCMToken != "" {
-					salesorderHeader, errheader := salesorderHeaderrepo.FindByCode(c, models.SalesOrderHeaderParameter{DocumentNo: *invoiceObject.DocumentNo})
-					if errheader == nil {
-						orderlinerepo := repository.NewSalesOrderLineRepository(uc.DB)
-						orderline, errline := orderlinerepo.SelectAll(c, models.SalesOrderLineParameter{
-							HeaderID: *salesorderHeader.ID,
-							By:       "def.created_date",
-						})
+						if errheader == nil {
+							orderlinerepo := repository.NewSalesOrderLineRepository(uc.DB)
+							orderline, errline := orderlinerepo.SelectAll(c, models.SalesOrderLineParameter{
+								HeaderID: *salesorderHeader.ID,
+								By:       "def.created_date",
+							})
 
-						if errline == nil {
-							messageTemplate := ""
-							messageTitle := ""
-							messageType := "2"
-							if *invoiceObject.Status == "submitted" {
-								messageTemplate = helper.BuildProcessSalesOrderTransactionTemplate(salesorderHeader, orderline, useraccount)
-								messageTitle = "Transaksi " + *invoiceObject.DocumentNo + " diproses."
-							}
-
-							if useraccount.CustomerFCMToken != nil && *useraccount.CustomerFCMToken != "" {
-								FcmUc := FCMUC{ContractUC: uc.ContractUC}
-								_, errfcm := FcmUc.SendFCMMessage(c, messageTitle, messageTemplate, *useraccount.CustomerFCMToken)
-								if errfcm == nil {
-
+							if errline == nil {
+								messageTemplate := ""
+								messageTitle := ""
+								messageType := "2"
+								if *invoiceObject.Status == "submitted" {
+									messageTemplate = helper.BuildProcessSalesOrderTransactionTemplate(salesorderHeader, orderline, useraccount)
+									messageTitle = "Transaksi " + *invoiceObject.DocumentNo + " diproses."
 								}
 
-								userNotificationRepo := repository.NewUserNotificationRepository(uc.DB)
-								_, errnotifinsert := userNotificationRepo.Add(c, &models.UserNotification{
-									Title:  &messageTitle,
-									Text:   &messageTemplate,
-									Type:   &messageType,
-									UserID: invoiceObject.CustomerID,
-									RowID:  invoiceObject.ID,
-								})
-								if errnotifinsert == nil {
+								if useraccount.CustomerFCMToken != nil && *useraccount.CustomerFCMToken != "" {
+									FcmUc := FCMUC{ContractUC: uc.ContractUC}
+									_, errfcm := FcmUc.SendFCMMessage(c, messageTitle, messageTemplate, *useraccount.CustomerFCMToken)
+									if errfcm == nil {
 
-								}
+									}
 
-							}
+									userNotificationRepo := repository.NewUserNotificationRepository(uc.DB)
+									_, errnotifinsert := userNotificationRepo.Add(c, &models.UserNotification{
+										Title:  &messageTitle,
+										Text:   &messageTemplate,
+										Type:   &messageType,
+										UserID: invoiceObject.CustomerID,
+										RowID:  invoiceObject.ID,
+									})
+									if errnotifinsert == nil {
 
-							if useraccount.CustomerPhone != nil && *useraccount.CustomerPhone != "" {
-								if messageTemplate != "" {
-									senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.CustomerPhone, messageTemplate)
-									if senDwaMessage != nil {
-										fmt.Println("sukses")
 									}
 
 								}
 
+								if useraccount.CustomerPhone != nil && *useraccount.CustomerPhone != "" {
+									if messageTemplate != "" {
+										senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.CustomerPhone, messageTemplate)
+										if senDwaMessage != nil {
+											fmt.Println("sukses")
+										}
+
+									}
+
+								}
 							}
 						}
-					}
 
+					}
 				}
 			}
 		}
