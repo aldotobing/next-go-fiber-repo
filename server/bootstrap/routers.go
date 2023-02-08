@@ -254,4 +254,7 @@ func (boot Bootstrap) RegisterRouters() {
 
 	WebDoctorRoutes := routers.WebDoctorRoutes{RouterGroup: apiV1, Handler: handler}
 	WebDoctorRoutes.RegisterRoute()
+
+	TransactionVaRoutes := routers.TransactionVARoutes{RouterGroup: apiV1, Handler: handler}
+	TransactionVaRoutes.RegisterRoute()
 }
