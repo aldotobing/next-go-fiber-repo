@@ -257,4 +257,7 @@ func (boot Bootstrap) RegisterRouters() {
 
 	TransactionVaRoutes := routers.TransactionVARoutes{RouterGroup: apiV1, Handler: handler}
 	TransactionVaRoutes.RegisterRoute()
+
+	WebSalesmanRoutes := routers.WebSalesmanRoutes{RouterGroup: apiV1, Handler: handler}
+	WebSalesmanRoutes.RegisterRoute()
 }
