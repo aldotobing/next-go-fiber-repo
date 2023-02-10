@@ -18,6 +18,7 @@ import (
 	"nextbasis-service-v-0.1/pkg/functioncaller"
 	"nextbasis-service-v-0.1/pkg/logruslogger"
 	"nextbasis-service-v-0.1/pkg/number"
+	pkgtime "nextbasis-service-v-0.1/pkg/time"
 	"nextbasis-service-v-0.1/server/requests"
 	"nextbasis-service-v-0.1/usecase/viewmodel"
 )
@@ -149,11 +150,15 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 		orderlinerepo := repository.NewCustomerOrderLineRepository(uc.DB)
 		order, errorder := orderrepo.FindByID(c, models.CustomerOrderHeaderParameter{ID: *res.ID})
 		if errorder == nil {
+			dateString := pkgtime.GetDate(*order.TransactionDate, "01 - 01 - 2006", "Asia/Jakarta")
+
 			messageType := "1"
 			bayar, _ := strconv.ParseFloat(*order.NetAmount, 0)
 			harga := strings.ReplaceAll(number.FormatCurrency(bayar, "IDR", ".", "", 0), "Rp", "")
 			msgtitle := "Checkout " + *order.DocumentNo
-			msgbody := `Kepada Yang Terhormat ` + *useraccount.CustomerName + `\n\nCheckout anda dengan nomor ` + *order.DocumentNo + ` telah diterima dan akan segera diproses\n\nBerikut merupakan rincian pesanan anda:`
+			msgbody := `*Kepada Yang Terhormat* \n\n *` + *useraccount.Code + ` - ` + *useraccount.CustomerName + `*`
+			msgbody += `\n\n*NO ORDERAN ` + *order.DocumentNo + ` anda pada tanggal ` + dateString + ` oleh Toko : (` + *useraccount.CustomerName + `) telah berhasil dan akan diproses*`
+			msgbody += `\n\n*Berikut merupakan rincian pesanan anda:*`
 			orderline, errline := orderlinerepo.SelectAll(c, models.CustomerOrderLineParameter{
 				HeaderID: *order.ID,
 				By:       "def.created_date",
