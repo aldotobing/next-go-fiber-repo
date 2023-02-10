@@ -6,6 +6,7 @@ import (
 
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/pkg/number"
+	pkgtime "nextbasis-service-v-0.1/pkg/time"
 )
 
 func BuildProcessTransactionTemplate(customerOrderHeader models.CustomerOrderHeader, lineData []models.CustomerOrderLine, userData models.Customer) (res string) {
@@ -37,10 +38,18 @@ func BuildProcessTransactionTemplate(customerOrderHeader models.CustomerOrderHea
 }
 
 func BuildProcessSalesOrderTransactionTemplate(customerOrderHeader models.SalesOrderHeader, lineData []models.SalesOrderLine, userData models.Customer) (res string) {
+	dateString := pkgtime.GetDate(*customerOrderHeader.TransactionDate, "01 - 01 - 2006", "Asia/Jakarta")
 
-	msgbody := `Kepada Yang Terhormat ` + *userData.CustomerName + `\n\nSales Order anda dengan nomor ` + *customerOrderHeader.DocumentNo
-	msgbody += ` sedang dalam proses`
-	msgbody += `\n\nBerikut merupakan rincian pesanan anda:`
+	CretaedBy := ``
+	if *customerOrderHeader.DocumentNo != "" && strings.Contains(*customerOrderHeader.DocumentNo, "OSO") {
+		CretaedBy += ` oleh Toko : ` + *userData.CustomerName
+	} else {
+		CretaedBy += ` oleh Salesman : ` + *userData.CustomerSalesmanName
+	}
+	msgbody := `*Kepada Yang Terhormat* \n\n`
+	msgbody += `*` + *userData.Code + ` - ` + *userData.CustomerName + `*`
+	msgbody += `\n\n*NO ORDERAN ` + *customerOrderHeader.DocumentNo + ` anda pada tanggal ` + dateString + CretaedBy + ` telah diproses*`
+	msgbody += `\n\n*Berikut merupakan rincian pesanan anda:*`
 
 	bayar, _ := strconv.ParseFloat(*customerOrderHeader.NetAmount, 0)
 	harga := strings.ReplaceAll(number.FormatCurrency(bayar, "IDR", ".", "", 0), "Rp", "")
