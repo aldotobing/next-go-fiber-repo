@@ -150,7 +150,8 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 		orderlinerepo := repository.NewCustomerOrderLineRepository(uc.DB)
 		order, errorder := orderrepo.FindByID(c, models.CustomerOrderHeaderParameter{ID: *res.ID})
 		if errorder == nil {
-			dateString := pkgtime.GetDate(*order.TransactionDate, "01 - 01 - 2006", "Asia/Jakarta")
+			// fmt.Println("tanggal ", *order.TransactionDate)
+			dateString := pkgtime.GetDate(*order.TransactionDate+"T00:00:00Z", "02 - 01 - 2006", "Asia/Jakarta")
 
 			messageType := "1"
 			bayar, _ := strconv.ParseFloat(*order.NetAmount, 0)
@@ -177,7 +178,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 				msgbody += `\n`
 				msgbody += `\nSalam Sehat`
 				msgbody += `\n`
-				msgbody += `\nAutogenerate Whatsapp`
+				msgbody += `\nNB : Bila ini bukan transaksi dari Toko Bapak/Ibu, silahkan menghubungi Distributor Produk Sido Muncul.`
 			}
 
 			if useraccount.CustomerFCMToken != nil && *useraccount.CustomerFCMToken != "" {
