@@ -207,8 +207,8 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 
 			}
 			if useraccount.CustomerPhone != nil && *useraccount.CustomerPhone != "" {
-
-				senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.CustomerPhone, msgbody)
+				msgcustomer := msgcustomerheader + msgbody
+				senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.CustomerPhone, msgcustomer)
 				if senDwaMessage != nil {
 					fmt.Println("sukses")
 				}
