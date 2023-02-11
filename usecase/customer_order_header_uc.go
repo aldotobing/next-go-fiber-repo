@@ -157,9 +157,13 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 			bayar, _ := strconv.ParseFloat(*order.NetAmount, 0)
 			harga := strings.ReplaceAll(number.FormatCurrency(bayar, "IDR", ".", "", 0), "Rp", "")
 			msgtitle := "Checkout " + *order.DocumentNo
-			msgbody := `*Kepada Yang Terhormat* \n\n *` + *useraccount.Code + ` - ` + *useraccount.CustomerName + `*`
-			msgbody += `\n\n*NO ORDERAN ` + *order.DocumentNo + ` anda pada tanggal ` + dateString + ` oleh Toko : (` + *useraccount.CustomerName + `) telah berhasil dan akan diproses*`
-			msgbody += `\n\n*Berikut merupakan rincian pesanan anda:*`
+			msgsalesmanheader := `*Kepada Yang Terhormat* \n\n *` + *useraccount.CustomerSalesmanName + `*`
+			msgsalesmanheader += `\n\n*NO ORDERAN ` + *order.DocumentNo + ` pada tanggal ` + dateString + ` oleh Toko : (` + *useraccount.CustomerName + `) telah berhasil dan akan diproses*`
+
+			msgcustomerheader := `*Kepada Yang Terhormat* \n\n *` + *useraccount.Code + ` - ` + *useraccount.CustomerName + `*`
+			msgcustomerheader += `\n\n*NO ORDERAN ` + *order.DocumentNo + ` anda pada tanggal ` + dateString + ` oleh Toko : (` + *useraccount.CustomerName + `) telah berhasil dan akan diproses*`
+
+			msgbody := `\n\n*Berikut merupakan rincian pesanan anda:*`
 			orderline, errline := orderlinerepo.SelectAll(c, models.CustomerOrderLineParameter{
 				HeaderID: *order.ID,
 				By:       "def.created_date",
@@ -183,7 +187,8 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 
 			if useraccount.CustomerFCMToken != nil && *useraccount.CustomerFCMToken != "" {
 
-				_, errfcm := FcmUc.SendFCMMessage(c, msgtitle, msgbody, *useraccount.CustomerFCMToken)
+				msgcustomer := msgcustomerheader + msgbody
+				_, errfcm := FcmUc.SendFCMMessage(c, msgtitle, msgcustomer, *useraccount.CustomerFCMToken)
 				if errfcm == nil {
 
 				}
@@ -191,7 +196,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 				userNotificationRepo := repository.NewUserNotificationRepository(uc.DB)
 				_, errnotifinsert := userNotificationRepo.Add(c, &models.UserNotification{
 					Title:  &msgtitle,
-					Text:   &msgbody,
+					Text:   &msgcustomer,
 					Type:   &messageType,
 					UserID: order.CustomerID,
 					RowID:  order.ID,
@@ -212,7 +217,8 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 					customerSales, errcustsales := salesmannRepo.FindByID(c, models.SalesmanParameter{ID: *useraccount.CustomerSalesmanID})
 					if errcustsales == nil {
 						if customerSales.PhoneNo != nil {
-							senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*customerSales.PhoneNo, msgbody)
+							msgSalesman := msgsalesmanheader + msgbody
+							senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*customerSales.PhoneNo, msgSalesman)
 							if senDwaMessage != nil {
 								fmt.Println("sukses")
 							}
