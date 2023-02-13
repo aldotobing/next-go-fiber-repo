@@ -13,3 +13,21 @@ type TransactionVARequest struct {
 	EndDate       string `json:"end_date"`
 	VAPartnerCode string `json:"va_partner_code"`
 }
+
+type InquiryBodyRequest struct {
+	Language        string `json:"language"`
+	TransactionDate string `json:"trxDateTime"`
+	TransmisionDate string `json:"transmissionDateTime"`
+	CompanyCode     string `json:"companyCode"`
+	VaReChanelId    string `json:"channelID"`
+	Billkey1        string `json:"billKey1"` //code va yang diambil di next
+	Billkey2        string `json:"billKey2"`
+	Billkey3        string `json:"billKey3"`
+	Reference1      string `json:"reference1"`
+	Reference2      string `json:"reference2"`
+	Reference3      string `json:"reference3"`
+}
+
+type InquiryVaRequest struct {
+	InquiryBody InquiryBodyRequest `json:"InquiryRequest"`
+}

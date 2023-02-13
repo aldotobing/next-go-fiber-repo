@@ -13,6 +13,7 @@ type TransactionVA struct {
 	StartDate     *string `json:"start_date"`
 	EndDate       *string `json:"end_date"`
 	PaidStatus    *string `json:"paid_status"`
+	Customername  *string `json:"customer_name"`
 }
 
 // DoctorParameter ...
@@ -41,8 +42,11 @@ var (
 
 	TransactionVASelectStatement = `
 	select def.id,def.invoice_code, def.va_code, def.amount,def.va_pair_id,
-	def.va_ref1,def.va_ref2, def.start_date, def.end_date, def.va_partner_code, def.paid_status
+	def.va_ref1,def.va_ref2, def.start_date, def.end_date, def.va_partner_code, def.paid_status,
+	c.customer_name as cus_name
 		from virtual_account_transaction def
+		join sales_invoice_header sih on sih.document_no = def.invoice_code
+		left join customer c on sih.cust_bill_to_id = c.id
 	`
 
 	// CustomerWhereStatement ...

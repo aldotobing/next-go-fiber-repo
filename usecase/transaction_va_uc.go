@@ -73,6 +73,20 @@ func (uc TransactionVAUC) FindByID(c context.Context, parameter models.Transacti
 	return res, err
 }
 
+// FindBycode ...
+func (uc TransactionVAUC) FindByCode(c context.Context, parameter models.TransactionVAParameter) (res models.TransactionVA, err error) {
+
+	repo := repository.NewTransactionVARepository(uc.DB)
+	res, err = repo.FindByCode(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+	uc.BuildBody(&res)
+
+	return res, err
+}
+
 func (uc TransactionVAUC) Edit(c context.Context, id string, data *requests.TransactionVARequest) (res models.TransactionVA, err error) {
 
 	repo := repository.NewTransactionVARepository(uc.DB)
