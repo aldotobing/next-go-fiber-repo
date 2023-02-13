@@ -19,7 +19,7 @@ type TransactionVARoutes struct {
 // RegisterRoute register Customer routes
 func (route TransactionVARoutes) RegisterRoute() {
 	handler := handlers.TransactionVAHandler{Handler: route.Handler}
-	// jwtMiddleware := middlewares.JwtMiddleware{ContractUC: handler.ContractUC}
+	jwtMiddleware := middlewares.JwtMiddleware{ContractUC: handler.ContractUC}
 
 	r := route.RouterGroup.Group("/api/transaction_va")
 	// r.Use(jwtMiddleware.VerifyUser)
@@ -29,6 +29,12 @@ func (route TransactionVARoutes) RegisterRoute() {
 	r.Get("/id/:partner_id", handler.FindByID)
 	r.Put("/id/:partner_id", handler.Edit)
 	r.Post("/request_va", handler.Add)
-	// r.Get("/tesgen", handler.TestGenerate)
+	r.Get("/authsah521", handler.GetSah)
+	// r.Get("/tesgen", handler.GetTransactionByVaCode)
+
+	r2 := route.RouterGroup.Group("/api/mysido/va/inquiry")
+	r2.Use(jwtMiddleware.VerifySignature)
+	r2.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
+	r2.Post("/", handler.GetTransactionByVaCode)
 
 }

@@ -18,6 +18,7 @@ type ITransactionVARepository interface {
 	Edit(c context.Context, model *models.TransactionVA) (*string, error)
 	Add(c context.Context, model *models.TransactionVA) (*string, error)
 	FindLastActiveVa(c context.Context, parameter models.TransactionVAParameter) (models.TransactionVA, error)
+	FindByCode(c context.Context, parameter models.TransactionVAParameter) (models.TransactionVA, error)
 }
 
 // CustomerRepository ...
@@ -44,6 +45,7 @@ func (repository TransactionVARepository) scanRows(rows *sql.Rows) (res models.T
 		&res.EndDate,
 		&res.VAPartnerCode,
 		&res.PaidStatus,
+		&res.Customername,
 	)
 	if err != nil {
 
@@ -67,6 +69,7 @@ func (repository TransactionVARepository) scanRow(row *sql.Row) (res models.Tran
 		&res.EndDate,
 		&res.VAPartnerCode,
 		&res.PaidStatus,
+		&res.Customername,
 	)
 	if err != nil {
 		return res, err
@@ -149,6 +152,21 @@ func (repository TransactionVARepository) FindByID(c context.Context, parameter 
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
 
 	// fmt.Println(statement)
+
+	data, err = repository.scanRow(row)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
+}
+
+// FindByID ...
+func (repository TransactionVARepository) FindByCode(c context.Context, parameter models.TransactionVAParameter) (data models.TransactionVA, err error) {
+	statement := models.TransactionVASelectStatement + ` WHERE def.va_code = $1`
+	row := repository.DB.QueryRowContext(c, statement, parameter.VACode)
+
+	fmt.Println(statement)
 
 	data, err = repository.scanRow(row)
 	if err != nil {
