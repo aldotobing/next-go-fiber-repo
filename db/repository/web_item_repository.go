@@ -40,7 +40,7 @@ func (repository WebItemRepository) scanRows(rows *sql.Rows) (res models.WebItem
 		&res.ItemCategoryName,
 		&res.ItemHide,
 		&res.ItemActive,
-		&res.Description,
+		&res.ItemDescription,
 	)
 	if err != nil {
 
@@ -61,7 +61,7 @@ func (repository WebItemRepository) scanRow(row *sql.Row) (res models.WebItem, e
 		&res.ItemCategoryName,
 		&res.ItemHide,
 		&res.ItemActive,
-		&res.Description,
+		&res.ItemDescription,
 	)
 
 	fmt.Println(err)
@@ -190,14 +190,16 @@ func (repository WebItemRepository) Edit(c context.Context, model *models.WebIte
 	_name = $1, 
 	item_picture = $2,
 	item_category_id = $3,
-	hide = $4
-	WHERE id = $5 
+	hide = $4,
+	description = $5
+	WHERE id = $6 
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		model.Name,
 		model.ItemPicture,
 		model.ItemCategoryId,
 		model.ItemHide,
+		model.ItemDescription,
 		model.ID).Scan(&res)
 	if err != nil {
 		return res, err
