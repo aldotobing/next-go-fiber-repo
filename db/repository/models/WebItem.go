@@ -10,7 +10,7 @@ type WebItem struct {
 	ItemCategoryName *string `json:"item_category_name"`
 	ItemHide         *string `json:"item_hide"`
 	ItemActive       *string `json:"item_active"`
-	Description      *string `json:"item_description"`
+	ItemDescription  *string `json:"item_description"`
 }
 
 // WebItemParameter ...
