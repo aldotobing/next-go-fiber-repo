@@ -116,9 +116,7 @@ func (jwtMiddleware JwtMiddleware) VerifyUser(ctx *fiber.Ctx) (err error) {
 func (jwtMiddleware JwtMiddleware) VerifySignature(ctx *fiber.Ctx) (err error) {
 	sha_512 := sha512.Sum512([]byte("BMRI_SIDO"))
 	basic := fmt.Sprintf("%x", sha_512)
-	// basic := base64.StdEncoding.EncodeToString([]byte(jwtMiddleware.EnvConfig["MANDIRI_SIGNATURE_KEY"]))
 
-	fmt.Println(basic)
 	header := ctx.Get("Authorization")
 	if !strings.Contains(header, "Basic") {
 		logruslogger.Log(logruslogger.WarnLevel, helper.HeaderNotPresent, functioncaller.PrintFuncName(), "middleware-jwt-header")

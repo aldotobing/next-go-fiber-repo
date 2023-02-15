@@ -148,15 +148,17 @@ func (h *TransactionVAHandler) GetTransactionByVaCode(ctx *fiber.Ctx) error {
 
 	input := new(requests.InquiryVaRequest)
 	if err := ctx.BodyParser(input); err != nil {
-		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+		return h.SendBasicResponse(ctx, nil, nil, err, http.StatusBadRequest)
 	}
+	fmt.Println("Masuk Sini")
 	if err := h.Validator.Struct(input); err != nil {
 		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
-		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+		return h.SendBasicResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
 	}
 
 	parameter := models.TransactionVAParameter{
-		VACode: input.InquiryBody.Billkey1,
+		VACode:        input.InquiryBody.Billkey1,
+		CurrentVaUser: 1,
 	}
 
 	fmt.Println(parameter.VACode)
@@ -169,20 +171,37 @@ func (h *TransactionVAHandler) GetTransactionByVaCode(ctx *fiber.Ctx) error {
 	}
 
 	ObjectData := new(InquiryResponseData)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			ObjectData.InquiryResult.Status.ErrorCode = "B5"
+			ObjectData.InquiryResult.Status.IsError = "true"
+			ObjectData.InquiryResult.Status.StatusDescription = "Bill Not Found"
+			err = nil
+		}
+	}
 
-	ObjectDataDetail := new(viewmodel.VaBillDetailVM)
+	if res.VACode != nil {
 
-	ObjectData.InquiryResult.BillInfo1 = *res.VACode
-	ObjectData.InquiryResult.BillInfo2 = *res.Customername
+		ObjectDataDetail := new(viewmodel.VaBillDetailVM)
 
-	ObjectDataDetail.BillCode = *res.InvoiceCode
-	ObjectDataDetail.BillName = *res.InvoiceCode
-	ObjectDataDetail.BillShortName = *res.InvoiceCode
-	ObjectDataDetail.BillAmount = *res.Amount
-	ObjectData.InquiryResult.VabillDetails.BillDetail = append(ObjectData.InquiryResult.VabillDetails.BillDetail, *ObjectDataDetail)
-	ObjectData.InquiryResult.Status.IsError = "false"
-	ObjectData.InquiryResult.Status.ErrorCode = "200"
-	ObjectData.InquiryResult.Status.StatusDescription = "transaksi sukses"
+		ObjectData.InquiryResult.BillInfo1 = *res.VACode
+		ObjectData.InquiryResult.BillInfo2 = *res.Customername
+
+		ObjectDataDetail.BillCode = "01"
+		ObjectDataDetail.BillName = *res.InvoiceCode
+		ObjectDataDetail.BillShortName = "Pembayaran"
+		ObjectDataDetail.BillAmount = *res.Amount
+		ObjectData.InquiryResult.VabillDetails.BillDetail = append(ObjectData.InquiryResult.VabillDetails.BillDetail, *ObjectDataDetail)
+		ObjectData.InquiryResult.Currency = "360"
+		ObjectData.InquiryResult.Status.IsError = "false"
+		ObjectData.InquiryResult.Status.ErrorCode = "00"
+		ObjectData.InquiryResult.Status.StatusDescription = "Transaction Success"
+		if res.PaidStatus != nil && *res.PaidStatus == "paid" {
+			ObjectData.InquiryResult.Status.IsError = "false"
+			ObjectData.InquiryResult.Status.ErrorCode = "B8"
+			ObjectData.InquiryResult.Status.StatusDescription = "Bill Already Paid"
+		}
+	}
 
 	return h.SendBasicResponse(ctx, ObjectData, nil, err, 0)
 }
@@ -194,4 +213,75 @@ func (h *TransactionVAHandler) GetSah(ctx *fiber.Ctx) error {
 	// newPasswd := base64.StdEncoding.EncodeToString(basic[:])
 	token := fmt.Sprintf("sha512: %x", basic)
 	return h.SendBasicResponse(ctx, token, nil, nil, 0)
+}
+
+func (h *TransactionVAHandler) PaidTransactionByVaCode(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	input := new(requests.InquiryVaRequest)
+	if err := ctx.BodyParser(input); err != nil {
+		return h.SendBasicResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+
+	if err := h.Validator.Struct(input); err != nil {
+		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
+		return h.SendBasicResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+	}
+
+	parameter := models.TransactionVAParameter{
+		VACode:        input.InquiryBody.Billkey1,
+		CurrentVaUser: 0,
+	}
+
+	fmt.Println(parameter.VACode)
+
+	uc := usecase.TransactionVAUC{ContractUC: h.ContractUC}
+	res, err := uc.FindByCode(c, parameter)
+
+	type InquiryResponseData struct {
+		InquiryResult viewmodel.PaymentVaBillInfoVM `json:"paymentResponse"`
+	}
+
+	ObjectData := new(InquiryResponseData)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			ObjectData.InquiryResult.Status.ErrorCode = "B5"
+			ObjectData.InquiryResult.Status.IsError = "true"
+			ObjectData.InquiryResult.Status.StatusDescription = "Bill Not Found"
+			err = nil
+		}
+	}
+
+	if res.VACode != nil {
+		uc := usecase.TransactionVAUC{ContractUC: h.ContractUC}
+		inputUpdate := new(requests.TransactionVARequest)
+		inputUpdate.VaRef1 = input.InquiryBody.Reference1
+		inputUpdate.VaRef2 = input.InquiryBody.Reference2
+		inputUpdate.VaPairID = input.InquiryBody.TransactionID
+		_, errpaid := uc.PaidTransaction(c, *res.ID, inputUpdate)
+
+		if errpaid == nil {
+
+			resafterupdate, errafter := uc.FindByCode(c, parameter)
+
+			if errafter != nil {
+				if errafter.Error() == "sql: no rows in result set" {
+					ObjectData.InquiryResult.Status.ErrorCode = "B5"
+					ObjectData.InquiryResult.Status.IsError = "true"
+					ObjectData.InquiryResult.Status.StatusDescription = "Bill Not Found"
+					errafter = nil
+				}
+			}
+
+			ObjectData.InquiryResult.BillInfo1 = *resafterupdate.VACode
+			ObjectData.InquiryResult.BillInfo2 = *resafterupdate.Customername
+
+			ObjectData.InquiryResult.Status.IsError = "false"
+			ObjectData.InquiryResult.Status.ErrorCode = "00"
+			ObjectData.InquiryResult.Status.StatusDescription = "Transaction Success"
+
+		}
+	}
+
+	return h.SendBasicResponse(ctx, ObjectData, nil, err, 0)
 }

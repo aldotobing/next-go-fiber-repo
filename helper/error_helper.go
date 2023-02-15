@@ -147,4 +147,26 @@ var (
 	WrongEmailOrPassword = "Email or password is wrong"
 
 	InvalidMinimumAmountOrder = "Order Minimal "
+
+	StatusMandiriVaSuccess                     = "Transaction Success"
+	StatusMandiriVaSystemCurrentlyNotAvailable = "System Currently Unavailable"
+	StatusMandiriVaBillNotFound                = "Bill Not Found"
+	StatusMandiriVaBillAlreadyPaid             = "Bill Already Paid"
+	StatusMandiriVaBillBlocked                 = "Bill Is Blocked, Please Contact The Company"
+	StatusMandiriVaTransactionCantCalcel       = "Transaction Cant be Cancel"
+	StatusMandiriVaProviderDatabaseProblem     = "Provider Database Problem"
+	StatusMandiriTimeOut                       = "Time Out"
+	StatusMandiriVaLinkDown                    = "Link Down"
+)
+
+const (
+	StatusMandiriVaSuccessCode                     = "00"
+	StatusMandiriVaSystemCurrentlyNotAvailableCode = "01"
+	StatusMandiriVaBillNotFoundCode                = "B5"
+	StatusMandiriVaBillAlreadyPaidCode             = "B8"
+	StatusMandiriVaBillBlockedCode                 = "C0"
+	StatusMandiriVaTransactionCantCalcelCode       = "86"
+	StatusMandiriVaProviderDatabaseProblemCode     = "87"
+	StatusMandiriTimeOutCode                       = "89"
+	StatusMandiriVaLinkDownCode                    = "91"
 )
