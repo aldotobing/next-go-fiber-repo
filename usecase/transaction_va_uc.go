@@ -148,3 +148,23 @@ func (uc TransactionVAUC) Add(c context.Context, data *requests.TransactionVAReq
 
 	return res, err
 }
+
+func (uc TransactionVAUC) PaidTransaction(c context.Context, id string, data *requests.TransactionVARequest) (res models.TransactionVA, err error) {
+
+	repo := repository.NewTransactionVARepository(uc.DB)
+
+	res = models.TransactionVA{
+		ID:       &id,
+		VaPairID: &data.VaPairID,
+		VaRef1:   &data.VaRef1,
+		VaRef2:   &data.VaRef2,
+	}
+
+	res.ID, err = repo.PaidTransaction(c, &res)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	return res, err
+}

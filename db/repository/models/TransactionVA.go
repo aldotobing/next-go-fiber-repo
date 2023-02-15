@@ -18,16 +18,17 @@ type TransactionVA struct {
 
 // DoctorParameter ...
 type TransactionVAParameter struct {
-	ID          string `json:"partner_id"`
-	InvoiceCode string `json:"invoice_code"`
-	VACode      string `json:"va_code"`
-	UserId      string `json:"admin_user_id"`
-	Search      string `json:"search"`
-	Page        int    `json:"page"`
-	Offset      int    `json:"offset"`
-	Limit       int    `json:"limit"`
-	By          string `json:"by"`
-	Sort        string `json:"sort"`
+	ID            string `json:"partner_id"`
+	InvoiceCode   string `json:"invoice_code"`
+	VACode        string `json:"va_code"`
+	UserId        string `json:"admin_user_id"`
+	Search        string `json:"search"`
+	CurrentVaUser int    `json:"current_va_user"`
+	Page          int    `json:"page"`
+	Offset        int    `json:"offset"`
+	Limit         int    `json:"limit"`
+	By            string `json:"by"`
+	Sort          string `json:"sort"`
 }
 
 var (

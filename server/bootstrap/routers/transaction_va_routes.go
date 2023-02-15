@@ -36,5 +36,6 @@ func (route TransactionVARoutes) RegisterRoute() {
 	r2.Use(jwtMiddleware.VerifySignature)
 	r2.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
 	r2.Post("/", handler.GetTransactionByVaCode)
+	r2.Post("/paid", handler.PaidTransactionByVaCode)
 
 }

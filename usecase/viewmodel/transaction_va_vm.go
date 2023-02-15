@@ -10,14 +10,20 @@ type VaBillInfoVM struct {
 	Status        VaBillStatus    `json:"status"`
 }
 
+type PaymentVaBillInfoVM struct {
+	BillInfo1 string       `json:"billInfo1"`
+	BillInfo2 string       `json:"billInfo2"`
+	Status    VaBillStatus `json:"status"`
+}
+
 type VaBillDetailVM struct {
-	BillCode      string `json:"billCode"`
-	BillName      string `json:"billName"`
-	BillShortName string `json:"billShortName"`
-	BillAmount    string `json:"billAmount"`
-	Reference1    string `json:"reference1"`
-	Reference2    string `json:"reference2"`
-	Reference3    string `json:"reference3"`
+	BillCode      string  `json:"billCode"`
+	BillName      string  `json:"billName"`
+	BillShortName string  `json:"billShortName"`
+	BillAmount    string  `json:"billAmount"`
+	Reference1    *string `json:"reference1"`
+	Reference2    *string `json:"reference2"`
+	Reference3    *string `json:"reference3"`
 }
 
 type VaBillDetailsVM struct {
