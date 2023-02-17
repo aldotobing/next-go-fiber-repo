@@ -260,4 +260,7 @@ func (boot Bootstrap) RegisterRouters() {
 
 	WebSalesmanRoutes := routers.WebSalesmanRoutes{RouterGroup: apiV1, Handler: handler}
 	WebSalesmanRoutes.RegisterRoute()
+
+	TicketDokterRoutes := routers.TicketDokterRoutes{RouterGroup: apiV1, Handler: handler}
+	TicketDokterRoutes.RegisterRoute()
 }
