@@ -262,12 +262,14 @@ func (repository TicketDokter) Edit(c context.Context, model *models.TicketDokte
 	statement := `UPDATE ticket_dokter SET 
 	status = $1, 
 	solution = $2,
+	doctor_id = $3,
 	close_date = now()
-	WHERE id = $3 
+	WHERE id = $4 
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		model.Status,
 		model.Solution,
+		model.DoctorID,
 		model.ID).Scan(&res)
 	if err != nil {
 		return res, err
