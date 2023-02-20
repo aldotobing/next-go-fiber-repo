@@ -266,4 +266,7 @@ func (boot Bootstrap) RegisterRouters() {
 
 	UserCheckinActivityRoute := routers.UserCheckinActivityRoutes{RouterGroup: apiV1, Handler: handler}
 	UserCheckinActivityRoute.RegisterRoute()
+
+	WebRegionAreaRoute := routers.WebRegionAreaRoutes{RouterGroup: apiV1, Handler: handler}
+	WebRegionAreaRoute.RegisterRoute()
 }

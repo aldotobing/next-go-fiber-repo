@@ -138,5 +138,15 @@ func (h *WebPromoHandler) FindByID(ctx *fiber.Ctx) error {
 		res.CustomerTypeList = &resEligible
 	}
 
+	ucRegionEligible := usecase.WebRegionAreaEligiblePromoUC{ContractUC: h.ContractUC}
+	resRegionEligible, errRegionEligible := ucRegionEligible.SelectAll(c, models.WebRegionAreaEligiblePromoParameter{
+		PromoID: *res.ID,
+		By:      "pr._name",
+	})
+
+	if errRegionEligible == nil {
+		res.RegionAreaList = &resRegionEligible
+	}
+
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
