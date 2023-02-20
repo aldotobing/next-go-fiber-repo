@@ -23,7 +23,7 @@ func (h *TicketDokterHandler) SelectAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.TicketDokterParameter{
-		ID:         ctx.Query("id"),
+		ID:         ctx.Query("ticket_id"),
 		CustomerID: ctx.Query("customer_id"),
 		DoctorID:   ctx.Query("doctor_id"),
 		Status:     ctx.Query("status"),
@@ -57,7 +57,7 @@ func (h *TicketDokterHandler) FindAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.TicketDokterParameter{
-		ID:         ctx.Query("id"),
+		ID:         ctx.Query("ticket_id"),
 		CustomerID: ctx.Query("customer_id"),
 		DoctorID:   ctx.Query("doctor_id"),
 		Status:     ctx.Query("status"),
