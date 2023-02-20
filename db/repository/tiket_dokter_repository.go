@@ -99,6 +99,10 @@ func (repository TicketDokter) scanRow(row *sql.Row) (res models.TicketDokter, e
 func (repository TicketDokter) SelectAll(c context.Context, parameter models.TicketDokterParameter) (data []models.TicketDokter, err error) {
 	conditionString := ``
 
+	if parameter.ID != "" {
+		conditionString += ` AND TD.ID = ` + parameter.ID
+	}
+
 	if parameter.CustomerID != "" {
 		conditionString += ` AND TD.CUSTOMER_ID = ` + parameter.CustomerID
 	}
@@ -139,6 +143,10 @@ func (repository TicketDokter) SelectAll(c context.Context, parameter models.Tic
 // FindAll ...
 func (repository TicketDokter) FindAll(ctx context.Context, parameter models.TicketDokterParameter) (data []models.TicketDokter, count int, err error) {
 	conditionString := ``
+
+	if parameter.ID != "" {
+		conditionString += ` AND TD.ID = ` + parameter.ID
+	}
 
 	if parameter.CustomerID != "" {
 		conditionString += ` AND TD.CUSTOMER_ID = ` + parameter.CustomerID
@@ -227,21 +235,21 @@ func (repository TicketDokter) Add(c context.Context, model *models.TicketDokter
 	err = transaction.QueryRowContext(c, statement,
 		model.CustomerID,
 		model.CustomerName,
-		model.CustomerHeight,
-		model.CustomerWeight,
+		str.NullOrEmtyString(model.CustomerHeight),
+		str.NullOrEmtyString(model.CustomerWeight),
 		model.CustomerAge,
 		model.CustomerPhone,
-		model.CustomerAltPhone,
-		model.CustomerProblem,
+		str.NullOrEmtyString(model.CustomerAltPhone),
+		str.NullOrEmtyString(model.CustomerProblem),
 		model.Solution,
 		model.Allergy,
-		model.Status,
+		str.NullOrEmtyString(model.Status),
 		str.NullOrEmtyString(model.CloseDate),
 		model.DoctorID,
 		model.DoctorName,
 		model.Description).Scan(&res)
 
-	fmt.Println("TIKET DOKTER INSERT : " + statement)
+	//fmt.Println("TIKET DOKTER INSERT : " + statement)
 
 	if err = transaction.Commit(); err != nil {
 		return res, err
@@ -253,11 +261,13 @@ func (repository TicketDokter) Add(c context.Context, model *models.TicketDokter
 func (repository TicketDokter) Edit(c context.Context, model *models.TicketDokter) (res *string, err error) {
 	statement := `UPDATE ticket_dokter SET 
 	status = $1, 
+	solusion = $2,
 	close_date = now()
 	WHERE id = $2 
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		model.Status,
+		model.Solution,
 		model.ID).Scan(&res)
 	if err != nil {
 		return res, err

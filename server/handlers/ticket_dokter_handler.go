@@ -23,7 +23,7 @@ func (h *TicketDokterHandler) SelectAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.TicketDokterParameter{
-		ID:         ctx.Query("id"),
+		ID:         ctx.Query("ticket_id"),
 		CustomerID: ctx.Query("customer_id"),
 		DoctorID:   ctx.Query("doctor_id"),
 		Status:     ctx.Query("status"),
@@ -43,13 +43,13 @@ func (h *TicketDokterHandler) SelectAll(ctx *fiber.Ctx) error {
 		ListObject []models.TicketDokter `json:"list_ticket_dokter"`
 	}
 
-	ObjcetData := new(StructObject)
+	ObjectData := new(StructObject)
 
 	if res != nil {
-		ObjcetData.ListObject = res
+		ObjectData.ListObject = res
 	}
 
-	return h.SendResponse(ctx, ObjcetData, nil, err, 0)
+	return h.SendResponse(ctx, ObjectData, nil, err, 0)
 }
 
 // FindAll ...
@@ -57,7 +57,7 @@ func (h *TicketDokterHandler) FindAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.TicketDokterParameter{
-		ID:         ctx.Query("id"),
+		ID:         ctx.Query("ticket_id"),
 		CustomerID: ctx.Query("customer_id"),
 		DoctorID:   ctx.Query("doctor_id"),
 		Status:     ctx.Query("status"),
