@@ -43,13 +43,13 @@ func (h *TicketDokterHandler) SelectAll(ctx *fiber.Ctx) error {
 		ListObject []models.TicketDokter `json:"list_ticket_dokter"`
 	}
 
-	ObjcetData := new(StructObject)
+	ObjectData := new(StructObject)
 
 	if res != nil {
-		ObjcetData.ListObject = res
+		ObjectData.ListObject = res
 	}
 
-	return h.SendResponse(ctx, ObjcetData, nil, err, 0)
+	return h.SendResponse(ctx, ObjectData, nil, err, 0)
 }
 
 // FindAll ...
