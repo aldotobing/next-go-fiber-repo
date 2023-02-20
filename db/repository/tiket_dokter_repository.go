@@ -245,8 +245,8 @@ func (repository TicketDokter) Add(c context.Context, model *models.TicketDokter
 		model.Allergy,
 		str.NullOrEmtyString(model.Status),
 		str.NullOrEmtyString(model.CloseDate),
-		model.DoctorID,
-		model.DoctorName,
+		str.NullOrEmtyString(model.DoctorID),
+		str.NullOrEmtyString(model.DoctorName),
 		model.Description).Scan(&res)
 
 	//fmt.Println("TIKET DOKTER INSERT : " + statement)
