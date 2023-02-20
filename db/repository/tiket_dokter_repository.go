@@ -263,7 +263,7 @@ func (repository TicketDokter) Edit(c context.Context, model *models.TicketDokte
 	status = $1, 
 	solution = $2,
 	close_date = now()
-	WHERE id = $2 
+	WHERE id = $3 
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		model.Status,
