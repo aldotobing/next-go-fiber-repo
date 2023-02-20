@@ -263,13 +263,15 @@ func (repository TicketDokter) Edit(c context.Context, model *models.TicketDokte
 	status = $1, 
 	solution = $2,
 	doctor_id = $3,
+	doctor_name = $4,
 	close_date = now()
-	WHERE id = $4 
+	WHERE id = $5 
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		model.Status,
 		model.Solution,
 		model.DoctorID,
+		model.DoctorName,
 		model.ID).Scan(&res)
 	if err != nil {
 		return res, err

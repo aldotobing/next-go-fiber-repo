@@ -114,10 +114,11 @@ func (uc TicketDokterUC) Edit(c context.Context, id string, data *requests.Ticke
 	// now := time.Now().UTC()
 	// strnow := now.Format(time.RFC3339)
 	res = models.TicketDokter{
-		ID:       &id,
-		Status:   &data.Status,
-		Solution: &data.Solution,
-		DoctorID: &data.DoctorID,
+		ID:         &id,
+		Status:     &data.Status,
+		Solution:   &data.Solution,
+		DoctorID:   &data.DoctorID,
+		DoctorName: &data.DoctorName,
 	}
 
 	res.ID, err = repo.Edit(c, &res)
