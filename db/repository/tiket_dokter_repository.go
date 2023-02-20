@@ -238,10 +238,10 @@ func (repository TicketDokter) Add(c context.Context, model *models.TicketDokter
 		str.NullOrEmtyString(model.CustomerHeight),
 		str.NullOrEmtyString(model.CustomerWeight),
 		model.CustomerAge,
-		model.CustomerPhone,
+		str.NullOrEmtyString(model.CustomerPhone),
 		str.NullOrEmtyString(model.CustomerAltPhone),
 		str.NullOrEmtyString(model.CustomerProblem),
-		model.Solution,
+		str.NullOrEmtyString(model.Solution),
 		model.Allergy,
 		str.NullOrEmtyString(model.Status),
 		str.NullOrEmtyString(model.CloseDate),
@@ -261,7 +261,7 @@ func (repository TicketDokter) Add(c context.Context, model *models.TicketDokter
 func (repository TicketDokter) Edit(c context.Context, model *models.TicketDokter) (res *string, err error) {
 	statement := `UPDATE ticket_dokter SET 
 	status = $1, 
-	solusion = $2,
+	solution = $2,
 	close_date = now()
 	WHERE id = $2 
 	RETURNING id`
