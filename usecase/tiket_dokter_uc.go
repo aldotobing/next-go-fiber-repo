@@ -117,6 +117,7 @@ func (uc TicketDokterUC) Edit(c context.Context, id string, data *requests.Ticke
 		ID:       &id,
 		Status:   &data.Status,
 		Solution: &data.Solution,
+		DoctorID: &data.DoctorID,
 	}
 
 	res.ID, err = repo.Edit(c, &res)
