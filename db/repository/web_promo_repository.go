@@ -217,6 +217,20 @@ func (repository WebPromo) Add(c context.Context, model *models.WebPromo) (res *
 		}
 	}
 
+	regionparts := strings.Split(*model.RegionAreaIdList, ",")
+	if len(regionparts) >= 1 && regionparts[0] != "" {
+		for pi, _ := range regionparts {
+			linestatement := `INSERT INTO region_area_eligible_promo 
+			(region_id, promo_id, created_date, modified_date)
+					VALUES ($1, $2, now(), now()) RETURNING id`
+			var resregionIDLine string
+			err = transaction.QueryRowContext(c, linestatement, regionparts[pi], PromoId).Scan(&resregionIDLine)
+			if err != nil {
+				return res, err
+			}
+		}
+	}
+
 	if err = transaction.Commit(); err != nil {
 		return res, err
 	}

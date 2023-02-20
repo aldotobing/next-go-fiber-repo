@@ -88,6 +88,7 @@ func (uc WebPromoUC) Add(c context.Context, data *requests.WebPromoRequest, imgB
 		EndDate:            &data.EndDate,
 		ShowInApp:          &data.ShowInApp,
 		CustomerTypeIdList: &data.CustomerTypeIdList,
+		RegionAreaIdList:   &data.RegionIDList,
 	}
 	res.ID, err = repo.Add(c, &res)
 	if err != nil {

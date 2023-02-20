@@ -13,6 +13,8 @@ type WebPromo struct {
 	ShowInApp          *string                         `json:"show_in_app"`
 	CustomerTypeIdList *string                         `json:"customer_type_id_list"`
 	CustomerTypeList   *[]WebCustomerTypeEligiblePromo `json:"customer_type_list"`
+	RegionAreaIdList   *string                         `json:"region_area_id_list"`
+	RegionAreaList     *[]WebRegionAreaEligiblePromo   `json:"reagion_area_list"`
 }
 
 // WebPromoParameter ...

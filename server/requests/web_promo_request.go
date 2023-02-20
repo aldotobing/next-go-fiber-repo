@@ -11,4 +11,5 @@ type WebPromoRequest struct {
 	EndDate            string `json:"end_date"`
 	ShowInApp          string `json:"show_in_app"`
 	CustomerTypeIdList string `json:"customer_type_id_list"`
+	RegionIDList       string `json:"region_area_id_list"`
 }
