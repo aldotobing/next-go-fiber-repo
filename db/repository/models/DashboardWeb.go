@@ -32,6 +32,7 @@ type DashboardWebBranchDetail struct {
 	TotalRepeatUser *string `json:"total_repeat_order_user_customer_detail"`
 	TotalOrderUser  *string `json:"total_order_user_customer_detail"`
 	TotalInvoice    *string `json:"total_invoice_user_customer_detail"`
+	TotalCheckin    *string `json:"total_checkin_user_customer_detail"`
 }
 
 // DashboardWebParameter ...
@@ -133,7 +134,9 @@ var (
 	(select count(*) from sales_invoice_header where  cust_bill_to_id in (select distinct(cust_bill_to_id) from customer_order_header where (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP)) )  and cust_bill_to_id = def.id 
 	and transaction_source_document_no like '%co%'		
 	and (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP)) 
-	) as total_invoice
+	) as total_invoice,
+	(select count(*) from user_checkin_activity where user_id = def.user_id  and (date_part('month', checkin_time::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', now()::TIMESTAMP)=date_part('year', checkin_time::TIMESTAMP)) ) as total_checkin
+	
 	from customer def
 	left join branch b on b.id = def.branch_id
 	left join region r on r.id = b.region_id

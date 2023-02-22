@@ -71,7 +71,7 @@ func (repository DashboardWebRepository) scanRegionDetailRows(rows *sql.Rows) (r
 func (repository DashboardWebRepository) scanBranchCustomerDetailRows(rows *sql.Rows) (res models.DashboardWebBranchDetail, err error) {
 	err = rows.Scan(
 		&res.CustomerID, &res.CustomerName, &res.TotalRepeatUser, &res.TotalOrderUser,
-		&res.TotalInvoice,
+		&res.TotalInvoice, &res.TotalCheckin,
 	)
 	if err != nil {
 
@@ -131,7 +131,7 @@ func (repository DashboardWebRepository) GetRegionDetailData(c context.Context, 
 }
 
 func (repository DashboardWebRepository) GetBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) (data []models.DashboardWebBranchDetail, count int, err error) {
-	conditionString := ` WHERE def.created_date IS not NULL `
+	conditionString := ` WHERE def.created_date IS not NULL and def.user_id is not null and def.user_id in(select us.id from _user us join customer cs on cs.user_id = us.id where us.fcm_token is not null) `
 
 	if parameter.BarnchID != "" {
 		conditionString += ` AND def.branch_id = '` + parameter.BarnchID + `'`
