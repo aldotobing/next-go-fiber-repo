@@ -131,7 +131,7 @@ func (repository DashboardWebRepository) GetRegionDetailData(c context.Context, 
 }
 
 func (repository DashboardWebRepository) GetBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) (data []models.DashboardWebBranchDetail, count int, err error) {
-	conditionString := ` WHERE def.created_date IS not NULL and def.user_id is not null and def.user_id in(select us.id from _user us join customer cs on cs.user_id = us.id where us.fcm_token is not null) `
+	conditionString := ` WHERE def.created_date IS not NULL and def.user_id is not null and def.user_id in(select us.id from _user us join customer cs on cs.user_id = us.id where us.fcm_token is not null and length(trim(us.fcm_token))>0 ) `
 
 	if parameter.BarnchID != "" {
 		conditionString += ` AND def.branch_id = '` + parameter.BarnchID + `'`
