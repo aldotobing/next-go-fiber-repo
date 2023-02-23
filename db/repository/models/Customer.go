@@ -17,6 +17,7 @@ type Customer struct {
 	CustomerBranchAddress      *string `json:"customer_branch_address"`
 	CustomerBranchLat          *string `json:"customer_branch_lat"`
 	CustomerBranchLng          *string `json:"customer_branch_lng"`
+	CustomerBranchPicPhoneNo   *string `json:"customer_branch_pic_phone_no"`
 	CustomerRegionCode         *string `json:"customer_region_code"`
 	CustomerRegionName         *string `json:"customer_region_name"`
 	CustomerRegionGroup        *string `json:"customer_region_group"`
@@ -103,6 +104,7 @@ var (
 		B.ADDRESS AS BRANCH_ADRESS,
 		B.LATITUDE AS BRANCH_LATITUDE,
 		B.LONGITUDE AS BRANCH_LONGITUDE,
+		B.PIC_PHONE_NO AS PIC_PHONE_NO,
 		REG.CODE AS REGION_CODE,
 		REG._NAME AS REGION_NAME,
 		REG.GROUP_NAME AS REGION_GROUP,
