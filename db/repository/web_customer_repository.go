@@ -49,6 +49,7 @@ func (repository WebCustomerRepository) scanRows(rows *sql.Rows) (res models.Web
 		&res.CustomerBranchAddress,
 		&res.CustomerBranchLat,
 		&res.CustomerBranchLng,
+		&res.CustomerBranchPicPhoneNo,
 		&res.CustomerRegionCode,
 		&res.CustomerRegionName,
 		&res.CustomerRegionGroup,
@@ -108,6 +109,7 @@ func (repository WebCustomerRepository) scanRow(row *sql.Row) (res models.WebCus
 		&res.CustomerBranchAddress,
 		&res.CustomerBranchLat,
 		&res.CustomerBranchLng,
+		&res.CustomerBranchPicPhoneNo,
 		&res.CustomerRegionCode,
 		&res.CustomerRegionName,
 		&res.CustomerRegionGroup,
@@ -261,7 +263,7 @@ func (repository WebCustomerRepository) Add(c context.Context, model *models.Web
 	statement := `INSERT INTO customer (customer_name,customer_address, customer_phone, customer_email,
 		customer_cp_name, customer_profile_picture, created_date, modified_date,tax_calc_method, branch_id,customer_code,device_id,
 		salesman_id,user_id)
-	VALUES ($1, $2, $3, $4, $5, $6, now(), now() ,$7, $8, $9,99, $10,$11) RETURNING id`
+	VALUES ($1, $2, $3, $4, $5, $6, now(), now(), $7, $8, $9, 99, $10, $11) RETURNING id`
 
 	fmt.Println(statement)
 
