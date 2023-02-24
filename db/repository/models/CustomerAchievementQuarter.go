@@ -44,6 +44,5 @@ var (
 	// CustomerAchievementQuarterWhereStatement ...
 	CustomerAchievementQuarterWhereStatement = ` 
 	WHERE cus.created_date IS not NULL 
-	AND SIH.TRANSACTION_DATE > NOW() - INTERVAL '2 months'
 	`
 )
