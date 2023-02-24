@@ -51,7 +51,7 @@ type Customer struct {
 	CustomerPhotoKtp           *string `json:"customer_photo_ktp"`
 	CustomerLevel              *string `json:"customer_level_name"`
 	CustomerPriceListID        *string `json:"customer_price_list_id"`
-	CustomerPriceListVersionID *string `json:"customer_price_list_verison_id"`
+	CustomerPriceListVersionID *string `json:"customer_price_list_version_id"`
 	CustomerFCMToken           *string `json:"customer_fcm_token"`
 }
 

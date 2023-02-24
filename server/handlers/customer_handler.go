@@ -102,6 +102,8 @@ func (h *CustomerHandler) FindByID(ctx *fiber.Ctx) error {
 
 	ObjectData.ListObject = res
 
+	parameter.Code = *res.Code
+
 	target := h.FetchVisitDay(parameter)
 	if target != "" {
 		ObjectData.ListObject.VisitDay = &target
