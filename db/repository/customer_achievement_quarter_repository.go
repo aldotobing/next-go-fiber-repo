@@ -66,6 +66,8 @@ func (repository CustomerAchievementQuarter) SelectAll(c context.Context, parame
 
 	conditionStringQuarter := ``
 
+	quarterGetCurrentYear := ` and extract(year from sih.transaction_date) = (select extract (year from now())) `
+
 	/*
 		SET QUARTER
 	*/
@@ -75,24 +77,23 @@ func (repository CustomerAchievementQuarter) SelectAll(c context.Context, parame
 
 	if quarter == 1 {
 
-		conditionStringQuarter += ` AND extract (month from SIH.TRANSACTION_DATE) in (1,2,3) `
+		conditionStringQuarter += ` AND extract (month from SIH.TRANSACTION_DATE) in (1,2,3)  ` + quarterGetCurrentYear + ` `
 	}
 	if quarter == 2 {
 
-		conditionStringQuarter += ` AND extract (month from SIH.TRANSACTION_DATE) in (4,5,6) `
+		conditionStringQuarter += ` AND extract (month from SIH.TRANSACTION_DATE) in (4,5,6) ` + quarterGetCurrentYear + ` `
 	}
 	if quarter == 3 {
 
-		conditionStringQuarter += ` AND extract (month from SIH.TRANSACTION_DATE) in (7,8,9) `
+		conditionStringQuarter += ` AND extract (month from SIH.TRANSACTION_DATE) in (7,8,9) ` + quarterGetCurrentYear + ` `
 	}
 	if quarter == 4 {
 
-		conditionStringQuarter += ` AND extract (month from SIH.TRANSACTION_DATE) in (10,11,12) `
+		conditionStringQuarter += ` AND extract (month from SIH.TRANSACTION_DATE) in (10,11,12) ` + quarterGetCurrentYear + ` `
 	}
 	/*
 		END QUARTER
 	*/
-
 	groupByString := ` GROUP BY CUS.ID, CUSTOMER_CODE, CUSTOMER_NAME `
 
 	if parameter.ID != "" {
@@ -133,6 +134,8 @@ func (repository CustomerAchievementQuarter) FindAll(ctx context.Context, parame
 
 	conditionStringQuarter := ``
 
+	quarterGetCurrentYear := ` and extract(year from sih.transaction_date) = (select extract (year from now())) `
+
 	/*
 		SET QUARTER
 	*/
@@ -142,19 +145,19 @@ func (repository CustomerAchievementQuarter) FindAll(ctx context.Context, parame
 
 	if quarter == 1 {
 
-		conditionStringQuarter += ` AND extract (month from SIH.TRANSACTION_DATE) in (1,2,3) `
+		conditionStringQuarter += ` AND extract (month from SIH.TRANSACTION_DATE) in (1,2,3)  ` + quarterGetCurrentYear + ` `
 	}
 	if quarter == 2 {
 
-		conditionStringQuarter += ` AND extract (month from SIH.TRANSACTION_DATE) in (4,5,6) `
+		conditionStringQuarter += ` AND extract (month from SIH.TRANSACTION_DATE) in (4,5,6) ` + quarterGetCurrentYear + ` `
 	}
 	if quarter == 3 {
 
-		conditionStringQuarter += ` AND extract (month from SIH.TRANSACTION_DATE) in (7,8,9) `
+		conditionStringQuarter += ` AND extract (month from SIH.TRANSACTION_DATE) in (7,8,9) ` + quarterGetCurrentYear + ` `
 	}
 	if quarter == 4 {
 
-		conditionStringQuarter += ` AND extract (month from SIH.TRANSACTION_DATE) in (10,11,12) `
+		conditionStringQuarter += ` AND extract (month from SIH.TRANSACTION_DATE) in (10,11,12) ` + quarterGetCurrentYear + ` `
 	}
 	/*
 		END QUARTER
