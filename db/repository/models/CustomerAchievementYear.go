@@ -44,6 +44,6 @@ var (
 	// CustomerAchievementYearWhereStatement ...
 	CustomerAchievementYearWhereStatement = ` 
 	WHERE cus.created_date IS not NULL 
-	AND DATE_TRUNC('year', TRANSACTION_DATE) = DATE_TRUNC('year', CURRENT_TIMESTAMP)
+	AND DATE_TRUNC('year', SIH.TRANSACTION_DATE) = DATE_TRUNC('year', CURRENT_TIMESTAMP)
 	`
 )
