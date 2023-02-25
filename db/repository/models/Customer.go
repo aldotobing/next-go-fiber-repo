@@ -44,6 +44,7 @@ type Customer struct {
 	GiftName                   *string `json:"customer_gift_name"`
 	Loyalty                    *string `json:"customer_loyalty"`
 	VisitDay                   *string `json:"visit_day"`
+	VisitWeek                  *string `json:"visit_week"`
 	CustomerTaxCalcMethod      *string `json:"customer_tax_calc_method"`
 	CustomerBranchID           *string `json:"customer_branch_id"`
 	CustomerSalesmanID         *string `json:"customer_salesman_id"`
