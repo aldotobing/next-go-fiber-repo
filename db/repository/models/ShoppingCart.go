@@ -59,13 +59,12 @@ var (
 	}
 
 	// ShoppingCartSelectStatement ...
-	ShoppingCartSelectStatement = `select def.id, cus.id as c_id,p._name,
+	ShoppingCartSelectStatement = `select def.id, cus.id as c_id,cus.customer_name,
 	it.id as i_id,it._name as i_name, uom.id as uo_id, uom._name as uo_name,
 	def.qty::integer, def.stock_qty::integer,
 	def.price, it.item_category_id, ic._name as cat_name, it.item_picture,def.total_price::bigint
 	from cart def
 	join customer cus on cus.id = def.customer_id
-	join partner p on p.id =cus.partner_id
 	join item it on it.id = def.item_id
 	join uom uom on uom.id = def.uom_id
 	join item_category ic on ic.id=  it.item_category_id
@@ -74,7 +73,6 @@ var (
 	GroupedShoppingCartSelectStatement = `select it.item_category_id, ic._name as cat_name
 	from cart def
 	join customer cus on cus.id = def.customer_id
-	join partner p on p.id =cus.partner_id
 	join item it on it.id = def.item_id
 	join uom uom on uom.id = def.uom_id
 	join item_category ic on ic.id=  it.item_category_id
