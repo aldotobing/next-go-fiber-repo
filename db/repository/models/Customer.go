@@ -53,6 +53,8 @@ type Customer struct {
 	CustomerPriceListID        *string `json:"customer_price_list_id"`
 	CustomerPriceListVersionID *string `json:"customer_price_list_version_id"`
 	CustomerFCMToken           *string `json:"customer_fcm_token"`
+	CustomerPaymentTermsID     *string `json:"customer_payment_terms_id"`
+	CustomerPaymentTermsCode   *string `json:"customer_payment_terms_code"`
 }
 
 // CustomerParameter ...
@@ -133,7 +135,7 @@ var (
 		c.customer_nik,
 		cl._name as cus_level_name,
 		C.price_list_id,C.price_list_version_id,
-		us.fcm_token
+		us.fcm_token,top.id as top_id, top.code as top_code
 
 	FROM CUSTOMER C
 	LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
@@ -150,6 +152,7 @@ var (
 	LEFT JOIN LOYALTY LOY ON LOY.CUSTOMER_ID = C.ID
 	left join customer_level cl on cl.id = c.customer_level_id
 	left join _user us on us.id = C.user_id
+	left join term_of_payment top on top.id = C.payment_terms_id
 	`
 
 	// CustomerWhereStatement ...
