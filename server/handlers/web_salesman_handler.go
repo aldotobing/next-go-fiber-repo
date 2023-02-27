@@ -27,6 +27,7 @@ func (h *WebSalesmanHandler) SelectAll(ctx *fiber.Ctx) error {
 		CustomerTypeId: ctx.Query("customer_type_id"),
 		UserId:         ctx.Query("admin_user_id"),
 		Search:         ctx.Query("search"),
+		BranchID:       ctx.Query("branch_id"),
 		By:             ctx.Query("by"),
 		Sort:           ctx.Query("sort"),
 	}
@@ -54,6 +55,7 @@ func (h *WebSalesmanHandler) FindAll(ctx *fiber.Ctx) error {
 		ID:             ctx.Query("customer_id"),
 		CustomerTypeId: ctx.Query("customer_type_id"),
 		UserId:         ctx.Query("admin_user_id"),
+		BranchID:       ctx.Query("branch_id"),
 		Search:         ctx.Query("search"),
 		Page:           str.StringToInt(ctx.Query("page")),
 		Limit:          str.StringToInt(ctx.Query("limit")),

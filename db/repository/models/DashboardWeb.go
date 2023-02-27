@@ -37,23 +37,27 @@ type DashboardWebBranchDetail struct {
 
 // DashboardWebParameter ...
 type DashboardWebParameter struct {
-	ID     string `json:"id"`
-	Search string `json:"search"`
-	Page   int    `json:"page"`
-	Offset int    `json:"offset"`
-	Limit  int    `json:"limit"`
-	By     string `json:"by"`
-	Sort   string `json:"sort"`
+	ID        string `json:"id"`
+	Search    string `json:"search"`
+	Page      int    `json:"page"`
+	Offset    int    `json:"offset"`
+	Limit     int    `json:"limit"`
+	By        string `json:"by"`
+	Sort      string `json:"sort"`
+	StartDate string `json:"start_date"`
+	EndDate   string `json:"end_date"`
 }
 
 type DashboardWebRegionParameter struct {
-	GroupID string `json:"group_id"`
-	Search  string `json:"search"`
-	Page    int    `json:"page"`
-	Offset  int    `json:"offset"`
-	Limit   int    `json:"limit"`
-	By      string `json:"by"`
-	Sort    string `json:"sort"`
+	GroupID   string `json:"group_id"`
+	Search    string `json:"search"`
+	Page      int    `json:"page"`
+	Offset    int    `json:"offset"`
+	Limit     int    `json:"limit"`
+	By        string `json:"by"`
+	Sort      string `json:"sort"`
+	StartDate string `json:"start_date"`
+	EndDate   string `json:"end_date"`
 }
 
 type DashboardWebBranchParameter struct {
@@ -71,51 +75,12 @@ var (
 	// DashboardWebSelectStatement ...
 
 	DashboardWebSelectStatement = ` 
-	select 0 as group_id,'Nasional' as group_name,(select count(*) from _user us join customer c on c.user_id=us.id where us.fcm_token is not null and length(trim(us.fcm_token))>0) as total_register_user,
-	(select count(*) from (select count(*) as total_transaksi,cust_bill_to_id from customer_order_header where (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP))group by cust_bill_to_id) x where x.total_transaksi>1) as total_repeat_order,
-	(select count(*) from customer_order_header where (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP))) as total_transaction,
-	(select count(*) from sales_invoice_header where cust_bill_to_id in(select cust_bill_to_id from customer_order_header) 
-	and transaction_source_document_no like '%co%'
-	 and (date_part('month',transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP))
-	) as total_invoice,
-	(select count(*) from (select count(distinct(cust_bill_to_id)) from customer_order_header where (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP))group by cust_bill_to_id) x) as total_active_user
-
-	union all
-	select * from(
-	select x.group_id as group_id,x.group_name as group_name, 
-		(select count(*) from _user us join customer c on c.user_id=us.id where us.fcm_token is not null and length(trim(us.fcm_token))>0 and c.branch_id in (select br.id from branch br where br.region_id in(select rg.id from region rg where rg.group_id = x.group_id) ) ) as total_register_user,
-		(select count(*) from (select count(*) as total_transaksi,cust_bill_to_id from customer_order_header where (date_part('month', now()::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP)) and branch_id in (select br.id from branch br where br.region_id in(select rg.id from region rg where rg.group_id = x.group_id) )  group by cust_bill_to_id) x where x.total_transaksi>1) as total_repeat_order,
-		(select count(*) from customer_order_header where (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', now()::TIMESTAMP)=date_part('year', transaction_date::TIMESTAMP))  and branch_id in (select br.id from branch br where br.region_id in(select rg.id from region rg where rg.group_id = x.group_id)) ) as total_transaction,
-		(select count(*) from sales_invoice_header where cust_bill_to_id in(select distinct(cust_bill_to_id) from customer_order_header) 
-		and transaction_source_document_no like '%co%' 
-		and (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP)) 
-		 and branch_id in (select br.id from branch br where br.region_id in(select rg.id from region rg where rg.group_id = x.group_id)) ) as total_invoice,
-		(select count(*) from (select distinct(cust_bill_to_id) from customer_order_header where (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP)) and branch_id in (select br.id from branch br where br.region_id in(select rg.id from region rg where rg.group_id = x.group_id) )  group by cust_bill_to_id) x) as total_active_user
-
-	from (
-	select r.group_id,r.group_name 
-	from region r group by r.group_id,r.group_name
-	)x order by x.group_id
-		)y
- 	`
+	select * from os_fetch_dashborad_regiongroupdata($1,$2,null,null,null)
+	`
 
 	DashboardWebRegionDetailSelectStatement = `
+	select * from os_fetch_dashborad_regiongroupdetaildata($1::integer,$2,$3,null,null,null)
 	 
-	 select 
-		def.id as b_id,def._name as b_name,
-		r.id as region_id, r._name as region_name, r.group_id as region_group_id, r.group_name as region_group_name,
-		(select count(*) from _user us join customer c on c.user_id=us.id where us.fcm_token is not null and length(trim(us.fcm_token))>0 and c.branch_id = def.id  ) as total_register_user,
-		(select count(*) from (select count(*) as total_transaksi,cust_bill_to_id from customer_order_header where (date_part('month', now()::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP)) and branch_id in (select br.id from branch br where br.region_id =def.id )  group by cust_bill_to_id) x where x.total_transaksi>1) as total_repeat_order,
-		(select count(*) from customer_order_header where (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', now()::TIMESTAMP)=date_part('year', transaction_date::TIMESTAMP))  and branch_id =def.id ) as total_transaction,
-		(select count(*) from sales_invoice_header where cust_bill_to_id in(select distinct(cust_bill_to_id) from customer_order_header) 
-		and transaction_source_document_no like '%co%'		
-		and (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP)) 
-				and branch_id =def.id ) as total_invoice,
-		(select count(*) from (select distinct(cust_bill_to_id) from customer_order_header where (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP)) and branch_id =def.id  group by cust_bill_to_id) x) as total_active_user
-
-
-		from branch def
-		left join region r on r.id = def.region_id
 		
 	 `
 
@@ -142,3 +107,48 @@ var (
 	left join region r on r.id = b.region_id
 	   `
 )
+
+// old query dashboard region group
+// select 0 as group_id,'Nasional' as group_name,(select count(*) from _user us join customer c on c.user_id=us.id where us.fcm_token is not null and length(trim(us.fcm_token))>0) as total_register_user,
+// 	(select count(*) from (select count(*) as total_transaksi,cust_bill_to_id from customer_order_header where (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP))group by cust_bill_to_id) x where x.total_transaksi>1) as total_repeat_order,
+// 	(select count(*) from customer_order_header where (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP))) as total_transaction,
+// 	(select count(*) from sales_invoice_header where cust_bill_to_id in(select cust_bill_to_id from customer_order_header)
+// 	and transaction_source_document_no like '%co%'
+// 	 and (date_part('month',transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP))
+// 	) as total_invoice,
+// 	(select count(*) from (select count(distinct(cust_bill_to_id)) from customer_order_header where (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP))group by cust_bill_to_id) x) as total_active_user
+
+// 	union all
+// 	select * from(
+// 	select x.group_id as group_id,x.group_name as group_name,
+// 		(select count(*) from _user us join customer c on c.user_id=us.id where us.fcm_token is not null and length(trim(us.fcm_token))>0 and c.branch_id in (select br.id from branch br where br.region_id in(select rg.id from region rg where rg.group_id = x.group_id) ) ) as total_register_user,
+// 		(select count(*) from (select count(*) as total_transaksi,cust_bill_to_id from customer_order_header where (date_part('month', now()::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP)) and branch_id in (select br.id from branch br where br.region_id in(select rg.id from region rg where rg.group_id = x.group_id) )  group by cust_bill_to_id) x where x.total_transaksi>1) as total_repeat_order,
+// 		(select count(*) from customer_order_header where (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', now()::TIMESTAMP)=date_part('year', transaction_date::TIMESTAMP))  and branch_id in (select br.id from branch br where br.region_id in(select rg.id from region rg where rg.group_id = x.group_id)) ) as total_transaction,
+// 		(select count(*) from sales_invoice_header where cust_bill_to_id in(select distinct(cust_bill_to_id) from customer_order_header)
+// 		and transaction_source_document_no like '%co%'
+// 		and (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP))
+// 		 and branch_id in (select br.id from branch br where br.region_id in(select rg.id from region rg where rg.group_id = x.group_id)) ) as total_invoice,
+// 		(select count(*) from (select distinct(cust_bill_to_id) from customer_order_header where (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP)) and branch_id in (select br.id from branch br where br.region_id in(select rg.id from region rg where rg.group_id = x.group_id) )  group by cust_bill_to_id) x) as total_active_user
+
+// 	from (
+// 	select r.group_id,r.group_name
+// 	from region r group by r.group_id,r.group_name
+// 	)x order by x.group_id
+// 		)y
+
+// query dashboard detail old
+
+// select
+// 		def.id as b_id,def._name as b_name,
+// 		r.id as region_id, r._name as region_name, r.group_id as region_group_id, r.group_name as region_group_name,
+// 		(select count(*) from _user us join customer c on c.user_id=us.id where us.fcm_token is not null and length(trim(us.fcm_token))>0 and c.branch_id = def.id  ) as total_register_user,
+// 		(select count(*) from (select count(*) as total_transaksi,cust_bill_to_id from customer_order_header where (date_part('month', now()::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP)) and branch_id in (select br.id from branch br where br.region_id =def.id )  group by cust_bill_to_id) x where x.total_transaksi>1) as total_repeat_order,
+// 		(select count(*) from customer_order_header where (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', now()::TIMESTAMP)=date_part('year', transaction_date::TIMESTAMP))  and branch_id =def.id ) as total_transaction,
+// 		(select count(*) from sales_invoice_header where cust_bill_to_id in(select distinct(cust_bill_to_id) from customer_order_header)
+// 		and transaction_source_document_no like '%co%'
+// 		and (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP))
+// 				and branch_id =def.id ) as total_invoice,
+// 		(select count(*) from (select distinct(cust_bill_to_id) from customer_order_header where (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP)) and branch_id =def.id  group by cust_bill_to_id) x) as total_active_user
+
+// from branch def
+// left join region r on r.id = def.region_id

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
+	"nextbasis-service-v-0.1/pkg/str"
 )
 
 // IDashboardWebRepository ...
@@ -84,7 +85,7 @@ func (repository DashboardWebRepository) scanBranchCustomerDetailRows(rows *sql.
 // FindByID ...
 func (repository DashboardWebRepository) GetData(c context.Context, parameter models.DashboardWebParameter) (data []models.DashboardWeb, err error) {
 	statement := models.DashboardWebSelectStatement
-	rows, err := repository.DB.QueryContext(c, statement)
+	rows, err := repository.DB.QueryContext(c, statement, str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
 
 	if err != nil {
 		return data, err
@@ -105,13 +106,8 @@ func (repository DashboardWebRepository) GetData(c context.Context, parameter mo
 
 func (repository DashboardWebRepository) GetRegionDetailData(c context.Context, parameter models.DashboardWebRegionParameter) (data []models.DashboardWebRegionDetail, err error) {
 	statement := models.DashboardWebRegionDetailSelectStatement
-	statement += ` where def.region_id is not null `
-	if &parameter.GroupID != nil && strings.Trim(parameter.GroupID, " ") != "" && parameter.GroupID != "0" {
-		statement += ` and r.group_id = ` + parameter.GroupID
-	}
-	statement += ` order by r.sequence,def.region_id `
 
-	rows, err := repository.DB.QueryContext(c, statement)
+	rows, err := repository.DB.QueryContext(c, statement, str.NullOrEmtyString(&parameter.GroupID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
 
 	if err != nil {
 		return data, err
