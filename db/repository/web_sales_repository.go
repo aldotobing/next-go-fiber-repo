@@ -72,8 +72,12 @@ func (repository WebSalesmanRepository) SelectAll(c context.Context, parameter m
 		conditionString += ` AND def.id = '` + parameter.ID + `'`
 	}
 
+	if parameter.BranchID != "" {
+		conditionString += ` AND def.branch_id = '` + parameter.BranchID + `'`
+	}
+
 	statement := models.WebSalesmanSelectStatement + ` ` + models.WebSalesmanWhereStatement +
-		` AND (LOWER(def."salesman_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+		` AND (LOWER(def."salesman_name") LIKE $1 or LOWER(def."salesman_code") LIKE $1 ) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 
 	//print
@@ -104,8 +108,12 @@ func (repository WebSalesmanRepository) FindAll(ctx context.Context, parameter m
 		conditionString += ` AND def.id = '` + parameter.ID + `'`
 	}
 
+	if parameter.BranchID != "" {
+		conditionString += ` AND def.branch_id = '` + parameter.BranchID + `'`
+	}
+
 	query := models.WebSalesmanSelectStatement + ` ` + models.WebSalesmanWhereStatement + ` ` + conditionString + `
-		AND (LOWER(def."salesman_name") LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
+		AND (LOWER(def."salesman_name") LIKE $1 or LOWER(def."salesman_code") LIKE $1 ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
 	fmt.Println(query)
 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
 	if err != nil {

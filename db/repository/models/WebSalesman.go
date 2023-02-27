@@ -16,6 +16,7 @@ type WebSalesmanParameter struct {
 	ID             string `json:"salesman_id"`
 	Code           string `json:"salesman_code"`
 	Name           string `json:"salesman_name"`
+	BranchID       string `json:"branch_id"`
 	CustomerTypeId string `json:"custome_type_id"`
 	UserId         string `json:"admin_user_id"`
 	Search         string `json:"search"`

@@ -18,13 +18,20 @@ type DashboardWebHandler struct {
 func (h *DashboardWebHandler) GetData(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
-	parameter := models.DashboardWebParameter{}
+	parameter := models.DashboardWebParameter{
+		StartDate: ctx.Query("start_date"),
+		EndDate:   ctx.Query("end_date"),
+	}
 
 	uc := usecase.DashboardWebUC{ContractUC: h.ContractUC}
 	res, err := uc.GetData(c, parameter)
 
 	for i, object := range res {
-		detail, errdetail := uc.GetRegionDetailData(c, models.DashboardWebRegionParameter{GroupID: *object.RegionGroupID})
+		detail, errdetail := uc.GetRegionDetailData(c, models.DashboardWebRegionParameter{
+			GroupID:   *object.RegionGroupID,
+			StartDate: ctx.Query("start_date"),
+			EndDate:   ctx.Query("end_date"),
+		})
 		if errdetail == nil {
 			res[i].DetailData = detail
 		}
