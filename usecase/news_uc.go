@@ -80,3 +80,16 @@ func (uc NewsUC) Add(c context.Context, data *requests.NewsRequest) (res models.
 
 	return res, err
 }
+
+// Delete ...
+func (uc NewsUC) Delete(c context.Context, id string) (res viewmodel.CommonDeletedObjectVM, err error) {
+	repo := repository.NewNewsRepository(uc.DB)
+	res.ID, err = repo.Delete(c, id)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	return res, err
+
+}
