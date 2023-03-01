@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -53,7 +55,6 @@ func (h *WebCustomerHandler) SelectAll(ctx *fiber.Ctx) error {
 // FindAll ...
 func (h *WebCustomerHandler) FindAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
-
 	parameter := models.WebCustomerParameter{
 		ID:             ctx.Query("customer_id"),
 		CustomerTypeId: ctx.Query("customer_type_id"),
@@ -165,6 +166,10 @@ func (h *WebCustomerHandler) Edit(ctx *fiber.Ctx) error {
 		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
 	}
 
+	if input.CustomerGender != "" && !str.Contains(models.CustomerGenderList, strings.ToLower(input.CustomerGender)) {
+		return h.SendResponse(ctx, nil, nil, errors.New(helper.InvalidGender), http.StatusBadRequest)
+	}
+
 	imgProfile, _ := ctx.FormFile("img_profile")
 	uc := usecase.WebCustomerUC{ContractUC: h.ContractUC}
 	res, err := uc.Edit(c, id, input, imgProfile)
@@ -184,6 +189,10 @@ func (h *WebCustomerHandler) Add(ctx *fiber.Ctx) error {
 	if err := h.Validator.Struct(input); err != nil {
 		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
 		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+	}
+
+	if input.CustomerGender != "" && !str.Contains(models.CustomerGenderList, strings.ToLower(input.CustomerGender)) {
+		return h.SendResponse(ctx, nil, nil, errors.New(helper.InvalidGender), http.StatusBadRequest)
 	}
 
 	imgProfile, _ := ctx.FormFile("img_profile")

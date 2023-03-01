@@ -23,4 +23,6 @@ type WebCustomerRequest struct {
 	CustomerBirthDate      string `json:"customer_birthdate"`
 	CustomerReligion       string `json:"customer_religion"`
 	CustomerUserID         string `json:"customer_user_id"`
+	CustomerLevelID        int    `json:"customer_level_id"`
+	CustomerGender         string `json:"customer_gender"`
 }
