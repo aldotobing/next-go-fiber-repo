@@ -1,7 +1,7 @@
 package requests
 
-// CustomerRequest ...
-type WebCustomerRequest struct {
+// CustomerLevelRequest ...
+type CustomerLevelRequest struct {
 	ID                     string `json:"customer_id"`
 	Code                   string `json:"customer_code"`
 	CustomerName           string `json:"customer_name"`
@@ -22,7 +22,4 @@ type WebCustomerRequest struct {
 	CustomerNik            string `json:"customer_nik"`
 	CustomerBirthDate      string `json:"customer_birthdate"`
 	CustomerReligion       string `json:"customer_religion"`
-	CustomerUserID         string `json:"customer_user_id"`
-	CustomerLevelID        int    `json:"customer_level_id"`
-	CustomerGender         string `json:"customer_gender"`
 }

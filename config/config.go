@@ -19,7 +19,6 @@ import (
 	"time"
 
 	firesorepkg "nextbasis-service-v-0.1/pkg/firestore"
-	miniopkg "nextbasis-service-v-0.1/pkg/minio"
 	"nextbasis-service-v-0.1/pkg/mssqldb"
 	postgresqlPkg "nextbasis-service-v-0.1/pkg/postgresql"
 	"nextbasis-service-v-0.1/pkg/recaptcha"
@@ -138,16 +137,16 @@ func LoadConfigs() (res Configs, err error) {
 	}
 
 	// Minio connection
-	minioInfo := miniopkg.Connection{
-		EndSuperhub: res.EnvConfig["MINIO_ENDPOINT"],
-		AccessKey:   res.EnvConfig["MINIO_ACCESS_KEY_ID"],
-		SecretKey:   res.EnvConfig["MINIO_SECRET_ACCESS_KEY"],
-		UseSSL:      str.StringToBool(res.EnvConfig["MINIO_USE_SSL"]),
-	}
-	res.Minio, err = minioInfo.InitClient()
-	if err != nil {
-		return res, err
-	}
+	// minioInfo := miniopkg.Connection{
+	// 	EndSuperhub: res.EnvConfig["MINIO_ENDPOINT"],
+	// 	AccessKey:   res.EnvConfig["MINIO_ACCESS_KEY_ID"],
+	// 	SecretKey:   res.EnvConfig["MINIO_SECRET_ACCESS_KEY"],
+	// 	UseSSL:      str.StringToBool(res.EnvConfig["MINIO_USE_SSL"]),
+	// }
+	// res.Minio, err = minioInfo.InitClient()
+	// if err != nil {
+	// 	return res, err
+	// }
 
 	//Firestore
 
