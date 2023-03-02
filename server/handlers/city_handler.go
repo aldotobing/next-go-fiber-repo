@@ -90,6 +90,21 @@ func (h *CityHandler) FindByID(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
+// FindByID ...
+func (h *CityHandler) FindByIDTest(ctx *fiber.Ctx) error {
+
+	type resbody struct {
+		//Exported string
+		Message string `json:"message"`
+	}
+
+	objectData := new(resbody)
+
+	objectData.Message = "OK!"
+
+	return h.SendResponse(ctx, objectData, nil, nil, 0)
+}
+
 // Add ...
 func (h *CityHandler) Add(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)

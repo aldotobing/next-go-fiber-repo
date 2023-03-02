@@ -18,6 +18,7 @@ type ICustomerRepository interface {
 	EditAddress(c context.Context, model *models.Customer) (*string, error)
 	BackendEdit(c context.Context, model *models.Customer) (*string, error)
 	BackendAdd(c context.Context, model *models.Customer) (*string, error)
+	FindByCodeAndPhone(c context.Context, parameter models.CustomerParameter) (models.Customer, error)
 }
 
 // CustomerRepository ...
@@ -51,6 +52,7 @@ func (repository CustomerRepository) scanRows(rows *sql.Rows) (res models.Custom
 		&res.CustomerBranchAddress,
 		&res.CustomerBranchLat,
 		&res.CustomerBranchLng,
+		&res.CustomerBranchPicPhoneNo,
 		&res.CustomerRegionCode,
 		&res.CustomerRegionName,
 		&res.CustomerRegionGroup,
@@ -78,6 +80,11 @@ func (repository CustomerRepository) scanRows(rows *sql.Rows) (res models.Custom
 		&res.CustomerPhotoKtp,
 		&res.CustomerNik,
 		&res.CustomerLevel,
+		&res.CustomerPriceListID,
+		&res.CustomerPriceListVersionID,
+		&res.CustomerFCMToken,
+		&res.CustomerPaymentTermsID,
+		&res.CustomerPaymentTermsCode,
 	)
 	if err != nil {
 
@@ -108,6 +115,7 @@ func (repository CustomerRepository) scanRow(row *sql.Row) (res models.Customer,
 		&res.CustomerBranchAddress,
 		&res.CustomerBranchLat,
 		&res.CustomerBranchLng,
+		&res.CustomerBranchPicPhoneNo,
 		&res.CustomerRegionCode,
 		&res.CustomerRegionName,
 		&res.CustomerRegionGroup,
@@ -135,6 +143,11 @@ func (repository CustomerRepository) scanRow(row *sql.Row) (res models.Customer,
 		&res.CustomerPhotoKtp,
 		&res.CustomerNik,
 		&res.CustomerLevel,
+		&res.CustomerPriceListID,
+		&res.CustomerPriceListVersionID,
+		&res.CustomerFCMToken,
+		&res.CustomerPaymentTermsID,
+		&res.CustomerPaymentTermsCode,
 	)
 	if err != nil {
 		return res, err
@@ -345,4 +358,19 @@ func (repository CustomerRepository) BackendAdd(c context.Context, model *models
 		return res, err
 	}
 	return res, err
+}
+
+// FindByID ...
+func (repository CustomerRepository) FindByCodeAndPhone(c context.Context, parameter models.CustomerParameter) (data models.Customer, err error) {
+	statement := models.CustomerSelectStatement + ` WHERE c.customer_code = $1 and c.customer_phone = $2 `
+	row := repository.DB.QueryRowContext(c, statement, parameter.Code, parameter.Phone)
+
+	fmt.Println(statement)
+
+	data, err = repository.scanRow(row)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }

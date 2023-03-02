@@ -98,3 +98,22 @@ func (h Handler) GetUser(ctx *fiber.Ctx) (res viewmodel.UserVM) {
 
 	return res
 }
+
+func (h Handler) SendBasicResponse(ctx *fiber.Ctx, data interface{}, meta interface{}, err interface{}, code int) error {
+	if code == 0 && err != nil {
+		code = http.StatusUnprocessableEntity
+		err = err.(error).Error()
+	}
+
+	if code != http.StatusOK && err != nil {
+		return h.SendErrorResponseWithCode(ctx, err, code)
+	}
+
+	return h.SendBasicSuccessResponse(ctx, data, meta)
+}
+
+func (h Handler) SendBasicSuccessResponse(ctx *fiber.Ctx, data interface{}, meta interface{}) error {
+	response := data
+
+	return ctx.Status(http.StatusOK).JSON(response)
+}

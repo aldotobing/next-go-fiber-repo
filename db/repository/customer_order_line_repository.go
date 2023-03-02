@@ -36,6 +36,7 @@ func (repository CustomerOrderLineRepository) scanRows(rows *sql.Rows) (res mode
 		&res.UseDiscPercent, &res.DisPercent1, &res.DisPercent2, &res.DisPercent3,
 		&res.DisPercent4, &res.DisPercent5, &res.TaxableAmount, &res.TaxAmount,
 		&res.RoundingAmount, &res.NetAmount, &res.SalesmanName, &res.SalesmanCode, &res.ItemPicture,
+		&res.FromPromo,
 	)
 	if err != nil {
 
@@ -54,6 +55,7 @@ func (repository CustomerOrderLineRepository) scanRow(row *sql.Row) (res models.
 		&res.UseDiscPercent, &res.DisPercent1, &res.DisPercent2, &res.DisPercent3,
 		&res.DisPercent4, &res.DisPercent5, &res.TaxableAmount, &res.TaxAmount,
 		&res.RoundingAmount, &res.NetAmount, &res.SalesmanName, &res.SalesmanCode, &res.ItemPicture,
+		&res.FromPromo,
 	)
 	if err != nil {
 		return res, err

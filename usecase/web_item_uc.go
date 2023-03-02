@@ -109,11 +109,13 @@ func (uc WebItemUC) Edit(c context.Context, id string, data *requests.WebItemReq
 	// now := time.Now().UTC()
 	// strnow := now.Format(time.RFC3339)
 	res = models.WebItem{
-		ID:             &id,
-		Code:           &data.Code,
-		Name:           &data.Name,
-		ItemPicture:    &strImg,
-		ItemCategoryId: &data.ItemCategoryId,
+		ID:              &id,
+		Code:            &data.Code,
+		Name:            &data.Name,
+		ItemPicture:     &strImg,
+		ItemCategoryId:  &data.ItemCategoryId,
+		ItemHide:        &data.ItemHide,
+		ItemDescription: &data.ItemDescription,
 	}
 
 	res.ID, err = repo.Edit(c, &res)

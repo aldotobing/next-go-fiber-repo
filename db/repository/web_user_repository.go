@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strings"
 	"time"
 
@@ -145,7 +146,7 @@ func (repository WebUserRepository) Add(c context.Context, model *models.WebUser
 	UserID := &res
 
 	parts := strings.Split(*model.UserRoleGroupIDList, ",")
-	if len(parts) >= 1 {
+	if len(parts) >= 1 && parts[0] != "" {
 		for pi, _ := range parts {
 			linestatement := `INSERT INTO user_role_group (user_id,role_group_id,created_date, modified_date)
 					VALUES ($1,$2, now(),now()) RETURNING id`
@@ -174,7 +175,7 @@ func (repository WebUserRepository) Edit(c context.Context, model *models.WebUse
 	defer transaction.Rollback()
 
 	statement := `UPDATE _user SET 
-	login = $1,_password = $2, modified_date = now()
+	login = $1,_password = (case when ($2::character varying) is not null and trim($2::character varying) !='' then $2 else _password end) , modified_date = now()
 	 WHERE id = $3 RETURNING id`
 
 	err = transaction.QueryRowContext(c, statement, model.Login, model.Password,
@@ -186,7 +187,8 @@ func (repository WebUserRepository) Edit(c context.Context, model *models.WebUse
 
 	parts := strings.Split(*model.UserRoleGroupIDList, ",")
 
-	if len(parts) >= 1 {
+	if len(parts) >= 1 && parts[0] != "" {
+		fmt.Println("banyak role = ", len(parts))
 		deletelinestatement := `delete from user_role_group WHERE user_id = $1`
 
 		deletedRow, _ := transaction.QueryContext(c, deletelinestatement, UserID)
@@ -212,10 +214,27 @@ func (repository WebUserRepository) Edit(c context.Context, model *models.WebUse
 
 // Delete ...
 func (repository WebUserRepository) Delete(c context.Context, id string, now time.Time) (res *string, err error) {
+	transaction, err := repository.DB.BeginTx(c, nil)
+	if err != nil {
+		return res, err
+	}
+	defer transaction.Rollback()
+
+	userroleeletelinestatement := `delete from user_role_group WHERE user_id = $1`
+
+	deletedRoleGroupRow, _ := transaction.QueryContext(c, userroleeletelinestatement, id)
+
+	deletedRoleGroupRow.Close()
+
 	deletelinestatement := `delete from _user WHERE id = $1`
 
-	deletedRow, _ := repository.DB.QueryContext(c, deletelinestatement, id)
+	deletedRow, _ := transaction.QueryContext(c, deletelinestatement, id)
+
 	deletedRow.Close()
+
+	if err = transaction.Commit(); err != nil {
+		return res, err
+	}
 
 	res = &id
 	return res, err

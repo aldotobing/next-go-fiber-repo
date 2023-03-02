@@ -88,14 +88,15 @@ func (repository SalesOrderCustomerSyncRepository) InsertDataWithLine(c context.
 		tax_calc_method ,salesman_id ,payment_terms_id ,company_id ,
 		branch_id ,price_list_id ,price_list_version_id ,status ,gross_amount ,
 		disc_amount ,taxable_amount ,tax_amount ,rounding_amount ,net_amount ,
-		global_disc_amount,cust_ship_to_id,expected_delivery_date,void_reason_notes
+		global_disc_amount,cust_ship_to_id,expected_delivery_date,void_reason_notes,
+		created_date,modified_date
 		)values(
 		$1, $2, $3, $4, (select id from customer where customer_code = $5),
 		$6, (select id from salesman where partner_id =(select id from partner where code = $7)), $8, $9, $10,
 		$11 ,$12, $13, $14, $15,
 		$16, $17, $18, $19, $20,
 		(select id from customer where customer_code = $21),
-		$22, $23
+		$22, $23, now(),now()
 		)
 	RETURNING id`
 	transaction, err := repository.DB.BeginTx(c, nil)

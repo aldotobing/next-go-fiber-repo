@@ -22,4 +22,5 @@ type UserAccountVM struct {
 	SalesmanID         *string `json:"salesman_id"`
 	SalesmanName       *string `json:"salesman_name"`
 	SalesmanCode       *string `json:"salesman_code"`
+	LoginCode          *string `json:"logincode"`
 }

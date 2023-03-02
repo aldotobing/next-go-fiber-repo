@@ -53,18 +53,20 @@ pipelines:
           after-script:
             - ALERT_TYPE="success"
             - if [[ $BITBUCKET_EXIT_CODE -ne 0 ]]; then ALERT_TYPE="error" ; fi
-            - pipe: atlassian/email-notify:0.3.12
+            # - pipe: atlassian/email-notify:0.3.12
+            - pipe: atlassian/email-notify:0.8.0
               variables:
                 USERNAME: "$EMAIL_USERNAME"
                 PASSWORD: $EMAIL_APP_PASSWORD
                 FROM: "commits-noreply@bitbucket.org"
-                TO: "$EMAIL_1_TO, $EMAIL_2_TO, $EMAIL_3_TO"
+                TO: "$EMAIL_1_TO, $EMAIL_3_TO"
                 HOST: "$EMAIL_HOST"
                 SUBJECT: "${BITBUCKET_REPO_FULL_NAME} : Deploy ${ALERT_TYPE} : Bitbucket Pipe Notification for branch : ${BITBUCKET_BRANCH}"
+                BODY_HTML: "mail_template.html"
 
             - ALERT_TYPE="success"
             - if [[ $BITBUCKET_EXIT_CODE -ne 0 ]]; then ALERT_TYPE="error" ; fi
             - pipe: atlassian/slack-notify:2.0.0
               variables:
                 WEBHOOK_URL: $SLACK_WEB_HOOK_URL
-                MESSAGE: "[${BITBUCKET_REPO_FULL_NAME}] build has exited with status ${ALERT_TYPE}! Deployed to Production"
+                MESSAGE: '"[${BITBUCKET_REPO_FULL_NAME}] build has exited with status ${ALERT_TYPE}! Deployed to Production"'

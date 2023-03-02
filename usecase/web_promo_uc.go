@@ -80,13 +80,15 @@ func (uc WebPromoUC) Add(c context.Context, data *requests.WebPromoRequest, imgB
 	// strNow := now.Format(time.RFC3339)
 	res = models.WebPromo{
 
-		Code:             &data.Code,
-		PromoName:        &data.PromoName,
-		PromoDescription: &data.PromoDescription,
-		PromoUrlBanner:   &strImgBanner,
-		StartDate:        &data.StartDate,
-		EndDate:          &data.EndDate,
-		ShowInApp:        &data.ShowInApp,
+		Code:               &data.Code,
+		PromoName:          &data.PromoName,
+		PromoDescription:   &data.PromoDescription,
+		PromoUrlBanner:     &strImgBanner,
+		StartDate:          &data.StartDate,
+		EndDate:            &data.EndDate,
+		ShowInApp:          &data.ShowInApp,
+		CustomerTypeIdList: &data.CustomerTypeIdList,
+		RegionAreaIdList:   &data.RegionIDList,
 	}
 	res.ID, err = repo.Add(c, &res)
 	if err != nil {
@@ -108,4 +110,17 @@ func (uc WebPromoUC) Delete(c context.Context, id string) (res viewmodel.CommonD
 
 	return res, err
 
+}
+
+// FindByID ...
+func (uc WebPromoUC) FindByID(c context.Context, parameter models.WebPromoParameter) (res models.WebPromo, err error) {
+	repo := repository.NewWebPromoRepository(uc.DB)
+	res, err = repo.FindByID(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+	uc.BuildBody(&res)
+
+	return res, err
 }

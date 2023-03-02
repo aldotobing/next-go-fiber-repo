@@ -130,6 +130,10 @@ func (boot Bootstrap) RegisterRouters() {
 	CustomerRoutes := routers.CustomerRoutes{RouterGroup: apiV1, Handler: handler}
 	CustomerRoutes.RegisterRoute()
 
+	//Customer Level routes
+	CustomerLevelRoutes := routers.CustomerLevelRoutes{RouterGroup: apiV1, Handler: handler}
+	CustomerLevelRoutes.RegisterRoute()
+
 	ShoppingCartRoutes := routers.ShoppingCartRoutes{RouterGroup: apiV1, Handler: handler}
 	ShoppingCartRoutes.RegisterRoute()
 
@@ -242,4 +246,31 @@ func (boot Bootstrap) RegisterRouters() {
 
 	WebUserRoutes := routers.WebUserRoutes{RouterGroup: apiV1, Handler: handler}
 	WebUserRoutes.RegisterRoute()
+
+	UserNotificationDetailRoutes := routers.UserNotificationDetailRoutes{RouterGroup: apiV1, Handler: handler}
+	UserNotificationDetailRoutes.RegisterRoute()
+
+	WebCustomerRoutes := routers.WebCustomerRoutes{RouterGroup: apiV1, Handler: handler}
+	WebCustomerRoutes.RegisterRoute()
+
+	WebPartnerRoutes := routers.WebPartnerRoutes{RouterGroup: apiV1, Handler: handler}
+	WebPartnerRoutes.RegisterRoute()
+
+	WebDoctorRoutes := routers.WebDoctorRoutes{RouterGroup: apiV1, Handler: handler}
+	WebDoctorRoutes.RegisterRoute()
+
+	TransactionVaRoutes := routers.TransactionVARoutes{RouterGroup: apiV1, Handler: handler}
+	TransactionVaRoutes.RegisterRoute()
+
+	WebSalesmanRoutes := routers.WebSalesmanRoutes{RouterGroup: apiV1, Handler: handler}
+	WebSalesmanRoutes.RegisterRoute()
+
+	TicketDokterRoutes := routers.TicketDokterRoutes{RouterGroup: apiV1, Handler: handler}
+	TicketDokterRoutes.RegisterRoute()
+
+	UserCheckinActivityRoute := routers.UserCheckinActivityRoutes{RouterGroup: apiV1, Handler: handler}
+	UserCheckinActivityRoute.RegisterRoute()
+
+	WebRegionAreaRoute := routers.WebRegionAreaRoutes{RouterGroup: apiV1, Handler: handler}
+	WebRegionAreaRoute.RegisterRoute()
 }

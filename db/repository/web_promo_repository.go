@@ -15,6 +15,7 @@ type IWebPromo interface {
 	FindAll(ctx context.Context, parameter models.WebPromoParameter) ([]models.WebPromo, int, error)
 	Add(c context.Context, parameter *models.WebPromo) (*string, error)
 	Delete(c context.Context, id string) (string, error)
+	FindByID(c context.Context, parameter models.WebPromoParameter) (models.WebPromo, error)
 	// 	Edit(c context.Context, model *models.WebPromo) (*string, error)
 	// 	EditAddress(c context.Context, model *models.WebPromo) (*string, error)
 }
@@ -140,10 +141,10 @@ func (repository WebPromo) FindAll(ctx context.Context, parameter models.WebProm
 
 // FindByID ...
 func (repository WebPromo) FindByID(c context.Context, parameter models.WebPromoParameter) (data models.WebPromo, err error) {
-	statement := models.WebPromoSelectStatement + ` WHERE pc.id = $1`
+	statement := models.WebPromoSelectStatement + ` WHERE PC.ID = $1 `
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
 
-	fmt.Println(statement)
+	fmt.Println("Promo find by ID : " + statement)
 
 	data, err = repository.scanRow(row)
 	if err != nil {
@@ -179,11 +180,18 @@ func (repository WebPromo) FindByID(c context.Context, parameter models.WebPromo
 // }
 
 func (repository WebPromo) Add(c context.Context, model *models.WebPromo) (res *string, err error) {
+
+	transaction, err := repository.DB.BeginTx(c, nil)
+	if err != nil {
+		return res, err
+	}
+	defer transaction.Rollback()
+
 	statement := `INSERT INTO promo (code, _name, description, url_banner,
-		start_date, end_date, active,show_in_app)
+		start_date, end_date, active, show_in_app)
 	VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`
 
-	err = repository.DB.QueryRowContext(c, statement, model.Code, model.PromoName, model.PromoDescription, model.PromoUrlBanner,
+	err = transaction.QueryRowContext(c, statement, model.Code, model.PromoName, model.PromoDescription, model.PromoUrlBanner,
 		model.StartDate, model.EndDate, 1, model.ShowInApp).Scan(&res)
 
 	fmt.Println("PROMO INSERT : " + statement)
@@ -192,6 +200,41 @@ func (repository WebPromo) Add(c context.Context, model *models.WebPromo) (res *
 		fmt.Println("INSERT PROMO BERHASIL! :)")
 		return res, err
 	}
+
+	PromoId := &res
+
+	parts := strings.Split(*model.CustomerTypeIdList, ",")
+	if len(parts) >= 1 && parts[0] != "" {
+		for pi, _ := range parts {
+			linestatement := `INSERT INTO customer_type_eligible_promo 
+			(customer_type_id, promo_id, created_date, modified_date)
+					VALUES ($1, $2, now(), now()) RETURNING id`
+			var resLine string
+			err = transaction.QueryRowContext(c, linestatement, parts[pi], PromoId).Scan(&resLine)
+			if err != nil {
+				return res, err
+			}
+		}
+	}
+
+	regionparts := strings.Split(*model.RegionAreaIdList, ",")
+	if len(regionparts) >= 1 && regionparts[0] != "" {
+		for pi, _ := range regionparts {
+			linestatement := `INSERT INTO region_area_eligible_promo 
+			(region_id, promo_id, created_date, modified_date)
+					VALUES ($1, $2, now(), now()) RETURNING id`
+			var resregionIDLine string
+			err = transaction.QueryRowContext(c, linestatement, regionparts[pi], PromoId).Scan(&resregionIDLine)
+			if err != nil {
+				return res, err
+			}
+		}
+	}
+
+	if err = transaction.Commit(); err != nil {
+		return res, err
+	}
+
 	return res, err
 }
 

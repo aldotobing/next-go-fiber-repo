@@ -113,3 +113,40 @@ func (h *WebPromoHandler) Delete(ctx *fiber.Ctx) error {
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
+
+// FindByID ...
+func (h *WebPromoHandler) FindByID(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.WebPromoParameter{
+		ID: ctx.Params("id"),
+	}
+	if parameter.ID == "" {
+		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
+	}
+
+	uc := usecase.WebPromoUC{ContractUC: h.ContractUC}
+	res, err := uc.FindByID(c, parameter)
+
+	ucEligible := usecase.WebCustomerTypeEligiblePromoUC{ContractUC: h.ContractUC}
+	resEligible, errEligible := ucEligible.SelectAll(c, models.WebCustomerTypeEligiblePromoParameter{
+		PromoID: *res.ID,
+		By:      "pr._name",
+	})
+
+	if errEligible == nil {
+		res.CustomerTypeList = &resEligible
+	}
+
+	ucRegionEligible := usecase.WebRegionAreaEligiblePromoUC{ContractUC: h.ContractUC}
+	resRegionEligible, errRegionEligible := ucRegionEligible.SelectAll(c, models.WebRegionAreaEligiblePromoParameter{
+		PromoID: *res.ID,
+		By:      "pr._name",
+	})
+
+	if errRegionEligible == nil {
+		res.RegionAreaList = &resRegionEligible
+	}
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}

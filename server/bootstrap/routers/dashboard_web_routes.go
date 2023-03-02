@@ -25,4 +25,5 @@ func (route DashboardWebRoutes) RegisterRoute() {
 	// r.Use(jwtMiddleware.VerifyUser)
 	r.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
 	r.Get("/", handler.GetData)
+	r.Get("/branch", handler.GetBranchCustomerData)
 }

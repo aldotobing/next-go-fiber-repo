@@ -80,12 +80,13 @@ func (uc PromoContentUC) Add(c context.Context, data *requests.PromoContentReque
 	// strNow := now.Format(time.RFC3339)
 	res = models.PromoContent{
 
-		Code:             &data.Code,
-		PromoName:        &data.PromoName,
-		PromoDescription: &data.PromoDescription,
-		PromoUrlBanner:   &strImgBanner,
-		StartDate:        &data.StartDate,
-		EndDate:          &data.EndDate,
+		Code:               &data.Code,
+		PromoName:          &data.PromoName,
+		PromoDescription:   &data.PromoDescription,
+		PromoUrlBanner:     &strImgBanner,
+		StartDate:          &data.StartDate,
+		EndDate:            &data.EndDate,
+		CustomerTypeIdList: &data.CustomerTypeIdList,
 	}
 	res.ID, err = repo.Add(c, &res)
 	if err != nil {
