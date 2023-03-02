@@ -89,3 +89,33 @@ func (uc PromoLineUC) Add(c context.Context, data *requests.PromoLineRequest) (r
 
 	return res, err
 }
+
+func (uc PromoLineUC) Edit(c context.Context, id string, data *requests.PromoLineRequest) (res models.PromoLine, err error) {
+	repo := repository.NewPromoLineRepository(uc.DB)
+	// now := time.Now().UTC()
+	// strnow := now.Format(time.RFC3339)
+	res = models.PromoLine{
+		ID:              &id,
+		GlobalMaxQty:    &data.GlobalMaxQty,
+		CustomerMaxQty:  &data.CustomerMaxQty,
+		DiscPercent:     &data.DiscPercent,
+		DiscAmount:      &data.DiscAmount,
+		MinimumValue:    &data.MinimumValue,
+		MaximumValue:    &data.MaximumValue,
+		Multiply:        &data.Multiply,
+		Description:     &data.Description,
+		MinimumQty:      &data.MinimumQty,
+		MaximumQty:      &data.MaximumQty,
+		MinimumQtyUomID: &data.MinimumQtyUomID,
+		PromoType:       &data.PromoType,
+		Strata:          &data.Strata,
+	}
+
+	res.ID, err = repo.Edit(c, &res)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	return res, err
+}
