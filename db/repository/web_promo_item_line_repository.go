@@ -17,7 +17,7 @@ type IWebPromoItemLineRepository interface {
 	FindByID(c context.Context, parameter models.WebPromoItemLineParameter) (models.WebPromoItemLine, error)
 	Add(c context.Context, model *models.WebPromoItemLineBreakDown) (*string, error)
 	// Edit(c context.Context, model *models.WebPromoItemLine) (*string, error)
-	// Delete(c context.Context, id string, now time.Time) (string, error)
+	Delete(c context.Context, id string) (string, error)
 }
 
 // WebPromoItemLineRepository ...
@@ -197,6 +197,18 @@ func (repository WebPromoItemLineRepository) Add(c context.Context, model *model
 		str.NullString(model.ItemID),
 		str.NullString(model.UomID),
 		str.NullString(model.Qty)).Scan(&res)
+
+	if err != nil {
+		return res, err
+	}
+	return res, err
+}
+
+// Delete ...
+func (repository WebPromoItemLineRepository) Delete(c context.Context, id string) (res string, err error) {
+	statement := `DELETE from promo_item_line where id = $1 RETURNING id `
+
+	err = repository.DB.QueryRowContext(c, statement, id).Scan(&res)
 
 	if err != nil {
 		return res, err
