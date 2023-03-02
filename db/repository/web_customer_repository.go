@@ -40,6 +40,7 @@ func (repository WebCustomerRepository) scanRows(rows *sql.Rows) (res models.Web
 		&res.CustomerEmail,
 		&res.CustomerBirthDate,
 		&res.CustomerReligion,
+		&res.CustomerGender,
 		&res.CustomerActiveStatus,
 		&res.CustomerLatitude,
 		&res.CustomerLongitude,
@@ -100,6 +101,7 @@ func (repository WebCustomerRepository) scanRow(row *sql.Row) (res models.WebCus
 		&res.CustomerEmail,
 		&res.CustomerBirthDate,
 		&res.CustomerReligion,
+		&res.CustomerGender,
 		&res.CustomerActiveStatus,
 		&res.CustomerLatitude,
 		&res.CustomerLongitude,
@@ -197,7 +199,7 @@ func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter m
 
 	query := models.WebCustomerSelectStatement + ` ` + models.WebCustomerWhereStatement + ` ` + conditionString + `
 		AND (LOWER(c."customer_name") LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
-	// fmt.Println(query)
+
 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
 	if err != nil {
 		return data, count, err
@@ -240,18 +242,33 @@ func (repository WebCustomerRepository) FindByID(c context.Context, parameter mo
 // Edit ...
 func (repository WebCustomerRepository) Edit(c context.Context, model *models.WebCustomer) (res *string, err error) {
 	statement := `UPDATE customer SET 
-	customer_name = $1, 
-	customer_address = $2, 
-	user_id = $3,
-	customer_phone = $4 
-	WHERE id = $5 
+		customer_name = $1, 
+		customer_address = $2, 
+		user_id = $3,
+		customer_phone = $4,
+		customer_religion = $5,
+		customer_nik = $6,
+		customer_level_id = $7,
+		customer_gender = $8,
+		customer_code = $9,
+		customer_email = $10,
+		customer_birthdate = $11
+	WHERE id = $12
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		model.CustomerName,
 		model.CustomerAddress,
 		model.CustomerUserID,
 		model.CustomerPhone,
+		model.CustomerReligion,
+		model.CustomerNik,
+		model.CustomerLevelID,
+		model.CustomerGender,
+		model.Code,
+		model.CustomerEmail,
+		model.CustomerBirthDate,
 		model.ID).Scan(&res)
+
 	if err != nil {
 		return res, err
 	}
@@ -260,16 +277,29 @@ func (repository WebCustomerRepository) Edit(c context.Context, model *models.We
 
 // Add ...
 func (repository WebCustomerRepository) Add(c context.Context, model *models.WebCustomer) (res *string, err error) {
-	statement := `INSERT INTO customer (customer_name,customer_address, customer_phone, customer_email,
-		customer_cp_name, customer_profile_picture, created_date, modified_date,tax_calc_method, branch_id,customer_code,device_id,
-		salesman_id,user_id)
-	VALUES ($1, $2, $3, $4, $5, $6, now(), now(), $7, $8, $9, 99, $10, $11) RETURNING id`
+	statement := `INSERT INTO customer (
+			customer_name, customer_address, customer_phone, customer_email,
+			customer_cp_name, customer_profile_picture, created_date, modified_date, 
+			tax_calc_method, branch_id, customer_code, device_id, 
+			salesman_id, user_id, customer_religion, customer_nik,
+			customer_level_id, customer_gender, customer_birthdate
+		)
+	VALUES (
+			$1, $2, $3, $4,
+			$5, $6, now(), now(),
+			$7, $8, $9, 99, 
+			$10, $11, $12, $13,
+			$14, $15, $16
+		) RETURNING id`
 
 	fmt.Println(statement)
 
-	err = repository.DB.QueryRowContext(c, statement, model.CustomerName, model.CustomerAddress,
-		model.CustomerPhone, model.CustomerEmail, model.CustomerCpName, model.CustomerProfilePicture,
-		model.CustomerTaxCalcMethod, model.CustomerBranchID, model.Code, model.CustomerSalesmanID, model.CustomerUserID,
+	err = repository.DB.QueryRowContext(c, statement,
+		model.CustomerName, model.CustomerAddress, model.CustomerPhone, model.CustomerEmail,
+		model.CustomerCpName, model.CustomerProfilePicture,
+		model.CustomerTaxCalcMethod, model.CustomerBranchID, model.Code,
+		model.CustomerSalesmanID, model.CustomerUserID, model.CustomerReligion, model.CustomerNik,
+		model.CustomerLevelID, model.CustomerGender, model.CustomerBirthDate,
 	).Scan(&res)
 
 	if err != nil {

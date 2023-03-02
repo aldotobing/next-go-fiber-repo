@@ -49,9 +49,11 @@ type WebCustomer struct {
 	CustomerSalesmanID       *string `json:"customer_salesman_id"`
 	CustomerNik              *string `json:"customer_nik"`
 	CustomerPhotoKtp         *string `json:"customer_photo_ktp"`
+	CustomerLevelID          *int    `json:"customer_level_id"`
 	CustomerLevel            *string `json:"customer_level_name"`
 	CustomerUserID           *string `json:"customer_user_id"`
 	CustomerUserName         *string `json:"customer_user_name"`
+	CustomerGender           *string `json:"customer_gender"`
 }
 
 // CustomerParameter ...
@@ -77,6 +79,9 @@ var (
 		"c.customer_name",
 	}
 
+	//CustomerGenderList ...
+	CustomerGenderList = []string{"male", "female"}
+
 	// CustomerSelectStatement ...
 
 	WebCustomerSelectStatement = `
@@ -90,6 +95,7 @@ var (
 		C.CUSTOMER_EMAIL AS CUST_EMAIL,
 		C.CUSTOMER_BIRTHDATE AS BIRTHDATE,
 		C.CUSTOMER_RELIGION AS RELIGION,
+		C.CUSTOMER_GENDER AS GENDER,
 		CASE C.ACTIVE
 				WHEN 1 THEN 'Active'
 				WHEN 0 THEN 'Inactive'

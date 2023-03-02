@@ -4,6 +4,7 @@ import (
 	"context"
 	"mime/multipart"
 	"strings"
+	"time"
 
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -108,6 +109,10 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 	repo := repository.NewWebCustomerRepository(uc.DB)
 	// now := time.Now().UTC()
 	// strnow := now.Format(time.RFC3339)
+
+	birthDate, _ := time.Parse("2006-01-02", data.CustomerBirthDate)
+	data.CustomerBirthDate = birthDate.Format("2006-01-02")
+
 	res = models.WebCustomer{
 		ID:                     &id,
 		Code:                   &data.Code,
@@ -123,6 +128,10 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 		CustomerBranchID:       &data.CustomerBranchID,
 		CustomerNik:            &data.CustomerNik,
 		CustomerUserID:         &data.CustomerUserID,
+		CustomerReligion:       &data.CustomerReligion,
+		CustomerLevelID:        &data.CustomerLevelID,
+		CustomerGender:         &data.CustomerGender,
+		CustomerBirthDate:      &data.CustomerBirthDate,
 	}
 
 	res.ID, err = repo.Edit(c, &res)
@@ -143,7 +152,6 @@ func (uc WebCustomerUC) Add(c context.Context, data *requests.WebCustomerRequest
 	var strImgprofile = ""
 
 	if imgProfile != nil {
-
 		awsUc.AWSS3.Directory = "image/customer"
 		imgBannerFile, err := awsUc.Upload("image/customer", imgProfile)
 		if err != nil {
@@ -151,8 +159,11 @@ func (uc WebCustomerUC) Add(c context.Context, data *requests.WebCustomerRequest
 			return res, err
 		}
 		strImgprofile = imgBannerFile.FilePath
-
 	}
+
+	birthDate, _ := time.Parse("2006-01-02", data.CustomerBirthDate)
+	data.CustomerBirthDate = birthDate.Format("2006-01-02")
+
 	repo := repository.NewWebCustomerRepository(uc.DB)
 	// now := time.Now().UTC()
 	// strnow := now.Format(time.RFC3339)
@@ -169,6 +180,10 @@ func (uc WebCustomerUC) Add(c context.Context, data *requests.WebCustomerRequest
 		CustomerSalesmanID:     &data.CustomerSalesmanID,
 		CustomerBranchID:       &data.CustomerBranchID,
 		CustomerUserID:         &data.CustomerUserID,
+		CustomerReligion:       &data.CustomerReligion,
+		CustomerLevelID:        &data.CustomerLevelID,
+		CustomerGender:         &data.CustomerGender,
+		CustomerBirthDate:      &data.CustomerBirthDate,
 	}
 
 	res.ID, err = repo.Add(c, &res)
