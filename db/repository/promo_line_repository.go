@@ -191,19 +191,19 @@ func (repository PromoLine) Edit(c context.Context, model *models.PromoLine) (re
 	WHERE id = $14
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
-		model.GlobalMaxQty,
-		model.CustomerMaxQty,
-		model.DiscPercent,
-		model.DiscAmount,
-		model.MinimumValue,
-		model.MaximumValue,
-		model.Multiply,
-		model.Description,
-		model.MinimumQty,
-		model.MaximumQty,
-		model.MinimumQtyUomID,
-		model.PromoType,
-		model.Strata,
+		str.NullOrEmtyString(model.GlobalMaxQty),
+		str.NullOrEmtyString(model.CustomerMaxQty),
+		str.NullOrEmtyString(model.DiscPercent),
+		str.NullOrEmtyString(model.DiscAmount),
+		str.NullOrEmtyString(model.MinimumValue),
+		str.NullOrEmtyString(model.MaximumValue),
+		str.NullOrEmtyString(model.Multiply),
+		str.NullOrEmtyString(model.Description),
+		str.NullOrEmtyString(model.MinimumQty),
+		str.NullOrEmtyString(model.MaximumQty),
+		str.NullOrEmtyString(model.MinimumQtyUomID),
+		str.NullOrEmtyString(model.PromoType),
+		str.NullOrEmtyString(model.Strata),
 		model.ID).Scan(&res)
 
 	if err != nil {
