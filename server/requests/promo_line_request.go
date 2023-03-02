@@ -2,6 +2,7 @@ package requests
 
 // PromoLineRequest ...
 type PromoLineRequest struct {
+	ID              string `json:"id"`
 	PromoID         string `json:"promo_id"`
 	GlobalMaxQty    string `json:"global_max_qty"`
 	CustomerMaxQty  string `json:"customer_max_qty"`

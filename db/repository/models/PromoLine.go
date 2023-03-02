@@ -3,7 +3,7 @@ package models
 // Promo Line ...
 type PromoLine struct {
 	ID              *string `json:"id"`
-	PromoID         *string `json:"promo_id"` //dari table promo_content
+	PromoID         *string `json:"promo_id"`
 	GlobalMaxQty    *string `json:"global_max_qty"`
 	CustomerMaxQty  *string `json:"customer_max_qty"`
 	DiscPercent     *string `json:"disc_percent"`
@@ -20,7 +20,8 @@ type PromoLine struct {
 }
 
 type PromoLineBreakdown struct {
-	PromoID         *string `json:"promo_id"` //dari table promo_content
+	ID              *string `json:"id"`
+	PromoID         *string `json:"promo_id"`
 	GlobalMaxQty    *string `json:"global_max_qty"`
 	CustomerMaxQty  *string `json:"customer_max_qty"`
 	DiscPercent     *string `json:"disc_percent"`
@@ -37,7 +38,7 @@ type PromoLineBreakdown struct {
 // PromoLineParameter ...
 type PromoLineParameter struct {
 	ID              string `json:"id"`
-	PromoID         string `json:"promo_id"` //dari table promo_content
+	PromoID         string `json:"promo_id"`
 	GlobalMaxQty    string `json:"global_max_qty"`
 	CustomerMaxQty  string `json:"customer_max_qty"`
 	DiscPercent     string `json:"disc_percent"`
