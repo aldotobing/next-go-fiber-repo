@@ -24,8 +24,10 @@ type ShoppingCart struct {
 
 // ShoppingCartTotalPrice ...
 type ShoppingCheckouAble struct {
-	IsAble   *string `json:"is_able"`
-	MinOmzet *string `json:"min_omzet"`
+	IsAble     *string `json:"is_able"`
+	MinOmzet   *string `json:"min_omzet"`
+	IsMinOrder *string `json:"is_min_order"`
+	MinOrder   *string `json:"min_order"`
 }
 
 type GroupedShoppingCart struct {

@@ -2,11 +2,13 @@ package usecase
 
 import (
 	"context"
+	"time"
 
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/pkg/functioncaller"
 	"nextbasis-service-v-0.1/pkg/logruslogger"
+	"nextbasis-service-v-0.1/server/requests"
 	"nextbasis-service-v-0.1/usecase/viewmodel"
 )
 
@@ -93,6 +95,28 @@ func (uc SalesInvoiceUC) FindByCustomerId(c context.Context, parameter models.Sa
 		return res, err
 	}
 	uc.BuildBody(&res)
+
+	return res, err
+}
+
+// Edit ...
+func (uc SalesInvoiceUC) Edit(c context.Context, id string, input *requests.SalesInvoiceRequest) (res models.SalesInvoice, err error) {
+
+	now := time.Now().UTC()
+	strnow := now.Format(time.RFC3339)
+
+	res = models.SalesInvoice{
+		ID:            &id,
+		ModifiedDate:  &strnow,
+		TotalPaid:     &input.TotalPaid,
+		PaymentMethod: &input.PaymentMethod,
+	}
+	repo := repository.NewSalesInvoiceRepository(uc.DB)
+	_, err = repo.Edit(c, &res)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
 
 	return res, err
 }
