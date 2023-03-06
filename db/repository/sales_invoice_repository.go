@@ -17,7 +17,7 @@ type ISalesInvoiceRepository interface {
 	FindByDocumentNo(c context.Context, parameter models.SalesInvoiceParameter) (models.SalesInvoice, error)
 	FindByCustomerId(c context.Context, parameter models.SalesInvoiceParameter) (models.SalesInvoice, error)
 	// Add(c context.Context, model *models.SalesInvoice) (*string, error)
-	// Edit(c context.Context, model *models.SalesInvoice) (*string, error)
+	Edit(c context.Context, model *models.SalesInvoice) (*string, error)
 	// Delete(c context.Context, id string, now time.Time) (string, error)
 }
 
@@ -35,25 +35,20 @@ func NewSalesInvoiceRepository(DB *sql.DB) ISalesInvoiceRepository {
 func (repository SalesInvoiceRepository) scanRows(rows *sql.Rows) (res models.SalesInvoice, err error) {
 	err = rows.Scan(
 		&res.ID, &res.CustomerName, &res.NoInvoice, &res.NoOrder, &res.TrasactionDate, &res.ModifiedDate, &res.JatuhTempo, &res.Status, &res.NetAmount, &res.OutStandingAmount, &res.InvoiceLine,
+		&res.TotalPaid, &res.PaymentMethod,
 	)
-	if err != nil {
 
-		return res, err
-	}
-
-	return res, nil
+	return
 }
 
 // Scan row
 func (repository SalesInvoiceRepository) scanRow(row *sql.Row) (res models.SalesInvoice, err error) {
 	err = row.Scan(
 		&res.ID, &res.CustomerName, &res.NoInvoice, &res.NoOrder, &res.TrasactionDate, &res.ModifiedDate, &res.JatuhTempo, &res.Status, &res.NetAmount, &res.OutStandingAmount, &res.InvoiceLine,
+		&res.TotalPaid, &res.PaymentMethod,
 	)
-	if err != nil {
-		return res, err
-	}
 
-	return res, nil
+	return
 }
 
 // SelectAll ...
@@ -72,8 +67,7 @@ func (repository SalesInvoiceRepository) SelectAll(c context.Context, parameter 
 
 	statement := models.SalesInvoiceSelectStatement + ` ` + models.SalesInvoiceWhereStatement +
 		` AND (LOWER(def."document_no") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
-	fmt.Println(statement)
-	fmt.Println(parameter.StartDate)
+
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.NoInvoice)+"%")
 
 	if err != nil {
@@ -171,4 +165,22 @@ func (repository SalesInvoiceRepository) FindByCustomerId(c context.Context, par
 	}
 
 	return data, nil
+}
+
+// Edit ...
+func (repository SalesInvoiceRepository) Edit(c context.Context, in *models.SalesInvoice) (out *string, err error) {
+	statement := `UPDATE SALES_INVOICE_HEADER SET 
+		modified_date = $1, 
+		total_paid = $2,
+		payment_method = $3
+	WHERE id = $4 RETURNING id`
+
+	err = repository.DB.QueryRowContext(c, statement,
+		in.ModifiedDate,
+		in.TotalPaid,
+		in.PaymentMethod,
+		in.ID,
+	).Scan(&out)
+
+	return
 }

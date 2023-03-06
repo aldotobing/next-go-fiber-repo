@@ -4,10 +4,12 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/helper"
 	"nextbasis-service-v-0.1/pkg/str"
+	"nextbasis-service-v-0.1/server/requests"
 	"nextbasis-service-v-0.1/usecase"
 )
 
@@ -133,6 +135,30 @@ func (h *SalesInvoiceHandler) FindByCustomerId(ctx *fiber.Ctx) error {
 
 	uc := usecase.SalesInvoiceUC{ContractUC: h.ContractUC}
 	res, err := uc.FindByCustomerId(c, parameter)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+// Edit ...
+func (h *SalesInvoiceHandler) Edit(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	id := ctx.Params("id")
+	if id == "" {
+		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
+	}
+
+	input := new(requests.SalesInvoiceRequest)
+	if err := ctx.BodyParser(input); err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+	if err := h.Validator.Struct(input); err != nil {
+		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
+		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+	}
+
+	uc := usecase.SalesInvoiceUC{ContractUC: h.ContractUC}
+	res, err := uc.Edit(c, id, input)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
