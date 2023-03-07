@@ -29,4 +29,5 @@ func (route SalesInvoiceRoutes) RegisterRoute() {
 	r.Get("/id/:id", handler.FindByID)
 	r.Get("/document_no/:document_no", handler.FindByDocumentNo)
 	r.Get("/customer_id/:cust_bill_to_id", handler.FindByCustomerId)
+	r.Put("/id/:id", handler.Edit)
 }
