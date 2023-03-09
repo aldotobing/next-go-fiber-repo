@@ -103,6 +103,9 @@ func (h *WebPromoItemLineHandler) Add(ctx *fiber.Ctx) error {
 
 	uc := usecase.WebPromoItemLineUC{ContractUC: h.ContractUC}
 	res, err := uc.Add(c, input)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err.Error(), http.StatusBadRequest)
+	}
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
@@ -118,6 +121,9 @@ func (h *WebPromoItemLineHandler) Delete(ctx *fiber.Ctx) error {
 
 	uc := usecase.WebPromoItemLineUC{ContractUC: h.ContractUC}
 	res, err := uc.Delete(c, id)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err.Error(), http.StatusBadRequest)
+	}
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }

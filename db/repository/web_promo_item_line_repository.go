@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
-	"nextbasis-service-v-0.1/pkg/str"
 )
 
 // IWebPromoItemLineRepository ...
@@ -15,7 +14,7 @@ type IWebPromoItemLineRepository interface {
 	SelectAll(c context.Context, parameter models.WebPromoItemLineParameter) ([]models.WebPromoItemLine, error)
 	FindAll(ctx context.Context, parameter models.WebPromoItemLineParameter) ([]models.WebPromoItemLine, int, error)
 	FindByID(c context.Context, parameter models.WebPromoItemLineParameter) (models.WebPromoItemLine, error)
-	Add(c context.Context, model *models.WebPromoItemLineBreakDown) (*string, error)
+	Add(c context.Context, in []models.WebPromoItemLineBreakDown) ([]models.WebPromoItemLine, error)
 	// Edit(c context.Context, model *models.WebPromoItemLine) (*string, error)
 	Delete(c context.Context, id string) (string, error)
 }
@@ -28,6 +27,15 @@ type WebPromoItemLineRepository struct {
 // NewWebPromoItemLineRepository ...
 func NewWebPromoItemLineRepository(DB *sql.DB) IWebPromoItemLineRepository {
 	return &WebPromoItemLineRepository{DB: DB}
+}
+
+// Scan rows
+func (repository WebPromoItemLineRepository) scanRowsIDs(rows *sql.Rows) (res models.WebPromoItemLine, err error) {
+	err = rows.Scan(
+		&res.ID,
+	)
+
+	return
 }
 
 // Scan rows
@@ -139,11 +147,11 @@ func (repository WebPromoItemLineRepository) FindAll(ctx context.Context, parame
 	query := models.WebPromoItemLineSelectStatement + ` ` + models.WebPromoItemLineWhereStatement + ` ` +
 		`AND (LOWER(i."_name") LIKE $1)` + conditionString + ` ` + `ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
+
+	fmt.Println(query)
 	if err != nil {
 		return data, count, err
 	}
-
-	fmt.Println(query)
 
 	defer rows.Close()
 	for rows.Next() {
@@ -185,23 +193,37 @@ func (repository WebPromoItemLineRepository) FindByID(c context.Context, paramet
 	return data, nil
 }
 
-func (repository WebPromoItemLineRepository) Add(c context.Context, model *models.WebPromoItemLineBreakDown) (res *string, err error) {
-	statement := `INSERT INTO promo_item_line (
-		promo_line_id, 
-		item_id, 
-		uom_id, 
-		qty) VALUES ($1, $2, $3, $4) RETURNING id`
-
-	err = repository.DB.QueryRowContext(c, statement,
-		model.PromoLineID,
-		str.NullString(model.ItemID),
-		str.NullString(model.UomID),
-		str.NullString(model.Qty)).Scan(&res)
-
-	if err != nil {
-		return res, err
+func (repository WebPromoItemLineRepository) Add(c context.Context, in []models.WebPromoItemLineBreakDown) (res []models.WebPromoItemLine, err error) {
+	var values string
+	for i := range in {
+		if values == "" {
+			values += `(` + *in[i].PromoLineID + `,` + *in[i].ItemID + `,` + *in[i].UomID + `,` + *in[i].Qty + `)`
+		} else {
+			values += `,(` + *in[i].PromoLineID + `,` + *in[i].ItemID + `,` + *in[i].UomID + `,` + *in[i].Qty + `)`
+		}
 	}
-	return res, err
+	statement := `INSERT INTO promo_item_line (
+		promo_line_id,
+		item_id,
+		uom_id,
+		qty) VALUES ` + values + `RETURNING id`
+
+	rows, err := repository.DB.Query(statement)
+	if err != nil {
+		return
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		temp, err := repository.scanRowsIDs(rows)
+		if err != nil {
+			return res, err
+		}
+		res = append(res, temp)
+	}
+	err = rows.Err()
+
+	return
 }
 
 // Delete ...
