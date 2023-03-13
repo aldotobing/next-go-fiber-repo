@@ -136,7 +136,7 @@ var (
 		concat('` + CustomerImagePath + `',C.customer_photo_ktp) AS CUST_KTP_PICTURE,
 		c.customer_nik,
 		cl._name as cus_level_name,
-		c.customer_level_id
+		c.customer_level_id,
 		usr.id as user_id,
 		usr.login as user_name
 
