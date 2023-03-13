@@ -78,6 +78,7 @@ func (repository WebCustomerRepository) scanRows(rows *sql.Rows) (res models.Web
 		&res.CustomerPhotoKtp,
 		&res.CustomerNik,
 		&res.CustomerLevel,
+		&res.CustomerLevelID,
 		&res.CustomerUserID,
 		&res.CustomerUserName,
 	)
@@ -139,6 +140,7 @@ func (repository WebCustomerRepository) scanRow(row *sql.Row) (res models.WebCus
 		&res.CustomerPhotoKtp,
 		&res.CustomerNik,
 		&res.CustomerLevel,
+		&res.CustomerLevelID,
 		&res.CustomerUserID,
 		&res.CustomerUserName,
 	)

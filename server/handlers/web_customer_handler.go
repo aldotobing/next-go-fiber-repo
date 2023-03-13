@@ -157,7 +157,7 @@ func (h *WebCustomerHandler) Edit(ctx *fiber.Ctx) error {
 	}
 
 	input := new(requests.WebCustomerRequest)
-	err := json.Unmarshal([]byte(ctx.FormValue("form_data")), input)
+	err := json.Unmarshal([]byte(ctx.FormValue("form_data")), &input)
 	if err := ctx.BodyParser(input); err != nil {
 		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
 	}
