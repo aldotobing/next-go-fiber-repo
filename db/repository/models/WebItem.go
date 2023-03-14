@@ -13,6 +13,18 @@ type WebItem struct {
 	ItemDescription  *string `json:"item_description"`
 }
 
+// WebItemSelectByCategory ...
+type WebItemSelectByCategory struct {
+	ID               *string `json:"item_id"`
+	Code             *string `json:"item_code"`
+	Name             *string `json:"item_name"`
+	ItemPicture      *string `json:"item_picture"`
+	ItemCategoryId   *string `json:"item_category_id"`
+	ItemCategoryName *string `json:"item_category_name"`
+	ItemDescription  *string `json:"item_description"`
+	UOMDetail        *string `json:"oum_detail"`
+}
+
 // WebItemParameter ...
 type WebItemParameter struct {
 	ID             string `json:"item_id"`
