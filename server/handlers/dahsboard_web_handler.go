@@ -45,12 +45,14 @@ func (h *DashboardWebHandler) GetBranchCustomerData(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.DashboardWebBranchParameter{
-		Search:   ctx.Query("search"),
-		Page:     str.StringToInt(ctx.Query("page")),
-		Limit:    str.StringToInt(ctx.Query("limit")),
-		By:       ctx.Query("by"),
-		Sort:     ctx.Query("sort"),
-		BarnchID: ctx.Query("branch_id"),
+		Search:    ctx.Query("search"),
+		Page:      str.StringToInt(ctx.Query("page")),
+		Limit:     str.StringToInt(ctx.Query("limit")),
+		By:        ctx.Query("by"),
+		Sort:      ctx.Query("sort"),
+		BarnchID:  ctx.Query("branch_id"),
+		StartDate: ctx.Query("start_date"),
+		EndDate:   ctx.Query("end_date"),
 	}
 
 	uc := usecase.DashboardWebUC{ContractUC: h.ContractUC}

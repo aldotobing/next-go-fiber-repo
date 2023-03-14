@@ -61,13 +61,15 @@ type DashboardWebRegionParameter struct {
 }
 
 type DashboardWebBranchParameter struct {
-	BarnchID string `json:"branch_id"`
-	Search   string `json:"search"`
-	Page     int    `json:"page"`
-	Offset   int    `json:"offset"`
-	Limit    int    `json:"limit"`
-	By       string `json:"by"`
-	Sort     string `json:"sort"`
+	BarnchID  string `json:"branch_id"`
+	Search    string `json:"search"`
+	Page      int    `json:"page"`
+	Offset    int    `json:"offset"`
+	Limit     int    `json:"limit"`
+	By        string `json:"by"`
+	Sort      string `json:"sort"`
+	StartDate string `json:"start_date"`
+	EndDate   string `json:"end_date"`
 }
 
 var (
@@ -90,21 +92,7 @@ var (
 		"def.id",
 	}
 
-	DashboardWebBranchDetailSelectStatement = ` select 
-	def.id as cus_id,def.customer_name as cus_name,
-	(case when ( select count(*) from customer_order_header where (date_part('month', now()::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP)) and cust_bill_to_id = def.id)>0 then
-	( select count(*) from customer_order_header where (date_part('month', now()::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP)) and cust_bill_to_id = def.id) else 0 end
-	)as total_repeat_order,
-	(select count(*) from customer_order_header where cust_bill_to_id = def.id  and (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', now()::TIMESTAMP)=date_part('year', transaction_date::TIMESTAMP)) ) as total_transaction,
-	(select count(*) from sales_invoice_header where  cust_bill_to_id in (select distinct(cust_bill_to_id) from customer_order_header where (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP)) )  and cust_bill_to_id = def.id 
-	and transaction_source_document_no like '%co%'		
-	and (date_part('month', transaction_date::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', transaction_date::TIMESTAMP)=date_part('year', now()::TIMESTAMP)) 
-	) as total_invoice,
-	(select count(*) from user_checkin_activity where user_id = def.user_id  and (date_part('month', checkin_time::TIMESTAMP) = date_part('month', now()::TIMESTAMP) and date_part('year', now()::TIMESTAMP)=date_part('year', checkin_time::TIMESTAMP)) ) as total_checkin
-	
-	from customer def
-	left join branch b on b.id = def.branch_id
-	left join region r on r.id = b.region_id
+	DashboardWebBranchDetailSelectStatement = ` select * from os_fetch_dashborad_branchcustomerdata($1::integer,$2,$3,null,null,null)
 	   `
 )
 
