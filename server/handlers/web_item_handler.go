@@ -94,6 +94,21 @@ func (h *WebItemHandler) FindByID(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
+// FindByCategoryID ...
+func (h *WebItemHandler) FindByCategoryID(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	categoryID := ctx.Params("category_id")
+	if categoryID == "" {
+		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
+	}
+
+	uc := usecase.WebItemUC{ContractUC: h.ContractUC}
+	res, err := uc.FindByCategoryID(c, categoryID)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
 // Edit ...
 func (h *WebItemHandler) Edit(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)

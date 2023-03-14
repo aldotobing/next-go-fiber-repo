@@ -27,6 +27,7 @@ func (route WebItemRoutes) RegisterRoute() {
 	r.Get("/", handler.FindAll)
 	r.Get("/select", handler.SelectAll)
 	r.Get("/id/:id", handler.FindByID)
+	r.Get("/category_id/:category_id", handler.FindByCategoryID)
 	r.Get("/except", handler.SelectAll)
 	r.Put("/id/:item_id", handler.Edit)
 }
