@@ -34,3 +34,24 @@ type InquiryBodyRequest struct {
 type InquiryVaRequest struct {
 	InquiryBody InquiryBodyRequest `json:"InquiryRequest"`
 }
+
+type PaymentBodyRequest struct {
+	Language        string `json:"language"`
+	TransactionDate string `json:"trxDateTime"`
+	TransmisionDate string `json:"transmissionDateTime"`
+	CompanyCode     string `json:"companyCode"`
+	VaReChanelId    string `json:"channelID"`
+	Billkey1        string `json:"billKey1"` //code va yang diambil di next
+	Billkey2        string `json:"billKey2"`
+	Billkey3        string `json:"billKey3"`
+	Reference1      string `json:"reference1"`
+	Reference2      string `json:"reference2"`
+	Reference3      string `json:"reference3"`
+	PaymentAmount   string `json:"paymentAmount"`
+	Currency        string `json:"currency"`
+	TransactionID   string `json:"transactionID"`
+}
+
+type PaymentVaRequest struct {
+	PaymentRequestBody PaymentBodyRequest `json:"paymentRequest" validate:"required"`
+}
