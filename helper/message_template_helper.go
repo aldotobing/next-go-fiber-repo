@@ -84,11 +84,16 @@ func BuildProcessSalesOrderTransactionTemplate(customerOrderHeader models.SalesO
 }
 
 func BuildVoidTransactionTemplate(customerOrderHeader models.CustomerOrderHeader, lineData []models.CustomerOrderLine, userData models.Customer) (res string) {
+	voidReasonText := ``
+
+	if customerOrderHeader.VoidReasonText != nil {
+		voidReasonText = *customerOrderHeader.VoidReasonText
+	}
 	dateString := pkgtime.GetDate(*customerOrderHeader.TransactionDate+"T00:00:00Z", "02 - 01 - 2006", "Asia/Jakarta")
 	CretaedBy := ` oleh Toko : ` + *userData.CustomerName
 	msgbody := `*Kepada Yang Terhormat* \n\n`
 	msgbody += `*` + *userData.Code + ` - ` + *userData.CustomerName + `*`
-	msgbody += `\n\n*NO ORDERAN ` + *customerOrderHeader.DocumentNo + ` anda pada tanggal ` + dateString + CretaedBy + ` telah dibatalkan karena ` + *customerOrderHeader.VoidReasonText + `*`
+	msgbody += `\n\n*NO ORDERAN ` + *customerOrderHeader.DocumentNo + ` anda pada tanggal ` + dateString + CretaedBy + ` telah dibatalkan karena ` + voidReasonText + `*`
 	msgbody += `\n\n*Berikut merupakan rincian pesanan anda:*`
 
 	bayar, _ := strconv.ParseFloat(*customerOrderHeader.NetAmount, 0)
@@ -114,11 +119,16 @@ func BuildVoidTransactionTemplate(customerOrderHeader models.CustomerOrderHeader
 }
 
 func BuildVoidTransactionTemplateForSalesman(customerOrderHeader models.CustomerOrderHeader, lineData []models.CustomerOrderLine, userData models.Customer, salesman models.Salesman) (res string) {
+	voidReasonText := ``
+
+	if customerOrderHeader.VoidReasonText != nil {
+		voidReasonText = *customerOrderHeader.VoidReasonText
+	}
 	dateString := pkgtime.GetDate(*customerOrderHeader.TransactionDate+"T00:00:00Z", "02 - 01 - 2006", "Asia/Jakarta")
 	CretaedBy := ` oleh Toko : ` + *userData.CustomerName
 	msgbody := `*Kepada Yang Terhormat Salesman* \n\n`
 	msgbody += `*` + *salesman.Name + `*`
-	msgbody += `\n\n*NO ORDERAN ` + *customerOrderHeader.DocumentNo + ` pada tanggal ` + dateString + CretaedBy + ` telah dibatalkan karena ` + *customerOrderHeader.VoidReasonText + `*`
+	msgbody += `\n\n*NO ORDERAN ` + *customerOrderHeader.DocumentNo + ` pada tanggal ` + dateString + CretaedBy + ` telah dibatalkan karena ` + voidReasonText + `*`
 	msgbody += `\n\n*Berikut merupakan rincian pesanan anda:*`
 
 	bayar, _ := strconv.ParseFloat(*customerOrderHeader.NetAmount, 0)
