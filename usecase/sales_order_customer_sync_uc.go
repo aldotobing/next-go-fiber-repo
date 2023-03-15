@@ -118,7 +118,7 @@ func (uc SalesOrderCustomerSyncUC) DataSync(c context.Context, parameter models.
 								messageTitle := ""
 								messageType := "2"
 								if *invoiceObject.Status == "submitted" {
-									messageTemplate = helper.BuildProcessSalesOrderTransactionTemplate(salesorderHeader, orderline, useraccount)
+									messageTemplate = helper.BuildProcessSalesOrderTransactionTemplate(salesorderHeader, orderline, useraccount, 1)
 									messageTitle = "Transaksi " + *invoiceObject.DocumentNo + " diproses."
 								}
 
@@ -150,6 +150,27 @@ func (uc SalesOrderCustomerSyncUC) DataSync(c context.Context, parameter models.
 											fmt.Println("sukses")
 										}
 
+									}
+
+									if useraccount.CustomerSalesmanID != nil {
+										salesmanmessageTemplate := ""
+										salesmannRepo := repository.NewSalesmanRepository(uc.DB)
+										customerSales, errcustsales := salesmannRepo.FindByID(c, models.SalesmanParameter{ID: *useraccount.CustomerSalesmanID})
+
+										salesmanmessageTemplate = helper.BuildProcessSalesOrderTransactionTemplate(salesorderHeader, orderline, useraccount, 2)
+
+										if errcustsales == nil {
+											if customerSales.PhoneNo != nil {
+												if salesmanmessageTemplate != "" {
+
+													senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*customerSales.PhoneNo, salesmanmessageTemplate)
+													if senDwaMessage != nil {
+														fmt.Println("sukses")
+													}
+												}
+
+											}
+										}
 									}
 
 								}
