@@ -14,6 +14,7 @@ type IItemRepository interface {
 	SelectAll(c context.Context, parameter models.ItemParameter) ([]models.Item, error)
 	FindAll(ctx context.Context, parameter models.ItemParameter) ([]models.Item, int, error)
 	FindByID(c context.Context, parameter models.ItemParameter) (models.Item, error)
+	SelectAllV2(c context.Context, parameter models.ItemParameter) (data []models.ItemV2, err error)
 	// Add(c context.Context, model *models.Item) (*string, error)
 	// Edit(c context.Context, model *models.Item) (*string, error)
 	// Delete(c context.Context, id string, now time.Time) (string, error)
@@ -231,4 +232,75 @@ func (repository ItemRepository) FindByCategoryID(c context.Context, parameter m
 	}
 
 	return data, nil
+}
+
+// SelectAllV2 ...
+func (repository ItemRepository) SelectAllV2(c context.Context, parameter models.ItemParameter) (out []models.ItemV2, err error) {
+	conditionString := ``
+
+	if parameter.ID != "" {
+		conditionString += ` AND DEF.ID = '` + parameter.ID + `'`
+	}
+
+	if parameter.ItemCategoryId != "" {
+		if parameter.ItemCategoryId == "2" {
+			//KHUSUS TAC sendiri, tampilkan semua item dengan category TAC (TAC ANAK, BEBAS GULA, DLL)
+			conditionString += ` AND DEF.item_category_id IN (SELECT id FROM item_category WHERE lower (_name) LIKE '%tac%') `
+		} else {
+			conditionString += ` AND DEF.item_category_id = ` + parameter.ItemCategoryId + ``
+		}
+	}
+
+	if parameter.ExceptId != "" {
+		conditionString += ` AND DEF.id <> '` + parameter.ExceptId + `'`
+	}
+
+	if parameter.UomID != "" {
+		conditionString += ` AND IUL.UOM_ID = '` + parameter.UomID + `'`
+	}
+
+	statement := `SELECT
+				DEF.ID,DEF.CODE AS ITEM_CODE,
+				DEF._NAME,
+				DEF.DESCRIPTION AS I_DESCRIPT,
+				DEF.ITEM_CATEGORY_ID AS CAT_IHalobroD,
+				array_to_string((array_agg(distinct ic."_name")),'|') AS category_name,
+				array_to_string((array_agg(U.ID || '#sep#' || u."_name" || '#sep#' || IUL.conversion::text || '#sep#' || ip.price::text || '#sep#' || ip.price_list_version_id order by iul."conversion" asc)),'|') AS additional_data,
+				DEF.ITEM_PICTURE
+			FROM ITEM DEF
+			LEFT JOIN ITEM_CATEGORY IC ON IC.ID = DEF.ITEM_CATEGORY_ID
+			left JOIN ITEM_UOM_LINE IUL ON IUL.ITEM_ID = DEF.ID AND IUL.VISIBILITY = 1
+			left join item_price ip on ip.item_id = iul.item_id and ip.uom_id = iul.uom_id and ip.price_list_version_id=$1
+			left JOIN UOM U ON U.ID = IP.UOM_ID
+		WHERE def.created_date IS NOT NULL
+			AND DEF.ACTIVE = 1
+			AND DEF.HIDE = 0
+			AND (LOWER(def."_name") LIKE $2) ` + conditionString +
+		`GROUP by def.id ` +
+		`ORDER BY ` + parameter.By + ` ` + parameter.Sort
+	rows, err := repository.DB.QueryContext(c, statement, parameter.PriceListVersionId, "%"+strings.ToLower(parameter.Search)+"%")
+	if err != nil {
+		return
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var temp models.ItemV2
+		err := rows.Scan(
+			&temp.ID,
+			&temp.Code,
+			&temp.Name,
+			&temp.Description,
+			&temp.ItemCategoryId,
+			&temp.ItemCategoryName,
+			&temp.AdditionalData,
+			&temp.ItemPicture,
+		)
+		if err != nil {
+			return out, err
+		}
+		out = append(out, temp)
+	}
+
+	return
 }

@@ -20,6 +20,18 @@ type Item struct {
 	Uom                *json.RawMessage `json:"item_uom"`
 }
 
+// ItemV2 ...
+type ItemV2 struct {
+	ID               *string `json:"id"`
+	Name             *string `json:"_name"`
+	Code             *string `json:"item_code"`
+	Description      *string `json:"item_description"`
+	ItemCategoryId   *string `json:"item_category_id"`
+	ItemCategoryName *string `json:"item_category_name"`
+	AdditionalData   *string `json:"additional_data"`
+	ItemPicture      *string `json:"item_picture"`
+}
+
 // ItemParameter ...
 type ItemParameter struct {
 	ID                 string `json:"item_id"`

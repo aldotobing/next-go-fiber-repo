@@ -9,6 +9,7 @@ import (
 	"nextbasis-service-v-0.1/helper"
 	"nextbasis-service-v-0.1/pkg/str"
 	"nextbasis-service-v-0.1/usecase"
+	"nextbasis-service-v-0.1/usecase/viewmodel"
 )
 
 // ItemHandler ...
@@ -36,6 +37,37 @@ func (h *ItemHandler) SelectAll(ctx *fiber.Ctx) error {
 
 	type StructObject struct {
 		ListObject []models.Item `json:"list_item"`
+	}
+
+	ObjectData := new(StructObject)
+
+	if res != nil {
+		ObjectData.ListObject = res
+	}
+
+	return h.SendResponse(ctx, ObjectData, nil, err, 0)
+}
+
+// SelectAll ...
+func (h *ItemHandler) SelectAllV2(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.ItemParameter{
+		ID:                 ctx.Query("item_id"),
+		ItemCategoryId:     ctx.Query("item_category_id"),
+		UomID:              ctx.Query("uom_id"),
+		PriceListVersionId: ctx.Query("price_list_version_id"),
+		CustomerTypeId:     ctx.Query("customer_type_id"),
+		Search:             ctx.Query("search"),
+		By:                 ctx.Query("by"),
+		Sort:               ctx.Query("sort"),
+		ExceptId:           ctx.Query("except_id"),
+	}
+	uc := usecase.ItemUC{ContractUC: h.ContractUC}
+	res, err := uc.SelectAllV2(c, parameter)
+
+	type StructObject struct {
+		ListObject []viewmodel.ItemVM `json:"list_item"`
 	}
 
 	ObjectData := new(StructObject)
