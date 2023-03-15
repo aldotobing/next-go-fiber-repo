@@ -343,9 +343,9 @@ func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter mode
 								salesmannRepo := repository.NewSalesmanRepository(uc.DB)
 								customerSales, errcustsales := salesmannRepo.FindByID(c, models.SalesmanParameter{ID: *useraccount.CustomerSalesmanID})
 								if *invoiceObject.Status == "voided" {
-									salesmanmessageTemplate = helper.BuildVoidTransactionTemplate(currentOrder, orderline, useraccount)
+									salesmanmessageTemplate = helper.BuildVoidTransactionTemplateForSalesman(currentOrder, orderline, useraccount, customerSales)
 								} else if *invoiceObject.Status == "submitted" {
-									salesmanmessageTemplate = helper.BuildVoidTransactionTemplate(currentOrder, orderline, useraccount)
+									salesmanmessageTemplate = helper.BuildProcessTransactionTemplateForSalesman(currentOrder, orderline, useraccount, customerSales)
 								}
 								if errcustsales == nil {
 									if customerSales.PhoneNo != nil {
