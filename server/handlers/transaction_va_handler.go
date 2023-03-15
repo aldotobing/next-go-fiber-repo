@@ -218,7 +218,7 @@ func (h *TransactionVAHandler) GetSah(ctx *fiber.Ctx) error {
 func (h *TransactionVAHandler) PaidTransactionByVaCode(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
-	input := new(requests.InquiryVaRequest)
+	input := new(requests.PaymentVaRequest)
 	if err := ctx.BodyParser(input); err != nil {
 		return h.SendBasicResponse(ctx, nil, nil, err, http.StatusBadRequest)
 	}
@@ -229,7 +229,7 @@ func (h *TransactionVAHandler) PaidTransactionByVaCode(ctx *fiber.Ctx) error {
 	}
 
 	parameter := models.TransactionVAParameter{
-		VACode:        input.InquiryBody.Billkey1,
+		VACode:        input.PaymentRequestBody.Billkey1,
 		CurrentVaUser: 0,
 	}
 
@@ -255,9 +255,9 @@ func (h *TransactionVAHandler) PaidTransactionByVaCode(ctx *fiber.Ctx) error {
 	if res.VACode != nil {
 		uc := usecase.TransactionVAUC{ContractUC: h.ContractUC}
 		inputUpdate := new(requests.TransactionVARequest)
-		inputUpdate.VaRef1 = input.InquiryBody.Reference1
-		inputUpdate.VaRef2 = input.InquiryBody.Reference2
-		inputUpdate.VaPairID = input.InquiryBody.TransactionID
+		inputUpdate.VaRef1 = input.PaymentRequestBody.Reference1
+		inputUpdate.VaRef2 = input.PaymentRequestBody.Reference2
+		inputUpdate.VaPairID = input.PaymentRequestBody.TransactionID
 		_, errpaid := uc.PaidTransaction(c, *res.ID, inputUpdate)
 
 		if errpaid == nil {
