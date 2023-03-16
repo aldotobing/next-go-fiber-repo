@@ -28,7 +28,7 @@ func NewDashboardWebRepository(DB *sql.DB) IDashboardWebRepository {
 // Scan row
 func (repository DashboardWebRepository) scanRow(row *sql.Row) (res models.DashboardWeb, err error) {
 	err = row.Scan(
-		&res.RegionGroupID, &res.RegionGroupName, &res.TotalRegisteredUser, &res.TotalRepeatUser, &res.TotalOrderUser, &res.TotalInvoice, &res.TotalActiveUser,
+		&res.RegionGroupID, &res.RegionGroupName, &res.TotalRegisteredUser, &res.TotalRepeatUser, &res.TotalOrderUser, &res.TotalInvoice, &res.TotalVisitUser,
 	)
 
 	if err != nil {
@@ -41,7 +41,7 @@ func (repository DashboardWebRepository) scanRow(row *sql.Row) (res models.Dashb
 // Scan rows
 func (repository DashboardWebRepository) scanRows(rows *sql.Rows) (res models.DashboardWeb, err error) {
 	err = rows.Scan(
-		&res.RegionGroupID, &res.RegionGroupName, &res.TotalRegisteredUser, &res.TotalRepeatUser, &res.TotalOrderUser, &res.TotalInvoice, &res.TotalActiveUser,
+		&res.RegionGroupID, &res.RegionGroupName, &res.TotalRegisteredUser, &res.TotalRepeatUser, &res.TotalOrderUser, &res.TotalInvoice, &res.TotalVisitUser,
 	)
 	if err != nil {
 
@@ -57,7 +57,7 @@ func (repository DashboardWebRepository) scanRegionDetailRows(rows *sql.Rows) (r
 		&res.BranchID, &res.BranchName, &res.RegionID, &res.RegionName,
 		&res.RegionGroupID, &res.RegionGroupName,
 		&res.TotalRegisteredUser, &res.TotalRepeatUser, &res.TotalOrderUser,
-		&res.TotalInvoice, &res.TotalActiveUser,
+		&res.TotalInvoice, &res.TotalVisitUser,
 	)
 	if err != nil {
 
