@@ -145,7 +145,7 @@ func (repository SalesOrderCustomerSyncRepository) InsertDataWithLine(c context.
 				location_id 
 				
 				)values(
-				$1 ,$2 ,$3 ,( select id from item where code = $4 ) ,$5 ,
+				$1 ,$2 ,( select item_category_id from item where code = $3) ,( select id from item where code = $4 ) ,$5 ,
 				( select id from uom where code =$6 ) ,$7 ,$8 ,$9 ,$10 ,
 				$11 ,$12 ,$13 ,$14 ,$15 ,
 				$16 ,$17 ,$18 ,$19 ,$20,
@@ -154,7 +154,7 @@ func (repository SalesOrderCustomerSyncRepository) InsertDataWithLine(c context.
 			`
 			var resLine string
 			err = transaction.QueryRowContext(c, line_statement,
-				model.ID, lineObject.LineNo, lineObject.CategoryID, lineObject.ItemCode, lineObject.Qty,
+				model.ID, lineObject.LineNo, lineObject.ItemCode, lineObject.ItemCode, lineObject.Qty,
 				lineObject.UomCode, lineObject.StockQty, lineObject.UnitPrice, str.EmptyStringToZero(*lineObject.GrossAmount), str.EmptyStringToZero(*lineObject.UseDiscPercent),
 				str.EmptyStringToZero(*lineObject.DiscPercent1), str.EmptyStringToZero(*lineObject.DiscPercent2), str.EmptyStringToZero(*lineObject.DiscPercent3), str.EmptyStringToZero(*lineObject.DiscPercent4), str.EmptyStringToZero(*lineObject.DiscPercent5),
 				str.EmptyStringToZero(*lineObject.DiscountAmount), str.EmptyStringToZero(*lineObject.TaxableAmount), str.EmptyStringToZero(*lineObject.TaxAmount), str.EmptyStringToZero(*lineObject.RoundingAmount), str.EmptyStringToZero(*lineObject.NetAmount),
