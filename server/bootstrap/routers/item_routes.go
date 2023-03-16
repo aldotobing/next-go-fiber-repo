@@ -29,8 +29,5 @@ func (route ItemRoutes) RegisterRoute() {
 	r.Get("/id/:id", handler.FindByID)
 	r.Get("/except", handler.SelectAll)
 
-	r2 := route.RouterGroup.Group("/api/apps/item/v2")
-	// r.Use(jwtMiddleware.VerifyUser)
-	r2.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
-	r2.Get("/select", handler.SelectAllV2)
+	r.Get("/v2/select", handler.SelectAllV2)
 }

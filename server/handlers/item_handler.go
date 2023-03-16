@@ -48,7 +48,7 @@ func (h *ItemHandler) SelectAll(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, ObjectData, nil, err, 0)
 }
 
-// SelectAll ...
+// SelectAllV2 ...
 func (h *ItemHandler) SelectAllV2(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
