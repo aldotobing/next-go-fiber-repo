@@ -150,6 +150,8 @@ var (
 
 	InvalidMinimumAmountOrder = "Order Minimal "
 
+	InvalidPhoneOrCode = "Nomor Hp atau Kode Toko Salah"
+
 	StatusMandiriVaSuccess                     = "Transaction Success"
 	StatusMandiriVaSystemCurrentlyNotAvailable = "System Currently Unavailable"
 	StatusMandiriVaBillNotFound                = "Bill Not Found"
