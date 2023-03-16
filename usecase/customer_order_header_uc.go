@@ -179,7 +179,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 				}
 				ordercount := len(orderline)
 				msgbody += `\n`
-				msgbody += `Total ` + strconv.Itoa(ordercount) + ` item, senilai ` + harga + ` (belum termasuk potongan/diskon bila ada program potongan/diskon) `
+				msgbody += `Total ` + strconv.Itoa(ordercount) + ` item, senilai ` + harga
 				msgbody += `\n`
 				msgbody += `\nTerima kasih atas pemesanan anda`
 				msgbody += `\n`

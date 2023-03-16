@@ -4,7 +4,7 @@ package models
 type DashboardWeb struct {
 	RegionGroupID       *string                    `json:"region_id"`
 	RegionGroupName     *string                    `json:"region_name"`
-	TotalActiveUser     *string                    `json:"total_active_user"`
+	TotalVisitUser      *string                    `json:"total_visit_user"`
 	TotalRepeatUser     *string                    `json:"total_repeat_order_user"`
 	TotalOrderUser      *string                    `json:"total_order_user"`
 	TotalInvoice        *string                    `json:"total_invoice_user"`
@@ -19,7 +19,7 @@ type DashboardWebRegionDetail struct {
 	RegionGroupName     *string `json:"region_group_name_detail"`
 	BranchID            *string `json:"branch_id_detail"`
 	BranchName          *string `json:"branch_name_detail"`
-	TotalActiveUser     *string `json:"total_active_user_detail"`
+	TotalVisitUser      *string `json:"total_visit_user_detail"`
 	TotalRepeatUser     *string `json:"total_repeat_order_user_detail"`
 	TotalOrderUser      *string `json:"total_order_user_detail"`
 	TotalInvoice        *string `json:"total_invoice_user_detail"`
