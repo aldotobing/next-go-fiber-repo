@@ -20,12 +20,25 @@ type Item struct {
 	Uom                *json.RawMessage `json:"item_uom"`
 }
 
+// ItemV2 ...
+type ItemV2 struct {
+	ID               *string `json:"id"`
+	Name             *string `json:"_name"`
+	Code             *string `json:"item_code"`
+	Description      *string `json:"item_description"`
+	ItemCategoryId   *string `json:"item_category_id"`
+	ItemCategoryName *string `json:"item_category_name"`
+	AdditionalData   *string `json:"additional_data"`
+	ItemPicture      *string `json:"item_picture"`
+}
+
 // ItemParameter ...
 type ItemParameter struct {
 	ID                 string `json:"item_id"`
 	Code               string `json:"item_code"`
 	Name               string `json:"item_name"`
 	ItemCategoryId     string `json:"item_category_id"`
+	ItemCategoryName   string `json:"item_category_name"`
 	PriceListVersionId string `json:"price_list_version_id"`
 	UomID              string `json:"uom_id"`
 	CustomerTypeId     string `json:"customer_type_id"`
@@ -108,4 +121,22 @@ var (
 
 	// ItemWhereStatement ...
 	ItemWhereStatement = ` WHERE def.created_date IS NOT NULL AND IUL.VISIBILITY = 1 AND DEF.ACTIVE = 1 AND DEF.HIDE = 0 `
+
+	ItemV2SelectStatement = `SELECT
+		DEF.ID,DEF.CODE AS ITEM_CODE,
+		DEF._NAME,
+		DEF.DESCRIPTION AS I_DESCRIPT,
+		DEF.ITEM_CATEGORY_ID AS CAT_IHalobroD,
+		array_to_string((array_agg(distinct ic."_name")),'|') AS category_name,
+		array_to_string((array_agg(U.ID || '#sep#' || u."_name" || '#sep#' || IUL.conversion::text || '#sep#' || ip.price::text || '#sep#' || ip.price_list_version_id order by iul."conversion" asc)),'|') AS additional_data,
+		DEF.ITEM_PICTURE
+	FROM ITEM DEF
+	LEFT JOIN ITEM_CATEGORY IC ON IC.ID = DEF.ITEM_CATEGORY_ID
+	left JOIN ITEM_UOM_LINE IUL ON IUL.ITEM_ID = DEF.ID AND IUL.VISIBILITY = 1
+	left join item_price ip on ip.item_id = iul.item_id and ip.uom_id = iul.uom_id and ip.price_list_version_id=$1
+	left JOIN UOM U ON U.ID = IP.UOM_ID
+	WHERE def.created_date IS NOT NULL
+		AND DEF.ACTIVE = 1
+		AND DEF.HIDE = 0
+		AND (LOWER(def."_name") LIKE $2) `
 )

@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"strings"
 
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -36,6 +37,48 @@ func (uc ItemUC) SelectAll(c context.Context, parameter models.ItemParameter) (r
 	}
 
 	return res, err
+}
+
+// SelectAllV2 ...
+func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter) (res []viewmodel.ItemVM, err error) {
+	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(0, 0, parameter.By, parameter.Sort, models.ItemOrderBy, models.ItemOrderByrByString)
+
+	repo := repository.NewItemRepository(uc.DB)
+	data, err := repo.SelectAllV2(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	for i := range data {
+		additional := strings.Split(*data[i].AdditionalData, "|")
+
+		var uoms []viewmodel.Uom
+		if len(additional) > 1 {
+			for _, addDatum := range additional {
+				perAddDatum := strings.Split(addDatum, "#sep#")
+
+				uoms = append(uoms, viewmodel.Uom{
+					ID:               &perAddDatum[0],
+					Name:             &perAddDatum[1],
+					Conversion:       &perAddDatum[2],
+					ItemDetailsPrice: &perAddDatum[3],
+				})
+			}
+		}
+
+		res = append(res, viewmodel.ItemVM{
+			ID:               data[i].ID,
+			Name:             data[i].Name,
+			Description:      data[i].Description,
+			ItemCategoryId:   data[i].ItemCategoryId,
+			ItemCategoryName: data[i].ItemCategoryName,
+			ItemPicture:      data[i].ItemPicture,
+			Uom:              uoms,
+		})
+	}
+
+	return
 }
 
 // FindAll ...
