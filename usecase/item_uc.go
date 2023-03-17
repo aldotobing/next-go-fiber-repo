@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"strconv"
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository"
@@ -55,14 +56,30 @@ func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter) 
 
 		var uoms []viewmodel.Uom
 		if len(additional) > 1 {
+			// Find Lowest Price and lowest conversion
+			var lowestPrice, lowestConversion float64
 			for _, addDatum := range additional {
 				perAddDatum := strings.Split(addDatum, "#sep#")
+				price, _ := strconv.ParseFloat(perAddDatum[3], 64)
+				conversion, _ := strconv.ParseFloat(perAddDatum[2], 64)
+				if price < lowestPrice || lowestPrice == 0 {
+					lowestPrice = price
+					lowestConversion = conversion
+				}
+			}
+
+			basePrice := lowestPrice / lowestConversion
+			for _, addDatum := range additional {
+				perAddDatum := strings.Split(addDatum, "#sep#")
+
+				conversion, _ := strconv.ParseFloat(perAddDatum[2], 64)
+				price := strconv.FormatFloat(basePrice*conversion, 'f', 2, 64)
 
 				uoms = append(uoms, viewmodel.Uom{
 					ID:               &perAddDatum[0],
 					Name:             &perAddDatum[1],
 					Conversion:       &perAddDatum[2],
-					ItemDetailsPrice: &perAddDatum[3],
+					ItemDetailsPrice: &price,
 				})
 			}
 		}
