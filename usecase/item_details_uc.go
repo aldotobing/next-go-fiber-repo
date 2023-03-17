@@ -91,12 +91,6 @@ func (uc ItemDetailsUC) FindByIDV2(c context.Context, parameter models.ItemDetai
 		}
 	}
 
-	data, err = repo.FindContainByItemIDV2(c, parameter)
-	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
-		return 
-	}
-
 	basePrice := lowestPrice / lowestConversion
 	var uoms []viewmodel.Uom
 	for _, datum := range data {
