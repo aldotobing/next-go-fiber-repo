@@ -86,15 +86,17 @@ func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter) 
 			}
 		}
 
-		res = append(res, viewmodel.ItemVM{
-			ID:               data[i].ID,
-			Name:             data[i].Name,
-			Description:      data[i].Description,
-			ItemCategoryId:   data[i].ItemCategoryId,
-			ItemCategoryName: data[i].ItemCategoryName,
-			ItemPicture:      data[i].ItemPicture,
-			Uom:              uoms,
-		})
+		if len(uoms) > 0 {
+			res = append(res, viewmodel.ItemVM{
+				ID:               data[i].ID,
+				Name:             data[i].Name,
+				Description:      data[i].Description,
+				ItemCategoryId:   data[i].ItemCategoryId,
+				ItemCategoryName: data[i].ItemCategoryName,
+				ItemPicture:      data[i].ItemPicture,
+				Uom:              uoms,
+			})
+		}
 	}
 
 	return

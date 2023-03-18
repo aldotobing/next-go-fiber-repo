@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"strconv"
 
 	"nextbasis-service-v-0.1/db/repository"
@@ -105,6 +106,12 @@ func (uc ItemDetailsUC) FindByIDV2(c context.Context, parameter models.ItemDetai
 				ItemDetailsPrice: &price,
 			})
 		}
+	}
+
+	if len(uoms) == 0 {
+		err = errors.New("uom not available")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uom_checker", c.Value("requestid"))
+		return
 	}
 
 	res = viewmodel.ItemDetailsVM{
