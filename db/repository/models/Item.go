@@ -29,6 +29,7 @@ type ItemV2 struct {
 	ItemCategoryId   *string `json:"item_category_id"`
 	ItemCategoryName *string `json:"item_category_name"`
 	AdditionalData   *string `json:"additional_data"`
+	MultiplyData     *string `json:"multiply_data"`
 	ItemPicture      *string `json:"item_picture"`
 }
 
@@ -122,19 +123,34 @@ var (
 	// ItemWhereStatement ...
 	ItemWhereStatement = ` WHERE def.created_date IS NOT NULL AND IUL.VISIBILITY = 1 AND DEF.ACTIVE = 1 AND DEF.HIDE = 0 `
 
-	ItemV2SelectStatement = `SELECT
+	ItemV2SelectStatement = `with temp_data as(
+		select DEF.ID,
+		array_to_string((array_agg(U.ID || '#sep#' || u."_name" || '#sep#' || IUL."conversion" || '#sep#' || IUL."visibility" order by iul."conversion" asc)),'|') AS MULTIPLY_DATA
+		from item def
+		    left JOIN ITEM_UOM_LINE IUL ON IUL.ITEM_ID = DEF.ID 
+			left JOIN UOM U ON U.ID = IUL.UOM_ID
+	    WHERE def.created_date IS NOT NULL
+		AND DEF.ACTIVE = 1
+		AND DEF.HIDE = 0
+		AND (LOWER(def."_name") LIKE '%%')
+		group by def.id 
+		order by DEF.ID asc
+	)   
+	SELECT
 		DEF.ID,DEF.CODE AS ITEM_CODE,
 		DEF._NAME,
 		DEF.DESCRIPTION AS I_DESCRIPT,
 		DEF.ITEM_CATEGORY_ID AS CAT_IHalobroD,
 		array_to_string((array_agg(distinct ic."_name")),'|') AS category_name,
 		array_to_string((array_agg(U.ID || '#sep#' || u."_name" || '#sep#' || IUL.conversion::text || '#sep#' || ip.price::text || '#sep#' || ip.price_list_version_id || '#sep#' || IUL.visibility order by iul."conversion" asc)),'|') AS additional_data,
+		td.MULTIPLY_DATA,
 		DEF.ITEM_PICTURE
 	FROM ITEM DEF
 	LEFT JOIN ITEM_CATEGORY IC ON IC.ID = DEF.ITEM_CATEGORY_ID
 	left JOIN ITEM_UOM_LINE IUL ON IUL.ITEM_ID = DEF.ID
 	left join item_price ip on ip.item_id = iul.item_id and ip.uom_id = iul.uom_id and ip.price_list_version_id=$1
 	left JOIN UOM U ON U.ID = IP.UOM_ID
+	left join TEMP_DATA TD on TD.ID = DEF.ID
 	WHERE def.created_date IS NOT NULL
 		AND DEF.ACTIVE = 1
 		AND DEF.HIDE = 0

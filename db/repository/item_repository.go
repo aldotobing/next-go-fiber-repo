@@ -268,7 +268,7 @@ func (repository ItemRepository) SelectAllV2(c context.Context, parameter models
 	}
 
 	statement := models.ItemV2SelectStatement + conditionString +
-		`GROUP by def.id ` +
+		`GROUP by def.id, td.MULTIPLY_DATA ` +
 		`ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, parameter.PriceListVersionId, "%"+strings.ToLower(parameter.Search)+"%")
 	if err != nil {
@@ -286,6 +286,7 @@ func (repository ItemRepository) SelectAllV2(c context.Context, parameter models
 			&temp.ItemCategoryId,
 			&temp.ItemCategoryName,
 			&temp.AdditionalData,
+			&temp.MultiplyData,
 			&temp.ItemPicture,
 		)
 		if err != nil {
