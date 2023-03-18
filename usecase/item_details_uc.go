@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"strconv"
 
 	"nextbasis-service-v-0.1/db/repository"
@@ -94,15 +95,23 @@ func (uc ItemDetailsUC) FindByIDV2(c context.Context, parameter models.ItemDetai
 	basePrice := lowestPrice / lowestConversion
 	var uoms []viewmodel.Uom
 	for _, datum := range data {
-		conversion, _ := strconv.ParseFloat(*datum.UomLineConversion, 64)
-		price := strconv.FormatFloat(basePrice*conversion, 'f', 2, 64)
+		if *datum.Visibility == "1" {
+			conversion, _ := strconv.ParseFloat(*datum.UomLineConversion, 64)
+			price := strconv.FormatFloat(basePrice*conversion, 'f', 2, 64)
 
-		uoms = append(uoms, viewmodel.Uom{
-			ID:               datum.UomID,
-			Name:             datum.UomName,
-			Conversion:       datum.UomLineConversion,
-			ItemDetailsPrice: &price,
-		})
+			uoms = append(uoms, viewmodel.Uom{
+				ID:               datum.UomID,
+				Name:             datum.UomName,
+				Conversion:       datum.UomLineConversion,
+				ItemDetailsPrice: &price,
+			})
+		}
+	}
+
+	if len(uoms) == 0 {
+		err = errors.New("uom not available")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uom_checker", c.Value("requestid"))
+		return
 	}
 
 	res = viewmodel.ItemDetailsVM{

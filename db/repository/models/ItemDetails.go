@@ -14,6 +14,7 @@ type ItemDetails struct {
 	UomLineConversion       *string `json:"uom_line_conversion"`
 	ItemDetailsPrice        *string `json:"item_price"`
 	PriceListVersionId      *string `json:"price_list_version_id"`
+	Visibility              *string `json:"visibility"`
 }
 
 // ItemDetailsParameter ...
@@ -81,7 +82,8 @@ var (
 		UOM._NAME AS UOM_NAME,
 		IUL.CONVERSION AS IUL_CONVERSION,
 		IP.PRICE AS ITEM_PRICE,
-		IP.PRICE_LIST_VERSION_ID AS PRICE_LIST_VERSION_ID
+		IP.PRICE_LIST_VERSION_ID AS PRICE_LIST_VERSION_ID,
+		IUL.VISIBILITY
 	FROM ITEM_UOM_LINE IUL
 	LEFT JOIN ITEM DEF ON IUL.ITEM_ID = DEF.ID
 	LEFT JOIN ITEM_CATEGORY IC ON IC.ID = DEF.ITEM_CATEGORY_ID
@@ -89,5 +91,5 @@ var (
 	left JOIN ITEM_PRICE IP ON IP.UOM_ID = UOM.ID AND IP.ITEM_ID = IUL.ITEM_ID`
 
 	// ItemDetailsV2WhereStatement ...
-	ItemDetailsV2WhereStatement = ` WHERE def.created_date IS not NULL AND IUL.visibility = 1 `
+	ItemDetailsV2WhereStatement = ` WHERE def.created_date IS not NULL `
 )

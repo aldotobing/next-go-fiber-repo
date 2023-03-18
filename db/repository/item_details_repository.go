@@ -69,6 +69,7 @@ func (repository ItemDetailsRepository) scanRowsV2(rows *sql.Rows) (res models.I
 		&res.UomLineConversion,
 		&res.ItemDetailsPrice,
 		&res.PriceListVersionId,
+		&res.Visibility,
 	)
 
 	return
@@ -215,7 +216,6 @@ func (repository ItemDetailsRepository) FindByIDV2(c context.Context, parameter 
 	statement := models.ItemDetailsV2SelectStatement +
 		models.ItemDetailsV2WhereStatement + ` AND def.id = $1` + conditionString +
 		`ORDER BY IUL."conversion"`
-
 	rows, err := repository.DB.Query(statement, parameter.ID)
 	if err != nil {
 		return data, err
