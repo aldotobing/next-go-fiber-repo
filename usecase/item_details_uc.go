@@ -75,7 +75,8 @@ func (uc ItemDetailsUC) FindByID(c context.Context, parameter models.ItemDetails
 // FindByIDV2 ...
 func (uc ItemDetailsUC) FindByIDV2(c context.Context, parameter models.ItemDetailsParameter) (res viewmodel.ItemDetailsVM, err error) {
 	repo := repository.NewItemDetailsRepository(uc.DB)
-	data, err := repo.FindByIDV2(c, parameter)
+
+	data, err := repo.FindByIDs(c, parameter)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return
@@ -90,6 +91,12 @@ func (uc ItemDetailsUC) FindByIDV2(c context.Context, parameter models.ItemDetai
 			lowestPrice = price
 			lowestConversion = conversion
 		}
+	}
+
+	data, err = repo.FindByIDV2(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
 	}
 
 	basePrice := lowestPrice / lowestConversion
