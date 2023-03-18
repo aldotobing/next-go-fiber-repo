@@ -94,15 +94,17 @@ func (uc ItemDetailsUC) FindByIDV2(c context.Context, parameter models.ItemDetai
 	basePrice := lowestPrice / lowestConversion
 	var uoms []viewmodel.Uom
 	for _, datum := range data {
-		conversion, _ := strconv.ParseFloat(*datum.UomLineConversion, 64)
-		price := strconv.FormatFloat(basePrice*conversion, 'f', 2, 64)
+		if *datum.Visibility == "1" {
+			conversion, _ := strconv.ParseFloat(*datum.UomLineConversion, 64)
+			price := strconv.FormatFloat(basePrice*conversion, 'f', 2, 64)
 
-		uoms = append(uoms, viewmodel.Uom{
-			ID:               datum.UomID,
-			Name:             datum.UomName,
-			Conversion:       datum.UomLineConversion,
-			ItemDetailsPrice: &price,
-		})
+			uoms = append(uoms, viewmodel.Uom{
+				ID:               datum.UomID,
+				Name:             datum.UomName,
+				Conversion:       datum.UomLineConversion,
+				ItemDetailsPrice: &price,
+			})
+		}
 	}
 
 	res = viewmodel.ItemDetailsVM{

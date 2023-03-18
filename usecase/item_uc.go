@@ -72,15 +72,17 @@ func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter) 
 			for _, addDatum := range additional {
 				perAddDatum := strings.Split(addDatum, "#sep#")
 
-				conversion, _ := strconv.ParseFloat(perAddDatum[2], 64)
-				price := strconv.FormatFloat(basePrice*conversion, 'f', 2, 64)
+				if perAddDatum[5] == "1" {
+					conversion, _ := strconv.ParseFloat(perAddDatum[2], 64)
+					price := strconv.FormatFloat(basePrice*conversion, 'f', 2, 64)
 
-				uoms = append(uoms, viewmodel.Uom{
-					ID:               &perAddDatum[0],
-					Name:             &perAddDatum[1],
-					Conversion:       &perAddDatum[2],
-					ItemDetailsPrice: &price,
-				})
+					uoms = append(uoms, viewmodel.Uom{
+						ID:               &perAddDatum[0],
+						Name:             &perAddDatum[1],
+						Conversion:       &perAddDatum[2],
+						ItemDetailsPrice: &price,
+					})
+				}
 			}
 		}
 
