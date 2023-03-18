@@ -55,7 +55,7 @@ func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter) 
 		additional := strings.Split(*data[i].AdditionalData, "|")
 
 		var uoms []viewmodel.Uom
-		if len(additional) > 0 {
+		if len(additional) > 1 {
 			// Find Lowest Price and lowest conversion
 			var lowestPrice, lowestConversion float64
 			for _, addDatum := range additional {
@@ -69,7 +69,7 @@ func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter) 
 			}
 
 			multiplyData := strings.Split(*data[i].MultiplyData, "|")
-			if len(multiplyData) > 0 {
+			if len(multiplyData) > 1 {
 				basePrice := lowestPrice / lowestConversion
 				for _, multiplyDatum := range multiplyData {
 					perMultiDatum := strings.Split(multiplyDatum, "#sep#")
