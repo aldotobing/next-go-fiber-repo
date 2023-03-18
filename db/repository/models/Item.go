@@ -132,7 +132,7 @@ var (
 	    WHERE def.created_date IS NOT NULL
 		AND DEF.ACTIVE = 1
 		AND DEF.HIDE = 0
-		AND (LOWER(def."_name") LIKE '%%')
+		AND (LOWER(def."_name") LIKE LOWER($2))
 		group by def.id 
 		order by DEF.ID asc
 	)   
@@ -154,5 +154,5 @@ var (
 	WHERE def.created_date IS NOT NULL
 		AND DEF.ACTIVE = 1
 		AND DEF.HIDE = 0
-		AND (LOWER(def."_name") LIKE $2) `
+		AND (LOWER(def."_name") LIKE LOWER($2)) `
 )
