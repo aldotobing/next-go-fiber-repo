@@ -248,3 +248,32 @@ func (h *ShoppingCartHandler) SelecGroupedtAll(ctx *fiber.Ctx) error {
 
 	return h.SendResponse(ctx, ObjcetData, nil, err, 0)
 }
+
+// SelectAll ...
+func (h *ShoppingCartHandler) SelectAllBonus(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+	parameter := models.ShoppingCartParameter{
+		ListID: ctx.Query("chart_id_list"),
+		Search: ctx.Query("search"),
+		By:     ctx.Query("by"),
+		Sort:   ctx.Query("sort"),
+	}
+	uc := usecase.ShoppingCartUC{ContractUC: h.ContractUC}
+	res, err := uc.SelectAllBonus(c, parameter)
+
+	if err != nil {
+		fmt.Println("error", err.Error())
+	}
+
+	type StructObject struct {
+		ListObjcet []models.ShoppingCartItemBonus `json:"list_item_bonus"`
+	}
+
+	ObjcetData := new(StructObject)
+
+	if res != nil {
+		ObjcetData.ListObjcet = res
+	}
+
+	return h.SendResponse(ctx, ObjcetData, nil, err, 0)
+}
