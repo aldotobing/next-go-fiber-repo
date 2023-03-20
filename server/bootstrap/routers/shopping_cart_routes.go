@@ -25,6 +25,7 @@ func (route ShoppingCartRoutes) RegisterRoute() {
 	// r.Use(jwtMiddleware.VerifyUser)
 	r.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
 	r.Get("/", handler.FindAll)
+	r.Get("/bonus/item/select", handler.SelectAllBonus)
 	r.Get("/select/:customer_id", handler.SelectAll)
 	r.Get("/groupselect/:customer_id", handler.SelecGroupedtAll)
 	r.Get("/id/:id", handler.FindByID)

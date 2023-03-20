@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -18,6 +19,7 @@ type IShoppingCartRepository interface {
 	Delete(c context.Context, id string) (*string, error)
 	SelectAllForGroup(c context.Context, parameter models.ShoppingCartParameter) ([]models.GroupedShoppingCart, error)
 	GetTotal(c context.Context, parameter models.ShoppingCartParameter) (models.ShoppingCheckouAble, error)
+	SelectAllBonus(c context.Context, parameter models.ShoppingCartParameter) ([]models.ShoppingCartItemBonus, error)
 }
 
 // ShoppingCartRepository ...
@@ -87,6 +89,18 @@ func (repository ShoppingCartRepository) scanGroupedRow(row *sql.Row) (res model
 		&res.CategoryID, &res.CategoryName,
 	)
 	if err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
+func (repository ShoppingCartRepository) scanBonusRows(rows *sql.Rows) (res models.ShoppingCartItemBonus, err error) {
+	err = rows.Scan(
+		&res.ItemID, &res.ItemName, &res.ItemCode, &res.Qty, &res.UomName,
+	)
+	if err != nil {
+
 		return res, err
 	}
 
@@ -255,4 +269,30 @@ func (repository ShoppingCartRepository) GetTotal(c context.Context, parameter m
 	data, err = repository.scanIsAbleRow(row)
 
 	return
+}
+
+// SelectAll ...
+func (repository ShoppingCartRepository) SelectAllBonus(c context.Context, parameter models.ShoppingCartParameter) (data []models.ShoppingCartItemBonus, err error) {
+
+	statement := models.ShoppingCartBonusSelectStatement
+
+	fmt.Println(statement, parameter.ListID)
+
+	rows, err := repository.DB.QueryContext(c, statement, parameter.ListID)
+
+	if err != nil {
+		return data, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+
+		temp, err := repository.scanBonusRows(rows)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
+	}
+
+	return data, err
 }

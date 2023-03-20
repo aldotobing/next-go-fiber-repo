@@ -2,28 +2,32 @@ package models
 
 // DashboardWeb ...
 type DashboardWeb struct {
-	RegionGroupID       *string                    `json:"region_id"`
-	RegionGroupName     *string                    `json:"region_name"`
-	TotalVisitUser      *string                    `json:"total_visit_user"`
-	TotalRepeatUser     *string                    `json:"total_repeat_order_user"`
-	TotalOrderUser      *string                    `json:"total_order_user"`
-	TotalInvoice        *string                    `json:"total_invoice_user"`
-	TotalRegisteredUser *string                    `json:"total_registered_user"`
-	DetailData          []DashboardWebRegionDetail `json:"detailed_data"`
+	RegionGroupID            *string                    `json:"region_id"`
+	RegionGroupName          *string                    `json:"region_name"`
+	TotalVisitUser           *string                    `json:"total_visit_user"`
+	TotalRepeatUser          *string                    `json:"total_repeat_order_user"`
+	TotalOrderUser           *string                    `json:"total_order_user"`
+	TotalInvoice             *string                    `json:"total_invoice_user"`
+	TotalRegisteredUser      *string                    `json:"total_registered_user"`
+	DetailData               []DashboardWebRegionDetail `json:"detailed_data"`
+	CustomerCountRepeatOrder *string                    `json:"customer_count_repeat_order"`
+	TotalActiveOutlet        *string                    `json:"total_active_outlet"`
 }
 
 type DashboardWebRegionDetail struct {
-	RegionID            *string `json:"region_id_detail"`
-	RegionName          *string `json:"region_name_detail"`
-	RegionGroupID       *string `json:"region_group_id_detail"`
-	RegionGroupName     *string `json:"region_group_name_detail"`
-	BranchID            *string `json:"branch_id_detail"`
-	BranchName          *string `json:"branch_name_detail"`
-	TotalVisitUser      *string `json:"total_visit_user_detail"`
-	TotalRepeatUser     *string `json:"total_repeat_order_user_detail"`
-	TotalOrderUser      *string `json:"total_order_user_detail"`
-	TotalInvoice        *string `json:"total_invoice_user_detail"`
-	TotalRegisteredUser *string `json:"total_registered_user_detail"`
+	RegionID                 *string `json:"region_id_detail"`
+	RegionName               *string `json:"region_name_detail"`
+	RegionGroupID            *string `json:"region_group_id_detail"`
+	RegionGroupName          *string `json:"region_group_name_detail"`
+	BranchID                 *string `json:"branch_id_detail"`
+	BranchName               *string `json:"branch_name_detail"`
+	TotalVisitUser           *string `json:"total_visit_user_detail"`
+	TotalRepeatUser          *string `json:"total_repeat_order_user_detail"`
+	TotalOrderUser           *string `json:"total_order_user_detail"`
+	TotalInvoice             *string `json:"total_invoice_user_detail"`
+	TotalRegisteredUser      *string `json:"total_registered_user_detail"`
+	CustomerCountRepeatOrder *string `json:"customer_count_repeat_order_detail"`
+	TotalActiveOutlet        *string `json:"total_active_outlet_detail"`
 }
 
 type DashboardWebBranchDetail struct {
