@@ -14,8 +14,8 @@ type IItemDetailsRepository interface {
 	SelectAll(c context.Context, parameter models.ItemDetailsParameter) ([]models.ItemDetails, error)
 	FindAll(ctx context.Context, parameter models.ItemDetailsParameter) ([]models.ItemDetails, int, error)
 	FindByID(c context.Context, parameter models.ItemDetailsParameter) (models.ItemDetails, error)
+	FindByIDs(c context.Context, parameter models.ItemDetailsParameter) ([]models.ItemDetails, error)
 	FindByIDV2(c context.Context, parameter models.ItemDetailsParameter) ([]models.ItemDetails, error)
-	FindContainByItemIDV2(c context.Context, parameter models.ItemDetailsParameter) (data []models.ItemDetails, err error)
 	// Add(c context.Context, model *models.ItemDetails) (*string, error)
 	// Edit(c context.Context, model *models.ItemDetails) (*string, error)
 	// Delete(c context.Context, id string, now time.Time) (string, error)
@@ -68,6 +68,7 @@ func (repository ItemDetailsRepository) scanRowsV2(rows *sql.Rows) (res models.I
 		&res.UomID,
 		&res.UomName,
 		&res.UomLineConversion,
+		&res.Visibility,
 	)
 
 	return
@@ -203,8 +204,8 @@ func (repository ItemDetailsRepository) FindByID(c context.Context, parameter mo
 	return data, nil
 }
 
-// FindByIDV2 ...
-func (repository ItemDetailsRepository) FindByIDV2(c context.Context, parameter models.ItemDetailsParameter) (data []models.ItemDetails, err error) {
+// FindByIDs ...
+func (repository ItemDetailsRepository) FindByIDs(c context.Context, parameter models.ItemDetailsParameter) (data []models.ItemDetails, err error) {
 	conditionString := ``
 
 	if parameter.PriceListVersionId != "" {
@@ -213,7 +214,6 @@ func (repository ItemDetailsRepository) FindByIDV2(c context.Context, parameter 
 
 	statement := models.ItemDetailsSelectStatement + ` WHERE def.created_date IS NOT NULL AND def.id = $1` + conditionString + ``
 
-	fmt.Println(statement)
 	rows, err := repository.DB.Query(statement, parameter.ID)
 	if err != nil {
 		return data, err
@@ -229,14 +229,16 @@ func (repository ItemDetailsRepository) FindByIDV2(c context.Context, parameter 
 	}
 	err = rows.Err()
 
-	return
+	return data, nil
 }
 
-// FindContainByItemIDV2 ...
-func (repository ItemDetailsRepository) FindContainByItemIDV2(c context.Context, parameter models.ItemDetailsParameter) (data []models.ItemDetails, err error) {
-	statement := models.ItemDetailsV2SelectStatement +
-		models.ItemDetailsV2WhereStatement + ` AND def.id = $1` + `ORDER BY IUL."conversion"`
+// FindByIDV2 ...
+func (repository ItemDetailsRepository) FindByIDV2(c context.Context, parameter models.ItemDetailsParameter) (data []models.ItemDetails, err error) {
+	conditionString := ``
 
+	statement := models.ItemDetailsV2SelectStatement +
+		models.ItemDetailsV2WhereStatement + ` AND def.id = $1` + conditionString +
+		`ORDER BY IUL."conversion"`
 	rows, err := repository.DB.Query(statement, parameter.ID)
 	if err != nil {
 		return data, err

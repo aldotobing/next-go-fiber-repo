@@ -14,6 +14,7 @@ type ItemDetails struct {
 	UomLineConversion       *string `json:"uom_line_conversion"`
 	ItemDetailsPrice        *string `json:"item_price"`
 	PriceListVersionId      *string `json:"price_list_version_id"`
+	Visibility              *string `json:"visibility"`
 }
 
 // ItemDetailsParameter ...
@@ -79,7 +80,8 @@ var (
 		DEF.ITEM_PICTURE AS ITEM_PICTURE,
 		UOM.ID AS UOM_ID,
 		UOM._NAME AS UOM_NAME,
-		IUL.CONVERSION AS IUL_CONVERSION
+		IUL.CONVERSION AS IUL_CONVERSION,
+		IUL.visibility
 	FROM ITEM_UOM_LINE IUL
 	LEFT JOIN ITEM DEF ON IUL.ITEM_ID = DEF.ID
 	LEFT JOIN ITEM_CATEGORY IC ON IC.ID = DEF.ITEM_CATEGORY_ID
