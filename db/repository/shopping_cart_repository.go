@@ -97,7 +97,7 @@ func (repository ShoppingCartRepository) scanGroupedRow(row *sql.Row) (res model
 
 func (repository ShoppingCartRepository) scanBonusRows(rows *sql.Rows) (res models.ShoppingCartItemBonus, err error) {
 	err = rows.Scan(
-		&res.ItemID, &res.ItemName, &res.ItemCode, &res.Qty, &res.UomName,
+		&res.ItemID, &res.ItemName, &res.ItemCode, &res.Qty, &res.UomName, &res.ItemPicture,
 	)
 	if err != nil {
 
@@ -279,7 +279,6 @@ func (repository ShoppingCartRepository) SelectAllBonus(c context.Context, param
 	fmt.Println(statement, parameter.ListID)
 
 	rows, err := repository.DB.QueryContext(c, statement, parameter.ListID)
-
 	if err != nil {
 		return data, err
 	}

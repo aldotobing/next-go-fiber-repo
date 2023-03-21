@@ -229,7 +229,6 @@ func (uc ShoppingCartUC) SelectAllBonus(c context.Context, parameter models.Shop
 
 	repo := repository.NewShoppingCartRepository(uc.DB)
 	res, err = repo.SelectAllBonus(c, parameter)
-
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
