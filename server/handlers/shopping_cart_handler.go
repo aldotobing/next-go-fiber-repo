@@ -119,8 +119,28 @@ func (h *ShoppingCartHandler) Add(ctx *fiber.Ctx) error {
 func (h *ShoppingCartHandler) MultipleEdit(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
-	id := ctx.Params("customer_id")
-	if id == "" {
+	listInput := new([]requests.ShoppingCartRequest)
+	if err := ctx.BodyParser(listInput); err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+
+	if err := h.Validator.Struct(listInput); err != nil {
+		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
+		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+	}
+
+	uc := usecase.ShoppingCartUC{ContractUC: h.ContractUC}
+	res, err := uc.MultipleEdit(c, listInput)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+// MultipleEditByCartID ...
+func (h *ShoppingCartHandler) MultipleEditByCartID(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	cartID := ctx.Params("cart_id")
+	if cartID == "" {
 		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
 	}
 
@@ -137,7 +157,7 @@ func (h *ShoppingCartHandler) MultipleEdit(ctx *fiber.Ctx) error {
 	}
 
 	uc := usecase.ShoppingCartUC{ContractUC: h.ContractUC}
-	res, err := uc.MultipleEdit(c, listInput)
+	res, err := uc.MultipleEditByCartID(c, listInput)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }

@@ -16,6 +16,7 @@ type IShoppingCartRepository interface {
 	FindByID(c context.Context, parameter models.ShoppingCartParameter) (models.ShoppingCart, error)
 	Add(c context.Context, model *models.ShoppingCart) (*string, error)
 	Edit(c context.Context, model *models.ShoppingCart) (*string, error)
+	EditQuantity(c context.Context, model *models.ShoppingCart) (*string, error)
 	Delete(c context.Context, id string) (*string, error)
 	SelectAllForGroup(c context.Context, parameter models.ShoppingCartParameter) ([]models.GroupedShoppingCart, error)
 	GetTotal(c context.Context, parameter models.ShoppingCartParameter) (models.ShoppingCheckouAble, error)
@@ -210,6 +211,32 @@ func (repository ShoppingCartRepository) Edit(c context.Context, model *models.S
 
 	err = repository.DB.QueryRowContext(c, statement, model.ItemID, model.UomID,
 		model.Price, model.ModifiedAt, model.ModifiedBy, model.Qty, model.StockQty, model.TotalPrice, model.ID).Scan(&res)
+	if err != nil {
+		return res, err
+	}
+	return res, err
+}
+
+// EditQuantity ...
+func (repository ShoppingCartRepository) EditQuantity(c context.Context, model *models.ShoppingCart) (res *string, err error) {
+	statement := `UPDATE cart SET 
+	qty = $1 WHERE id = $2 RETURNING id`
+
+	err = repository.DB.QueryRowContext(c, statement, model.Qty, model.ID).Scan(&res)
+	if err != nil {
+		return res, err
+	}
+	return res, err
+}
+
+// EditByCartID ...
+func (repository ShoppingCartRepository) EditByCartID(c context.Context, cartID string, model *models.ShoppingCart) (res *string, err error) {
+	statement := `UPDATE cart SET 
+	item_id = $1, uom_id = $2, price = $3, modified_date = $4, 
+	modified_by = $5, qty = $6 ,stock_qty = $7 ,total_price = $8 WHERE id = $9 RETURNING id`
+
+	err = repository.DB.QueryRowContext(c, statement, model.ItemID, model.UomID,
+		model.Price, model.ModifiedAt, model.ModifiedBy, model.Qty, model.StockQty, model.TotalPrice, cartID).Scan(&res)
 	if err != nil {
 		return res, err
 	}

@@ -181,6 +181,43 @@ func (uc ShoppingCartUC) MultipleEdit(c context.Context, data *[]requests.Shoppi
 	return res, err
 }
 
+func (uc ShoppingCartUC) MultipleEditByCartID(c context.Context, data *[]requests.ShoppingCartRequest) (res []models.ShoppingCart, err error) {
+
+	repo := repository.NewShoppingCartRepository(uc.DB)
+
+	var listobjectData []models.ShoppingCart
+
+	for _, input := range *data {
+
+		now := time.Now().UTC()
+		strnow := now.Format(time.RFC3339)
+		ShoppingcartOject := models.ShoppingCart{
+			ID:         &input.ID,
+			CustomerID: &input.CustomerID,
+			ItemID:     &input.ItemID,
+			UomID:      &input.UomID,
+			ModifiedBy: &input.CustomerID,
+			ModifiedAt: &strnow,
+			Qty:        &input.Qty,
+			StockQty:   &input.StockQty,
+			Price:      &input.Price,
+			// TotalPrice: &input.TotalPrice,
+		}
+		ShoppingcartOject.ID, err = repo.EditQuantity(c, &ShoppingcartOject)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+			return res, err
+		}
+		var objectData models.ShoppingCart
+		objectData = ShoppingcartOject
+		listobjectData = append(listobjectData, objectData)
+	}
+
+	res = listobjectData
+
+	return res, err
+}
+
 func (uc ShoppingCartUC) MultipleDelete(c context.Context, data *[]requests.ShoppingCartRequest) (res []models.ShoppingCart, err error) {
 
 	repo := repository.NewShoppingCartRepository(uc.DB)
