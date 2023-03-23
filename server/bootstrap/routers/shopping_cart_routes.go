@@ -32,6 +32,7 @@ func (route ShoppingCartRoutes) RegisterRoute() {
 	r.Post("/", handler.Add)
 	r.Post("/checkout", handler.CheckOut)
 	r.Put("/:customer_id", handler.MultipleEdit)
+	r.Put("/quantity/cart_id/:cart_id", handler.MultipleEditByCartID)
 	r.Delete("/:customer_id", handler.MultipleDelete)
 	r.Delete("/id/:id", handler.Delete)
 	// r.Post("/databreakdown/", handler.AddAll)
