@@ -119,19 +119,22 @@ func (h *ShoppingCartHandler) Add(ctx *fiber.Ctx) error {
 func (h *ShoppingCartHandler) MultipleEdit(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
+	fmt.Println("tes")
 	listInput := new([]requests.ShoppingCartRequest)
 	if err := ctx.BodyParser(listInput); err != nil {
 		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
 	}
 
-	if err := h.Validator.Struct(listInput); err != nil {
-		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
-		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+	for _, input := range *listInput {
+		if err := h.Validator.Struct(input); err != nil {
+			errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
+			return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+		}
 	}
 
 	uc := usecase.ShoppingCartUC{ContractUC: h.ContractUC}
 	res, err := uc.MultipleEdit(c, listInput)
-
+	fmt.Println("tes 2")
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
