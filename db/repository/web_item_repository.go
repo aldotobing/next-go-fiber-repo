@@ -91,7 +91,7 @@ func (repository WebItemRepository) SelectAll(c context.Context, parameter model
 	}
 
 	statement := models.WebItemSelectStatement + ` ` + models.WebItemWhereStatement +
-		` AND def.hide IN (0, 1) and def."active" = 1
+		` AND def.hide IN (0, 1) and def.active IN (0, 1)
 		AND (LOWER(def."_name") LIKE $1 OR LOWER(def."code") LIKE $1) ` +
 		conditionString +
 		` ORDER BY ` +
