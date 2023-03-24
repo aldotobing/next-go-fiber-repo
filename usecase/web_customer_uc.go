@@ -71,7 +71,21 @@ func (uc WebCustomerUC) FindByID(c context.Context, parameter models.WebCustomer
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
 	}
-	uc.BuildBody(&res)
+
+	if res.CustomerProfilePicture == nil ||
+		res.CustomerName == nil ||
+		res.CustomerBranchName == nil ||
+		res.CustomerBranchCode == nil ||
+		res.CustomerPhone == nil ||
+		res.CustomerBranchPicPhoneNo == nil ||
+		res.CustomerReligion == nil ||
+		res.CustomerBirthDate == nil ||
+		res.CustomerNik == nil ||
+		res.CustomerPhotoKtp == nil {
+		res.CustomerProfileStatus = &models.CustomerProfileStatusIncomplete
+	} else {
+		res.CustomerProfileStatus = &models.CustomerProfileStatusComplete
+	}
 
 	return res, err
 }

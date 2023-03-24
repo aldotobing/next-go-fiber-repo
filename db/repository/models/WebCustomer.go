@@ -54,6 +54,7 @@ type WebCustomer struct {
 	CustomerUserID           *string `json:"customer_user_id"`
 	CustomerUserName         *string `json:"customer_user_name"`
 	CustomerGender           *string `json:"customer_gender"`
+	CustomerProfileStatus    *string `json:"customer_profile_status"`
 }
 
 // CustomerParameter ...
@@ -81,6 +82,10 @@ var (
 
 	//CustomerGenderList ...
 	CustomerGenderList = []string{"male", "female"}
+
+	//CustomerProfileStatusComplete ...
+	CustomerProfileStatusComplete   = "Lengkap"
+	CustomerProfileStatusIncomplete = "Tidak Lengkap"
 
 	// CustomerSelectStatement ...
 
