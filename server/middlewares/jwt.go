@@ -114,15 +114,22 @@ func (jwtMiddleware JwtMiddleware) VerifyUser(ctx *fiber.Ctx) (err error) {
 
 // VerifyBasic ...
 func (jwtMiddleware JwtMiddleware) VerifySignature(ctx *fiber.Ctx) (err error) {
-	sha_512 := sha512.Sum512([]byte("BMRI_SIDO"))
+	// fmt.Println(ctx.Body())
+	basicCode := `888`
+	codeBase := string(ctx.Body()[:])
+	MandiriCode := `BMRI_SIDO`
+	finalCode := basicCode + `:` + codeBase + `:` + MandiriCode
+	sha_512 := sha512.Sum512([]byte(finalCode))
 	basic := fmt.Sprintf("%x", sha_512)
+	// fmt.Println("res ", codeBase)
+	// fmt.Println("code nya" + basic)
 
 	header := ctx.Get("Authorization")
-	if !strings.Contains(header, "Basic") {
+	if !strings.Contains(header, "signature") {
 		logruslogger.Log(logruslogger.WarnLevel, helper.HeaderNotPresent, functioncaller.PrintFuncName(), "middleware-jwt-header")
 		return errors.New(helper.HeaderNotPresent)
 	}
-	token := strings.Replace(header, "Basic ", "", -1)
+	token := strings.Replace(header, "signature ", "", -1)
 	if token != basic {
 		logruslogger.Log(logruslogger.WarnLevel, basic, functioncaller.PrintFuncName(), "invalid-token")
 		return errors.New(helper.UnexpectedClaims)
