@@ -84,12 +84,14 @@ func (uc ItemDetailsUC) FindByIDV2(c context.Context, parameter models.ItemDetai
 
 	// Find Lowest Price and lowest conversion
 	var lowestPrice, lowestConversion float64
+	var lowestUOMName string
 	for _, datum := range data {
 		price, _ := strconv.ParseFloat(*datum.ItemDetailsPrice, 64)
 		conversion, _ := strconv.ParseFloat(*datum.UomLineConversion, 64)
 		if price < lowestPrice || lowestPrice == 0 {
 			lowestPrice = price
 			lowestConversion = conversion
+			lowestUOMName = *datum.UomName
 		}
 	}
 
@@ -129,6 +131,7 @@ func (uc ItemDetailsUC) FindByIDV2(c context.Context, parameter models.ItemDetai
 		ItemDetailsCategoryId:   data[0].ItemDetailsCategoryId,
 		ItemDetailsCategoryName: data[0].ItemDetailsCategoryName,
 		ItemDetailsPicture:      data[0].ItemDetailsPicture,
+		LowestUOMName:           &lowestUOMName,
 		Uom:                     uoms,
 		PriceListVersionId:      &parameter.PriceListVersionId,
 	}

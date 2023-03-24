@@ -8,6 +8,7 @@ type ItemDetailsVM struct {
 	ItemDetailsCategoryId   *string `json:"item_category_id"`
 	ItemDetailsCategoryName *string `json:"item_category_name"`
 	ItemDetailsPicture      *string `json:"item_picture"`
+	LowestUOMName           *string `json:"lowest_uom_name"`
 	Uom                     []Uom   `json:"uom"`
 	PriceListVersionId      *string `json:"price_list_version_id"`
 }
