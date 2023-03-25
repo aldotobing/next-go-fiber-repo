@@ -21,6 +21,7 @@ type DashboardWebRegionDetail struct {
 	RegionGroupName          *string `json:"region_group_name_detail"`
 	BranchID                 *string `json:"branch_id_detail"`
 	BranchName               *string `json:"branch_name_detail"`
+	BranchCode               *string `json:"branch_code_detail"`
 	TotalVisitUser           *string `json:"total_visit_user_detail"`
 	TotalRepeatUser          *string `json:"total_repeat_order_user_detail"`
 	TotalOrderUser           *string `json:"total_order_user_detail"`
@@ -31,12 +32,18 @@ type DashboardWebRegionDetail struct {
 }
 
 type DashboardWebBranchDetail struct {
-	CustomerID      *string `json:"customer_id_detail"`
-	CustomerName    *string `json:"customer_name_detail"`
-	TotalRepeatUser *string `json:"total_repeat_order_user_customer_detail"`
-	TotalOrderUser  *string `json:"total_order_user_customer_detail"`
-	TotalInvoice    *string `json:"total_invoice_user_customer_detail"`
-	TotalCheckin    *string `json:"total_checkin_user_customer_detail"`
+	CustomerID              *string `json:"customer_id_detail"`
+	CustomerName            *string `json:"customer_name_detail"`
+	CustomerCode            *string `json:"customer_code_detail"`
+	CustomerBranchName      *string `json:"customer_branch_name_detail"`
+	CustomerBranchCode      *string `json:"customer_branch_code_detail"`
+	CustomerRegionName      *string `json:"customer_region_name_detail"`
+	CustomerRegionGroupName *string `json:"customer_region_group_name_detail"`
+	CustomerTypeName        *string `json:"customer_type_name_detail"`
+	TotalRepeatUser         *string `json:"total_repeat_order_user_customer_detail"`
+	TotalOrderUser          *string `json:"total_order_user_customer_detail"`
+	TotalInvoice            *string `json:"total_invoice_user_customer_detail"`
+	TotalCheckin            *string `json:"total_checkin_user_customer_detail"`
 }
 
 // DashboardWebParameter ...

@@ -26,17 +26,30 @@ func (h *DashboardWebHandler) GetData(ctx *fiber.Ctx) error {
 	uc := usecase.DashboardWebUC{ContractUC: h.ContractUC}
 	res, err := uc.GetData(c, parameter)
 
-	for i, object := range res {
-		detail, errdetail := uc.GetRegionDetailData(c, models.DashboardWebRegionParameter{
-			GroupID:   *object.RegionGroupID,
-			StartDate: ctx.Query("start_date"),
-			EndDate:   ctx.Query("end_date"),
-		})
-		if errdetail == nil {
-			res[i].DetailData = detail
-		}
+	// for i, object := range res {
+	// 	detail, errdetail := uc.GetRegionDetailData(c, models.DashboardWebRegionParameter{
+	// 		GroupID:   *object.RegionGroupID,
+	// 		StartDate: ctx.Query("start_date"),
+	// 		EndDate:   ctx.Query("end_date"),
+	// 	})
+	// 	if errdetail == nil {
+	// 		res[i].DetailData = detail
+	// 	}
 
-	}
+	// }
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *DashboardWebHandler) GetRegionDetailData(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	uc := usecase.DashboardWebUC{ContractUC: h.ContractUC}
+	res, err := uc.GetRegionDetailData(c, models.DashboardWebRegionParameter{
+		GroupID:   ctx.Query("group_id"),
+		StartDate: ctx.Query("start_date"),
+		EndDate:   ctx.Query("end_date"),
+	})
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
