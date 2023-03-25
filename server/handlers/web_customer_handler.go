@@ -17,6 +17,7 @@ import (
 	"nextbasis-service-v-0.1/pkg/str"
 	"nextbasis-service-v-0.1/server/requests"
 	"nextbasis-service-v-0.1/usecase"
+	"nextbasis-service-v-0.1/usecase/viewmodel"
 )
 
 // WebCustomerHandler ...
@@ -43,13 +44,13 @@ func (h *WebCustomerHandler) SelectAll(ctx *fiber.Ctx) error {
 		ListObject []models.WebCustomer `json:"list_customer"`
 	}
 
-	ObjectData := new(StructObject)
+	objectData := new(StructObject)
 
 	if res != nil {
-		ObjectData.ListObject = res
+		objectData.ListObject = res
 	}
 
-	return h.SendResponse(ctx, ObjectData, nil, err, 0)
+	return h.SendResponse(ctx, objectData, nil, err, 0)
 }
 
 // FindAll ...
@@ -69,16 +70,16 @@ func (h *WebCustomerHandler) FindAll(ctx *fiber.Ctx) error {
 	res, meta, err := uc.FindAll(c, parameter)
 
 	type StructObject struct {
-		ListObject []models.WebCustomer `json:"list_customer"`
+		ListObject []viewmodel.CustomerVM `json:"list_customer"`
 	}
 
-	ObjectData := new(StructObject)
+	objectData := new(StructObject)
 
 	if res != nil {
-		ObjectData.ListObject = res
+		objectData.ListObject = res
 	}
 
-	return h.SendResponse(ctx, ObjectData, meta, err, 0)
+	return h.SendResponse(ctx, objectData, meta, err, 0)
 }
 
 // FindByID ...
@@ -99,16 +100,16 @@ func (h *WebCustomerHandler) FindByID(ctx *fiber.Ctx) error {
 		ListObject models.WebCustomer `json:"customer"`
 	}
 
-	ObjectData := new(StructObject)
+	objectData := new(StructObject)
 
-	ObjectData.ListObject = res
+	objectData.ListObject = res
 
 	target := h.FetchVisitDay(parameter)
 	if target != "" {
-		ObjectData.ListObject.VisitDay = &target
+		objectData.ListObject.VisitDay = &target
 	}
 
-	return h.SendResponse(ctx, ObjectData, nil, err, 0)
+	return h.SendResponse(ctx, objectData, nil, err, 0)
 }
 
 func (h *WebCustomerHandler) FetchVisitDay(params models.WebCustomerParameter) string {
@@ -139,12 +140,12 @@ func (h *WebCustomerHandler) FetchVisitDay(params models.WebCustomerParameter) s
 		VisitDay string `json:"visit_day"`
 	}
 
-	ObjectData := new(resutlData)
+	objectData := new(resutlData)
 
 	// var responseObject http.Response
-	json.Unmarshal(bodyBytes, &ObjectData)
+	json.Unmarshal(bodyBytes, &objectData)
 
-	return ObjectData.VisitDay
+	return objectData.VisitDay
 }
 
 // Edit ...
