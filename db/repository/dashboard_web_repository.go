@@ -57,7 +57,7 @@ func (repository DashboardWebRepository) scanRows(rows *sql.Rows) (res models.Da
 // Scan rows
 func (repository DashboardWebRepository) scanRegionDetailRows(rows *sql.Rows) (res models.DashboardWebRegionDetail, err error) {
 	err = rows.Scan(
-		&res.BranchID, &res.BranchName, &res.RegionID, &res.RegionName,
+		&res.BranchID, &res.BranchCode, &res.BranchName, &res.RegionID, &res.RegionName,
 		&res.RegionGroupID, &res.RegionGroupName,
 		&res.TotalRegisteredUser, &res.TotalRepeatUser, &res.TotalOrderUser,
 		&res.TotalInvoice, &res.TotalVisitUser, &res.CustomerCountRepeatOrder,
@@ -74,7 +74,11 @@ func (repository DashboardWebRepository) scanRegionDetailRows(rows *sql.Rows) (r
 // Scan rows
 func (repository DashboardWebRepository) scanBranchCustomerDetailRows(rows *sql.Rows) (res models.DashboardWebBranchDetail, err error) {
 	err = rows.Scan(
-		&res.CustomerID, &res.CustomerName, &res.TotalRepeatUser, &res.TotalOrderUser,
+		&res.CustomerID, &res.CustomerName, &res.CustomerCode,
+		&res.CustomerBranchName, &res.CustomerBranchCode,
+		&res.CustomerRegionName, &res.CustomerRegionGroupName,
+		&res.CustomerTypeName,
+		&res.TotalRepeatUser, &res.TotalOrderUser,
 		&res.TotalInvoice, &res.TotalCheckin,
 	)
 	if err != nil {
