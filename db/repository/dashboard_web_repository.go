@@ -79,7 +79,7 @@ func (repository DashboardWebRepository) scanBranchCustomerDetailRows(rows *sql.
 		&res.CustomerRegionName, &res.CustomerRegionGroupName,
 		&res.CustomerTypeName,
 		&res.TotalRepeatUser, &res.TotalOrderUser,
-		&res.TotalInvoice, &res.TotalCheckin, &res.CustomerClassName,
+		&res.TotalInvoice, &res.TotalCheckin, &res.CustomerClassName, &res.CustomerCityName,
 	)
 	if err != nil {
 
