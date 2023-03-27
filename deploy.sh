@@ -21,6 +21,8 @@ echo "Entering server directory to start main.go"
 sleep 2
 cd /home/ec2-user/nextbasis-service-golang/server && echo OK || echo Failed
 pwd 
+echo "Clearing nohup.out log file ..."
+cat /dev/null > nohup.out && echo Cleared! || echo Failed
 echo "Starting GO Service ..."
 sleep 2
 nohup bash -c "go run main.go 2>&1 &"
