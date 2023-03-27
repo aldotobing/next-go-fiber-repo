@@ -44,6 +44,7 @@ type DashboardWebBranchDetail struct {
 	TotalOrderUser          *string `json:"total_order_user_customer_detail"`
 	TotalInvoice            *string `json:"total_invoice_user_customer_detail"`
 	TotalCheckin            *string `json:"total_checkin_user_customer_detail"`
+	CustomerClassName       *string `json:"customer_class_name_detail"`
 }
 
 // DashboardWebParameter ...
