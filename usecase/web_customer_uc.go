@@ -20,7 +20,74 @@ type WebCustomerUC struct {
 }
 
 // BuildBody ...
-func (uc WebCustomerUC) BuildBody(res *models.WebCustomer) {
+func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.CustomerVM) {
+	if data.CustomerProfilePicture == nil ||
+		data.CustomerName == nil ||
+		data.CustomerBranchName == nil ||
+		data.CustomerBranchCode == nil ||
+		data.CustomerPhone == nil ||
+		data.CustomerBranchPicPhoneNo == nil ||
+		data.CustomerReligion == nil ||
+		data.CustomerBirthDate == nil ||
+		data.CustomerNik == nil ||
+		data.CustomerPhotoKtp == nil {
+		res.CustomerProfileStatus = &models.CustomerProfileStatusIncomplete
+	} else {
+		res.CustomerProfileStatus = &models.CustomerProfileStatusComplete
+	}
+
+	res.ID = data.ID
+	res.Code = data.Code
+	res.CustomerName = data.CustomerName
+	res.CustomerProfilePicture = data.CustomerProfilePicture
+	res.CustomerActiveStatus = data.CustomerActiveStatus
+	res.CustomerBirthDate = data.CustomerBirthDate
+	res.CustomerReligion = data.CustomerReligion
+	res.CustomerLatitude = data.CustomerLatitude
+	res.CustomerLongitude = data.CustomerLongitude
+	res.CustomerBranchCode = data.CustomerBranchCode
+	res.CustomerBranchName = data.CustomerBranchName
+	res.CustomerBranchArea = data.CustomerBranchArea
+	res.CustomerBranchAddress = data.CustomerAddress
+	res.CustomerBranchLat = data.CustomerBranchLat
+	res.CustomerBranchLng = data.CustomerBranchLng
+	res.CustomerBranchPicPhoneNo = data.CustomerBranchPicPhoneNo
+	res.CustomerRegionCode = data.CustomerRegionCode
+	res.CustomerRegionName = data.CustomerRegionName
+	res.CustomerRegionGroup = data.CustomerRegionGroup
+	res.CustomerEmail = data.CustomerEmail
+	res.CustomerCpName = data.CustomerCpName
+	res.CustomerAddress = data.CustomerAddress
+	res.CustomerPostalCode = data.CustomerPostalCode
+	res.CustomerProvinceID = data.CustomerProvinceID
+	res.CustomerProvinceName = data.CustomerProvinceName
+	res.CustomerCityID = data.CustomerCityID
+	res.CustomerCityName = data.CustomerCityName
+	res.CustomerDistrictID = data.CustomerDistrictID
+	res.CustomerDistrictName = data.CustomerDistrictName
+	res.CustomerSubdistrictID = data.CustomerSubdistrictID
+	res.CustomerSubdistrictName = data.CustomerSubdistrictName
+	res.CustomerSalesmanCode = data.CustomerSalesmanCode
+	res.CustomerSalesmanName = data.CustomerSalesmanName
+	res.CustomerSalesmanPhone = data.CustomerSalesmanPhone
+	res.CustomerSalesCycle = data.CustomerSalesCycle
+	res.CustomerTypeId = data.CustomerTypeId
+	res.CustomerTypeName = data.CustomerTypeName
+	res.CustomerPhone = data.CustomerPhone
+	res.CustomerPoint = data.CustomerPoint
+	res.GiftName = data.GiftName
+	res.Loyalty = data.Loyalty
+	res.VisitDay = data.VisitDay
+	res.CustomerTaxCalcMethod = data.CustomerTaxCalcMethod
+	res.CustomerBranchID = data.CustomerBranchID
+	res.CustomerSalesmanID = data.CustomerSalesmanID
+	res.CustomerNik = data.CustomerNik
+	res.CustomerPhotoKtp = data.CustomerPhotoKtp
+	res.CustomerLevelID = data.CustomerLevelID
+	res.CustomerLevel = data.CustomerLevel
+	res.CustomerUserID = data.CustomerUserID
+	res.CustomerUserName = data.CustomerUserName
+	res.CustomerGender = data.CustomerGender
 }
 
 // SelectAll ...
@@ -35,28 +102,26 @@ func (uc WebCustomerUC) SelectAll(c context.Context, parameter models.WebCustome
 		return res, err
 	}
 
-	for i := range res {
-		uc.BuildBody(&res[i])
-	}
-
 	return res, err
 }
 
 // FindAll ...
-func (uc WebCustomerUC) FindAll(c context.Context, parameter models.WebCustomerParameter) (res []models.WebCustomer, p viewmodel.PaginationVM, err error) {
+func (uc WebCustomerUC) FindAll(c context.Context, parameter models.WebCustomerParameter) (res []viewmodel.CustomerVM, p viewmodel.PaginationVM, err error) {
 	parameter.Offset, parameter.Limit, parameter.Page, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.WebCustomerOrderBy, models.WebCustomerOrderByrByString)
 
 	var count int
 	repo := repository.NewWebCustomerRepository(uc.DB)
-	res, count, err = repo.FindAll(c, parameter)
+	data, count, err := repo.FindAll(c, parameter)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, p, err
 	}
 
 	p = uc.setPaginationResponse(parameter.Page, parameter.Limit, count)
-	for i := range res {
-		uc.BuildBody(&res[i])
+	for i := range data {
+		var temp viewmodel.CustomerVM
+		uc.BuildBody(&data[i], &temp)
+		res = append(res, temp)
 	}
 
 	return res, p, err
@@ -71,7 +136,21 @@ func (uc WebCustomerUC) FindByID(c context.Context, parameter models.WebCustomer
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
 	}
-	uc.BuildBody(&res)
+
+	if res.CustomerProfilePicture == nil ||
+		res.CustomerName == nil ||
+		res.CustomerBranchName == nil ||
+		res.CustomerBranchCode == nil ||
+		res.CustomerPhone == nil ||
+		res.CustomerBranchPicPhoneNo == nil ||
+		res.CustomerReligion == nil ||
+		res.CustomerBirthDate == nil ||
+		res.CustomerNik == nil ||
+		res.CustomerPhotoKtp == nil {
+		res.CustomerProfileStatus = &models.CustomerProfileStatusIncomplete
+	} else {
+		res.CustomerProfileStatus = &models.CustomerProfileStatusComplete
+	}
 
 	return res, err
 }
