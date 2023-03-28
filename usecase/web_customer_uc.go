@@ -30,7 +30,8 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 		data.CustomerReligion == nil ||
 		data.CustomerBirthDate == nil ||
 		data.CustomerNik == nil ||
-		data.CustomerPhotoKtp == nil {
+		data.CustomerPhotoKtp == nil ||
+		data.CustomerProfilePicture == nil {
 		res.CustomerProfileStatus = &models.CustomerProfileStatusIncomplete
 	} else {
 		res.CustomerProfileStatus = &models.CustomerProfileStatusComplete
@@ -146,7 +147,8 @@ func (uc WebCustomerUC) FindByID(c context.Context, parameter models.WebCustomer
 		res.CustomerReligion == nil ||
 		res.CustomerBirthDate == nil ||
 		res.CustomerNik == nil ||
-		res.CustomerPhotoKtp == nil {
+		res.CustomerPhotoKtp == nil ||
+		res.CustomerProfilePicture == nil {
 		res.CustomerProfileStatus = &models.CustomerProfileStatusIncomplete
 	} else {
 		res.CustomerProfileStatus = &models.CustomerProfileStatusComplete
