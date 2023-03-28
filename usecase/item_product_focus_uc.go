@@ -86,6 +86,17 @@ func (uc ItemProductFocusUC) SelectAllV2(c context.Context, parameter models.Ite
 		return res, err
 	}
 
+	count, err := uc.CountByBranchID(c, *userData.CustomerBranchID)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "count_by_branch_id", c.Value("requestid"))
+		return res, err
+	}
+
+	if count == 0 {
+		customerBranchID := "1"
+		userData.CustomerBranchID = &customerBranchID
+	}
+
 	repo := repository.NewItemProductFocusRepository(uc.DB)
 	data, err := repo.SelectAllV2(c, parameter, *userData.CustomerBranchID, *userData.CustomerTypeId, *userData.CustomerPriceListID)
 	if err != nil {
@@ -144,6 +155,18 @@ func (uc ItemProductFocusUC) SelectAllV2(c context.Context, parameter models.Ite
 				Uom:              uoms,
 			})
 		}
+	}
+
+	return res, err
+}
+
+// CountByBranchID ...
+func (uc ItemProductFocusUC) CountByBranchID(c context.Context, customerBranchID string) (res int, err error) {
+	repo := repository.NewItemProductFocusRepository(uc.DB)
+	res, err = repo.CountByBranchID(c, customerBranchID)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
 	}
 
 	return res, err
