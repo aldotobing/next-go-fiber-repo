@@ -13,6 +13,7 @@ import (
 type IItemProductFocusRepository interface {
 	SelectAll(c context.Context, parameter models.ItemProductFocusParameter) ([]models.ItemProductFocus, error)
 	SelectAllV2(c context.Context, parameter models.ItemProductFocusParameter, branchID, customerTypeID, customerPriceListID string) ([]models.ItemProductFocusV2, error)
+	CountByBranchID(c context.Context, branchID string) (int, error)
 	FindAll(ctx context.Context, parameter models.ItemProductFocusParameter) ([]models.ItemProductFocus, int, error)
 	FindByID(c context.Context, parameter models.ItemProductFocusParameter) (models.ItemProductFocus, error)
 	// Add(c context.Context, model *models.ItemProductFocus) (*string, error)
@@ -157,6 +158,20 @@ func (repository ItemProductFocusRepository) SelectAllV2(c context.Context, para
 	}
 
 	return data, err
+}
+
+// CountByBranchID ...
+func (repository ItemProductFocusRepository) CountByBranchID(c context.Context, branchID string) (out int, err error) {
+	conditionString := `WHERE def.created_date IS not NULL `
+
+	conditionString += `AND DEF.BRANCH_ID = '` + branchID + `'`
+
+	statement := models.ItemProductFocusV2CountStatement + ` ` + conditionString
+	rows := repository.DB.QueryRowContext(c, statement)
+
+	err = rows.Scan(&out)
+
+	return
 }
 
 // FindAll ...

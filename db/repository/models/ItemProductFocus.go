@@ -111,6 +111,9 @@ AND IP.ITEM_ID = IUL.ITEM_ID`
 	JOIN ITEM_PRICE IP ON ip.item_id = iul.item_id and ip.uom_id = iul.uom_id  
 	left join TEMP_DATA TD on TD.ID = I.ID`
 
+	ItemProductFocusV2CountStatement = `SELECT count(*)
+	FROM PRODUCT_FOCUS DEF`
+
 	// ItemProductFocusWhereStatement ...
-	ItemProductFocusV2WhereStatement = ` WHERE def.created_date IS not NULL AND I.HIDE = 0 `
+	ItemProductFocusV2WhereStatement = ` WHERE def.created_date IS not NULL AND I.HIDE = 0`
 )
