@@ -92,15 +92,20 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 }
 
 // SelectAll ...
-func (uc WebCustomerUC) SelectAll(c context.Context, parameter models.WebCustomerParameter) (res []models.WebCustomer, err error) {
+func (uc WebCustomerUC) SelectAll(c context.Context, parameter models.WebCustomerParameter) (res []viewmodel.CustomerVM, err error) {
 	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(0, 0, parameter.By, parameter.Sort, models.WebCustomerOrderBy, models.WebCustomerOrderByrByString)
 
 	repo := repository.NewWebCustomerRepository(uc.DB)
-	res, err = repo.SelectAll(c, parameter)
-
+	data, err := repo.SelectAll(c, parameter)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
+	}
+
+	for i := range data {
+		var temp viewmodel.CustomerVM
+		uc.BuildBody(&data[i], &temp)
+		res = append(res, temp)
 	}
 
 	return res, err
