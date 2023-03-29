@@ -20,6 +20,7 @@ type CustomerTargetRoutes struct {
 func (route CustomerTargetRoutes) RegisterRoute() {
 	handler := handlers.CustomerTargetHandler{Handler: route.Handler}
 	handlerQuarter := handlers.CustomerTargetQuarterHandler{Handler: route.Handler}
+	handlerSemester := handlers.CustomerTargetSemesterHandler{Handler: route.Handler}
 	handlerYear := handlers.CustomerTargetYearHandler{Handler: route.Handler}
 	// jwtMiddleware := middlewares.JwtMiddleware{ContractUC: handler.ContractUC}
 
@@ -36,6 +37,12 @@ func (route CustomerTargetRoutes) RegisterRoute() {
 	rQuarter.Get("/", handlerQuarter.FindAll)
 	rQuarter.Get("/select", handlerQuarter.SelectAll)
 	// r.Get("/id/:customer_id", handler.SelectAll)
+
+	rSemester := route.RouterGroup.Group("/api/apps/customer/target/semester")
+	// r.Use(jwtMiddleware.VerifyUser)
+	rQuarter.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
+	rSemester.Get("/", handlerSemester.FindAll)
+	rSemester.Get("/select", handlerSemester.SelectAll)
 
 	rYear := route.RouterGroup.Group("/api/apps/customer/target/year")
 	// r.Use(jwtMiddleware.VerifyUser)

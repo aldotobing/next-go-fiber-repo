@@ -39,7 +39,13 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 	res.ID = data.ID
 	res.Code = data.Code
 	res.CustomerName = data.CustomerName
-	res.CustomerProfilePicture = data.CustomerProfilePicture
+
+	var profilePictureURL string
+	if *res.CustomerProfilePicture != "" {
+		profilePictureURL = models.CustomerImagePath + *data.CustomerProfilePicture
+	}
+	res.CustomerProfilePicture = &profilePictureURL
+
 	res.CustomerActiveStatus = data.CustomerActiveStatus
 	res.CustomerBirthDate = data.CustomerBirthDate
 	res.CustomerReligion = data.CustomerReligion
@@ -82,7 +88,13 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 	res.CustomerBranchID = data.CustomerBranchID
 	res.CustomerSalesmanID = data.CustomerSalesmanID
 	res.CustomerNik = data.CustomerNik
-	res.CustomerPhotoKtp = data.CustomerPhotoKtp
+
+	var photoktpURL string
+	if *res.CustomerPhotoKtp != "" {
+		photoktpURL = models.CustomerImagePath + *data.CustomerPhotoKtp
+	}
+	res.CustomerPhotoKtp = &photoktpURL
+
 	res.CustomerLevelID = data.CustomerLevelID
 	res.CustomerLevel = data.CustomerLevel
 	res.CustomerUserID = data.CustomerUserID

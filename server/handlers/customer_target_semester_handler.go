@@ -14,26 +14,26 @@ import (
 	"nextbasis-service-v-0.1/usecase"
 )
 
-// CustomerTargetQuarterHandler ...
-type CustomerTargetQuarterHandler struct {
+// CustomerTargetSemesterHandler ...
+type CustomerTargetSemesterHandler struct {
 	Handler
 }
 
 // SelectAll ...
-func (h *CustomerTargetQuarterHandler) SelectAll(ctx *fiber.Ctx) error {
+func (h *CustomerTargetSemesterHandler) SelectAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
-	parameter := models.CustomerTargetQuarterParameter{
+	parameter := models.CustomerTargetSemesterParameter{
 		ID:     ctx.Query("customer_id"),
 		Search: ctx.Query("search"),
 		By:     ctx.Query("by"),
 		Sort:   ctx.Query("sort"),
 	}
-	uc := usecase.CustomerTargetQuarterUC{ContractUC: h.ContractUC}
+	uc := usecase.CustomerTargetSemesterUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectAll(c, parameter)
 
 	type StructObject struct {
-		ListObjcet []models.CustomerTargetQuarter `json:"list_customer"`
+		ListObjcet []models.CustomerTargetSemester `json:"list_customer"`
 	}
 
 	ObjcetData := new(StructObject)
@@ -42,7 +42,7 @@ func (h *CustomerTargetQuarterHandler) SelectAll(ctx *fiber.Ctx) error {
 		target := h.FetchClientDataTarget(parameter)
 		if target != "" {
 			for i := range res {
-				res[i].CustomerTargetQuarter = &target
+				res[i].CustomerTargetSemester = &target
 			}
 		}
 		ObjcetData.ListObjcet = res
@@ -52,10 +52,10 @@ func (h *CustomerTargetQuarterHandler) SelectAll(ctx *fiber.Ctx) error {
 }
 
 // FindAll ...
-func (h *CustomerTargetQuarterHandler) FindAll(ctx *fiber.Ctx) error {
+func (h *CustomerTargetSemesterHandler) FindAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
-	parameter := models.CustomerTargetQuarterParameter{
+	parameter := models.CustomerTargetSemesterParameter{
 		ID:     ctx.Query("customer_id"),
 		Search: ctx.Query("search"),
 		Page:   str.StringToInt(ctx.Query("page")),
@@ -63,11 +63,11 @@ func (h *CustomerTargetQuarterHandler) FindAll(ctx *fiber.Ctx) error {
 		By:     ctx.Query("by"),
 		Sort:   ctx.Query("sort"),
 	}
-	uc := usecase.CustomerTargetQuarterUC{ContractUC: h.ContractUC}
+	uc := usecase.CustomerTargetSemesterUC{ContractUC: h.ContractUC}
 	res, meta, err := uc.FindAll(c, parameter)
 
 	type StructObject struct {
-		ListObject []models.CustomerTargetQuarter `json:"list_customer"`
+		ListObject []models.CustomerTargetSemester `json:"list_customer"`
 	}
 
 	ObjectData := new(StructObject)
@@ -79,7 +79,7 @@ func (h *CustomerTargetQuarterHandler) FindAll(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, ObjectData, meta, err, 0)
 }
 
-func (h *CustomerTargetQuarterHandler) FetchClientDataTarget(params models.CustomerTargetQuarterParameter) string {
+func (h *CustomerTargetSemesterHandler) FetchClientDataTarget(params models.CustomerTargetSemesterParameter) string {
 	jsonReq, err := json.Marshal(params)
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrv/rest/customertarget/data/1", bytes.NewBuffer(jsonReq))
@@ -104,9 +104,9 @@ func (h *CustomerTargetQuarterHandler) FetchClientDataTarget(params models.Custo
 	}
 
 	type resutlData struct {
-		QuartalTarget string `json:"quartal_target"`
-		CurrentTarget string `json:"current_target"`
-		AnualTarget   string `json:"anual_target"`
+		SemesterTarget string `json:"semester_target"`
+		CurrentTarget  string `json:"current_target"`
+		AnualTarget    string `json:"anual_target"`
 	}
 
 	ObjectData := new(resutlData)
@@ -114,25 +114,25 @@ func (h *CustomerTargetQuarterHandler) FetchClientDataTarget(params models.Custo
 	// var responseObject http.Response
 	json.Unmarshal(bodyBytes, &ObjectData)
 
-	return ObjectData.QuartalTarget
+	return ObjectData.SemesterTarget
 }
 
 // FindByID ...
-// func (h *CustomerTargetQuarterHandler) FindByID(ctx *fiber.Ctx) error {
+// func (h *CustomerTargetSemesterHandler) FindByID(ctx *fiber.Ctx) error {
 // 	c := ctx.Locals("ctx").(context.Context)
 
-// 	parameter := models.CustomerTargetQuarterParameter{
+// 	parameter := models.CustomerTargetSemesterParameter{
 // 		ID: ctx.Params("customer_id"),
 // 	}
 // 	if parameter.ID == "" {
 // 		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
 // 	}
 
-// 	uc := usecase.CustomerTargetQuarterUC{ContractUC: h.ContractUC}
+// 	uc := usecase.CustomerTargetSemesterUC{ContractUC: h.ContractUC}
 // 	res, err := uc.FindByID(c, parameter)
 
 // 	type StructObject struct {
-// 		ListObject models.CustomerTargetQuarter `json:"customer"`
+// 		ListObject models.CustomerTargetSemester `json:"customer"`
 // 	}
 
 // 	ObjectData := new(StructObject)
