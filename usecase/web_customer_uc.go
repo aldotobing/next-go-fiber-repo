@@ -21,17 +21,16 @@ type WebCustomerUC struct {
 
 // BuildBody ...
 func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.CustomerVM) {
-	if data.CustomerProfilePicture == nil ||
-		data.CustomerName == nil ||
-		data.CustomerBranchName == nil ||
-		data.CustomerBranchCode == nil ||
-		data.CustomerPhone == nil ||
-		data.CustomerBranchPicPhoneNo == nil ||
-		data.CustomerReligion == nil ||
-		data.CustomerBirthDate == nil ||
-		data.CustomerNik == nil ||
-		data.CustomerPhotoKtp == nil ||
-		data.CustomerProfilePicture == nil {
+	if res.CustomerProfilePicture == nil || *res.CustomerProfilePicture == "" ||
+		res.CustomerName == nil || *res.CustomerName == "" ||
+		res.CustomerBranchName == nil || *res.CustomerBranchName == "" ||
+		res.CustomerBranchCode == nil || *res.CustomerBranchCode == "" ||
+		res.CustomerPhone == nil || *res.CustomerPhone == "" ||
+		res.CustomerBranchPicPhoneNo == nil || *res.CustomerBranchPicPhoneNo == "" ||
+		res.CustomerReligion == nil || *res.CustomerReligion == "" ||
+		res.CustomerBirthDate == nil || *res.CustomerBirthDate == "" ||
+		res.CustomerNik == nil || *res.CustomerNik == "" ||
+		res.CustomerPhotoKtp == nil || *res.CustomerPhotoKtp == "" {
 		res.CustomerProfileStatus = &models.CustomerProfileStatusIncomplete
 	} else {
 		res.CustomerProfileStatus = &models.CustomerProfileStatusComplete
@@ -143,17 +142,16 @@ func (uc WebCustomerUC) FindByID(c context.Context, parameter models.WebCustomer
 		return res, err
 	}
 
-	if res.CustomerProfilePicture == nil ||
-		res.CustomerName == nil ||
-		res.CustomerBranchName == nil ||
-		res.CustomerBranchCode == nil ||
-		res.CustomerPhone == nil ||
-		res.CustomerBranchPicPhoneNo == nil ||
-		res.CustomerReligion == nil ||
-		res.CustomerBirthDate == nil ||
-		res.CustomerNik == nil ||
-		res.CustomerPhotoKtp == nil ||
-		res.CustomerProfilePicture == nil {
+	if res.CustomerProfilePicture == nil || *res.CustomerProfilePicture == "" ||
+		res.CustomerName == nil || *res.CustomerName == "" ||
+		res.CustomerBranchName == nil || *res.CustomerBranchName == "" ||
+		res.CustomerBranchCode == nil || *res.CustomerBranchCode == "" ||
+		res.CustomerPhone == nil || *res.CustomerPhone == "" ||
+		res.CustomerBranchPicPhoneNo == nil || *res.CustomerBranchPicPhoneNo == "" ||
+		res.CustomerReligion == nil || *res.CustomerReligion == "" ||
+		res.CustomerBirthDate == nil || *res.CustomerBirthDate == "" ||
+		res.CustomerNik == nil || *res.CustomerNik == "" ||
+		res.CustomerPhotoKtp == nil || *res.CustomerPhotoKtp == "" {
 		res.CustomerProfileStatus = &models.CustomerProfileStatusIncomplete
 	} else {
 		res.CustomerProfileStatus = &models.CustomerProfileStatusComplete
