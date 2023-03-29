@@ -66,19 +66,18 @@ func (repository CustomerTargetSemesterRepository) SelectAll(c context.Context, 
 	conditionStringQuarter := ``
 
 	/*
-		SET QUARTER
+		SET Semester
 	*/
-	month := time.Now().Month()
-	quarter := int(math.Ceil(float64(month) / 6))
+	semester := int(math.Ceil(float64(time.Now().Month()) / 6))
 
-	if quarter == 1 {
+	if semester == 1 {
 		conditionStringQuarter += ` and bmt._month in (1, 2, 3, 4, 5, 6) `
 	}
-	if quarter == 2 {
+	if semester == 2 {
 		conditionStringQuarter += ` and bmt._month in (7, 8, 9, 10, 11, 12) `
 	}
 	/*
-		END QUARTER
+		END Semester
 	*/
 
 	if parameter.ID != "" {
@@ -95,10 +94,6 @@ func (repository CustomerTargetSemesterRepository) SelectAll(c context.Context, 
 		` FROM CUSTOMER CUS WHERE CUS.ID = '` + parameter.ID + `'`
 
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
-
-	//print
-	fmt.Println(statement)
-
 	if err != nil {
 		return data, err
 	}
