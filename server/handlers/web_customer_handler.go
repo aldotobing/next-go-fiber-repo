@@ -41,7 +41,7 @@ func (h *WebCustomerHandler) SelectAll(ctx *fiber.Ctx) error {
 	res, err := uc.SelectAll(c, parameter)
 
 	type StructObject struct {
-		ListObject []models.WebCustomer `json:"list_customer"`
+		ListObject []viewmodel.CustomerVM `json:"list_customer"`
 	}
 
 	objectData := new(StructObject)
