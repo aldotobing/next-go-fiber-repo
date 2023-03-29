@@ -113,7 +113,6 @@ func (h *CustomerTargetQuarterHandler) FetchClientDataTarget(params models.Custo
 
 	// var responseObject http.Response
 	json.Unmarshal(bodyBytes, &ObjectData)
-	fmt.Println("data ", ObjectData)
 
 	return ObjectData.QuartalTarget
 }
