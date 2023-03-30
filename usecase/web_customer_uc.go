@@ -21,16 +21,16 @@ type WebCustomerUC struct {
 
 // BuildBody ...
 func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.CustomerVM) {
-	if res.CustomerProfilePicture == nil || *res.CustomerProfilePicture == "" ||
-		res.CustomerName == nil || *res.CustomerName == "" ||
-		res.CustomerBranchName == nil || *res.CustomerBranchName == "" ||
-		res.CustomerBranchCode == nil || *res.CustomerBranchCode == "" ||
-		res.CustomerPhone == nil || *res.CustomerPhone == "" ||
-		res.CustomerBranchPicPhoneNo == nil || *res.CustomerBranchPicPhoneNo == "" ||
-		res.CustomerReligion == nil || *res.CustomerReligion == "" ||
-		res.CustomerBirthDate == nil || *res.CustomerBirthDate == "" ||
-		res.CustomerNik == nil || *res.CustomerNik == "" ||
-		res.CustomerPhotoKtp == nil || *res.CustomerPhotoKtp == "" {
+	if data.CustomerProfilePicture == nil || *data.CustomerProfilePicture == "" ||
+		data.CustomerName == nil || *data.CustomerName == "" ||
+		data.CustomerBranchName == nil || *data.CustomerBranchName == "" ||
+		data.CustomerBranchCode == nil || *data.CustomerBranchCode == "" ||
+		data.CustomerPhone == nil || *data.CustomerPhone == "" ||
+		data.CustomerBranchPicPhoneNo == nil || *data.CustomerBranchPicPhoneNo == "" ||
+		data.CustomerReligion == nil || *data.CustomerReligion == "" ||
+		data.CustomerBirthDate == nil || *data.CustomerBirthDate == "" ||
+		data.CustomerNik == nil || *data.CustomerNik == "" ||
+		data.CustomerPhotoKtp == nil || *data.CustomerPhotoKtp == "" {
 		res.CustomerProfileStatus = &models.CustomerProfileStatusIncomplete
 	} else {
 		res.CustomerProfileStatus = &models.CustomerProfileStatusComplete
@@ -41,7 +41,7 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 	res.CustomerName = data.CustomerName
 
 	var profilePictureURL string
-	if *res.CustomerProfilePicture != "" {
+	if data.CustomerProfilePicture != nil && *data.CustomerProfilePicture != "" {
 		profilePictureURL = models.CustomerImagePath + *data.CustomerProfilePicture
 	}
 	res.CustomerProfilePicture = &profilePictureURL
@@ -90,7 +90,7 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 	res.CustomerNik = data.CustomerNik
 
 	var photoktpURL string
-	if *res.CustomerPhotoKtp != "" {
+	if data.CustomerPhotoKtp != nil && *data.CustomerPhotoKtp != "" {
 		photoktpURL = models.CustomerImagePath + *data.CustomerPhotoKtp
 	}
 	res.CustomerPhotoKtp = &photoktpURL
@@ -145,29 +145,16 @@ func (uc WebCustomerUC) FindAll(c context.Context, parameter models.WebCustomerP
 }
 
 // FindByID ...
-func (uc WebCustomerUC) FindByID(c context.Context, parameter models.WebCustomerParameter) (res models.WebCustomer, err error) {
+func (uc WebCustomerUC) FindByID(c context.Context, parameter models.WebCustomerParameter) (res viewmodel.CustomerVM, err error) {
 
 	repo := repository.NewWebCustomerRepository(uc.DB)
-	res, err = repo.FindByID(c, parameter)
+	datum, err := repo.FindByID(c, parameter)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
 	}
 
-	if res.CustomerProfilePicture == nil || *res.CustomerProfilePicture == "" ||
-		res.CustomerName == nil || *res.CustomerName == "" ||
-		res.CustomerBranchName == nil || *res.CustomerBranchName == "" ||
-		res.CustomerBranchCode == nil || *res.CustomerBranchCode == "" ||
-		res.CustomerPhone == nil || *res.CustomerPhone == "" ||
-		res.CustomerBranchPicPhoneNo == nil || *res.CustomerBranchPicPhoneNo == "" ||
-		res.CustomerReligion == nil || *res.CustomerReligion == "" ||
-		res.CustomerBirthDate == nil || *res.CustomerBirthDate == "" ||
-		res.CustomerNik == nil || *res.CustomerNik == "" ||
-		res.CustomerPhotoKtp == nil || *res.CustomerPhotoKtp == "" {
-		res.CustomerProfileStatus = &models.CustomerProfileStatusIncomplete
-	} else {
-		res.CustomerProfileStatus = &models.CustomerProfileStatusComplete
-	}
+	uc.BuildBody(&datum, &res)
 
 	return res, err
 }
