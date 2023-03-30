@@ -97,7 +97,7 @@ func (h *WebCustomerHandler) FindByID(ctx *fiber.Ctx) error {
 	res, err := uc.FindByID(c, parameter)
 
 	type StructObject struct {
-		ListObject models.WebCustomer `json:"customer"`
+		ListObject viewmodel.CustomerVM `json:"customer"`
 	}
 
 	objectData := new(StructObject)
