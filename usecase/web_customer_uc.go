@@ -20,7 +20,7 @@ type WebCustomerUC struct {
 }
 
 // BuildBody ...
-func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.CustomerVM) {
+func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.CustomerVM, birthdateFull bool) {
 	if data.CustomerProfilePicture == nil || *data.CustomerProfilePicture == "" ||
 		data.CustomerName == nil || *data.CustomerName == "" ||
 		data.CustomerBranchName == nil || *data.CustomerBranchName == "" ||
@@ -47,7 +47,15 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 	res.CustomerProfilePicture = &profilePictureURL
 
 	res.CustomerActiveStatus = data.CustomerActiveStatus
+
+	if data.CustomerBirthDate != nil && *data.CustomerBirthDate != "" && birthdateFull {
+		birthDate, _ := time.Parse("2006-01-02T15:04:05Z", *data.CustomerBirthDate)
+		birthDateString := birthDate.Format("02 January 2006")
+		data.CustomerBirthDate = &birthDateString
+	}
+
 	res.CustomerBirthDate = data.CustomerBirthDate
+
 	res.CustomerReligion = data.CustomerReligion
 	res.CustomerLatitude = data.CustomerLatitude
 	res.CustomerLongitude = data.CustomerLongitude
@@ -115,7 +123,8 @@ func (uc WebCustomerUC) SelectAll(c context.Context, parameter models.WebCustome
 
 	for i := range data {
 		var temp viewmodel.CustomerVM
-		uc.BuildBody(&data[i], &temp)
+
+		uc.BuildBody(&data[i], &temp, true)
 		res = append(res, temp)
 	}
 
@@ -137,7 +146,7 @@ func (uc WebCustomerUC) FindAll(c context.Context, parameter models.WebCustomerP
 	p = uc.setPaginationResponse(parameter.Page, parameter.Limit, count)
 	for i := range data {
 		var temp viewmodel.CustomerVM
-		uc.BuildBody(&data[i], &temp)
+		uc.BuildBody(&data[i], &temp, false)
 		res = append(res, temp)
 	}
 
@@ -154,7 +163,7 @@ func (uc WebCustomerUC) FindByID(c context.Context, parameter models.WebCustomer
 		return res, err
 	}
 
-	uc.BuildBody(&datum, &res)
+	uc.BuildBody(&datum, &res, false)
 
 	return res, err
 }
