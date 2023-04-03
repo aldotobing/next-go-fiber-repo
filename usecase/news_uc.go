@@ -93,3 +93,25 @@ func (uc NewsUC) Delete(c context.Context, id string) (res viewmodel.CommonDelet
 	return res, err
 
 }
+
+func (uc NewsUC) Edit(c context.Context, id string, data *requests.NewsRequest) (res models.News, err error) {
+	repo := repository.NewNewsRepository(uc.DB)
+	// now := time.Now().UTC()
+	// strnow := now.Format(time.RFC3339)
+	res = models.News{
+		ID:          &id,
+		Title:       &data.Title,
+		Description: &data.Description,
+		StartDate:   &data.StartDate,
+		EndDate:     &data.EndDate,
+		Active:      &data.Active,
+	}
+
+	res.ID, err = repo.Edit(c, &res)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	return res, err
+}
