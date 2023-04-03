@@ -28,5 +28,6 @@ func (route NewsRoutes) RegisterRoute() {
 	r.Get("/select", handler.SelectAll)
 	r.Post("/add", handler.Add)
 	r.Delete("/id/:id", handler.Delete)
+	r.Put("/id/:id", handler.Edit)
 
 }

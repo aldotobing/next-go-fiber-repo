@@ -18,7 +18,7 @@ type IVideoPromoteRepository interface {
 	// FindByDocumentNo(c context.Context, parameter models.SalesInvoiceParameter) (models.SalesInvoice, error)
 	// FindByCustomerId(c context.Context, parameter models.SalesInvoiceParameter) (models.SalesInvoice, error)
 	// Add(c context.Context, model *models.SalesInvoice) (*string, error)
-	// Edit(c context.Context, model *models.SalesInvoice) (*string, error)
+	Edit(c context.Context, model *models.VideoPromote) (*string, error)
 	Delete(c context.Context, id string) (string, error)
 }
 
@@ -140,6 +140,17 @@ func (repository VideoPromoteRepository) Delete(c context.Context, id string) (r
 
 	err = repository.DB.QueryRowContext(c, statement, id).Scan(&res)
 
+	if err != nil {
+		return res, err
+	}
+	return res, err
+}
+
+// Edit ...
+func (repository VideoPromoteRepository) Edit(c context.Context, model *models.VideoPromote) (res *string, err error) {
+	statement := `UPDATE video_promote SET start_date = $1, end_date = $2, title = $3, description = $4, active = $5, url =$6 WHERE id = $7 RETURNING id`
+
+	err = repository.DB.QueryRowContext(c, statement, model.StartDate, model.EndDate, model.Title, model.Description, model.Active, model.Url, model.ID).Scan(&res)
 	if err != nil {
 		return res, err
 	}

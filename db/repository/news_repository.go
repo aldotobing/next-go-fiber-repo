@@ -18,7 +18,7 @@ type INewsRepository interface {
 	// FindByDocumentNo(c context.Context, parameter models.SalesInvoiceParameter) (models.SalesInvoice, error)
 	// FindByCustomerId(c context.Context, parameter models.SalesInvoiceParameter) (models.SalesInvoice, error)
 	// Add(c context.Context, model *models.SalesInvoice) (*string, error)
-	// Edit(c context.Context, model *models.SalesInvoice) (*string, error)
+	Edit(c context.Context, model *models.News) (*string, error)
 	Delete(c context.Context, id string) (string, error)
 }
 
@@ -141,6 +141,17 @@ func (repository NewsRepository) Delete(c context.Context, id string) (res strin
 
 	err = repository.DB.QueryRowContext(c, statement, id).Scan(&res)
 
+	if err != nil {
+		return res, err
+	}
+	return res, err
+}
+
+// Edit ...
+func (repository NewsRepository) Edit(c context.Context, model *models.News) (res *string, err error) {
+	statement := `UPDATE news SET start_date = $1, end_date = $2, title = $3, description = $4, active = $5 WHERE id = $6 RETURNING id`
+
+	err = repository.DB.QueryRowContext(c, statement, model.StartDate, model.EndDate, model.Title, model.Description, model.Active, model.ID).Scan(&res)
 	if err != nil {
 		return res, err
 	}
