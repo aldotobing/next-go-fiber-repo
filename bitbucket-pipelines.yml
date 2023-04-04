@@ -38,3 +38,11 @@ pipelines:
                 # ANNOTATION_SUMMARY: '<string>' # Optional.
                 # ANNOTATION_DESCRIPTION: '<string>' # Optional.
                 DEBUG: "TRUE" # Optional.
+          after-script:
+            - ALERT_TYPE="success"
+            - if [[ $BITBUCKET_EXIT_CODE -ne 0 ]]; then ALERT_TYPE="error" ; fi
+            - pipe: atlassian/slack-notify:2.0.0
+              variables:
+                WEBHOOK_URL: $SLACK_WEB_HOOK_URL
+                MESSAGE: '"[${BITBUCKET_REPO_FULL_NAME}] branch : ${BITBUCKET_BRANCH} build has exited with status ${ALERT_TYPE}!"'
+
