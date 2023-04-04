@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/pkg/str"
@@ -14,6 +13,7 @@ type IDashboardWebRepository interface {
 	GetData(c context.Context, parameter models.DashboardWebParameter) ([]models.DashboardWeb, error)
 	GetRegionDetailData(c context.Context, parameter models.DashboardWebRegionParameter) ([]models.DashboardWebRegionDetail, error)
 	GetBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.DashboardWebBranchDetail, int, error)
+	GetAllBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.DashboardWebBranchDetail, error)
 }
 
 // DashboardWebRepository ...
@@ -29,7 +29,8 @@ func NewDashboardWebRepository(DB *sql.DB) IDashboardWebRepository {
 // Scan row
 func (repository DashboardWebRepository) scanRow(row *sql.Row) (res models.DashboardWeb, err error) {
 	err = row.Scan(
-		&res.RegionGroupID, &res.RegionGroupName, &res.TotalRegisteredUser, &res.TotalRepeatUser, &res.TotalOrderUser, &res.TotalInvoice, &res.TotalActiveUser,
+		&res.RegionGroupID, &res.RegionGroupName, &res.TotalRegisteredUser, &res.TotalRepeatUser, &res.TotalOrderUser, &res.TotalInvoice, &res.TotalVisitUser,
+		&res.CustomerCountRepeatOrder, &res.TotalActiveOutlet,
 	)
 
 	if err != nil {
@@ -42,7 +43,8 @@ func (repository DashboardWebRepository) scanRow(row *sql.Row) (res models.Dashb
 // Scan rows
 func (repository DashboardWebRepository) scanRows(rows *sql.Rows) (res models.DashboardWeb, err error) {
 	err = rows.Scan(
-		&res.RegionGroupID, &res.RegionGroupName, &res.TotalRegisteredUser, &res.TotalRepeatUser, &res.TotalOrderUser, &res.TotalInvoice, &res.TotalActiveUser,
+		&res.RegionGroupID, &res.RegionGroupName, &res.TotalRegisteredUser, &res.TotalRepeatUser, &res.TotalOrderUser, &res.TotalInvoice, &res.TotalVisitUser,
+		&res.CustomerCountRepeatOrder, &res.TotalActiveOutlet,
 	)
 	if err != nil {
 
@@ -55,10 +57,11 @@ func (repository DashboardWebRepository) scanRows(rows *sql.Rows) (res models.Da
 // Scan rows
 func (repository DashboardWebRepository) scanRegionDetailRows(rows *sql.Rows) (res models.DashboardWebRegionDetail, err error) {
 	err = rows.Scan(
-		&res.BranchID, &res.BranchName, &res.RegionID, &res.RegionName,
+		&res.BranchID, &res.BranchCode, &res.BranchName, &res.RegionID, &res.RegionName,
 		&res.RegionGroupID, &res.RegionGroupName,
 		&res.TotalRegisteredUser, &res.TotalRepeatUser, &res.TotalOrderUser,
-		&res.TotalInvoice, &res.TotalActiveUser,
+		&res.TotalInvoice, &res.TotalVisitUser, &res.CustomerCountRepeatOrder,
+		&res.TotalActiveOutlet,
 	)
 	if err != nil {
 
@@ -71,8 +74,12 @@ func (repository DashboardWebRepository) scanRegionDetailRows(rows *sql.Rows) (r
 // Scan rows
 func (repository DashboardWebRepository) scanBranchCustomerDetailRows(rows *sql.Rows) (res models.DashboardWebBranchDetail, err error) {
 	err = rows.Scan(
-		&res.CustomerID, &res.CustomerName, &res.TotalRepeatUser, &res.TotalOrderUser,
-		&res.TotalInvoice, &res.TotalCheckin,
+		&res.CustomerID, &res.CustomerName, &res.CustomerCode,
+		&res.CustomerBranchName, &res.CustomerBranchCode,
+		&res.CustomerRegionName, &res.CustomerRegionGroupName,
+		&res.CustomerTypeName,
+		&res.TotalRepeatUser, &res.TotalOrderUser,
+		&res.TotalInvoice, &res.TotalCheckin, &res.CustomerClassName, &res.CustomerCityName,
 	)
 	if err != nil {
 
@@ -127,15 +134,10 @@ func (repository DashboardWebRepository) GetRegionDetailData(c context.Context, 
 }
 
 func (repository DashboardWebRepository) GetBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) (data []models.DashboardWebBranchDetail, count int, err error) {
-	conditionString := ` WHERE def.created_date IS not NULL and def.user_id is not null and def.user_id in(select us.id from _user us join customer cs on cs.user_id = us.id where us.fcm_token is not null and length(trim(us.fcm_token))>0 ) `
 
-	if parameter.BarnchID != "" {
-		conditionString += ` AND def.branch_id = '` + parameter.BarnchID + `'`
-	}
-
-	query := models.DashboardWebBranchDetailSelectStatement + ` ` + conditionString + `
-		AND (LOWER(def."customer_name") LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
-	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
+	query := models.DashboardWebBranchDetailSelectStatement + ` OFFSET $4 LIMIT $5`
+	rows, err := repository.DB.Query(query, str.NullOrEmtyString(&parameter.BarnchID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate),
+		parameter.Offset, parameter.Limit)
 	if err != nil {
 		return data, count, err
 	}
@@ -153,12 +155,31 @@ func (repository DashboardWebRepository) GetBranchDetailCustomerData(ctx context
 		return data, count, err
 	}
 
-	query = `select 
-			count(*)
-			from customer def 
-			left join branch b on b.id = def.branch_id
-			left join region r on r.id = b.region_id ` + ` ` +
-		conditionString + ` AND (LOWER(def."customer_name") LIKE $1)`
-	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
+	query = ` select count(*) from os_fetch_dashborad_branchcustomerdata($1::integer,$2,$3,null,null,null) `
+	err = repository.DB.QueryRow(query, str.NullOrEmtyString(&parameter.BarnchID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate)).Scan(&count)
 	return data, count, err
+}
+
+func (repository DashboardWebRepository) GetAllBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) (data []models.DashboardWebBranchDetail, err error) {
+
+	query := models.DashboardWebBranchDetailSelectStatement
+	rows, err := repository.DB.Query(query, str.NullOrEmtyString(&parameter.BarnchID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
+	if err != nil {
+		return data, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		temp, err := repository.scanBranchCustomerDetailRows(rows)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
+	}
+	err = rows.Err()
+	if err != nil {
+		return data, err
+	}
+
+	return data, err
 }

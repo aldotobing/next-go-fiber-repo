@@ -78,6 +78,7 @@ func (repository WebCustomerRepository) scanRows(rows *sql.Rows) (res models.Web
 		&res.CustomerPhotoKtp,
 		&res.CustomerNik,
 		&res.CustomerLevel,
+		&res.CustomerLevelID,
 		&res.CustomerUserID,
 		&res.CustomerUserName,
 	)
@@ -139,6 +140,7 @@ func (repository WebCustomerRepository) scanRow(row *sql.Row) (res models.WebCus
 		&res.CustomerPhotoKtp,
 		&res.CustomerNik,
 		&res.CustomerLevel,
+		&res.CustomerLevelID,
 		&res.CustomerUserID,
 		&res.CustomerUserName,
 	)
@@ -162,7 +164,7 @@ func (repository WebCustomerRepository) SelectAll(c context.Context, parameter m
 	}
 
 	statement := models.WebCustomerSelectStatement + ` ` + models.WebCustomerWhereStatement +
-		` AND (LOWER(c."customer_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+		` AND (LOWER(c.customer_name) LIKE $1 or LOWER(c.customer_code) LIKE $1 ) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 
 	//print
@@ -198,7 +200,7 @@ func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter m
 	}
 
 	query := models.WebCustomerSelectStatement + ` ` + models.WebCustomerWhereStatement + ` ` + conditionString + `
-		AND (LOWER(c."customer_name") LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
+		AND (LOWER(c.customer_name) LIKE $1 or LOWER(c.customer_code) LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
 
 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
 	if err != nil {
@@ -219,7 +221,7 @@ func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter m
 	}
 
 	query = `SELECT COUNT(*) FROM "customer" c ` + models.WebCustomerWhereStatement + ` ` +
-		conditionString + ` AND (LOWER(c."customer_name") LIKE $1)`
+		conditionString + ` AND (LOWER(c.customer_name) LIKE $1 or LOWER(c.customer_code) LIKE $1 )`
 	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
 	return data, count, err
 }

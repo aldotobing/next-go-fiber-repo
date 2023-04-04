@@ -28,4 +28,6 @@ func (route ItemRoutes) RegisterRoute() {
 	r.Get("/select", handler.SelectAll)
 	r.Get("/id/:id", handler.FindByID)
 	r.Get("/except", handler.SelectAll)
+
+	r.Get("/v2/select", handler.SelectAllV2)
 }

@@ -54,6 +54,7 @@ type WebCustomer struct {
 	CustomerUserID           *string `json:"customer_user_id"`
 	CustomerUserName         *string `json:"customer_user_name"`
 	CustomerGender           *string `json:"customer_gender"`
+	CustomerProfileStatus    *string `json:"customer_profile_status"`
 }
 
 // CustomerParameter ...
@@ -82,6 +83,10 @@ var (
 	//CustomerGenderList ...
 	CustomerGenderList = []string{"male", "female"}
 
+	//CustomerProfileStatusComplete ...
+	CustomerProfileStatusComplete   = "Lengkap"
+	CustomerProfileStatusIncomplete = "Tidak Lengkap"
+
 	// CustomerSelectStatement ...
 
 	WebCustomerSelectStatement = `
@@ -91,7 +96,7 @@ var (
 		C.CUSTOMER_NAME AS CUST_NAME,
 		C.CUSTOMER_CP_NAME AS CUST_CP_NAME,
 		C.CUSTOMER_ADDRESS AS CUST_ADDRESS,
-		concat('` + CustomerImagePath + `',C.CUSTOMER_PROFILE_PICTURE) AS CUST_PROFILE_PICTURE,
+		C.CUSTOMER_PROFILE_PICTURE AS CUST_PROFILE_PICTURE,
 		C.CUSTOMER_EMAIL AS CUST_EMAIL,
 		C.CUSTOMER_BIRTHDATE AS BIRTHDATE,
 		C.CUSTOMER_RELIGION AS RELIGION,
@@ -133,9 +138,10 @@ var (
 		C.tax_calc_method as tax_calc_method,
 		C.branch_id as c_branch_id,
 		C.salesman_id as c_salesman_id,
-		concat('` + CustomerImagePath + `',C.customer_photo_ktp) AS CUST_KTP_PICTURE,
+		C.customer_photo_ktp AS CUST_KTP_PICTURE,
 		c.customer_nik,
 		cl._name as cus_level_name,
+		c.customer_level_id,
 		usr.id as user_id,
 		usr.login as user_name
 

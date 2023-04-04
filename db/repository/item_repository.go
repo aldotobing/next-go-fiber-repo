@@ -14,6 +14,7 @@ type IItemRepository interface {
 	SelectAll(c context.Context, parameter models.ItemParameter) ([]models.Item, error)
 	FindAll(ctx context.Context, parameter models.ItemParameter) ([]models.Item, int, error)
 	FindByID(c context.Context, parameter models.ItemParameter) (models.Item, error)
+	SelectAllV2(c context.Context, parameter models.ItemParameter) (data []models.ItemV2, err error)
 	// Add(c context.Context, model *models.Item) (*string, error)
 	// Edit(c context.Context, model *models.Item) (*string, error)
 	// Delete(c context.Context, id string, now time.Time) (string, error)
@@ -231,4 +232,68 @@ func (repository ItemRepository) FindByCategoryID(c context.Context, parameter m
 	}
 
 	return data, nil
+}
+
+// SelectAllV2 ...
+func (repository ItemRepository) SelectAllV2(c context.Context, parameter models.ItemParameter) (out []models.ItemV2, err error) {
+	conditionString := ``
+
+	if parameter.ID != "" {
+		conditionString += ` AND DEF.ID = '` + parameter.ID + `'`
+	}
+
+	if parameter.ItemCategoryId != "" {
+		if parameter.ItemCategoryId == "2" {
+			//KHUSUS TAC sendiri, tampilkan semua item dengan category TAC (TAC ANAK, BEBAS GULA, DLL)
+			conditionString += ` AND DEF.item_category_id IN (SELECT id FROM item_category WHERE lower (_name) LIKE '%tac%') `
+		} else {
+			conditionString += ` AND DEF.item_category_id = ` + parameter.ItemCategoryId + ``
+		}
+	}
+
+	if parameter.ExceptId != "" {
+		conditionString += ` AND DEF.id <> '` + parameter.ExceptId + `'`
+	}
+
+	if parameter.UomID != "" {
+		conditionString += ` AND IUL.UOM_ID = '` + parameter.UomID + `'`
+	}
+
+	if parameter.ItemCategoryName != "" {
+		conditionString += ` or (LOWER (ic."_name") like ` + `'%` + strings.ToLower(parameter.ItemCategoryName) + `%')`
+	}
+
+	if parameter.CustomerTypeId != "" && (parameter.CustomerTypeId != "7" && parameter.CustomerTypeId != "15") {
+		conditionString += ` AND def.id NOT IN (83, 307, 393) `
+	}
+
+	statement := models.ItemV2SelectStatement + conditionString +
+		`GROUP by def.id, td.MULTIPLY_DATA ` +
+		`ORDER BY ` + parameter.By + ` ` + parameter.Sort
+	rows, err := repository.DB.QueryContext(c, statement, parameter.PriceListVersionId, "%"+strings.ToLower(parameter.Search)+"%")
+	if err != nil {
+		return
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var temp models.ItemV2
+		err := rows.Scan(
+			&temp.ID,
+			&temp.Code,
+			&temp.Name,
+			&temp.Description,
+			&temp.ItemCategoryId,
+			&temp.ItemCategoryName,
+			&temp.AdditionalData,
+			&temp.MultiplyData,
+			&temp.ItemPicture,
+		)
+		if err != nil {
+			return out, err
+		}
+		out = append(out, temp)
+	}
+
+	return
 }

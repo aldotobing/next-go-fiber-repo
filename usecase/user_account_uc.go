@@ -94,7 +94,7 @@ func (uc UserAccountUC) Login(c context.Context, data *requests.UserAccountLogin
 	chkuser, _ := uc.FindByLoginName(c, models.UserAccountParameter{PhoneNo: data.PhoneNo, Code: CodeUser})
 	if chkuser.ID == "" {
 		logruslogger.Log(logruslogger.WarnLevel, helper.NameAlreadyExist, functioncaller.PrintFuncName(), "email", c.Value("requestid"))
-		return res, errors.New(helper.InvalidEmail)
+		return res, errors.New(helper.InvalidPhoneOrCode)
 	}
 	fmt.Println(&chkuser)
 	userOtpRequest := requests.UserOtpRequest{
@@ -128,7 +128,7 @@ func (uc UserAccountUC) Login(c context.Context, data *requests.UserAccountLogin
 			customerrepo := repository.NewCustomerRepository(uc.DB)
 			chkcustomer, errckeckcus := customerrepo.FindByCodeAndPhone(c, models.CustomerParameter{Code: *chkuser.LoginCode, Phone: data.PhoneNo})
 			if errckeckcus != nil {
-				return res, errors.New(helper.InvalidEmail)
+				return res, errors.New(helper.InvalidPhoneOrCode)
 			}
 
 			res.CustomerID = *chkcustomer.ID
@@ -148,7 +148,7 @@ func (uc UserAccountUC) Login(c context.Context, data *requests.UserAccountLogin
 			doctorrepo := repository.NewDoctorRepository(uc.DB)
 			chkdoctor, errckeckcdoc := doctorrepo.FindByCodeAndPhone(c, models.DoctorParameter{Code: *chkuser.LoginCode, Phone: data.PhoneNo})
 			if errckeckcdoc != nil {
-				return res, errors.New(helper.InvalidEmail)
+				return res, errors.New(helper.InvalidPhoneOrCode)
 			}
 			res.CustomerID = *chkdoctor.ID
 			res.CustomerName = *chkdoctor.DoctorName

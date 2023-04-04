@@ -22,6 +22,15 @@ type ShoppingCart struct {
 	TotalPrice       *string `json:"total_price"`
 }
 
+type ShoppingCartItemBonus struct {
+	ItemID      *string `json:"item_id"`
+	ItemName    *string `json:"item_name"`
+	ItemCode    *string `json:"item_code"`
+	UomName     *string `json:"uom_name"`
+	Qty         *string `json:"qty"`
+	ItemPicture *string `json:"item_picture"`
+}
+
 // ShoppingCartTotalPrice ...
 type ShoppingCheckouAble struct {
 	IsAble     *string `json:"is_able"`
@@ -39,6 +48,7 @@ type GroupedShoppingCart struct {
 // ShoppingCartParameter ...
 type ShoppingCartParameter struct {
 	ID             string `json:"shopping_cart_id"`
+	ListID         string `json:"shopping_cart_id_list"`
 	ListLine       string `json:"list_line"`
 	CustomerID     string `json:"customer_id"`
 	ItemCategoryID string `json:"item_category_id"`
@@ -79,6 +89,8 @@ var (
 	join uom uom on uom.id = def.uom_id
 	join item_category ic on ic.id=  it.item_category_id
 	`
+
+	ShoppingCartBonusSelectStatement = ` select * from download_chart_order_bonus_with_picture($1) `
 
 	// ShoppingCartWhereStatement ...
 	ShoppingCartWhereStatement = ` WHERE def.created_date IS not NULL `

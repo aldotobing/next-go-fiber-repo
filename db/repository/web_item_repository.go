@@ -14,6 +14,7 @@ type IWebItemRepository interface {
 	SelectAll(c context.Context, parameter models.WebItemParameter) ([]models.WebItem, error)
 	FindAll(ctx context.Context, parameter models.WebItemParameter) ([]models.WebItem, int, error)
 	FindByID(c context.Context, parameter models.WebItemParameter) (models.WebItem, error)
+	FindByCategoryID(c context.Context, categoryID string) ([]models.WebItemSelectByCategory, error)
 	// Add(c context.Context, model *models.Item) (*string, error)
 	Edit(c context.Context, model *models.WebItem) (*string, error)
 	// Delete(c context.Context, id string, now time.Time) (string, error)
@@ -90,7 +91,13 @@ func (repository WebItemRepository) SelectAll(c context.Context, parameter model
 	}
 
 	statement := models.WebItemSelectStatement + ` ` + models.WebItemWhereStatement +
-		` AND (LOWER(def."_name") LIKE $1 OR LOWER(def."code") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+		` AND def.hide IN (0, 1) and def.active IN (0, 1)
+		AND (LOWER(def."_name") LIKE $1 OR LOWER(def."code") LIKE $1) ` +
+		conditionString +
+		` ORDER BY ` +
+		parameter.By + ` ` +
+		parameter.Sort
+
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 
 	fmt.Println(statement)
@@ -172,16 +179,43 @@ func (repository WebItemRepository) FindByID(c context.Context, parameter models
 	return data, nil
 }
 
-func (repository WebItemRepository) FindByCategoryID(c context.Context, parameter models.WebItemParameter) (data models.WebItem, err error) {
-	statement := models.WebItemSelectStatement + ` WHERE def.created_date IS NOT NULL AND def.id = $1`
-	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
-
-	data, err = repository.scanRow(row)
+func (repository WebItemRepository) FindByCategoryID(c context.Context, categoryID string) (data []models.WebItemSelectByCategory, err error) {
+	statement := `SELECT 
+			DEF.ID AS item_id,
+			DEF.CODE AS item_code,
+			DEF._NAME AS item_name,
+			(concat('` + models.ItemImagePath + `',def.item_picture)) AS item_picture,
+			DEF.DESCRIPTION AS description,
+			array_to_string(array_agg(u."id" || '#sep#' || u."_name" || '#sep#' || iul.conversion order by iul."conversion"),'|') AS hashtags
+		FROM ITEM DEF
+		left join item_uom_line iul on iul.item_id = def.id 
+		left join uom u on u.id = iul.uom_id ` +
+		` WHERE def.created_date IS NOT NULL AND def.ITEM_CATEGORY_ID = $1 and def.hide = 0 and def.active = 1` +
+		`group by def.id
+		order by def.id asc`
+	rows, err := repository.DB.Query(statement, categoryID)
 	if err != nil {
-		return data, err
+		return
 	}
 
-	return data, nil
+	defer rows.Close()
+	for rows.Next() {
+		var temp models.WebItemSelectByCategory
+		err := rows.Scan(&temp.ID,
+			&temp.Code,
+			&temp.Name,
+			&temp.ItemPicture,
+			&temp.ItemDescription,
+			&temp.UOMDetail,
+		)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
+	}
+	err = rows.Err()
+
+	return
 }
 
 // Edit ...

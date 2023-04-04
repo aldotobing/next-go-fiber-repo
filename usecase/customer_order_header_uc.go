@@ -179,7 +179,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 				}
 				ordercount := len(orderline)
 				msgbody += `\n`
-				msgbody += `Total ` + strconv.Itoa(ordercount) + ` item, senilai ` + harga + ` (belum termasuk potongan/diskon bila ada program potongan/diskon) `
+				msgbody += `Total ` + strconv.Itoa(ordercount) + ` item, senilai ` + harga
 				msgbody += `\n`
 				msgbody += `\nTerima kasih atas pemesanan anda`
 				msgbody += `\n`
@@ -299,6 +299,7 @@ func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter mode
 					if errline == nil {
 						messageTemplate := ""
 						messageTitle := ""
+						salesmanmessageTemplate := ""
 						messageType := "1"
 						if *invoiceObject.Status == "voided" {
 							messageTemplate = helper.BuildVoidTransactionTemplate(currentOrder, orderline, useraccount)
@@ -338,7 +339,30 @@ func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter mode
 
 							}
 
+							if useraccount.CustomerSalesmanID != nil {
+								salesmannRepo := repository.NewSalesmanRepository(uc.DB)
+								customerSales, errcustsales := salesmannRepo.FindByID(c, models.SalesmanParameter{ID: *useraccount.CustomerSalesmanID})
+								if *invoiceObject.Status == "voided" {
+									salesmanmessageTemplate = helper.BuildVoidTransactionTemplateForSalesman(currentOrder, orderline, useraccount, customerSales)
+								} else if *invoiceObject.Status == "submitted" {
+									salesmanmessageTemplate = helper.BuildProcessTransactionTemplateForSalesman(currentOrder, orderline, useraccount, customerSales)
+								}
+								if errcustsales == nil {
+									if customerSales.PhoneNo != nil {
+										if salesmanmessageTemplate != "" {
+
+											senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*customerSales.PhoneNo, salesmanmessageTemplate)
+											if senDwaMessage != nil {
+												fmt.Println("sukses")
+											}
+										}
+
+									}
+								}
+							}
+
 						}
+
 					}
 
 				}
