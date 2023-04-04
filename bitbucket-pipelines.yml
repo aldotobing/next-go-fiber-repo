@@ -7,7 +7,7 @@ image: golang:1.18
 
 pipelines:
   branches:
-    rebuild:
+    billy-dev:
       #- parallel:
       - step:
           name: Test and Build
