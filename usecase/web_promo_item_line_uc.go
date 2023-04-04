@@ -97,6 +97,38 @@ func (uc WebPromoItemLineUC) Add(c context.Context, in *requests.WebPromoItemLin
 	return
 }
 
+func (uc WebPromoItemLineUC) AddByCategory(c context.Context, in *requests.WebPromoItemLineAddByCategoryRequest) (res []models.WebPromoItemLineBreakDown, err error) {
+
+	webItemUC := WebItemUC{ContractUC: uc.ContractUC}
+	itemData, err := webItemUC.FindByCategoryID(c, in.CategoryID)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	for i := range itemData {
+		res = append(res, models.WebPromoItemLineBreakDown{
+			PromoLineID: &in.PromoLineID,
+			ItemID:      itemData[i].ID,
+			UomID:       itemData[i].Uom[0].ID,
+			Qty:         &in.Qty,
+		})
+	}
+
+	repo := repository.NewWebPromoItemLineRepository(uc.DB)
+	data, err := repo.Add(c, res)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	for i, datum := range data {
+		res[i].ID = datum.ID
+	}
+
+	return
+}
+
 // Delete ...
 func (uc WebPromoItemLineUC) Delete(c context.Context, id string) (res viewmodel.CommonDeletedObjectVM, err error) {
 	repo := repository.NewWebPromoItemLineRepository(uc.DB)

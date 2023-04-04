@@ -26,5 +26,6 @@ func (route WebPromoItemLineRoutes) RegisterRoute() {
 	r.Get("/", handler.FindAll)
 	r.Get("/select", handler.SelectAll)
 	r.Post("/add", handler.Add)
+	r.Post("/add/by/category", handler.AddByCategory)
 	r.Delete("/delete/:id", handler.Delete)
 }
