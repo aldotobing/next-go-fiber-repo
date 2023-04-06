@@ -116,21 +116,36 @@ func (jwtMiddleware JwtMiddleware) VerifyUser(ctx *fiber.Ctx) (err error) {
 // VerifyBasic ...
 func (jwtMiddleware JwtMiddleware) VerifySignature(ctx *fiber.Ctx) (err error) {
 	// fmt.Println(ctx.Body())
-	basicCode := `888`
+	basicCid := `888`
 	codeBase := string(ctx.Body()[:])
 	MandiriCode := `BMRI_SIDO`
-	finalCode := basicCode + `:` + codeBase + `:` + MandiriCode
+	finalCode := basicCid + `:` + codeBase + `:` + MandiriCode
 
 	hashBody := []byte(finalCode)
 
 	hash := hmac.New(sha512.New, []byte("BMRI_SIDO"))
 	hash.Write(hashBody)
 	//	hash.Write(salt)
-	// fmt.Printf("\n\nHMAC-sha512: %x", hash.Sum(nil))
+	fmt.Printf("\n\nHMAC-sha512: %x", hash.Sum(nil))
 	basic := fmt.Sprintf("%x", hash.Sum(nil))
 
-	header := ctx.Get("Authorization")
-	if !strings.Contains(header, "signature") {
+	header := ctx.Get("signature")
+	cid := ctx.Get("cid")
+	// if !strings.Contains(header, "signature") {
+	// 	logruslogger.Log(logruslogger.WarnLevel, helper.HeaderNotPresent, functioncaller.PrintFuncName(), "middleware-jwt-header")
+	// 	return errors.New(helper.HeaderNotPresent)
+	// }
+	if &cid == nil || strings.Trim(cid, " ") == "" {
+		logruslogger.Log(logruslogger.WarnLevel, helper.CidNotPresent, functioncaller.PrintFuncName(), "middleware-jwt-header")
+		return errors.New(helper.CidNotPresent)
+	}
+
+	if cid != basicCid {
+		logruslogger.Log(logruslogger.WarnLevel, helper.UnexpectedCid, functioncaller.PrintFuncName(), "middleware-jwt-header")
+		return errors.New(helper.UnexpectedCid)
+	}
+
+	if &header == nil || strings.Trim(header, " ") == "" {
 		logruslogger.Log(logruslogger.WarnLevel, helper.HeaderNotPresent, functioncaller.PrintFuncName(), "middleware-jwt-header")
 		return errors.New(helper.HeaderNotPresent)
 	}
