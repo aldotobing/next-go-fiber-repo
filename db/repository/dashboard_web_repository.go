@@ -45,6 +45,7 @@ func (repository DashboardWebRepository) scanRows(rows *sql.Rows) (res models.Da
 	err = rows.Scan(
 		&res.RegionGroupID, &res.RegionGroupName, &res.TotalRegisteredUser, &res.TotalRepeatUser, &res.TotalOrderUser, &res.TotalInvoice, &res.TotalVisitUser,
 		&res.CustomerCountRepeatOrder, &res.TotalActiveOutlet,
+		&res.TotalOutlet,
 	)
 	if err != nil {
 
