@@ -12,6 +12,7 @@ type DashboardWeb struct {
 	DetailData               []DashboardWebRegionDetail `json:"detailed_data"`
 	CustomerCountRepeatOrder *string                    `json:"customer_count_repeat_order"`
 	TotalActiveOutlet        *string                    `json:"total_active_outlet"`
+	TotalOutlet              *string                    `json:"total_outlet"`
 }
 
 type DashboardWebRegionDetail struct {
@@ -29,6 +30,7 @@ type DashboardWebRegionDetail struct {
 	TotalRegisteredUser      *string `json:"total_registered_user_detail"`
 	CustomerCountRepeatOrder *string `json:"customer_count_repeat_order_detail"`
 	TotalActiveOutlet        *string `json:"total_active_outlet_detail"`
+	TotalOutlet              *string `json:"total_outlet"`
 }
 
 type DashboardWebBranchDetail struct {
