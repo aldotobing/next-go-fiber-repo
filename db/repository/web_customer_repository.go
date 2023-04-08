@@ -163,6 +163,10 @@ func (repository WebCustomerRepository) SelectAll(c context.Context, parameter m
 		conditionString += ` AND C.BRANCH_ID IN (SELECT BRANCH_ID FROM USER_BRANCH UB WHERE UB.USER_ID = ` + parameter.UserId + `) `
 	}
 
+	if parameter.BranchId != "" {
+		conditionString += ` AND C.BRANCH_ID= ` + parameter.BranchId
+	}
+
 	statement := models.WebCustomerSelectStatement + ` ` + models.WebCustomerWhereStatement +
 		` AND (LOWER(c.customer_name) LIKE $1 or LOWER(c.customer_code) LIKE $1 ) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
@@ -197,6 +201,10 @@ func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter m
 
 	if parameter.UserId != "" {
 		conditionString += ` AND C.BRANCH_ID IN (SELECT BRANCH_ID FROM USER_BRANCH UB WHERE UB.USER_ID = ` + parameter.UserId + `) `
+	}
+
+	if parameter.BranchId != "" {
+		conditionString += ` AND C.BRANCH_ID= ` + parameter.BranchId
 	}
 
 	query := models.WebCustomerSelectStatement + ` ` + models.WebCustomerWhereStatement + ` ` + conditionString + `
