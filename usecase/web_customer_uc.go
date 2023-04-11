@@ -21,16 +21,14 @@ type WebCustomerUC struct {
 
 // BuildBody ...
 func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.CustomerVM, birthdateFull bool) {
-	if data.CustomerProfilePicture == nil || *data.CustomerProfilePicture == "" ||
+	if data.CustomerNik == nil || *data.CustomerNik == "" ||
 		data.CustomerName == nil || *data.CustomerName == "" ||
-		data.CustomerBranchName == nil || *data.CustomerBranchName == "" ||
-		data.CustomerBranchCode == nil || *data.CustomerBranchCode == "" ||
-		data.CustomerPhone == nil || *data.CustomerPhone == "" ||
-		data.CustomerBranchPicPhoneNo == nil || *data.CustomerBranchPicPhoneNo == "" ||
-		data.CustomerReligion == nil || *data.CustomerReligion == "" ||
 		data.CustomerBirthDate == nil || *data.CustomerBirthDate == "" ||
-		data.CustomerNik == nil || *data.CustomerNik == "" ||
-		data.CustomerPhotoKtp == nil || *data.CustomerPhotoKtp == "" {
+		data.CustomerReligion == nil || *data.CustomerReligion == "" ||
+		data.CustomerPhotoKtp == nil || *data.CustomerPhotoKtp == "" ||
+		data.CustomerProfilePicture == nil || *data.CustomerProfilePicture == "" ||
+		data.CustomerPhone == nil || *data.CustomerPhone == "" ||
+		data.Code == nil || *data.Code == "" {
 		res.CustomerProfileStatus = &models.CustomerProfileStatusIncomplete
 	} else {
 		res.CustomerProfileStatus = &models.CustomerProfileStatusComplete
