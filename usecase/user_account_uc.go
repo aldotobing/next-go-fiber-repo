@@ -308,6 +308,7 @@ func (uc UserAccountUC) LoginBackEnd(c context.Context, data *requests.UserAccou
 	res.SalesmanID = chkuser.SalesmanID
 	res.SalesmanName = chkuser.SalesmanName
 	res.SalesmanCode = chkuser.SalesmanCode
+	res.RoleList = *chkuser.RoleIDList
 
 	return res, nil
 }
