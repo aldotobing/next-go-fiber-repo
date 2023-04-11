@@ -80,6 +80,7 @@ pipelines:
     billy-dev:
       - step: *test
       - step: *lint
+      - step: *security
 
   default:
     - step: *test
