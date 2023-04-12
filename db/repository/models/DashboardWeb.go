@@ -46,6 +46,7 @@ type DashboardWebBranchDetail struct {
 	TotalOrderUser          *string `json:"total_order_user_customer_detail"`
 	TotalInvoice            *string `json:"total_invoice_user_customer_detail"`
 	TotalCheckin            *string `json:"total_checkin_user_customer_detail"`
+	TotalAktifOutlet        *string `json:"total_aktif_outlet"`
 	CustomerClassName       *string `json:"customer_class_name_detail"`
 	CustomerCityName        *string `json:"customer_city_name_detail"`
 }
