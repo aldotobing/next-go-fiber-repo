@@ -169,44 +169,6 @@ func (h *TransactionVAHandler) GetTransactionByVaCode(ctx *fiber.Ctx) error {
 
 	ObjectData := new(InquiryResponseData)
 
-	if parameter.VACode == "8954102230400004" {
-		return nil
-	}
-
-	if parameter.VACode == "8954102230400005" {
-		ObjectData.InquiryResult.Status.ErrorCode = "87"
-		ObjectData.InquiryResult.Status.IsError = "true"
-		ObjectData.InquiryResult.Status.StatusDescription = "Provider Database Problem"
-		return h.SendBasicResponse(ctx, ObjectData, nil, nil, 0)
-	}
-
-	if parameter.VACode == "8954102230400006" {
-		ObjectData.InquiryResult.Status.ErrorCode = "91"
-		ObjectData.InquiryResult.Status.IsError = "true"
-		ObjectData.InquiryResult.Status.StatusDescription = "Link Down"
-		return h.SendBasicResponse(ctx, ObjectData, nil, nil, 0)
-	}
-
-	if parameter.VACode == "8954102230400007" {
-		ObjectData.InquiryResult.Status.ErrorCode = "89"
-		ObjectData.InquiryResult.Status.IsError = "true"
-		ObjectData.InquiryResult.Status.StatusDescription = "Time Out"
-		return h.SendBasicResponse(ctx, ObjectData, nil, nil, 0)
-	}
-
-	if parameter.VACode == "8954102230400008" {
-		ObjectData.InquiryResult.Status.ErrorCode = "01"
-		ObjectData.InquiryResult.Status.IsError = "true"
-		ObjectData.InquiryResult.Status.StatusDescription = "General Error"
-		return h.SendBasicResponse(ctx, ObjectData, nil, nil, 0)
-	}
-	if parameter.VACode == "8954102230400009" {
-		ObjectData.InquiryResult.Status.ErrorCode = "C0"
-		ObjectData.InquiryResult.Status.IsError = "true"
-		ObjectData.InquiryResult.Status.StatusDescription = "Bill Suspended"
-		return h.SendBasicResponse(ctx, ObjectData, nil, nil, 0)
-	}
-
 	uc := usecase.TransactionVAUC{ContractUC: h.ContractUC}
 	res, err := uc.FindByCode(c, parameter)
 
