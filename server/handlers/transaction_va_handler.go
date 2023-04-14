@@ -5,6 +5,7 @@ import (
 	"crypto/sha512"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -243,6 +244,10 @@ func (h *TransactionVAHandler) PaidTransactionByVaCode(ctx *fiber.Ctx) error {
 	ObjectData := new(InquiryResponseData)
 
 	if parameter.VACode == "8954102230400004" {
+
+		fmt.Println("before sleep")
+		time.Sleep(30 * time.Second)
+		fmt.Println("after sleep")
 		return nil
 	}
 
