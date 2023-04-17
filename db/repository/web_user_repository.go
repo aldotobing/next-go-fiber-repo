@@ -143,7 +143,7 @@ func (repository WebUserRepository) Add(c context.Context, model *models.WebUser
 		return res, err
 	}
 
-	UserID := &res
+	userID := res
 
 	parts := strings.Split(*model.UserRoleGroupIDList, ",")
 	if len(parts) >= 1 && parts[0] != "" {
@@ -151,12 +151,23 @@ func (repository WebUserRepository) Add(c context.Context, model *models.WebUser
 			linestatement := `INSERT INTO user_role_group (user_id,role_group_id,created_date, modified_date)
 					VALUES ($1,$2, now(),now()) RETURNING id`
 			var resLine string
-			err = transaction.QueryRowContext(c, linestatement, UserID, parts[pi]).Scan(&resLine)
+			err = transaction.QueryRowContext(c, linestatement, userID, parts[pi]).Scan(&resLine)
 			if err != nil {
 				return res, err
 			}
 		}
 	}
+
+	var inputUserBranchList string
+	for _, datum := range model.BranchIDList {
+		if inputUserBranchList == "" {
+			inputUserBranchList += `(` + *userID + `, ` + datum + `, NOW(), NOW())`
+		} else {
+			inputUserBranchList += `, (` + *userID + `, ` + datum + `, NOW(), NOW())`
+		}
+	}
+	userBranchStatement := `INSERT INTO user_branch (user_id, branch_id,created_date, modified_date) VALUES ` + inputUserBranchList
+	err = transaction.QueryRowContext(c, userBranchStatement).Err()
 
 	if err = transaction.Commit(); err != nil {
 		return res, err
