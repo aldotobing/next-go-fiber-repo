@@ -105,13 +105,11 @@ func (uc WebUserUC) Edit(c context.Context, id string, data *requests.WebUserReq
 		BranchIDList:        data.BranchIDList,
 	}
 
-	resID, err := repo.Edit(c, &res)
+	res.ID, err = repo.Edit(c, &res)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
 	}
-
-	res.ID = &resID
 
 	return res, err
 }
