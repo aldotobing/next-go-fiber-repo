@@ -156,17 +156,22 @@ func (repository WebUserRepository) Add(c context.Context, model *models.WebUser
 		}
 	}
 
-	var inputUserBranchList string
-	for _, datum := range model.BranchIDList {
-		if inputUserBranchList == "" {
-			inputUserBranchList += `(` + *res + `, ` + datum + `, NOW(), NOW())`
-		} else {
-			inputUserBranchList += `, (` + *res + `, ` + datum + `, NOW(), NOW())`
+	if len(model.BranchIDList) > 0 {
+		var inputUserBranchList string
+		for _, datum := range model.BranchIDList {
+			if inputUserBranchList == "" {
+				inputUserBranchList += `(` + *res + `, ` + datum + `, NOW(), NOW())`
+			} else {
+				inputUserBranchList += `, (` + *res + `, ` + datum + `, NOW(), NOW())`
+			}
+		}
+		userBranchStatement := `INSERT INTO user_branch (user_id, branch_id,created_date, modified_date) VALUES ` + inputUserBranchList
+		err = transaction.QueryRowContext(c, userBranchStatement).Err()
+		if err != nil {
+			transaction.Rollback()
+			return res, err
 		}
 	}
-	userBranchStatement := `INSERT INTO user_branch (user_id, branch_id,created_date, modified_date) VALUES ` + inputUserBranchList
-	err = transaction.QueryRowContext(c, userBranchStatement).Err()
-
 	if err = transaction.Commit(); err != nil {
 		return res, err
 	}
