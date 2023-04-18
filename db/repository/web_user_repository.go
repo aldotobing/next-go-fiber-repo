@@ -16,7 +16,7 @@ type IWebUserRepository interface {
 	FindAll(ctx context.Context, parameter models.WebUserParameter) ([]models.WebUser, int, error)
 	FindByID(c context.Context, parameter models.WebUserParameter) (models.WebUser, error)
 	Add(c context.Context, model *models.WebUser) (*string, error)
-	Edit(c context.Context, model *models.WebUser) (*string, error)
+	Edit(c context.Context, model *models.WebUser) (string, error)
 	Delete(c context.Context, id string, now time.Time) (*string, error)
 }
 
@@ -177,7 +177,7 @@ func (repository WebUserRepository) Add(c context.Context, model *models.WebUser
 }
 
 // Edit ...
-func (repository WebUserRepository) Edit(c context.Context, model *models.WebUser) (res *string, err error) {
+func (repository WebUserRepository) Edit(c context.Context, model *models.WebUser) (res string, err error) {
 
 	transaction, err := repository.DB.BeginTx(c, nil)
 	if err != nil {
@@ -192,9 +192,9 @@ func (repository WebUserRepository) Edit(c context.Context, model *models.WebUse
 	err = transaction.QueryRowContext(c, statement, model.Login, model.Password,
 		model.ID).Scan(&res)
 	if err != nil {
+		transaction.Rollback()
 		return res, err
 	}
-	UserID := &res
 
 	parts := strings.Split(*model.UserRoleGroupIDList, ",")
 
@@ -202,17 +202,48 @@ func (repository WebUserRepository) Edit(c context.Context, model *models.WebUse
 		fmt.Println("banyak role = ", len(parts))
 		deletelinestatement := `delete from user_role_group WHERE user_id = $1`
 
-		deletedRow, _ := transaction.QueryContext(c, deletelinestatement, UserID)
+		deletedRow, err := transaction.QueryContext(c, deletelinestatement, res)
+		if err != nil {
+			transaction.Rollback()
+			return res, err
+		}
 		deletedRow.Close()
 
 		for pi, _ := range parts {
 			linestatement := `INSERT INTO user_role_group (user_id,role_group_id,created_date, modified_date)
 						VALUES ($1,$2, now(),now()) RETURNING id`
 			var resLine string
-			err = transaction.QueryRowContext(c, linestatement, UserID, parts[pi]).Scan(&resLine)
+			err = transaction.QueryRowContext(c, linestatement, res, parts[pi]).Scan(&resLine)
 			if err != nil {
+				transaction.Rollback()
 				return res, err
 			}
+		}
+	}
+
+	if len(model.BranchIDList) != 0 {
+		deleteBranchUser := `DELETE FROM user_branch where user_id = ` + res
+		deletedBranchRow, err := transaction.QueryContext(c, deleteBranchUser)
+		if err != nil {
+			transaction.Rollback()
+			return res, err
+		}
+		deletedBranchRow.Close()
+
+		var inputUserBranchList string
+		for _, datum := range model.BranchIDList {
+			if inputUserBranchList == "" {
+				inputUserBranchList += `(` + res + `, ` + datum + `, NOW(), NOW())`
+			} else {
+				inputUserBranchList += `, (` + res + `, ` + datum + `, NOW(), NOW())`
+			}
+		}
+		userBranchStatement := `INSERT INTO user_branch (user_id, branch_id,created_date, modified_date) VALUES ` + inputUserBranchList
+		err = transaction.QueryRowContext(c, userBranchStatement).Err()
+
+		if err != nil {
+			transaction.Rollback()
+			return res, err
 		}
 	}
 
