@@ -92,6 +92,25 @@ func (h *WebUserHandler) FindByID(ctx *fiber.Ctx) error {
 		res.UserRoleGroupList = &userrolegroupres
 	}
 
+	userBranchuc := usecase.WebUserBranchUC{ContractUC: uc.ContractUC}
+	userBranchParam := models.WebUserBranchParameter{
+		UserID: *res.ID,
+		By:     "br._name",
+	}
+	userBranchRes, err := userBranchuc.SelectAll(c, userBranchParam)
+	if err == nil {
+		var branchList []models.WebUserBranch
+
+		for _, datum := range userBranchRes {
+			branchList = append(branchList, models.WebUserBranch{
+				ID:         datum.ID,
+				BranchID:   datum.BranchID,
+				BranchName: datum.BranchName,
+			})
+		}
+		res.BranchList = &branchList
+	}
+
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
