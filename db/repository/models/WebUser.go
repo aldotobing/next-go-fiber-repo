@@ -11,6 +11,7 @@ type WebUser struct {
 	FcmToken            *string             `json:"fcm_token"`
 	UserRoleGroupList   *[]WebUserRoleGroup `json:"role_group_list"`
 	UserRoleGroupIDList *string             `json:"role_group_id_list"`
+	BranchIDList        []string            `json:"branch_id_list"`
 }
 
 // WebUserParameter ...
