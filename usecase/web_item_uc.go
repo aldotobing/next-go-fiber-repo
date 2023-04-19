@@ -140,6 +140,7 @@ func (uc WebItemUC) Edit(c context.Context, id string, data *requests.WebItemReq
 		ItemPicture:     &strImg,
 		ItemCategoryId:  &data.ItemCategoryId,
 		ItemHide:        &data.ItemHide,
+		ItemActive:      &data.ItemActive,
 		ItemDescription: &data.ItemDescription,
 	}
 
