@@ -94,3 +94,19 @@ func (uc DashboardWebUC) GetAllBranchDetailCustomerData(c context.Context, param
 
 	return res, p, err
 }
+
+func (uc DashboardWebUC) GetAllDetailCustomerDataWithUserID(c context.Context, parameter models.DashboardWebBranchParameter) (res []models.DashboardWebBranchDetail, p viewmodel.PaginationVM, err error) {
+	parameter.Offset, parameter.Limit, parameter.Page, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.DashboardWebBranchDetailOrderBy, models.DashboardWebBranchDetailOrderByrByString)
+
+	var count int
+	repo := repository.NewDashboardWebRepository(uc.DB)
+	res, err = repo.GetAllDetailCustomerDataWithUserID(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, p, err
+	}
+
+	p = uc.setPaginationResponse(parameter.Page, parameter.Limit, count)
+
+	return res, p, err
+}

@@ -86,6 +86,7 @@ type DashboardWebBranchParameter struct {
 	Sort      string `json:"sort"`
 	StartDate string `json:"start_date"`
 	EndDate   string `json:"end_date"`
+	UserID    string `json:"user_id"`
 }
 
 var (
@@ -109,6 +110,9 @@ var (
 	}
 
 	DashboardWebBranchDetailSelectStatement = ` select * from os_fetch_dashborad_branchcustomerdata($1::integer,$2,$3,null,null,null)
+	   `
+
+	DashboardWebBranchDetailSelectWithUserIDStatement = ` select * from os_fetch_dashborad_customerdata_using_user_id($1::integer,$2,$3,null,null,null)
 	   `
 )
 

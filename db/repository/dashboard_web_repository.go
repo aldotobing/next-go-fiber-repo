@@ -14,6 +14,7 @@ type IDashboardWebRepository interface {
 	GetRegionDetailData(c context.Context, parameter models.DashboardWebRegionParameter) ([]models.DashboardWebRegionDetail, error)
 	GetBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.DashboardWebBranchDetail, int, error)
 	GetAllBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.DashboardWebBranchDetail, error)
+	GetAllDetailCustomerDataWithUserID(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.DashboardWebBranchDetail, error)
 }
 
 // DashboardWebRepository ...
@@ -166,6 +167,30 @@ func (repository DashboardWebRepository) GetAllBranchDetailCustomerData(ctx cont
 
 	query := models.DashboardWebBranchDetailSelectStatement
 	rows, err := repository.DB.Query(query, str.NullOrEmtyString(&parameter.BarnchID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
+	if err != nil {
+		return data, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		temp, err := repository.scanBranchCustomerDetailRows(rows)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
+	}
+	err = rows.Err()
+	if err != nil {
+		return data, err
+	}
+
+	return data, err
+}
+
+func (repository DashboardWebRepository) GetAllDetailCustomerDataWithUserID(ctx context.Context, parameter models.DashboardWebBranchParameter) (data []models.DashboardWebBranchDetail, err error) {
+
+	query := models.DashboardWebBranchDetailSelectWithUserIDStatement
+	rows, err := repository.DB.Query(query, str.NullOrEmtyString(&parameter.UserID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
 	if err != nil {
 		return data, err
 	}
