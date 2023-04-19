@@ -5,6 +5,7 @@ import (
 	"crypto/sha512"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -163,14 +164,15 @@ func (h *TransactionVAHandler) GetTransactionByVaCode(ctx *fiber.Ctx) error {
 
 	fmt.Println(parameter.VACode)
 
-	uc := usecase.TransactionVAUC{ContractUC: h.ContractUC}
-	res, err := uc.FindByCode(c, parameter)
-
 	type InquiryResponseData struct {
 		InquiryResult viewmodel.VaBillInfoVM `json:"InquiryResponse"`
 	}
 
 	ObjectData := new(InquiryResponseData)
+
+	uc := usecase.TransactionVAUC{ContractUC: h.ContractUC}
+	res, err := uc.FindByCode(c, parameter)
+
 	if err != nil {
 		if err.Error() == "sql: no rows in result set" {
 			ObjectData.InquiryResult.Status.ErrorCode = "B5"
@@ -235,14 +237,57 @@ func (h *TransactionVAHandler) PaidTransactionByVaCode(ctx *fiber.Ctx) error {
 
 	fmt.Println(parameter.VACode)
 
-	uc := usecase.TransactionVAUC{ContractUC: h.ContractUC}
-	res, err := uc.FindByCode(c, parameter)
-
 	type InquiryResponseData struct {
 		InquiryResult viewmodel.PaymentVaBillInfoVM `json:"paymentResponse"`
 	}
 
 	ObjectData := new(InquiryResponseData)
+
+	if parameter.VACode == "8954102230400004" {
+
+		fmt.Println("before sleep")
+		time.Sleep(30 * time.Second)
+		fmt.Println("after sleep")
+		return nil
+	}
+
+	if parameter.VACode == "8954102230400005" {
+		ObjectData.InquiryResult.Status.ErrorCode = "87"
+		ObjectData.InquiryResult.Status.IsError = "true"
+		ObjectData.InquiryResult.Status.StatusDescription = "Provider Database Problem"
+		return h.SendBasicResponse(ctx, ObjectData, nil, nil, 0)
+	}
+
+	if parameter.VACode == "8954102230400006" {
+		ObjectData.InquiryResult.Status.ErrorCode = "91"
+		ObjectData.InquiryResult.Status.IsError = "true"
+		ObjectData.InquiryResult.Status.StatusDescription = "Link Down"
+		return h.SendBasicResponse(ctx, ObjectData, nil, nil, 0)
+	}
+
+	if parameter.VACode == "8954102230400007" {
+		ObjectData.InquiryResult.Status.ErrorCode = "89"
+		ObjectData.InquiryResult.Status.IsError = "true"
+		ObjectData.InquiryResult.Status.StatusDescription = "Time Out"
+		return h.SendBasicResponse(ctx, ObjectData, nil, nil, 0)
+	}
+
+	if parameter.VACode == "8954102230400008" {
+		ObjectData.InquiryResult.Status.ErrorCode = "01"
+		ObjectData.InquiryResult.Status.IsError = "true"
+		ObjectData.InquiryResult.Status.StatusDescription = "General Error"
+		return h.SendBasicResponse(ctx, ObjectData, nil, nil, 0)
+	}
+	if parameter.VACode == "8954102230400009" {
+		ObjectData.InquiryResult.Status.ErrorCode = "C0"
+		ObjectData.InquiryResult.Status.IsError = "true"
+		ObjectData.InquiryResult.Status.StatusDescription = "Bill Suspended"
+		return h.SendBasicResponse(ctx, ObjectData, nil, nil, 0)
+	}
+
+	uc := usecase.TransactionVAUC{ContractUC: h.ContractUC}
+	res, err := uc.FindByCode(c, parameter)
+
 	if err != nil {
 		if err.Error() == "sql: no rows in result set" {
 			ObjectData.InquiryResult.Status.ErrorCode = "B5"

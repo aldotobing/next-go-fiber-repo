@@ -8,5 +8,6 @@ type WebItemRequest struct {
 	ItemPicture     string `json:"item_picture"`
 	ItemCategoryId  string `json:"item_category_id"`
 	ItemHide        string `json:"item_hide"`
+	ItemActive      string `json:"item_active"`
 	ItemDescription string `json:"item_description"`
 }

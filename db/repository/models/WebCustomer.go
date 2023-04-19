@@ -64,6 +64,7 @@ type WebCustomerParameter struct {
 	Name           string `json:"customer_name"`
 	CustomerTypeId string `json:"custome_type_id"`
 	UserId         string `json:"admin_user_id"`
+	BranchId       string `json:"branch_id"`
 	Search         string `json:"search"`
 	Page           int    `json:"page"`
 	Offset         int    `json:"offset"`

@@ -152,6 +152,10 @@ var (
 
 	InvalidPhoneOrCode = "Nomor Hp atau Kode Toko Salah"
 
+	CidNotPresent = "cid_not_present"
+
+	UnexpectedCid = "unexpected_cid"
+
 	StatusMandiriVaSuccess                     = "Transaction Success"
 	StatusMandiriVaSystemCurrentlyNotAvailable = "System Currently Unavailable"
 	StatusMandiriVaBillNotFound                = "Bill Not Found"

@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"crypto/hmac"
 	"crypto/sha512"
 	"encoding/base64"
 	"errors"
@@ -115,22 +116,41 @@ func (jwtMiddleware JwtMiddleware) VerifyUser(ctx *fiber.Ctx) (err error) {
 // VerifyBasic ...
 func (jwtMiddleware JwtMiddleware) VerifySignature(ctx *fiber.Ctx) (err error) {
 	// fmt.Println(ctx.Body())
-	basicCode := `888`
+	basicCid := `888`
 	codeBase := string(ctx.Body()[:])
 	MandiriCode := `BMRI_SIDO`
-	finalCode := basicCode + `:` + codeBase + `:` + MandiriCode
-	sha_512 := sha512.Sum512([]byte(finalCode))
-	basic := fmt.Sprintf("%x", sha_512)
-	// fmt.Println("res ", codeBase)
-	// fmt.Println("code nya" + basic)
+	finalCode := basicCid + `:` + codeBase + `:` + MandiriCode
 
-	header := ctx.Get("Authorization")
-	if !strings.Contains(header, "signature") {
+	hashBody := []byte(finalCode)
+
+	hash := hmac.New(sha512.New, []byte("BMRI_SIDO"))
+	hash.Write(hashBody)
+	//	hash.Write(salt)
+	fmt.Printf("\n\nHMAC-sha512: %x", hash.Sum(nil))
+	basic := fmt.Sprintf("%x", hash.Sum(nil))
+
+	header := ctx.Get("signature")
+	cid := ctx.Get("cid")
+	// if !strings.Contains(header, "signature") {
+	// 	logruslogger.Log(logruslogger.WarnLevel, helper.HeaderNotPresent, functioncaller.PrintFuncName(), "middleware-jwt-header")
+	// 	return errors.New(helper.HeaderNotPresent)
+	// }
+	if &cid == nil || strings.Trim(cid, " ") == "" {
+		logruslogger.Log(logruslogger.WarnLevel, helper.CidNotPresent, functioncaller.PrintFuncName(), "middleware-jwt-header")
+		return errors.New(helper.CidNotPresent)
+	}
+
+	if cid != basicCid {
+		logruslogger.Log(logruslogger.WarnLevel, helper.UnexpectedCid, functioncaller.PrintFuncName(), "middleware-jwt-header")
+		return errors.New(helper.UnexpectedCid)
+	}
+
+	if &header == nil || strings.Trim(header, " ") == "" {
 		logruslogger.Log(logruslogger.WarnLevel, helper.HeaderNotPresent, functioncaller.PrintFuncName(), "middleware-jwt-header")
 		return errors.New(helper.HeaderNotPresent)
 	}
 	token := strings.Replace(header, "signature ", "", -1)
-	if token != basic {
+	if strings.ToLower(token) != strings.ToLower(basic) {
 		logruslogger.Log(logruslogger.WarnLevel, basic, functioncaller.PrintFuncName(), "invalid-token")
 		return errors.New(helper.UnexpectedClaims)
 	}
