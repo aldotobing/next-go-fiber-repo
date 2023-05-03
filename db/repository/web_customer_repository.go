@@ -262,8 +262,8 @@ func (repository WebCustomerRepository) Edit(c context.Context, model *models.We
 		customer_gender = $8,
 		customer_code = $9,
 		customer_email = $10,
-		customer_birthdate = $11
-		customer_profile_picture = $12
+		customer_birthdate = $11,
+		customer_profile_picture = $12,
 		customer_photo_ktp = $13
 	WHERE id = $14
 	RETURNING id`
