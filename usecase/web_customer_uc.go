@@ -178,20 +178,20 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 		strImgprofile = strings.ReplaceAll(*currentObjectUc.CustomerProfilePicture, models.CustomerImagePath, "")
 	}
 	if imgProfile != nil {
+		awsUc.AWSS3.Directory = "image/customer"
 		if &strImgprofile != nil && strings.Trim(strImgprofile, " ") != "" {
-			_, err = awsUc.Delete("image/customer", strImgprofile)
+			_, err = awsUc.Delete(awsUc.AWSS3.Directory, strImgprofile)
 			if err != nil {
 				logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "s3", uc.ReqID)
 			}
 		}
 
-		awsUc.AWSS3.Directory = "image/customer"
-		imgBannerFile, err := awsUc.Upload("image/customer", imgProfile)
+		imgBannerFile, err := awsUc.Upload(awsUc.AWSS3.Directory, imgProfile)
 		if err != nil {
 			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "upload_file", c.Value("requestid"))
 			return res, err
 		}
-		strImgprofile = imgBannerFile.FilePath
+		strImgprofile = imgBannerFile.FileName
 	}
 
 	var stringImageKTP string
@@ -199,7 +199,7 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 		stringImageKTP = strings.ReplaceAll(*currentObjectUc.CustomerPhotoKtp, models.CustomerImagePath, "")
 	}
 	if imgKtp != nil {
-		awsUc.AWSS3.Directory = "image/customer/ktp"
+		awsUc.AWSS3.Directory = "image/customer"
 		if &stringImageKTP != nil && strings.Trim(stringImageKTP, " ") != "" {
 			_, err = awsUc.Delete(awsUc.AWSS3.Directory, stringImageKTP)
 			if err != nil {
@@ -212,7 +212,7 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "upload_file", c.Value("requestid"))
 			return res, err
 		}
-		stringImageKTP = imgBannerFile.FilePath
+		stringImageKTP = imgBannerFile.FileName
 	}
 
 	repo := repository.NewWebCustomerRepository(uc.DB)
