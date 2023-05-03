@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"fmt"
 	"mime/multipart"
 	"strings"
 	"time"
@@ -42,7 +41,6 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 	var profilePictureURL string
 	if data.CustomerProfilePicture != nil && *data.CustomerProfilePicture != "" {
 		profilePictureURL = models.CustomerImagePath + *data.CustomerProfilePicture
-		fmt.Println("testing")
 	}
 	res.CustomerProfilePicture = &profilePictureURL
 
