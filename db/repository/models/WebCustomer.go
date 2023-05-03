@@ -140,7 +140,6 @@ var (
 		C.branch_id as c_branch_id,
 		C.salesman_id as c_salesman_id,
 		C.customer_photo_ktp AS CUST_KTP_PICTURE,
-		C.customer_photo_ktp AS CUST_KTP_PICTURE,
 		c.customer_nik,
 		cl._name as cus_level_name,
 		c.customer_level_id,
