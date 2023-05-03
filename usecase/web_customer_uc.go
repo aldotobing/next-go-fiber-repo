@@ -199,15 +199,15 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 		stringImageKTP = strings.ReplaceAll(*currentObjectUc.CustomerPhotoKtp, models.CustomerImagePath, "")
 	}
 	if imgKtp != nil {
+		awsUc.AWSS3.Directory = "image/customer/ktp"
 		if &stringImageKTP != nil && strings.Trim(stringImageKTP, " ") != "" {
-			_, err = awsUc.Delete("image/customer", stringImageKTP)
+			_, err = awsUc.Delete(awsUc.AWSS3.Directory, stringImageKTP)
 			if err != nil {
 				logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "s3", uc.ReqID)
 			}
 		}
 
-		awsUc.AWSS3.Directory = "image/customer"
-		imgBannerFile, err := awsUc.Upload("image/customer", imgKtp)
+		imgBannerFile, err := awsUc.Upload(awsUc.AWSS3.Directory, imgKtp)
 		if err != nil {
 			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "upload_file", c.Value("requestid"))
 			return res, err
