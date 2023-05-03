@@ -40,8 +40,7 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 
 	var profilePictureURL string
 	if data.CustomerProfilePicture != nil && *data.CustomerProfilePicture != "" {
-		// profilePictureURL = models.CustomerImagePath + *data.CustomerProfilePicture
-		profilePictureURL = *data.CustomerProfilePicture
+		profilePictureURL = models.CustomerImagePath + *data.CustomerProfilePicture
 	}
 	res.CustomerProfilePicture = &profilePictureURL
 
