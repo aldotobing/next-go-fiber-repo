@@ -185,7 +185,7 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 			}
 		}
 
-		awsUc.AWSS3.Directory = "image/customer"
+		//awsUc.AWSS3.Directory = "image/customer"
 		imgBannerFile, err := awsUc.Upload("image/customer", imgProfile)
 		if err != nil {
 			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "upload_file", c.Value("requestid"))
@@ -206,7 +206,7 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 			}
 		}
 
-		awsUc.AWSS3.Directory = "image/customer"
+		//awsUc.AWSS3.Directory = "image/customer"
 		imgBannerFile, err := awsUc.Upload("image/customer", imgKtp)
 		if err != nil {
 			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "upload_file", c.Value("requestid"))
