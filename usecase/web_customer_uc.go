@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 	"mime/multipart"
 	"strings"
 	"time"
@@ -99,6 +100,7 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 	if data.CustomerPhotoKtp != nil && *data.CustomerPhotoKtp != "" {
 		photoktpURL = models.CustomerImagePath + *data.CustomerPhotoKtp
 	}
+	fmt.Println("test commit")
 	res.CustomerPhotoKtp = &photoktpURL
 
 	res.CustomerLevelID = data.CustomerLevelID
