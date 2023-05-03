@@ -166,7 +166,7 @@ func (uc WebCustomerUC) FindByID(c context.Context, parameter models.WebCustomer
 	return res, err
 }
 
-func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCustomerRequest, imgProfile *multipart.FileHeader) (res models.WebCustomer, err error) {
+func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCustomerRequest, imgProfile, imgKtp *multipart.FileHeader) (res models.WebCustomer, err error) {
 
 	// currentObjectUc, err := uc.FindByID(c, models.MpBankParameter{ID: id})
 	currentObjectUc, err := uc.FindByID(c, models.WebCustomerParameter{ID: id})
@@ -174,11 +174,9 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 	awsUc := AwsUC{ContractUC: uc.ContractUC}
 
 	var strImgprofile = ""
-
 	if currentObjectUc.CustomerProfilePicture != nil && *currentObjectUc.CustomerProfilePicture != "" {
 		strImgprofile = strings.ReplaceAll(*currentObjectUc.CustomerProfilePicture, models.CustomerImagePath, "")
 	}
-
 	if imgProfile != nil {
 		if &strImgprofile != nil && strings.Trim(strImgprofile, " ") != "" {
 			_, err = awsUc.Delete("image/customer", strImgprofile)
@@ -194,8 +192,29 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 			return res, err
 		}
 		strImgprofile = imgBannerFile.FilePath
-
 	}
+
+	var stringImageKTP string
+	if currentObjectUc.CustomerPhotoKtp != nil && *currentObjectUc.CustomerPhotoKtp != "" {
+		stringImageKTP = strings.ReplaceAll(*currentObjectUc.CustomerPhotoKtp, models.CustomerImagePath, "")
+	}
+	if imgKtp != nil {
+		if &stringImageKTP != nil && strings.Trim(stringImageKTP, " ") != "" {
+			_, err = awsUc.Delete("image/customer", stringImageKTP)
+			if err != nil {
+				logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "s3", uc.ReqID)
+			}
+		}
+
+		awsUc.AWSS3.Directory = "image/customer"
+		imgBannerFile, err := awsUc.Upload("image/customer", imgKtp)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "upload_file", c.Value("requestid"))
+			return res, err
+		}
+		stringImageKTP = imgBannerFile.FilePath
+	}
+
 	repo := repository.NewWebCustomerRepository(uc.DB)
 	// now := time.Now().UTC()
 	// strnow := now.Format(time.RFC3339)
@@ -222,6 +241,7 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 		CustomerLevelID:        &data.CustomerLevelID,
 		CustomerGender:         &data.CustomerGender,
 		CustomerBirthDate:      &data.CustomerBirthDate,
+		CustomerPhotoKtp:       &stringImageKTP,
 	}
 
 	res.ID, err = repo.Edit(c, &res)
