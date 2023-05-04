@@ -16,7 +16,18 @@ type WebRegionAreaUC struct {
 }
 
 // BuildBody ...
-func (uc WebRegionAreaUC) BuildBody(res *models.WebRegionArea) {
+func (uc WebRegionAreaUC) BuildBody(data *models.WebRegionArea, res *viewmodel.RegionAreaVM) {
+	if res.ID != nil {
+		res.ID = data.ID
+	}
+	if res.Code != nil {
+		res.Code = data.Code
+	}
+	if res.Name != nil {
+		res.Name = data.Name
+	}
+	res.GroupID = data.GroupID
+	res.GroupName = data.GroupName
 }
 
 // SelectAll ...
@@ -31,8 +42,23 @@ func (uc WebRegionAreaUC) SelectAll(c context.Context, parameter models.WebRegio
 		return res, err
 	}
 
-	for i := range res {
-		uc.BuildBody(&res[i])
+	return res, err
+}
+
+// SelectAllGroupByRegion ...
+func (uc WebRegionAreaUC) SelectAllGroupByRegion(c context.Context) (res []viewmodel.RegionAreaVM, err error) {
+	repo := repository.NewWebRegionAreaRepository(uc.DB)
+	data, err := repo.SelectAllGroupByRegion(c)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	for i := range data {
+		var temp viewmodel.RegionAreaVM
+		uc.BuildBody(&data[i], &temp)
+
+		res = append(res, temp)
 	}
 
 	return res, err
@@ -51,9 +77,6 @@ func (uc WebRegionAreaUC) FindAll(c context.Context, parameter models.WebRegionA
 	}
 
 	p = uc.setPaginationResponse(parameter.Page, parameter.Limit, count)
-	for i := range res {
-		uc.BuildBody(&res[i])
-	}
 
 	return res, p, err
 }
@@ -66,7 +89,6 @@ func (uc WebRegionAreaUC) FindByID(c context.Context, parameter models.WebRegion
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
 	}
-	uc.BuildBody(&res)
 
 	return res, err
 }

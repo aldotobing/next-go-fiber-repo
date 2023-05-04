@@ -2,7 +2,9 @@ package usecase
 
 import (
 	"context"
+	"strconv"
 
+	"github.com/leekchan/accounting"
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/pkg/functioncaller"
@@ -109,4 +111,67 @@ func (uc DashboardWebUC) GetAllDetailCustomerDataWithUserID(c context.Context, p
 	p = uc.setPaginationResponse(parameter.Page, parameter.Limit, count)
 
 	return res, p, err
+}
+
+func (uc DashboardWebUC) GetOmzetValue(c context.Context, parameter models.DashboardWebBranchParameter) (res []viewmodel.OmzetValueVM, err error) {
+	regionUC := WebRegionAreaUC{ContractUC: uc.ContractUC}
+	regionData, err := regionUC.SelectAllGroupByRegion(c)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "get_region_data", c.Value("requestid"))
+		return res, err
+	}
+
+	// initiate region national
+	var regionIDNational, regionNameNational string
+	regionIDNational = "0"
+	regionNameNational = "Nasional"
+	res = append(res, viewmodel.OmzetValueVM{
+		RegionID:   &regionIDNational,
+		RegionName: &regionNameNational,
+	})
+
+	//Append the rest of region
+	for i := range regionData {
+		res = append(res, viewmodel.OmzetValueVM{
+			RegionID:   regionData[i].GroupID,
+			RegionName: regionData[i].GroupName,
+		})
+	}
+
+	repo := repository.NewDashboardWebRepository(uc.DB)
+	omzetData, err := repo.GetOmzetValue(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	acOmzet := accounting.Accounting{Symbol: "Rp. ", Thousand: ".", Decimal: ","}
+	acQuantity := accounting.Accounting{Thousand: "."}
+	for i := range res {
+		var totalAmount, totalQuantity float64
+		for j := range omzetData {
+			if i == 0 {
+				amount, _ := strconv.ParseFloat(omzetData[j].TotalNettAmount, 64)
+				totalAmount += amount
+				amount, _ = strconv.ParseFloat(omzetData[j].TotalQuantity, 64)
+				totalQuantity += amount
+			} else {
+				if omzetData[j].RegionID.String == *res[i].RegionID {
+					amount, _ := strconv.ParseFloat(omzetData[j].TotalNettAmount, 64)
+					totalAmount += amount
+					amount, _ = strconv.ParseFloat(omzetData[j].TotalQuantity, 64)
+					totalQuantity += amount
+
+					break
+				}
+			}
+		}
+
+		resTotalOmzet := acOmzet.FormatMoney(totalAmount)
+		res[i].TotalOmzet = &resTotalOmzet
+		resTotalQuantity := acQuantity.FormatMoney(totalQuantity)
+		res[i].TotalQuantity = &resTotalQuantity
+	}
+
+	return res, err
 }

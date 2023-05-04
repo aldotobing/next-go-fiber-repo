@@ -140,3 +140,22 @@ func (h *DashboardWebHandler) GetAllCustomerDataByUserID(ctx *fiber.Ctx) error {
 
 	return h.SendResponse(ctx, res, meta, err, 0)
 }
+
+func (h *DashboardWebHandler) GetOmzetValue(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.DashboardWebBranchParameter{
+		StartDate:      ctx.Query("start_date"),
+		EndDate:        ctx.Query("end_date"),
+		ItemID:         ctx.Query("item_id"),
+		ItemCategoryID: ctx.Query("item_category_id"),
+	}
+
+	uc := usecase.DashboardWebUC{ContractUC: h.ContractUC}
+	res, err := uc.GetOmzetValue(c, parameter)
+	if err != nil {
+		h.SendResponse(ctx, res, nil, err, 0)
+	}
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}

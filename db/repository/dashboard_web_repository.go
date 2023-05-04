@@ -15,6 +15,7 @@ type IDashboardWebRepository interface {
 	GetBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.DashboardWebBranchDetail, int, error)
 	GetAllBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.DashboardWebBranchDetail, error)
 	GetAllDetailCustomerDataWithUserID(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.DashboardWebBranchDetail, error)
+	GetOmzetValue(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.OmzetValueModel, error)
 }
 
 // DashboardWebRepository ...
@@ -209,4 +210,60 @@ func (repository DashboardWebRepository) GetAllDetailCustomerDataWithUserID(ctx 
 	}
 
 	return data, err
+}
+
+func (repo DashboardWebRepository) GetOmzetValue(ctx context.Context, parameter models.DashboardWebBranchParameter) (res []models.OmzetValueModel, err error) {
+	var whereStatement string
+	if parameter.StartDate != "" && parameter.EndDate != "" {
+		whereStatement += ` sih.transaction_date  between '` + parameter.StartDate + `' and '` + parameter.EndDate + `'`
+	}
+	if parameter.ItemID != "" {
+		if whereStatement != "" {
+			whereStatement += ` AND sil.item_id = ` + parameter.ItemID
+		} else {
+			whereStatement += ` sil.item_id = ` + parameter.ItemID
+		}
+	}
+
+	if parameter.ItemCategoryID != "" {
+		if whereStatement != "" {
+			whereStatement += ` AND sil.category_id = ` + parameter.ItemCategoryID
+		} else {
+			whereStatement += ` AND sil.category_id = ` + parameter.ItemCategoryID
+		}
+	}
+
+	if whereStatement != "" {
+		whereStatement = `WHERE ` + whereStatement
+	}
+
+	query := `select r.group_id,
+			coalesce(sum(sil.gross_amount),0) as total_gross_amount, 
+			coalesce(sum(sil.net_amount),0) as total_nett_amount, 
+			coalesce(sum(sil.qty),0) as total_volume
+		from sales_invoice_header sih 
+			left join sales_invoice_line sil on sil.header_id = sih.id 
+			left join branch b on b.id = sih.branch_id  
+			left join region r on r.id = b.region_id` +
+		whereStatement + `
+			group by r.group_id
+			order by r.group_id asc`
+	rows, err := repo.DB.Query(query)
+	if err != nil {
+		return
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var temp models.OmzetValueModel
+		err = rows.Scan(&temp.RegionID, &temp.TotalGrossAmount, &temp.TotalNettAmount, &temp.TotalQuantity)
+		if err != nil {
+			return
+		}
+
+		res = append(res, temp)
+	}
+
+	return
 }

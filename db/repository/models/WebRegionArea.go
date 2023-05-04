@@ -5,6 +5,7 @@ type WebRegionArea struct {
 	ID        *string `json:"id"`
 	Name      *string `json:"name"`
 	Code      *string `json:"code"`
+	GroupID   *string `json:"group_id"`
 	GroupName *string `json:"group_name"`
 }
 

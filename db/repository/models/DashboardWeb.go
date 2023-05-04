@@ -1,5 +1,7 @@
 package models
 
+import "database/sql"
+
 // DashboardWeb ...
 type DashboardWeb struct {
 	RegionGroupID            *string                    `json:"region_id"`
@@ -51,6 +53,13 @@ type DashboardWebBranchDetail struct {
 	CustomerCityName        *string `json:"customer_city_name_detail"`
 }
 
+type OmzetValueModel struct {
+	RegionID         sql.NullString `json:"region_id"`
+	TotalGrossAmount string         `json:"total_gross_amount"`
+	TotalNettAmount  string         `json:"total_nett_amount"`
+	TotalQuantity    string         `json:"total_quantity"`
+}
+
 // DashboardWebParameter ...
 type DashboardWebParameter struct {
 	ID        string `json:"id"`
@@ -77,16 +86,18 @@ type DashboardWebRegionParameter struct {
 }
 
 type DashboardWebBranchParameter struct {
-	BarnchID  string `json:"branch_id"`
-	Search    string `json:"search"`
-	Page      int    `json:"page"`
-	Offset    int    `json:"offset"`
-	Limit     int    `json:"limit"`
-	By        string `json:"by"`
-	Sort      string `json:"sort"`
-	StartDate string `json:"start_date"`
-	EndDate   string `json:"end_date"`
-	UserID    string `json:"user_id"`
+	BarnchID       string `json:"branch_id"`
+	Search         string `json:"search"`
+	Page           int    `json:"page"`
+	Offset         int    `json:"offset"`
+	Limit          int    `json:"limit"`
+	By             string `json:"by"`
+	Sort           string `json:"sort"`
+	StartDate      string `json:"start_date"`
+	EndDate        string `json:"end_date"`
+	UserID         string `json:"user_id"`
+	ItemID         string `json:"item_id"`
+	ItemCategoryID string `json:"item_category_id"`
 }
 
 var (
