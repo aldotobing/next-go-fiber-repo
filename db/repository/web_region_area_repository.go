@@ -12,6 +12,7 @@ import (
 type IWebRegionAreaRepository interface {
 	SelectAll(c context.Context, parameter models.WebRegionAreaParameter) ([]models.WebRegionArea, error)
 	SelectAllGroupByRegion(c context.Context) (data []models.WebRegionArea, err error)
+	SelectByRegionGroupID(c context.Context, groupID string) (data []models.WebRegionArea, err error)
 	FindAll(ctx context.Context, parameter models.WebRegionAreaParameter) ([]models.WebRegionArea, int, error)
 	FindByID(c context.Context, parameter models.WebRegionAreaParameter) (models.WebRegionArea, error)
 }
@@ -93,6 +94,35 @@ func (repository WebRegionAreaRepository) SelectAllGroupByRegion(c context.Conte
 	for rows.Next() {
 		var temp models.WebRegionArea
 		err := rows.Scan(&temp.GroupID, &temp.GroupName)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
+	}
+
+	return data, err
+}
+
+// SelectByRegionGroupID ...
+func (repo WebRegionAreaRepository) SelectByRegionGroupID(c context.Context, groupID string) (data []models.WebRegionArea, err error) {
+	var whereStatement string
+	if groupID != "" && groupID != "0" {
+		whereStatement += ` AND def.group_id='` + groupID + `' `
+	}
+	statement := `SELECT def.id, def._name
+		FROM region def ` +
+		models.WebRegionAreaWhereStatement + whereStatement +
+		`GROUP BY def.id ` +
+		`ORDER BY def.id asc`
+	rows, err := repo.DB.QueryContext(c, statement)
+	if err != nil {
+		return data, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var temp models.WebRegionArea
+		err := rows.Scan(&temp.ID, &temp.Name)
 		if err != nil {
 			return data, err
 		}
