@@ -67,6 +67,7 @@ func (h *WebCustomerHandler) FindAll(ctx *fiber.Ctx) error {
 		Limit:          str.StringToInt(ctx.Query("limit")),
 		By:             ctx.Query("by"),
 		Sort:           ctx.Query("sort"),
+		PhoneNumber:    ctx.Query("phone_number"),
 	}
 	uc := usecase.WebCustomerUC{ContractUC: h.ContractUC}
 	res, meta, err := uc.FindAll(c, parameter)

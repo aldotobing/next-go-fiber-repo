@@ -207,6 +207,10 @@ func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter m
 		conditionString += ` AND C.BRANCH_ID= ` + parameter.BranchId
 	}
 
+	if parameter.PhoneNumber != "" {
+		conditionString += ` AND c.customer_phone LIKE '%` + parameter.PhoneNumber + `%'`
+	}
+
 	query := models.WebCustomerSelectStatement + ` ` + models.WebCustomerWhereStatement + ` ` + conditionString + `
 		AND (LOWER(c.customer_name) LIKE $1 or LOWER(c.customer_code) LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
 
