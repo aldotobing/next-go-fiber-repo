@@ -17,17 +17,21 @@ type WebRegionAreaUC struct {
 
 // BuildBody ...
 func (uc WebRegionAreaUC) BuildBody(data *models.WebRegionArea, res *viewmodel.RegionAreaVM) {
-	if res.ID != nil {
+	if data.ID != nil {
 		res.ID = data.ID
 	}
-	if res.Code != nil {
+	if data.Code != nil {
 		res.Code = data.Code
 	}
-	if res.Name != nil {
+	if data.Name != nil {
 		res.Name = data.Name
 	}
-	res.GroupID = data.GroupID
-	res.GroupName = data.GroupName
+	if data.GroupID != nil {
+		res.GroupID = data.GroupID
+	}
+	if data.GroupName != nil {
+		res.GroupName = data.GroupName
+	}
 }
 
 // SelectAll ...
@@ -49,6 +53,26 @@ func (uc WebRegionAreaUC) SelectAll(c context.Context, parameter models.WebRegio
 func (uc WebRegionAreaUC) SelectAllGroupByRegion(c context.Context) (res []viewmodel.RegionAreaVM, err error) {
 	repo := repository.NewWebRegionAreaRepository(uc.DB)
 	data, err := repo.SelectAllGroupByRegion(c)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	for i := range data {
+		var temp viewmodel.RegionAreaVM
+		uc.BuildBody(&data[i], &temp)
+
+		res = append(res, temp)
+	}
+
+	return res, err
+}
+
+// SelectByGroupID ...
+func (uc WebRegionAreaUC) SelectByGroupID(c context.Context, groupID string) (res []viewmodel.RegionAreaVM, err error) {
+	repo := repository.NewWebRegionAreaRepository(uc.DB)
+	data, err := repo.SelectByRegionGroupID(c, groupID)
+
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err

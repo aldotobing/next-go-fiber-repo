@@ -6,3 +6,16 @@ type OmzetValueVM struct {
 	TotalQuantity *string `json:"total_quantity"`
 	TotalOmzet    *string `json:"total_omzet"`
 }
+
+type OmzetValueByRegionVM struct {
+	TotalOmzet    *string            `json:"total_omzet"`
+	TotalQuantity *string            `json:"total_quantity"`
+	Area          []OmzetValueAreaVM `json:"area"`
+}
+
+type OmzetValueAreaVM struct {
+	ID       *string `json:"id"`
+	Name     *string `json:"_name"`
+	Quantity *string `json:"quantity"`
+	Omzet    *string `json:"omzet"`
+}
