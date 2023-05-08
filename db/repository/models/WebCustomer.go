@@ -71,6 +71,7 @@ type WebCustomerParameter struct {
 	Limit          int    `json:"limit"`
 	By             string `json:"by"`
 	Sort           string `json:"sort"`
+	PhoneNumber    string `json:"phone_number"`
 }
 
 var (

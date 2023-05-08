@@ -216,6 +216,8 @@ func (repo DashboardWebRepository) GetOmzetValue(ctx context.Context, parameter 
 	var whereStatement string
 	if parameter.StartDate != "" && parameter.EndDate != "" {
 		whereStatement += ` AND sih.transaction_date BETWEEN '` + parameter.StartDate + `' AND '` + parameter.EndDate + `'`
+	} else {
+		whereStatement += ` AND sih.transaction_date BETWEEN date_trunc('MONTH',now())::DATE AND now()`
 	}
 	if parameter.ItemID != "" {
 		whereStatement += ` AND sil.item_id = ` + parameter.ItemID
