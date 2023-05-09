@@ -25,6 +25,7 @@ func (h *CustomerTargetSemesterHandler) SelectAll(ctx *fiber.Ctx) error {
 
 	parameter := models.CustomerTargetSemesterParameter{
 		ID:     ctx.Query("customer_id"),
+		Code:   ctx.Query("customer_code"),
 		Search: ctx.Query("search"),
 		By:     ctx.Query("by"),
 		Sort:   ctx.Query("sort"),
