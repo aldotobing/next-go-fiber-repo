@@ -194,10 +194,12 @@ func (uc DashboardWebUC) GetOmzetValueByRegionGroupID(c context.Context, paramet
 	var areas []viewmodel.OmzetValueAreaVM
 	for i := range regionData {
 		areas = append(areas, viewmodel.OmzetValueAreaVM{
-			ID:       regionData[i].ID,
-			Name:     regionData[i].Name,
-			Quantity: &quantityDefaultValue,
-			Omzet:    &amountDefultValue,
+			ID:        regionData[i].ID,
+			Name:      regionData[i].Name,
+			Quantity:  &quantityDefaultValue,
+			Omzet:     &amountDefultValue,
+			GroupID:   regionData[i].GroupID,
+			GroupName: regionData[i].GroupName,
 		})
 	}
 

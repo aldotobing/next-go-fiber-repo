@@ -109,7 +109,7 @@ func (repo WebRegionAreaRepository) SelectByRegionGroupID(c context.Context, gro
 	if groupID != "" && groupID != "0" {
 		whereStatement += ` AND def.group_id='` + groupID + `' `
 	}
-	statement := `SELECT def.id, def._name
+	statement := `SELECT def.id, def._name, def.group_id, def.group_name 
 		FROM region def ` +
 		models.WebRegionAreaWhereStatement + whereStatement +
 		`GROUP BY def.id ` +
@@ -122,7 +122,7 @@ func (repo WebRegionAreaRepository) SelectByRegionGroupID(c context.Context, gro
 	defer rows.Close()
 	for rows.Next() {
 		var temp models.WebRegionArea
-		err := rows.Scan(&temp.ID, &temp.Name)
+		err := rows.Scan(&temp.ID, &temp.Name, &temp.GroupID, &temp.GroupName)
 		if err != nil {
 			return data, err
 		}

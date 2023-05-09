@@ -14,8 +14,10 @@ type OmzetValueByRegionVM struct {
 }
 
 type OmzetValueAreaVM struct {
-	ID       *string `json:"id"`
-	Name     *string `json:"_name"`
-	Quantity *string `json:"quantity"`
-	Omzet    *string `json:"omzet"`
+	ID        *string `json:"id"`
+	Name      *string `json:"_name"`
+	Quantity  *string `json:"quantity"`
+	Omzet     *string `json:"omzet"`
+	GroupID   *string `json:"group_id"`
+	GroupName *string `json:"group_name"`
 }
