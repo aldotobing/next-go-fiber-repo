@@ -31,5 +31,5 @@ func (route DashboardWebRoutes) RegisterRoute() {
 	r.Get("/branch/select/user_id", handler.GetAllCustomerDataByUserID)
 
 	r.Get("/omzet", handler.GetOmzetValue)
-	r.Get("/omzet/group_id/:group_id", handler.GetOmzetValueByRegionGroupID)
+	r.Get("/omzet/group/", handler.GetOmzetValueByRegionGroupID)
 }

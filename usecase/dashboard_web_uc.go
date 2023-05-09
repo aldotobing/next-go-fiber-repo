@@ -225,6 +225,12 @@ func (uc DashboardWebUC) GetOmzetValueByRegionGroupID(c context.Context, paramet
 				grandTotalQuantity += amount
 
 				break
+			} else if omzetData[j].ID.Valid == false {
+				amount, _ := strconv.ParseFloat(omzetData[j].TotalNettAmount, 64)
+				grandTotalOmzet += amount
+
+				amount, _ = strconv.ParseFloat(omzetData[j].TotalQuantity, 64)
+				grandTotalQuantity += amount
 			}
 		}
 	}

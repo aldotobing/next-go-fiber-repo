@@ -163,7 +163,7 @@ func (h *DashboardWebHandler) GetOmzetValue(ctx *fiber.Ctx) error {
 func (h *DashboardWebHandler) GetOmzetValueByRegionGroupID(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
-	regionGroupID := ctx.Params("group_id")
+	regionGroupID := ctx.Query("group_id")
 
 	parameter := models.DashboardWebBranchParameter{
 		StartDate:      ctx.Query("start_date"),
