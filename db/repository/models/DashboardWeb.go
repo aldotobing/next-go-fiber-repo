@@ -99,6 +99,7 @@ type DashboardWebBranchParameter struct {
 	UserID         string `json:"user_id"`
 	ItemID         string `json:"item_id"`
 	ItemCategoryID string `json:"item_category_id"`
+	GroupID        string `json:"group_id"`
 }
 
 var (
