@@ -2,9 +2,13 @@ package models
 
 // Branch ...
 type Branch struct {
-	ID   *string `json:"branch_id"`
-	Code *string `json:"branch_code"`
-	Name *string `json:"branch_name"`
+	ID              *string `json:"branch_id"`
+	Code            *string `json:"branch_code"`
+	Name            *string `json:"branch_name"`
+	RegionID        *string `json:"region_id"`
+	RegionName      *string `json:"region_name"`
+	RegionGroupID   *string `json:"region_group_id"`
+	RegionGroupName *string `json:"region_group_name"`
 }
 
 // BranchParameter ...
@@ -32,7 +36,7 @@ var (
 	// BranchSelectStatement ...
 
 	BranchSelectStatement = `
-	select def.id,def._name,def.branch_code 
+	select def.id, def._name, def.branch_code, r.id, r._name, r.group_id, r.group_name
 	from branch def
 	left join region r on r.id = def.region_id
 		`
