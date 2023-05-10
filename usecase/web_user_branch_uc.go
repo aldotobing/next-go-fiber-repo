@@ -21,6 +21,7 @@ func (uc WebUserBranchUC) BuildBody(data *models.WebUserBranch, res *viewmodel.W
 	res.UserID = data.UserID
 	res.BranchID = data.BranchID
 	res.BranchName = data.BranchName
+	res.BranchCode = data.BranchCode
 }
 
 // SelectAll ...

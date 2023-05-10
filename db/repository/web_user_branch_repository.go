@@ -28,7 +28,7 @@ func NewWebUserBranchRepository(DB *sql.DB) IWebUserBranchRepository {
 // Scan rows
 func (repository WebUserBranchRepository) scanRows(rows *sql.Rows) (res models.WebUserBranch, err error) {
 	err = rows.Scan(
-		&res.ID, &res.UserID, &res.BranchID, &res.BranchName,
+		&res.ID, &res.UserID, &res.BranchID, &res.BranchName, &res.BranchCode,
 	)
 	if err != nil {
 
@@ -41,7 +41,7 @@ func (repository WebUserBranchRepository) scanRows(rows *sql.Rows) (res models.W
 // Scan row
 func (repository WebUserBranchRepository) scanRow(row *sql.Row) (res models.WebUserBranch, err error) {
 	err = row.Scan(
-		&res.ID, &res.UserID, &res.BranchID, &res.BranchName,
+		&res.ID, &res.UserID, &res.BranchID, &res.BranchName, &res.BranchCode,
 	)
 	if err != nil {
 		return res, err
