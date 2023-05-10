@@ -28,7 +28,7 @@ func NewWebUserBranchRepository(DB *sql.DB) IWebUserBranchRepository {
 // Scan rows
 func (repository WebUserBranchRepository) scanRows(rows *sql.Rows) (res models.WebUserBranch, err error) {
 	err = rows.Scan(
-		&res.ID, &res.UserID, &res.BranchID, &res.BranchName, &res.BranchCode,
+		&res.ID, &res.UserID, &res.BranchID, &res.BranchName,
 	)
 	if err != nil {
 
@@ -41,7 +41,7 @@ func (repository WebUserBranchRepository) scanRows(rows *sql.Rows) (res models.W
 // Scan row
 func (repository WebUserBranchRepository) scanRow(row *sql.Row) (res models.WebUserBranch, err error) {
 	err = row.Scan(
-		&res.ID, &res.UserID, &res.BranchID, &res.BranchName, &res.BranchCode,
+		&res.ID, &res.UserID, &res.BranchID, &res.BranchName,
 	)
 	if err != nil {
 		return res, err
@@ -57,6 +57,7 @@ func (repository WebUserBranchRepository) SelectAll(c context.Context, parameter
 	if parameter.UserID != "" {
 		conditionString += ` and def.user_id = ` + parameter.UserID
 	}
+
 	statement := models.WebUserBranchSelectStatement + ` ` + models.WebUserBranchWhereStatement +
 		` AND (LOWER(br."_name") LIKE $1 ) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
