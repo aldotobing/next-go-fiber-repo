@@ -54,8 +54,11 @@ type DashboardWebBranchDetail struct {
 }
 
 type OmzetValueModel struct {
-	ID               sql.NullString `json:"id"`
 	RegionID         sql.NullString `json:"region_id"`
+	RegionName       sql.NullString `json:"region_name"`
+	RegionGroupID    sql.NullString `json:"region_group_id"`
+	RegionGroupName  sql.NullString `json:"region_group_name"`
+	BranchID         sql.NullString `json:"branch_id"`
 	TotalGrossAmount string         `json:"total_gross_amount"`
 	TotalNettAmount  string         `json:"total_nett_amount"`
 	TotalQuantity    string         `json:"total_quantity"`
