@@ -167,6 +167,10 @@ func (repository WebCustomerRepository) SelectAll(c context.Context, parameter m
 		conditionString += ` AND C.BRANCH_ID= ` + parameter.BranchId
 	}
 
+	if parameter.PhoneNumber != "" {
+		conditionString += ` AND c.customer_phone LIKE '%` + parameter.PhoneNumber + `%'`
+	}
+
 	statement := models.WebCustomerSelectStatement + ` ` + models.WebCustomerWhereStatement +
 		` AND (LOWER(c.customer_name) LIKE $1 or LOWER(c.customer_code) LIKE $1 ) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")

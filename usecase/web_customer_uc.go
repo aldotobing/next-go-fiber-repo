@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"mime/multipart"
 	"strings"
 	"time"
@@ -170,6 +171,23 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 
 	// currentObjectUc, err := uc.FindByID(c, models.MpBankParameter{ID: id})
 	currentObjectUc, err := uc.FindByID(c, models.WebCustomerParameter{ID: id})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "invalid id", uc.ReqID)
+		return
+	}
+
+	if *currentObjectUc.CustomerPhone != data.CustomerPhone {
+		checkerPhoneNumberData, _ := uc.SelectAll(c, models.WebCustomerParameter{
+			PhoneNumber: data.CustomerPhone,
+			By:          "c.created_date",
+		})
+		if len(checkerPhoneNumberData) > 0 {
+			err = errors.New("Duplicate Phone Number")
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "duplicate phone number", uc.ReqID)
+			return
+		}
+	}
+
 	ctx := "FileUC.Upload"
 	awsUc := AwsUC{ContractUC: uc.ContractUC}
 
@@ -258,6 +276,16 @@ func (uc WebCustomerUC) Add(c context.Context, data *requests.WebCustomerRequest
 	// currentObjectUc, err := uc.FindByID(c, models.MpBankParameter{ID: id})
 	ctx := "FileUC.Upload"
 	awsUc := AwsUC{ContractUC: uc.ContractUC}
+
+	checkerPhoneNumberData, _ := uc.SelectAll(c, models.WebCustomerParameter{
+		PhoneNumber: data.CustomerPhone,
+		By:          "c.created_date",
+	})
+	if len(checkerPhoneNumberData) > 0 {
+		err = errors.New("Duplicate Phone Number")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "duplicate phone number", uc.ReqID)
+		return
+	}
 
 	var strImgprofile = ""
 
