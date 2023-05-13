@@ -272,8 +272,9 @@ func (repository WebCustomerRepository) Edit(c context.Context, model *models.We
 		customer_email = $10,
 		customer_birthdate = $11,
 		customer_profile_picture = $12,
-		customer_photo_ktp = $13
-	WHERE id = $14
+		customer_photo_ktp = $13,
+		customer_cp_name = $14
+	WHERE id = $15
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		model.CustomerName,
@@ -289,6 +290,7 @@ func (repository WebCustomerRepository) Edit(c context.Context, model *models.We
 		model.CustomerBirthDate,
 		model.CustomerProfilePicture,
 		model.CustomerPhotoKtp,
+		model.CustomerCpName,
 		model.ID).Scan(&res)
 
 	if err != nil {
