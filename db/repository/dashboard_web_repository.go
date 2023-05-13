@@ -237,7 +237,8 @@ func (repo DashboardWebRepository) GetOmzetValue(ctx context.Context, parameter 
 			left join sales_invoice_line sil on sil.header_id = sih.id 
 			left join branch b on b.id = sih.branch_id  
 			left join region r on r.id = b.region_id
-		WHERE sih.transaction_date is not null` + whereStatement + `
+		WHERE sih.transaction_date is not null 
+			and sih.transaction_source_document_no like 'CO%'` + whereStatement + `
 			group by r.group_id
 			order by r.group_id asc`
 
@@ -286,7 +287,8 @@ func (repo DashboardWebRepository) GetOmzetValueByGroupID(ctx context.Context, p
 			left join sales_invoice_line sil on sil.header_id = sih.id 
 			left join branch b on b.id = sih.branch_id  
 			left join region r on r.id = b.region_id
-		WHERE sih.transaction_date is not null` + whereStatement + `
+		WHERE sih.transaction_date is not null
+			and sih.transaction_source_document_no like 'CO%'` + whereStatement + `
 			group by r.id
 			order by r.id asc`
 
@@ -335,7 +337,8 @@ func (repo DashboardWebRepository) GetOmzetValueByRegionID(ctx context.Context, 
 			left join sales_invoice_line sil on sil.header_id = sih.id 
 			left join branch b on b.id = sih.branch_id  
 			left join region r on r.id = b.region_id
-		WHERE sih.transaction_date is not null` + whereStatement + `
+		WHERE sih.transaction_date is not null
+			and sih.transaction_source_document_no like 'CO%'` + whereStatement + `
 			group by sih.branch_id, r.id
 			order by sih.branch_id asc`
 
