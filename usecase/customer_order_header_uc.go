@@ -210,11 +210,11 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 
 			}
 			if useraccount.CustomerPhone != nil && *useraccount.CustomerPhone != "" {
-				msgcustomer := msgcustomerheader + msgbody
-				senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.CustomerPhone, msgcustomer)
-				if senDwaMessage != nil {
-					fmt.Println("sukses")
-				}
+				// msgcustomer := msgcustomerheader + msgbody
+				// senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.CustomerPhone, msgcustomer)
+				// if senDwaMessage != nil {
+				// 	fmt.Println("sukses")
+				// }
 				if useraccount.CustomerSalesmanID != nil {
 					salesmannRepo := repository.NewSalesmanRepository(uc.DB)
 					customerSales, errcustsales := salesmannRepo.FindByID(c, models.SalesmanParameter{ID: *useraccount.CustomerSalesmanID})
@@ -331,13 +331,13 @@ func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter mode
 						}
 
 						if useraccount.CustomerPhone != nil && *useraccount.CustomerPhone != "" {
-							if messageTemplate != "" {
-								senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.CustomerPhone, messageTemplate)
-								if senDwaMessage != nil {
-									fmt.Println("sukses")
-								}
+							// if messageTemplate != "" {
+							// 	senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.CustomerPhone, messageTemplate)
+							// 	if senDwaMessage != nil {
+							// 		fmt.Println("sukses")
+							// 	}
 
-							}
+							// }
 
 							if useraccount.CustomerSalesmanID != nil {
 								salesmannRepo := repository.NewSalesmanRepository(uc.DB)
