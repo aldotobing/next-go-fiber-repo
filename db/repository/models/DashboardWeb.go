@@ -90,19 +90,21 @@ type DashboardWebRegionParameter struct {
 }
 
 type DashboardWebBranchParameter struct {
-	BarnchID       string `json:"branch_id"`
-	Search         string `json:"search"`
-	Page           int    `json:"page"`
-	Offset         int    `json:"offset"`
-	Limit          int    `json:"limit"`
-	By             string `json:"by"`
-	Sort           string `json:"sort"`
-	StartDate      string `json:"start_date"`
-	EndDate        string `json:"end_date"`
-	UserID         string `json:"user_id"`
-	ItemID         string `json:"item_id"`
-	ItemCategoryID string `json:"item_category_id"`
-	GroupID        string `json:"group_id"`
+	BarnchID        string `json:"branch_id"`
+	Search          string `json:"search"`
+	Page            int    `json:"page"`
+	Offset          int    `json:"offset"`
+	Limit           int    `json:"limit"`
+	By              string `json:"by"`
+	Sort            string `json:"sort"`
+	StartDate       string `json:"start_date"`
+	EndDate         string `json:"end_date"`
+	UserID          string `json:"user_id"`
+	ItemID          string `json:"item_id"`
+	ItemCategoryID  string `json:"item_category_id"`
+	GroupID         string `json:"group_id"`
+	ItemIDs         string `json:"item_id"`
+	ItemCategoryIDs string `json:"item_category_id"`
 }
 
 var (

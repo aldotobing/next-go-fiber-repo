@@ -221,12 +221,19 @@ func (repo DashboardWebRepository) GetOmzetValue(ctx context.Context, parameter 
 	} else {
 		whereStatement += ` AND sih.transaction_date BETWEEN date_trunc('MONTH',now())::DATE AND now()`
 	}
+
 	if parameter.ItemID != "" {
 		whereStatement += ` AND sil.item_id = ` + parameter.ItemID
 	}
-
 	if parameter.ItemCategoryID != "" {
 		whereStatement += ` AND sil.category_id = ` + parameter.ItemCategoryID
+	}
+
+	if parameter.ItemIDs != "" {
+		whereStatement += ` AND sil.item_id IN (` + parameter.ItemIDs + `)`
+	}
+	if parameter.ItemCategoryIDs != "" {
+		whereStatement += ` AND sil.category_id IN (` + parameter.ItemCategoryIDs + `)`
 	}
 
 	query := `select r.group_id,
@@ -275,6 +282,14 @@ func (repo DashboardWebRepository) GetOmzetValueByGroupID(ctx context.Context, p
 	if parameter.ItemCategoryID != "" {
 		whereStatement += ` AND sil.category_id = ` + parameter.ItemCategoryID
 	}
+
+	if parameter.ItemIDs != "" {
+		whereStatement += ` AND sil.item_id IN (` + parameter.ItemIDs + `)`
+	}
+	if parameter.ItemCategoryIDs != "" {
+		whereStatement += ` AND sil.category_id IN (` + parameter.ItemCategoryIDs + `)`
+	}
+
 	if groupID != "" && groupID != "0" {
 		whereStatement += ` AND r.group_id = '` + groupID + `'`
 	}
@@ -325,6 +340,14 @@ func (repo DashboardWebRepository) GetOmzetValueByRegionID(ctx context.Context, 
 	if parameter.ItemCategoryID != "" {
 		whereStatement += ` AND sil.category_id = ` + parameter.ItemCategoryID
 	}
+
+	if parameter.ItemIDs != "" {
+		whereStatement += ` AND sil.item_id IN (` + parameter.ItemIDs + `)`
+	}
+	if parameter.ItemCategoryIDs != "" {
+		whereStatement += ` AND sil.category_id IN (` + parameter.ItemCategoryIDs + `)`
+	}
+
 	if regionID != "" && regionID != "0" {
 		whereStatement += ` AND r.id = '` + regionID + `'`
 	}
