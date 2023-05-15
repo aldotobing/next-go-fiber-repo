@@ -145,10 +145,12 @@ func (h *DashboardWebHandler) GetOmzetValue(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.DashboardWebBranchParameter{
-		StartDate:      ctx.Query("start_date"),
-		EndDate:        ctx.Query("end_date"),
-		ItemID:         ctx.Query("item_id"),
-		ItemCategoryID: ctx.Query("item_category_id"),
+		StartDate:       ctx.Query("start_date"),
+		EndDate:         ctx.Query("end_date"),
+		ItemID:          ctx.Query("item_id"),
+		ItemCategoryID:  ctx.Query("item_category_id"),
+		ItemIDs:         ctx.Query("item_ids"),
+		ItemCategoryIDs: ctx.Query("item_category_ids"),
 	}
 
 	uc := usecase.DashboardWebUC{ContractUC: h.ContractUC}
@@ -166,10 +168,12 @@ func (h *DashboardWebHandler) GetOmzetValueByRegionGroupID(ctx *fiber.Ctx) error
 	regionGroupID := ctx.Query("group_id")
 
 	parameter := models.DashboardWebBranchParameter{
-		StartDate:      ctx.Query("start_date"),
-		EndDate:        ctx.Query("end_date"),
-		ItemID:         ctx.Query("item_id"),
-		ItemCategoryID: ctx.Query("item_category_id"),
+		StartDate:       ctx.Query("start_date"),
+		EndDate:         ctx.Query("end_date"),
+		ItemID:          ctx.Query("item_id"),
+		ItemCategoryID:  ctx.Query("item_category_id"),
+		ItemIDs:         ctx.Query("item_ids"),
+		ItemCategoryIDs: ctx.Query("item_category_ids"),
 	}
 
 	uc := usecase.DashboardWebUC{ContractUC: h.ContractUC}
@@ -187,10 +191,12 @@ func (h *DashboardWebHandler) GetOmzetValueByRegionID(ctx *fiber.Ctx) error {
 	regionID := ctx.Query("region_id")
 
 	parameter := models.DashboardWebBranchParameter{
-		StartDate:      ctx.Query("start_date"),
-		EndDate:        ctx.Query("end_date"),
-		ItemID:         ctx.Query("item_id"),
-		ItemCategoryID: ctx.Query("item_category_id"),
+		StartDate:       ctx.Query("start_date"),
+		EndDate:         ctx.Query("end_date"),
+		ItemID:          ctx.Query("item_id"),
+		ItemCategoryID:  ctx.Query("item_category_id"),
+		ItemIDs:         ctx.Query("item_ids"),
+		ItemCategoryIDs: ctx.Query("item_category_ids"),
 	}
 
 	uc := usecase.DashboardWebUC{ContractUC: h.ContractUC}
