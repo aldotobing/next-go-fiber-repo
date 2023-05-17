@@ -130,27 +130,6 @@ func (uc WebCustomerUC) SelectAll(c context.Context, parameter models.WebCustome
 	return res, err
 }
 
-// SelectAllWithInvoice ...
-func (uc WebCustomerUC) SelectAllWithInvoice(c context.Context, parameter models.WebCustomerParameter) (res []viewmodel.CustomerVM, err error) {
-	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(0, 0, parameter.By, parameter.Sort, models.WebCustomerOrderBy, models.WebCustomerOrderByrByString)
-
-	repo := repository.NewWebCustomerRepository(uc.DB)
-	data, err := repo.SelectAllWithInvoice(c, parameter)
-	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
-		return res, err
-	}
-
-	for i := range data {
-		var temp viewmodel.CustomerVM
-
-		uc.BuildBody(&data[i], &temp, true)
-		res = append(res, temp)
-	}
-
-	return res, err
-}
-
 // FindAll ...
 func (uc WebCustomerUC) FindAll(c context.Context, parameter models.WebCustomerParameter) (res []viewmodel.CustomerVM, p viewmodel.PaginationVM, err error) {
 	parameter.Offset, parameter.Limit, parameter.Page, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.WebCustomerOrderBy, models.WebCustomerOrderByrByString)

@@ -12,7 +12,6 @@ import (
 // ICustomerRepository ...
 type IWebCustomerRepository interface {
 	SelectAll(c context.Context, parameter models.WebCustomerParameter) ([]models.WebCustomer, error)
-	SelectAllWithInvoice(c context.Context, parameter models.WebCustomerParameter) ([]models.WebCustomer, error)
 	FindAll(ctx context.Context, parameter models.WebCustomerParameter) ([]models.WebCustomer, int, error)
 	FindByID(c context.Context, parameter models.WebCustomerParameter) (models.WebCustomer, error)
 	Edit(c context.Context, model *models.WebCustomer) (*string, error)
@@ -179,55 +178,6 @@ func (repository WebCustomerRepository) SelectAll(c context.Context, parameter m
 	//print
 	// fmt.Println(statement)
 
-	if err != nil {
-		return data, err
-	}
-
-	defer rows.Close()
-	for rows.Next() {
-
-		temp, err := repository.scanRows(rows)
-		if err != nil {
-			return data, err
-		}
-		data = append(data, temp)
-	}
-
-	return data, err
-}
-
-// SelectAllWithInvoice ...
-func (repository WebCustomerRepository) SelectAllWithInvoice(c context.Context, parameter models.WebCustomerParameter) (data []models.WebCustomer, err error) {
-	var conditionWithString, conditionString string
-
-	if parameter.ID != "" {
-		conditionString += ` AND c.id = '` + parameter.ID + `'`
-	}
-
-	if parameter.UserId != "" {
-		conditionString += ` AND C.BRANCH_ID IN (SELECT BRANCH_ID FROM USER_BRANCH UB WHERE UB.USER_ID = ` + parameter.UserId + `) `
-	}
-
-	if parameter.BranchId != "" {
-		conditionString += ` AND C.BRANCH_ID= ` + parameter.BranchId
-		conditionWithString += ` AND C.BRANCH_ID= ` + parameter.BranchId
-	}
-
-	if parameter.PhoneNumber != "" {
-		conditionString += ` AND c.customer_phone LIKE '%` + parameter.PhoneNumber + `%'`
-	}
-
-	if parameter.StartDate != "" && parameter.EndDate != "" {
-		conditionWithString += ` AND coh.transaction_date BETWEEN '` + parameter.StartDate + `' AND '` + parameter.EndDate + `'`
-	} else {
-		conditionWithString += ` AND coh.transaction_date BETWEEN date_trunc('MONTH',now())::DATE AND now()`
-	}
-
-	baseStatement := strings.Replace(models.WebCustomerWithInvoiceSelectStatement, "{WHERE_CONDITION}", conditionWithString, 1)
-
-	statement := baseStatement + ` ` + models.WebCustomerWithInvoiceWhereStatement +
-		` AND (LOWER(c.customer_name) LIKE $1 or LOWER(c.customer_code) LIKE $1 ) ` + conditionString + models.WebCustomerWithInvoiceGroupByStatement + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
-	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 	if err != nil {
 		return data, err
 	}

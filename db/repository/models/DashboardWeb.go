@@ -65,6 +65,23 @@ type OmzetValueModel struct {
 	TotalQuantity    string         `json:"total_quantity"`
 }
 
+type OmzetValueBranchModel struct {
+	RegionGroupName  *string `json:"region_group_name"`
+	RegionName       *string `json:"region_name"`
+	BranchName       *string `json:"branch_name"`
+	BranchCode       *string `json:"branch_code"`
+	CustomerID       *string `json:"customer_id"`
+	CustomerCode     *string `json:"customer_code"`
+	CustomerName     *string `json:"customer_name"`
+	CustomerType     *string `json:"customer_type"`
+	ProvinceName     *string `json:"customer_province_name"`
+	CityName         *string `json:"customer_city_name"`
+	CustomerLevel    *string `json:"customer_level"`
+	TotalGrossAmount string  `json:"total_gross_amount"`
+	TotalNettAmount  string  `json:"total_nett_amount"`
+	TotalQuantity    string  `json:"total_quantity"`
+}
+
 // DashboardWebParameter ...
 type DashboardWebParameter struct {
 	ID        string `json:"id"`

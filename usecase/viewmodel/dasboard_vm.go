@@ -48,8 +48,6 @@ type OmzetValueByCustomerVM struct {
 type OmzetValueCustomerVM struct {
 	RegionGroupName *string `json:"region_group_name"`
 	RegionName      *string `json:"region_name"`
-	BranchID        *string `json:"branch_id"`
-	BranchClass     *string `json:"branch_class"`
 	BranchName      *string `json:"branch_name"`
 	BranchCode      *string `json:"branch_code"`
 	CustomerID      *string `json:"customer_id"`
