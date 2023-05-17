@@ -213,8 +213,9 @@ func (uc DashboardWebUC) GetOmzetValueByRegionGroupID(c context.Context, paramet
 	var grandTotalQuantity, grandTotalOmzet float64
 	acOmzet := accounting.Accounting{Symbol: "Rp. ", Thousand: ".", Decimal: ","}
 	acQuantity := accounting.Accounting{Thousand: "."}
-	for i := range areas {
-		for j := range omzetData {
+
+	for j := range omzetData {
+		for i := range areas {
 			if omzetData[j].RegionID.String == *areas[i].RegionID {
 				amount, _ := strconv.ParseFloat(omzetData[j].TotalNettAmount, 64)
 				resTotalOmzet := acOmzet.FormatMoney(amount)
@@ -286,8 +287,9 @@ func (uc DashboardWebUC) GetOmzetValueByRegionID(c context.Context, parameter mo
 
 	acOmzet := accounting.Accounting{Symbol: "Rp. ", Thousand: ".", Decimal: ","}
 	acQuantity := accounting.Accounting{Thousand: "."}
-	for i := range branches {
-		for j := range omzetData {
+
+	for j := range omzetData {
+		for i := range branches {
 			if omzetData[j].BranchID.String == *branches[i].BranchID {
 				amount, _ := strconv.ParseFloat(omzetData[j].TotalNettAmount, 64)
 				resTotalOmzet := acOmzet.FormatMoney(amount)
@@ -298,6 +300,8 @@ func (uc DashboardWebUC) GetOmzetValueByRegionID(c context.Context, parameter mo
 				resTotalQuantity := acQuantity.FormatMoney(amount)
 				branches[i].Quantity = &resTotalQuantity
 				grandTotalQuantity += amount
+
+				branches[i].ActiveCustomer = &omzetData[j].TotalActiveCustomer
 
 				break
 			}
@@ -331,6 +335,14 @@ func (uc DashboardWebUC) GetOmzetValueByBranchID(c context.Context, parameter mo
 
 	var customers []viewmodel.OmzetValueCustomerVM
 	for i := range omzetData {
+		amount, _ := strconv.ParseFloat(omzetData[i].TotalNettAmount, 64)
+		grandTotalOmzet += amount
+		resTotalOmzet := acOmzet.FormatMoney(amount)
+
+		amount, _ = strconv.ParseFloat(omzetData[i].TotalQuantity, 64)
+		grandTotalQuantity += amount
+		resTotalQuantity := acOmzet.FormatMoney(amount)
+
 		customers = append(customers, viewmodel.OmzetValueCustomerVM{
 			RegionGroupName: omzetData[i].RegionGroupName,
 			RegionName:      omzetData[i].RegionName,
@@ -343,13 +355,9 @@ func (uc DashboardWebUC) GetOmzetValueByBranchID(c context.Context, parameter mo
 			ProvinceName:    omzetData[i].ProvinceName,
 			CityName:        omzetData[i].CityName,
 			CustomerLevel:   omzetData[i].CustomerLevel,
-			Quantity:        &omzetData[i].TotalQuantity,
-			Omzet:           &omzetData[i].TotalNettAmount,
+			Quantity:        &resTotalQuantity,
+			Omzet:           &resTotalOmzet,
 		})
-		amount, _ := strconv.ParseFloat(omzetData[i].TotalNettAmount, 64)
-		grandTotalOmzet += amount
-		amount, _ = strconv.ParseFloat(omzetData[i].TotalQuantity, 64)
-		grandTotalQuantity += amount
 	}
 
 	grandTotalOmzetString := acOmzet.FormatMoney(grandTotalOmzet)

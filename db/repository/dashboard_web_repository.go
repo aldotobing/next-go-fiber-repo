@@ -358,7 +358,8 @@ func (repo DashboardWebRepository) GetOmzetValueByRegionID(ctx context.Context, 
 	query := `select sih.branch_id,
 			coalesce(sum(sil.gross_amount),0) as total_gross_amount, 
 			coalesce(sum(sil.net_amount),0) as total_nett_amount, 
-			coalesce(sum(sil.qty),0) as total_volume
+			coalesce(sum(sil.qty),0) as total_volume,
+			coalesce(count(distinct(sih.cust_bill_to_id)),0) as total_active_customer
 		from sales_invoice_header sih 
 			left join sales_invoice_line sil on sil.header_id = sih.id 
 			left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
@@ -381,7 +382,8 @@ func (repo DashboardWebRepository) GetOmzetValueByRegionID(ctx context.Context, 
 		err = rows.Scan(&temp.BranchID,
 			&temp.TotalGrossAmount,
 			&temp.TotalNettAmount,
-			&temp.TotalQuantity)
+			&temp.TotalQuantity,
+			&temp.TotalActiveCustomer)
 		if err != nil {
 			return
 		}

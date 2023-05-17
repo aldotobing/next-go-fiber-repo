@@ -37,6 +37,7 @@ type OmzetValueBranchVM struct {
 	BranchCode      *string `json:"branch_code"`
 	Quantity        *string `json:"quantity"`
 	Omzet           *string `json:"omzet"`
+	ActiveCustomer  *string `json:"active_customer"`
 }
 
 type OmzetValueByCustomerVM struct {
