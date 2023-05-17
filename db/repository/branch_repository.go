@@ -29,8 +29,8 @@ func NewBranchRepository(DB *sql.DB) IBranchRepository {
 func (repository BranchRepository) scanRows(rows *sql.Rows) (res models.Branch, err error) {
 	err = rows.Scan(
 		&res.ID,
-		&res.Code,
 		&res.Name,
+		&res.Code,
 		&res.RegionID,
 		&res.RegionName,
 		&res.RegionGroupID,

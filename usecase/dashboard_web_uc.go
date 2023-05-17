@@ -249,7 +249,7 @@ func (uc DashboardWebUC) GetOmzetValueByRegionGroupID(c context.Context, paramet
 	return res, err
 }
 
-func (uc DashboardWebUC) GetOmzetValueByRegionID(c context.Context, parameter models.DashboardWebBranchParameter, regionID string) (res []viewmodel.OmzetValueBranchVM, err error) {
+func (uc DashboardWebUC) GetOmzetValueByRegionID(c context.Context, parameter models.DashboardWebBranchParameter, regionID string) (res viewmodel.OmzetValueByBranchVM, err error) {
 	branchUC := BranchUC{ContractUC: uc.ContractUC}
 	branchData, err := branchUC.SelectAll(c, models.BranchParameter{
 		RegionID: regionID,
@@ -260,8 +260,9 @@ func (uc DashboardWebUC) GetOmzetValueByRegionID(c context.Context, parameter mo
 		return res, err
 	}
 
+	var branches []viewmodel.OmzetValueBranchVM
 	for i := range branchData {
-		res = append(res, viewmodel.OmzetValueBranchVM{
+		branches = append(branches, viewmodel.OmzetValueBranchVM{
 			BranchID:        branchData[i].ID,
 			BranchName:      branchData[i].Name,
 			BranchCode:      branchData[i].Code,
@@ -281,22 +282,110 @@ func (uc DashboardWebUC) GetOmzetValueByRegionID(c context.Context, parameter mo
 		return res, err
 	}
 
+	var grandTotalQuantity, grandTotalOmzet float64
+
 	acOmzet := accounting.Accounting{Symbol: "Rp. ", Thousand: ".", Decimal: ","}
 	acQuantity := accounting.Accounting{Thousand: "."}
-	for i := range res {
+	for i := range branches {
 		for j := range omzetData {
-			if omzetData[j].BranchID.String == *res[i].BranchID {
+			if omzetData[j].BranchID.String == *branches[i].BranchID {
 				amount, _ := strconv.ParseFloat(omzetData[j].TotalNettAmount, 64)
 				resTotalOmzet := acOmzet.FormatMoney(amount)
-				res[i].Omzet = &resTotalOmzet
+				branches[i].Omzet = &resTotalOmzet
+				grandTotalOmzet += amount
 
 				amount, _ = strconv.ParseFloat(omzetData[j].TotalQuantity, 64)
 				resTotalQuantity := acQuantity.FormatMoney(amount)
-				res[i].Quantity = &resTotalQuantity
+				branches[i].Quantity = &resTotalQuantity
+				grandTotalQuantity += amount
 
 				break
 			}
 		}
+	}
+
+	grandTotalOmzetString := acOmzet.FormatMoney(grandTotalOmzet)
+	grandTotalQuantityString := acQuantity.FormatMoney(grandTotalQuantity)
+
+	res = viewmodel.OmzetValueByBranchVM{
+		TotalOmzet:    &grandTotalOmzetString,
+		TotalQuantity: &grandTotalQuantityString,
+		Branches:      branches,
+	}
+
+	return res, err
+}
+
+func (uc DashboardWebUC) GetOmzetValueByBranchID(c context.Context, parameter models.DashboardWebBranchParameter, branchID string) (res viewmodel.OmzetValueByCustomerVM, err error) {
+	customerUC := WebCustomerUC{ContractUC: uc.ContractUC}
+	customerData, err := customerUC.SelectAllWithInvoice(c, models.WebCustomerParameter{
+		BranchId:  branchID,
+		By:        "c.id",
+		Sort:      "asc",
+		StartDate: parameter.StartDate,
+		EndDate:   parameter.EndDate,
+	})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "get_branch_data", c.Value("requestid"))
+		return res, err
+	}
+
+	var customers []viewmodel.OmzetValueCustomerVM
+	for i := range customerData {
+		customers = append(customers, viewmodel.OmzetValueCustomerVM{
+			RegionGroupName: customerData[i].CustomerRegionGroup,
+			RegionName:      customerData[i].CustomerRegionName,
+			BranchID:        customerData[i].CustomerBranchID,
+			BranchCode:      customerData[i].CustomerBranchCode,
+			BranchName:      customerData[i].CustomerBranchName,
+			CustomerID:      customerData[i].ID,
+			CustomerCode:    customerData[i].Code,
+			CustomerName:    customerData[i].CustomerName,
+			CustomerType:    customerData[i].CustomerTypeName,
+			ProvinceName:    customerData[i].CustomerProvinceName,
+			CityName:        customerData[i].CustomerCityName,
+			CustomerLevel:   customerData[i].CustomerLevel,
+			Quantity:        &quantityDefaultValue,
+			Omzet:           &amountDefultValue,
+		})
+	}
+
+	repo := repository.NewDashboardWebRepository(uc.DB)
+	omzetData, err := repo.GetOmzetValueByBranchID(c, parameter, branchID)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	var grandTotalQuantity, grandTotalOmzet float64
+
+	acOmzet := accounting.Accounting{Symbol: "Rp. ", Thousand: ".", Decimal: ","}
+	acQuantity := accounting.Accounting{Thousand: "."}
+	for i := range customers {
+		for j := range omzetData {
+			if omzetData[j].CustomerID.String == *customers[i].CustomerID {
+				amount, _ := strconv.ParseFloat(omzetData[j].TotalNettAmount, 64)
+				resTotalOmzet := acOmzet.FormatMoney(amount)
+				customers[i].Omzet = &resTotalOmzet
+				grandTotalOmzet += amount
+
+				amount, _ = strconv.ParseFloat(omzetData[j].TotalQuantity, 64)
+				resTotalQuantity := acQuantity.FormatMoney(amount)
+				customers[i].Quantity = &resTotalQuantity
+				grandTotalQuantity += amount
+
+				break
+			}
+		}
+	}
+
+	grandTotalOmzetString := acOmzet.FormatMoney(grandTotalOmzet)
+	grandTotalQuantityString := acQuantity.FormatMoney(grandTotalQuantity)
+
+	res = viewmodel.OmzetValueByCustomerVM{
+		TotalOmzet:    &grandTotalOmzetString,
+		TotalQuantity: &grandTotalQuantityString,
+		Customers:     customers,
 	}
 
 	return res, err
