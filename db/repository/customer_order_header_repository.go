@@ -257,6 +257,12 @@ func (repository CustomerOrderHeaderRepository) SyncVoid(c context.Context, mode
 func (repository CustomerOrderHeaderRepository) AppsSelectAll(c context.Context, parameter models.CustomerOrderHeaderParameter) (data []models.CustomerOrderHeader, err error) {
 	conditionString := ``
 
+	if parameter.StartDate != "" && parameter.EndDate != "" {
+		conditionString += ` AND def.transaction_date BETWEEN '` + parameter.StartDate + `' AND '` + parameter.EndDate + `'`
+	} else {
+		conditionString += ` AND def.transaction_date BETWEEN date_trunc('MONTH',now())::DATE AND now()`
+	}
+
 	if parameter.CustomerID != "" {
 		conditionString += ` AND def.cust_ship_to_id = '` + parameter.CustomerID + `'`
 	}

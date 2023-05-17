@@ -54,15 +54,33 @@ type DashboardWebBranchDetail struct {
 }
 
 type OmzetValueModel struct {
-	RegionID         sql.NullString `json:"region_id"`
-	RegionName       sql.NullString `json:"region_name"`
-	RegionGroupID    sql.NullString `json:"region_group_id"`
-	RegionGroupName  sql.NullString `json:"region_group_name"`
-	BranchID         sql.NullString `json:"branch_id"`
-	CustomerID       sql.NullString `json:"customer_id"`
-	TotalGrossAmount string         `json:"total_gross_amount"`
-	TotalNettAmount  string         `json:"total_nett_amount"`
-	TotalQuantity    string         `json:"total_quantity"`
+	RegionID            sql.NullString `json:"region_id"`
+	RegionName          sql.NullString `json:"region_name"`
+	RegionGroupID       sql.NullString `json:"region_group_id"`
+	RegionGroupName     sql.NullString `json:"region_group_name"`
+	BranchID            sql.NullString `json:"branch_id"`
+	CustomerID          sql.NullString `json:"customer_id"`
+	TotalGrossAmount    string         `json:"total_gross_amount"`
+	TotalNettAmount     string         `json:"total_nett_amount"`
+	TotalQuantity       string         `json:"total_quantity"`
+	TotalActiveCustomer string         `json:"total_active_customer"`
+}
+
+type OmzetValueBranchModel struct {
+	RegionGroupName  *string `json:"region_group_name"`
+	RegionName       *string `json:"region_name"`
+	BranchName       *string `json:"branch_name"`
+	BranchCode       *string `json:"branch_code"`
+	CustomerID       *string `json:"customer_id"`
+	CustomerCode     *string `json:"customer_code"`
+	CustomerName     *string `json:"customer_name"`
+	CustomerType     *string `json:"customer_type"`
+	ProvinceName     *string `json:"customer_province_name"`
+	CityName         *string `json:"customer_city_name"`
+	CustomerLevel    *string `json:"customer_level"`
+	TotalGrossAmount string  `json:"total_gross_amount"`
+	TotalNettAmount  string  `json:"total_nett_amount"`
+	TotalQuantity    string  `json:"total_quantity"`
 }
 
 // DashboardWebParameter ...

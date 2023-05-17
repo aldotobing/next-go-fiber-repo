@@ -18,7 +18,7 @@ type IDashboardWebRepository interface {
 	GetOmzetValue(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.OmzetValueModel, error)
 	GetOmzetValueByGroupID(ctx context.Context, parameter models.DashboardWebBranchParameter, groupID string) ([]models.OmzetValueModel, error)
 	GetOmzetValueByRegionID(ctx context.Context, parameter models.DashboardWebBranchParameter, groupID string) ([]models.OmzetValueModel, error)
-	GetOmzetValueByBranchID(ctx context.Context, parameter models.DashboardWebBranchParameter, branchID string) ([]models.OmzetValueModel, error)
+	GetOmzetValueByBranchID(ctx context.Context, parameter models.DashboardWebBranchParameter, branchID string) ([]models.OmzetValueBranchModel, error)
 }
 
 // DashboardWebRepository ...
@@ -358,7 +358,8 @@ func (repo DashboardWebRepository) GetOmzetValueByRegionID(ctx context.Context, 
 	query := `select sih.branch_id,
 			coalesce(sum(sil.gross_amount),0) as total_gross_amount, 
 			coalesce(sum(sil.net_amount),0) as total_nett_amount, 
-			coalesce(sum(sil.qty),0) as total_volume
+			coalesce(sum(sil.qty),0) as total_volume,
+			coalesce(count(distinct(sih.cust_bill_to_id)),0) as total_active_customer
 		from sales_invoice_header sih 
 			left join sales_invoice_line sil on sil.header_id = sih.id 
 			left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
@@ -381,7 +382,8 @@ func (repo DashboardWebRepository) GetOmzetValueByRegionID(ctx context.Context, 
 		err = rows.Scan(&temp.BranchID,
 			&temp.TotalGrossAmount,
 			&temp.TotalNettAmount,
-			&temp.TotalQuantity)
+			&temp.TotalQuantity,
+			&temp.TotalActiveCustomer)
 		if err != nil {
 			return
 		}
@@ -392,12 +394,14 @@ func (repo DashboardWebRepository) GetOmzetValueByRegionID(ctx context.Context, 
 	return
 }
 
-func (repo DashboardWebRepository) GetOmzetValueByBranchID(ctx context.Context, parameter models.DashboardWebBranchParameter, branchID string) (res []models.OmzetValueModel, err error) {
-	var whereStatement string
+func (repo DashboardWebRepository) GetOmzetValueByBranchID(ctx context.Context, parameter models.DashboardWebBranchParameter, branchID string) (res []models.OmzetValueBranchModel, err error) {
+	var whereStatement, withWhereStatement string
 	if parameter.StartDate != "" && parameter.EndDate != "" {
 		whereStatement += ` AND sih.transaction_date BETWEEN '` + parameter.StartDate + `' AND '` + parameter.EndDate + `'`
+		withWhereStatement += ` AND sih.transaction_date BETWEEN '` + parameter.StartDate + `' AND '` + parameter.EndDate + `'`
 	} else {
 		whereStatement += ` AND sih.transaction_date BETWEEN date_trunc('MONTH',now())::DATE AND now()`
+		withWhereStatement += ` AND sih.transaction_date BETWEEN date_trunc('MONTH',now())::DATE AND now()`
 	}
 	if parameter.ItemID != "" {
 		whereStatement += ` AND sil.item_id = ` + parameter.ItemID
@@ -415,22 +419,53 @@ func (repo DashboardWebRepository) GetOmzetValueByBranchID(ctx context.Context, 
 
 	if branchID != "" && branchID != "0" {
 		whereStatement += ` AND c.branch_id = '` + branchID + `'`
+		withWhereStatement += ` AND c.branch_id = '` + branchID + `'`
 	}
 
-	query := `select c.id,
-			coalesce(sum(sil.gross_amount),0) as total_gross_amount, 
-			coalesce(sum(sil.net_amount),0) as total_nett_amount, 
-			coalesce(sum(sil.qty),0) as total_volume
-		from sales_invoice_header sih 
-			left join sales_invoice_line sil on sil.header_id = sih.id 
-			left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
-        	left join customer c on c.id = coh.cust_bill_to_id 
-		WHERE sih.transaction_date is not null
-			and sih.transaction_source_document_no like 'CO%'` + whereStatement + `
-			group by c.id
-			order by c.id asc`
+	querySelect := `with customerSelected as(
+		select 
+			reg."_name" as region_name,
+			reg.group_name as region_group_name,
+			b."_name" as branch_name, 
+			b.branch_code as branch_code,
+			c.id as customer_id, 
+		  	CT._NAME as customer_type_name,
+		  	DIST._NAME AS CUSTomer_DISTRICT_NAME, 
+			CTY._NAME AS CUSTomer_CITY_NAME,
+		  	cl._name as customer_level_name
+		from customer c
+			left join customer_order_header coh on coh.cust_bill_to_id = c.id
+			left join sales_invoice_header sih on sih.transaction_source_document_no = coh.document_no
+			left join branch b on b.id = c.branch_id
+			LEFT JOIN REGION REG ON REG.ID = B.REGION_ID
+			left JOIN CITY CTY ON CTY.ID = C.CUSTOMER_CITY_ID
+	  		left JOIN DISTRICT DIST ON DIST.ID = C.CUSTOMER_DISTRICT_ID
+	  		left join customer_level cl on cl.id = c.customer_level_id
+	  		LEFT JOIN CUSTOMER_TYPE CT ON CT.ID = C.CUSTOMER_TYPE_ID
+		where c.show_in_apps = 1  
+			and coh.status in ('finish', 'submitted') 
+			and sih.id is not null ` + withWhereStatement + `
+		group by c.id, b.id, cty.id, dist.id, cl.id, ct.id, reg.id
+	)
+	select c.id, cs.region_name, cs.region_group_name, cs.branch_name, cs.branch_code, c.customer_name, c.customer_code, cs.customer_type_name, cs.customer_district_name, 
+		cs.customer_city_name, customer_level_name, 
+		coalesce(sum(sil.gross_amount),0) as total_gross_amount, 
+        coalesce(sum(sil.net_amount),0) as total_nett_amount, 
+        coalesce(sum(sil.qty),0) as total_volume
+    from sales_invoice_header sih 
+		left join sales_invoice_line sil on sil.header_id = sih.id 
+		left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
+		left join customer c on c.id = coh.cust_bill_to_id
+		left join branch b on b.id = sih.branch_id  
+		left join region r on r.id = b.region_id
+		left join customerSelected CS on cs.customer_id = c.id
+	WHERE sih.transaction_date is not null 
+		and coh.id is not null ` + whereStatement + `
+	group by c.id, cs.region_name,cs.region_group_name, cs.branch_name, cs.branch_code, cs.customer_type_name, cs.customer_district_name, 
+		cs.customer_city_name, customer_level_name
+	order by c.id asc`
 
-	rows, err := repo.DB.Query(query)
+	rows, err := repo.DB.Query(querySelect)
 	if err != nil {
 		return
 	}
@@ -438,8 +473,18 @@ func (repo DashboardWebRepository) GetOmzetValueByBranchID(ctx context.Context, 
 	defer rows.Close()
 
 	for rows.Next() {
-		var temp models.OmzetValueModel
+		var temp models.OmzetValueBranchModel
 		err = rows.Scan(&temp.CustomerID,
+			&temp.RegionName,
+			&temp.RegionGroupName,
+			&temp.BranchName,
+			&temp.BranchCode,
+			&temp.CustomerName,
+			&temp.CustomerCode,
+			&temp.CustomerType,
+			&temp.ProvinceName,
+			&temp.CityName,
+			&temp.CustomerLevel,
 			&temp.TotalGrossAmount,
 			&temp.TotalNettAmount,
 			&temp.TotalQuantity)

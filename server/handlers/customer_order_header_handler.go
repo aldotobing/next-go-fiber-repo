@@ -199,6 +199,8 @@ func (h *CustomerOrderHeaderHandler) AppsSelectAll(ctx *fiber.Ctx) error {
 		Search:     ctx.Query("search"),
 		By:         ctx.Query("by"),
 		Sort:       ctx.Query("sort"),
+		StartDate:  ctx.Query("start_date"),
+		EndDate:    ctx.Query("end_date"),
 	}
 	uc := usecase.CustomerOrderHeaderUC{ContractUC: h.ContractUC}
 	res, err := uc.AppsSelectAll(c, parameter)
