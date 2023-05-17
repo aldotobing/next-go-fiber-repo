@@ -241,6 +241,10 @@ func (uc DashboardWebUC) GetOmzetValueByRegionGroupID(c context.Context, paramet
 	grandTotalOmzetString := acOmzet.FormatMoney(grandTotalOmzet)
 	grandTotalQuantityString := acQuantity.FormatMoney(grandTotalQuantity)
 
+	if areas == nil {
+		areas = make([]viewmodel.OmzetValueAreaVM, 0)
+	}
+
 	res = viewmodel.OmzetValueByRegionVM{
 		TotalOmzet:    &grandTotalOmzetString,
 		TotalQuantity: &grandTotalQuantityString,
@@ -311,6 +315,10 @@ func (uc DashboardWebUC) GetOmzetValueByRegionID(c context.Context, parameter mo
 	grandTotalOmzetString := acOmzet.FormatMoney(grandTotalOmzet)
 	grandTotalQuantityString := acQuantity.FormatMoney(grandTotalQuantity)
 
+	if branches == nil {
+		branches = make([]viewmodel.OmzetValueBranchVM, 0)
+	}
+
 	res = viewmodel.OmzetValueByBranchVM{
 		TotalOmzet:    &grandTotalOmzetString,
 		TotalQuantity: &grandTotalQuantityString,
@@ -362,6 +370,10 @@ func (uc DashboardWebUC) GetOmzetValueByBranchID(c context.Context, parameter mo
 
 	grandTotalOmzetString := acOmzet.FormatMoney(grandTotalOmzet)
 	grandTotalQuantityString := acQuantity.FormatMoney(grandTotalQuantity)
+
+	if customers == nil {
+		customers = make([]viewmodel.OmzetValueCustomerVM, 0)
+	}
 
 	res = viewmodel.OmzetValueByCustomerVM{
 		TotalOmzet:    &grandTotalOmzetString,
