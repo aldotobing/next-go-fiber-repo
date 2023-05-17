@@ -207,3 +207,26 @@ func (h *DashboardWebHandler) GetOmzetValueByRegionID(ctx *fiber.Ctx) error {
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
+
+func (h *DashboardWebHandler) GetOmzetValueByBranchID(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	branchID := ctx.Query("branch_id")
+
+	parameter := models.DashboardWebBranchParameter{
+		StartDate:       ctx.Query("start_date"),
+		EndDate:         ctx.Query("end_date"),
+		ItemID:          ctx.Query("item_id"),
+		ItemCategoryID:  ctx.Query("item_category_id"),
+		ItemIDs:         ctx.Query("item_ids"),
+		ItemCategoryIDs: ctx.Query("item_category_ids"),
+	}
+
+	uc := usecase.DashboardWebUC{ContractUC: h.ContractUC}
+	res, err := uc.GetOmzetValueByBranchID(c, parameter, branchID)
+	if err != nil {
+		h.SendResponse(ctx, res, nil, err, 0)
+	}
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}

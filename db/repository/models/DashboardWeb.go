@@ -59,6 +59,7 @@ type OmzetValueModel struct {
 	RegionGroupID    sql.NullString `json:"region_group_id"`
 	RegionGroupName  sql.NullString `json:"region_group_name"`
 	BranchID         sql.NullString `json:"branch_id"`
+	CustomerID       sql.NullString `json:"customer_id"`
 	TotalGrossAmount string         `json:"total_gross_amount"`
 	TotalNettAmount  string         `json:"total_nett_amount"`
 	TotalQuantity    string         `json:"total_quantity"`

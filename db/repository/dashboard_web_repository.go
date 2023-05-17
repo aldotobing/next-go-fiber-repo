@@ -18,6 +18,7 @@ type IDashboardWebRepository interface {
 	GetOmzetValue(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.OmzetValueModel, error)
 	GetOmzetValueByGroupID(ctx context.Context, parameter models.DashboardWebBranchParameter, groupID string) ([]models.OmzetValueModel, error)
 	GetOmzetValueByRegionID(ctx context.Context, parameter models.DashboardWebBranchParameter, groupID string) ([]models.OmzetValueModel, error)
+	GetOmzetValueByBranchID(ctx context.Context, parameter models.DashboardWebBranchParameter, branchID string) ([]models.OmzetValueModel, error)
 }
 
 // DashboardWebRepository ...
@@ -242,10 +243,11 @@ func (repo DashboardWebRepository) GetOmzetValue(ctx context.Context, parameter 
 			coalesce(sum(sil.qty),0) as total_volume
 		from sales_invoice_header sih 
 			left join sales_invoice_line sil on sil.header_id = sih.id 
+			left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
 			left join branch b on b.id = sih.branch_id  
 			left join region r on r.id = b.region_id
 		WHERE sih.transaction_date is not null 
-			and sih.transaction_source_document_no like 'CO%'` + whereStatement + `
+			and coh.id is not null` + whereStatement + `
 			group by r.group_id
 			order by r.group_id asc`
 
@@ -300,10 +302,11 @@ func (repo DashboardWebRepository) GetOmzetValueByGroupID(ctx context.Context, p
 			coalesce(sum(sil.qty),0) as total_volume
 		from sales_invoice_header sih 
 			left join sales_invoice_line sil on sil.header_id = sih.id 
+			left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
 			left join branch b on b.id = sih.branch_id  
 			left join region r on r.id = b.region_id
 		WHERE sih.transaction_date is not null
-			and sih.transaction_source_document_no like 'CO%'` + whereStatement + `
+			and coh.id is not null` + whereStatement + `
 			group by r.id
 			order by r.id asc`
 
@@ -358,10 +361,11 @@ func (repo DashboardWebRepository) GetOmzetValueByRegionID(ctx context.Context, 
 			coalesce(sum(sil.qty),0) as total_volume
 		from sales_invoice_header sih 
 			left join sales_invoice_line sil on sil.header_id = sih.id 
+			left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
 			left join branch b on b.id = sih.branch_id  
 			left join region r on r.id = b.region_id
 		WHERE sih.transaction_date is not null
-			and sih.transaction_source_document_no like 'CO%'` + whereStatement + `
+			and coh.id is not null` + whereStatement + `
 			group by sih.branch_id, r.id
 			order by sih.branch_id asc`
 
@@ -375,6 +379,67 @@ func (repo DashboardWebRepository) GetOmzetValueByRegionID(ctx context.Context, 
 	for rows.Next() {
 		var temp models.OmzetValueModel
 		err = rows.Scan(&temp.BranchID,
+			&temp.TotalGrossAmount,
+			&temp.TotalNettAmount,
+			&temp.TotalQuantity)
+		if err != nil {
+			return
+		}
+
+		res = append(res, temp)
+	}
+
+	return
+}
+
+func (repo DashboardWebRepository) GetOmzetValueByBranchID(ctx context.Context, parameter models.DashboardWebBranchParameter, branchID string) (res []models.OmzetValueModel, err error) {
+	var whereStatement string
+	if parameter.StartDate != "" && parameter.EndDate != "" {
+		whereStatement += ` AND sih.transaction_date BETWEEN '` + parameter.StartDate + `' AND '` + parameter.EndDate + `'`
+	} else {
+		whereStatement += ` AND sih.transaction_date BETWEEN date_trunc('MONTH',now())::DATE AND now()`
+	}
+	if parameter.ItemID != "" {
+		whereStatement += ` AND sil.item_id = ` + parameter.ItemID
+	}
+	if parameter.ItemCategoryID != "" {
+		whereStatement += ` AND sil.category_id = ` + parameter.ItemCategoryID
+	}
+
+	if parameter.ItemIDs != "" {
+		whereStatement += ` AND sil.item_id IN (` + parameter.ItemIDs + `)`
+	}
+	if parameter.ItemCategoryIDs != "" {
+		whereStatement += ` AND sil.category_id IN (` + parameter.ItemCategoryIDs + `)`
+	}
+
+	if branchID != "" && branchID != "0" {
+		whereStatement += ` AND c.branch_id = '` + branchID + `'`
+	}
+
+	query := `select c.id,
+			coalesce(sum(sil.gross_amount),0) as total_gross_amount, 
+			coalesce(sum(sil.net_amount),0) as total_nett_amount, 
+			coalesce(sum(sil.qty),0) as total_volume
+		from sales_invoice_header sih 
+			left join sales_invoice_line sil on sil.header_id = sih.id 
+			left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
+        	left join customer c on c.id = coh.cust_bill_to_id 
+		WHERE sih.transaction_date is not null
+			and sih.transaction_source_document_no like 'CO%'` + whereStatement + `
+			group by c.id
+			order by c.id asc`
+
+	rows, err := repo.DB.Query(query)
+	if err != nil {
+		return
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var temp models.OmzetValueModel
+		err = rows.Scan(&temp.CustomerID,
 			&temp.TotalGrossAmount,
 			&temp.TotalNettAmount,
 			&temp.TotalQuantity)
