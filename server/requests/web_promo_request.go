@@ -12,4 +12,5 @@ type WebPromoRequest struct {
 	ShowInApp          string `json:"show_in_app"`
 	CustomerTypeIdList string `json:"customer_type_id_list"`
 	RegionIDList       string `json:"region_area_id_list"`
+	Active             string `json:"active"`
 }

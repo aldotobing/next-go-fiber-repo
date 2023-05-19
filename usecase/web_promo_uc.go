@@ -99,6 +99,51 @@ func (uc WebPromoUC) Add(c context.Context, data *requests.WebPromoRequest, imgB
 	return res, err
 }
 
+// Edit ...
+func (uc WebPromoUC) Edit(c context.Context, data *requests.WebPromoRequest, imgBanner *multipart.FileHeader, id string) (res models.WebPromo, err error) {
+	promo, err := uc.FindByID(c, models.WebPromoParameter{ID: id})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "find_by_id", c.Value("requestid"))
+		return res, err
+	}
+
+	var strImgBanner = ""
+	if imgBanner == nil {
+		strImgBanner = *promo.PromoUrlBanner
+	} else {
+		ctx := "FileUC.Upload"
+		awsUc := AwsUC{ContractUC: uc.ContractUC}
+
+		if imgBanner != nil {
+			imgProfileFile, err := awsUc.Upload("image/promo", imgBanner)
+			if err != nil {
+				logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "upload_file", c.Value("requestid"))
+				return res, err
+			}
+			strImgBanner = imgProfileFile.FileName
+		}
+	}
+
+	repo := repository.NewWebPromoRepository(uc.DB)
+	res = models.WebPromo{
+		ID:               &id,
+		PromoName:        &data.PromoName,
+		PromoDescription: &data.PromoDescription,
+		PromoUrlBanner:   &strImgBanner,
+		StartDate:        &data.StartDate,
+		EndDate:          &data.EndDate,
+		ShowInApp:        &data.ShowInApp,
+		Active:           &data.Active,
+	}
+	res.ID, err = repo.Edit(c, &res)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	return res, err
+}
+
 // Delete ...
 func (uc WebPromoUC) Delete(c context.Context, id string) (res viewmodel.CommonDeletedObjectVM, err error) {
 	repo := repository.NewWebPromoRepository(uc.DB)
