@@ -349,7 +349,7 @@ func (uc DashboardWebUC) GetOmzetValueByBranchID(c context.Context, parameter mo
 
 		amount, _ = strconv.ParseFloat(omzetData[i].TotalQuantity, 64)
 		grandTotalQuantity += amount
-		resTotalQuantity := acOmzet.FormatMoney(amount)
+		resTotalQuantity := acQuantity.FormatMoney(amount)
 
 		customers = append(customers, viewmodel.OmzetValueCustomerVM{
 			RegionGroupName: omzetData[i].RegionGroupName,
