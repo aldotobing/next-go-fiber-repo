@@ -19,6 +19,7 @@ type IDashboardWebRepository interface {
 	GetOmzetValueByGroupID(ctx context.Context, parameter models.DashboardWebBranchParameter, groupID string) ([]models.OmzetValueModel, error)
 	GetOmzetValueByRegionID(ctx context.Context, parameter models.DashboardWebBranchParameter, groupID string) ([]models.OmzetValueModel, error)
 	GetOmzetValueByBranchID(ctx context.Context, parameter models.DashboardWebBranchParameter, branchID string) ([]models.OmzetValueBranchModel, error)
+	GetOmzetValueByCustomerID(ctx context.Context, parameter models.DashboardWebBranchParameter, customerID string) (res []models.OmzetValueModel, err error)
 }
 
 // DashboardWebRepository ...
@@ -485,6 +486,73 @@ func (repo DashboardWebRepository) GetOmzetValueByBranchID(ctx context.Context, 
 			&temp.ProvinceName,
 			&temp.CityName,
 			&temp.CustomerLevel,
+			&temp.TotalGrossAmount,
+			&temp.TotalNettAmount,
+			&temp.TotalQuantity)
+		if err != nil {
+			return
+		}
+
+		res = append(res, temp)
+	}
+
+	return
+}
+
+func (repo DashboardWebRepository) GetOmzetValueByCustomerID(ctx context.Context, parameter models.DashboardWebBranchParameter, customerID string) (res []models.OmzetValueModel, err error) {
+	var whereStatement string
+	if parameter.StartDate != "" && parameter.EndDate != "" {
+		whereStatement += ` AND sih.transaction_date BETWEEN '` + parameter.StartDate + `' AND '` + parameter.EndDate + `'`
+	} else {
+		whereStatement += ` AND sih.transaction_date BETWEEN date_trunc('MONTH',now())::DATE AND now()`
+	}
+	if parameter.ItemID != "" {
+		whereStatement += ` AND sil.item_id = ` + parameter.ItemID
+	}
+	if parameter.ItemCategoryID != "" {
+		whereStatement += ` AND sil.category_id = ` + parameter.ItemCategoryID
+	}
+
+	if parameter.ItemIDs != "" {
+		whereStatement += ` AND sil.item_id IN (` + parameter.ItemIDs + `)`
+	}
+	if parameter.ItemCategoryIDs != "" {
+		whereStatement += ` AND sil.category_id IN (` + parameter.ItemCategoryIDs + `)`
+	}
+
+	if customerID != "" && customerID != "0" {
+		whereStatement += ` AND c.id = '` + customerID + `'`
+	}
+
+	querySelect := `select i.id, i."_name",
+		coalesce(sum(sil.gross_amount),0) as total_gross_amount, 
+		coalesce(sum(sil.net_amount),0) as total_nett_amount, 
+		coalesce(sum(sil.qty),0) as total_volume
+	from sales_invoice_header sih 
+		left join sales_invoice_line sil on sil.header_id = sih.id 
+		left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
+		left join customer_order_line col on col.header_id = coh.id
+		left join item i on i.id = col.item_id
+		left join customer c on c.id = coh.cust_bill_to_id
+		left join branch b on b.id = sih.branch_id  
+		left join region r on r.id = b.region_id
+	WHERE sih.transaction_date is not null 
+		and coh.id is not null AND sih.transaction_date BETWEEN '2023-05-01' AND '2023-05-30'
+		` + whereStatement + `
+	group by i.id
+	order by i.id asc`
+
+	rows, err := repo.DB.Query(querySelect)
+	if err != nil {
+		return
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var temp models.OmzetValueModel
+		err = rows.Scan(&temp.ItemID,
+			&temp.ItemName,
 			&temp.TotalGrossAmount,
 			&temp.TotalNettAmount,
 			&temp.TotalQuantity)
