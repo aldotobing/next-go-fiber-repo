@@ -383,3 +383,50 @@ func (uc DashboardWebUC) GetOmzetValueByBranchID(c context.Context, parameter mo
 
 	return res, err
 }
+
+func (uc DashboardWebUC) GetOmzetValueByCustomerID(c context.Context, parameter models.DashboardWebBranchParameter, customerID string) (res viewmodel.OmzetValueByItemVM, err error) {
+	repo := repository.NewDashboardWebRepository(uc.DB)
+	omzetData, err := repo.GetOmzetValueByCustomerID(c, parameter, customerID)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	var grandTotalQuantity, grandTotalOmzet float64
+
+	acOmzet := accounting.Accounting{Symbol: "Rp. ", Thousand: ".", Decimal: ","}
+	acQuantity := accounting.Accounting{Thousand: "."}
+
+	var customers []viewmodel.OmzetValueItemVM
+	for i := range omzetData {
+		amount, _ := strconv.ParseFloat(omzetData[i].TotalNettAmount, 64)
+		grandTotalOmzet += amount
+		resTotalOmzet := acOmzet.FormatMoney(amount)
+
+		amount, _ = strconv.ParseFloat(omzetData[i].TotalQuantity, 64)
+		grandTotalQuantity += amount
+		resTotalQuantity := acQuantity.FormatMoney(amount)
+
+		customers = append(customers, viewmodel.OmzetValueItemVM{
+			ItemID:   &omzetData[i].ItemID.String,
+			ItemName: &omzetData[i].ItemName.String,
+			Quantity: &resTotalQuantity,
+			Omzet:    &resTotalOmzet,
+		})
+	}
+
+	grandTotalOmzetString := acOmzet.FormatMoney(grandTotalOmzet)
+	grandTotalQuantityString := acQuantity.FormatMoney(grandTotalQuantity)
+
+	if customers == nil {
+		customers = make([]viewmodel.OmzetValueItemVM, 0)
+	}
+
+	res = viewmodel.OmzetValueByItemVM{
+		TotalOmzet:    &grandTotalOmzetString,
+		TotalQuantity: &grandTotalQuantityString,
+		Customers:     customers,
+	}
+
+	return res, err
+}
