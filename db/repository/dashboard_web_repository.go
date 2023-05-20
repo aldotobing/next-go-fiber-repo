@@ -531,8 +531,7 @@ func (repo DashboardWebRepository) GetOmzetValueByCustomerID(ctx context.Context
 	from sales_invoice_header sih 
 		left join sales_invoice_line sil on sil.header_id = sih.id 
 		left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
-		left join customer_order_line col on col.header_id = coh.id
-		left join item i on i.id = col.item_id
+		left join item i on i.id = sil.item_id
 		left join customer c on c.id = coh.cust_bill_to_id
 		left join branch b on b.id = sih.branch_id  
 		left join region r on r.id = b.region_id
