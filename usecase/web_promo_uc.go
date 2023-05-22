@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"mime/multipart"
+	"strings"
 
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -109,7 +110,7 @@ func (uc WebPromoUC) Edit(c context.Context, data *requests.WebPromoRequest, img
 
 	var strImgBanner = ""
 	if imgBanner == nil {
-		strImgBanner = *promo.PromoUrlBanner
+		strImgBanner = strings.ReplaceAll(*promo.PromoUrlBanner, models.PromoImagePath, "")
 	} else {
 		ctx := "FileUC.Upload"
 		awsUc := AwsUC{ContractUC: uc.ContractUC}
@@ -135,6 +136,7 @@ func (uc WebPromoUC) Edit(c context.Context, data *requests.WebPromoRequest, img
 		ShowInApp:        &data.ShowInApp,
 		Active:           &data.Active,
 	}
+
 	res.ID, err = repo.Edit(c, &res)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
