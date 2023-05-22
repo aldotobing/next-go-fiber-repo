@@ -9,8 +9,8 @@ type WebPromoRequest struct {
 	PromoUrlBanner     string `json:"promo_url_banner"`
 	StartDate          string `json:"start_date"`
 	EndDate            string `json:"end_date"`
-	ShowInApp          string `json:"show_in_app"`
+	ShowInApp          int    `json:"show_in_app"`
 	CustomerTypeIdList string `json:"customer_type_id_list"`
 	RegionIDList       string `json:"region_area_id_list"`
-	Active             string `json:"active"`
+	Active             int    `json:"active"`
 }

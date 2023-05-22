@@ -163,7 +163,7 @@ func (repository WebPromo) Edit(c context.Context, model *models.WebPromo) (res 
 	url_banner = $3,
 	show_in_app = $4,
 	start_date = $5,
-	end_date = $6
+	end_date = $6,
 	active = $7
 	WHERE id = $8
 	RETURNING id`
