@@ -55,6 +55,8 @@ type WebCustomer struct {
 	CustomerUserName         *string `json:"customer_user_name"`
 	CustomerGender           *string `json:"customer_gender"`
 	CustomerProfileStatus    *string `json:"customer_profile_status"`
+	ModifiedDate             *string `json:"modified_date"`
+	ModifiedBy               *string `json:"modified_by"`
 }
 
 // CustomerParameter ...
@@ -147,8 +149,9 @@ var (
 		cl._name as cus_level_name,
 		c.customer_level_id,
 		usr.id as user_id,
-		usr.login as user_name
-
+		usr.login as user_name,
+		usr_edited.email,
+		c.modified_date
 	FROM CUSTOMER C
 	LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
 	LEFT JOIN REGION REG ON REG.ID = B.REGION_ID
@@ -164,6 +167,7 @@ var (
 	LEFT JOIN LOYALTY LOY ON LOY.CUSTOMER_ID = C.ID
 	left join customer_level cl on cl.id = c.customer_level_id
 	left join _user usr on usr.id = C.user_id
+	left join _user usr_edited on usr_edited.id = c.modified_by
 	`
 
 	// CustomerWhereStatement ...

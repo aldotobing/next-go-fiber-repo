@@ -81,6 +81,8 @@ func (repository WebCustomerRepository) scanRows(rows *sql.Rows) (res models.Web
 		&res.CustomerLevelID,
 		&res.CustomerUserID,
 		&res.CustomerUserName,
+		&res.ModifiedBy,
+		&res.ModifiedDate,
 	)
 	if err != nil {
 
@@ -143,6 +145,8 @@ func (repository WebCustomerRepository) scanRow(row *sql.Row) (res models.WebCus
 		&res.CustomerLevelID,
 		&res.CustomerUserID,
 		&res.CustomerUserName,
+		&res.ModifiedBy,
+		&res.ModifiedDate,
 	)
 	if err != nil {
 		return res, err
@@ -273,8 +277,10 @@ func (repository WebCustomerRepository) Edit(c context.Context, model *models.We
 		customer_birthdate = $11,
 		customer_profile_picture = $12,
 		customer_photo_ktp = $13,
-		customer_cp_name = $14
-	WHERE id = $15
+		customer_cp_name = $14,
+		modified_date = now(),
+		modified_by = $15
+	WHERE id = $16
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		model.CustomerName,
@@ -291,6 +297,7 @@ func (repository WebCustomerRepository) Edit(c context.Context, model *models.We
 		model.CustomerProfilePicture,
 		model.CustomerPhotoKtp,
 		model.CustomerCpName,
+		model.ModifiedBy,
 		model.ID).Scan(&res)
 
 	if err != nil {

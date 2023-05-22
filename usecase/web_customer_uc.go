@@ -107,6 +107,8 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 	res.CustomerUserID = data.CustomerUserID
 	res.CustomerUserName = data.CustomerUserName
 	res.CustomerGender = data.CustomerGender
+	res.ModifiedBy = data.ModifiedBy
+	res.ModifiedDate = data.ModifiedDate
 }
 
 // SelectAll ...
@@ -260,6 +262,7 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 		CustomerGender:         &data.CustomerGender,
 		CustomerBirthDate:      &data.CustomerBirthDate,
 		CustomerPhotoKtp:       &stringImageKTP,
+		ModifiedBy:             &data.UserID,
 	}
 
 	res.ID, err = repo.Edit(c, &res)
