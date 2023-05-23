@@ -206,3 +206,30 @@ func (h *WebCustomerHandler) Add(ctx *fiber.Ctx) error {
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
+
+// ReportSelect ...
+func (h *WebCustomerHandler) ReportSelect(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.WebCustomerReportParameter{
+		RegionGroupID:         ctx.Query("region_group_id"),
+		RegionID:              ctx.Query("region_id"),
+		BranchArea:            ctx.Query("branch_area"),
+		CustomerTypeID:        ctx.Query("customer_type_id"),
+		BranchIDs:             ctx.Query("branch_ids"),
+		CustomerLevelID:       ctx.Query("customer_level_id"),
+		CustomerProfileStatus: ctx.Query("customer_profile_status"),
+	}
+	uc := usecase.WebCustomerUC{ContractUC: h.ContractUC}
+	res, err := uc.ReportSelect(c, parameter)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, errors.New(helper.InvalidGender), http.StatusBadRequest)
+	}
+
+	if res == nil {
+		err = errors.New("There is no customer with this filter")
+		return h.SendResponse(ctx, res, nil, err, 0)
+	}
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
