@@ -151,7 +151,7 @@ var (
 		c.customer_level_id,
 		usr.id as user_id,
 		usr.login as user_name,
-		usr_edited.email,
+		usr_edited.login,
 		c.modified_date
 	FROM CUSTOMER C
 	LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
