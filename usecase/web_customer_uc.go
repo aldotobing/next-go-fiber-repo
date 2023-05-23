@@ -262,7 +262,7 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 		CustomerGender:         &data.CustomerGender,
 		CustomerBirthDate:      &data.CustomerBirthDate,
 		CustomerPhotoKtp:       &stringImageKTP,
-		ModifiedBy:             &data.UserID,
+		UserID:                 &data.UserID,
 	}
 
 	res.ID, err = repo.Edit(c, &res)

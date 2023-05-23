@@ -297,7 +297,7 @@ func (repository WebCustomerRepository) Edit(c context.Context, model *models.We
 		model.CustomerProfilePicture,
 		model.CustomerPhotoKtp,
 		model.CustomerCpName,
-		model.ModifiedBy,
+		model.UserID,
 		model.ID).Scan(&res)
 
 	if err != nil {

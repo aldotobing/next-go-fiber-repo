@@ -25,5 +25,5 @@ type WebCustomerRequest struct {
 	CustomerUserID         string `json:"customer_user_id"`
 	CustomerLevelID        int    `json:"customer_level_id"`
 	CustomerGender         string `json:"customer_gender"`
-	UserID                 string `json:"user_id"`
+	UserID                 int    `json:"user_id"`
 }
