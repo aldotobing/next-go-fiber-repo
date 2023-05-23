@@ -75,6 +75,8 @@ func (repository PromoContent) SelectAll(c context.Context, parameter models.Pro
 		conditionString += ` AND start_date >= ` + `'` +
 			parameter.StartDate + `'::date` + ` AND end_date <= ` + `'` + parameter.EndDate + `'::date` +
 			` + INTERVAL ` + `'1 MONTH' `
+	} else {
+		conditionString += ` AND now()::date BETWEEN PC.START_DATE AND END_DATE `
 	}
 
 	if parameter.CustomerTypeId != "" {
