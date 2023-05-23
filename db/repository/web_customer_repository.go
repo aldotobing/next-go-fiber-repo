@@ -16,6 +16,7 @@ type IWebCustomerRepository interface {
 	FindByID(c context.Context, parameter models.WebCustomerParameter) (models.WebCustomer, error)
 	Edit(c context.Context, model *models.WebCustomer) (*string, error)
 	Add(c context.Context, model *models.WebCustomer) (*string, error)
+	ReportSelect(c context.Context, parameter models.WebCustomerReportParameter) ([]models.WebCustomer, error)
 }
 
 // CustomerRepository ...
@@ -337,4 +338,56 @@ func (repository WebCustomerRepository) Add(c context.Context, model *models.Web
 		return res, err
 	}
 	return res, err
+}
+
+// ReportSelect ...
+func (repository WebCustomerRepository) ReportSelect(c context.Context, parameter models.WebCustomerReportParameter) (data []models.WebCustomer, err error) {
+	conditionString := ``
+
+	if parameter.RegionID != "" {
+		conditionString += ` AND REG.id = '` + parameter.RegionID + `'`
+	}
+
+	if parameter.RegionGroupID != "" {
+		conditionString += ` AND REG.GROUP_ID = '` + parameter.RegionGroupID + `'`
+	}
+
+	if parameter.BranchArea != "" {
+		conditionString += ` AND LOWER(B.AREA LIKE) LIKE LOWER('%` + parameter.BranchArea + `%')`
+	}
+
+	if parameter.CustomerTypeID != "" {
+		conditionString += ` AND C.CUSTOMER_TYPE_ID = '` + parameter.CustomerTypeID + `'`
+	}
+
+	if parameter.BranchIDs != "" {
+		conditionString += ` AND C.BRANCH_ID IN (` + parameter.BranchIDs + `)`
+	}
+
+	if parameter.CustomerLevelID != "" {
+		conditionString += ` AND C.CUSTOMER_LEVEL_ID = '` + parameter.CustomerLevelID + `'`
+	}
+
+	statement := models.WebCustomerSelectStatement + ` ` + models.WebCustomerWhereStatement +
+		` ` + conditionString
+	rows, err := repository.DB.QueryContext(c, statement)
+
+	// print
+	fmt.Println(statement)
+
+	if err != nil {
+		return data, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+
+		temp, err := repository.scanRows(rows)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
+	}
+
+	return data, err
 }

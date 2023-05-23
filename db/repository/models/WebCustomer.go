@@ -79,6 +79,17 @@ type WebCustomerParameter struct {
 	EndDate        string `json:"end_date"`
 }
 
+// WebCustomerReportParameter ...
+type WebCustomerReportParameter struct {
+	RegionGroupID         string `json:"region_group_id"`
+	RegionID              string `json:"region_id"`
+	BranchArea            string `json:"branch_area"`
+	CustomerTypeID        string `json:"customer_type_id"`
+	BranchIDs             string `json:"branch_ids"`
+	CustomerLevelID       string `json:"customer_level_id"`
+	CustomerProfileStatus string `json:"customer_profile_status"`
+}
+
 var (
 	// CustomerOrderBy ...
 	WebCustomerOrderBy = []string{"c.id", "c.customer_name", "c.created_date"}
