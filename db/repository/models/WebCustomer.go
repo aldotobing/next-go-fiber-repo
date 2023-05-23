@@ -57,6 +57,7 @@ type WebCustomer struct {
 	CustomerProfileStatus    *string `json:"customer_profile_status"`
 	ModifiedDate             *string `json:"modified_date"`
 	ModifiedBy               *string `json:"modified_by"`
+	UserID                   *int    `json:"user_id"`
 }
 
 // CustomerParameter ...
