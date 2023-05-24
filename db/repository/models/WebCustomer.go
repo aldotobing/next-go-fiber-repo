@@ -88,6 +88,7 @@ type WebCustomerReportParameter struct {
 	BranchIDs             string `json:"branch_ids"`
 	CustomerLevelID       string `json:"customer_level_id"`
 	CustomerProfileStatus string `json:"customer_profile_status"`
+	AdminUserID           string `json:"admin_user_id"`
 }
 
 var (

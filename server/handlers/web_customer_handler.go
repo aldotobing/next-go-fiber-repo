@@ -219,6 +219,7 @@ func (h *WebCustomerHandler) ReportSelect(ctx *fiber.Ctx) error {
 		BranchIDs:             ctx.Query("branch_ids"),
 		CustomerLevelID:       ctx.Query("customer_level_id"),
 		CustomerProfileStatus: ctx.Query("customer_profile_status"),
+		AdminUserID:           ctx.Query("admin_user_id"),
 	}
 	uc := usecase.WebCustomerUC{ContractUC: h.ContractUC}
 	res, err := uc.ReportSelect(c, parameter)
