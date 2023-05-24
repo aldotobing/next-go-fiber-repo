@@ -377,7 +377,7 @@ func (repository WebCustomerRepository) ReportSelect(c context.Context, paramete
 	rows, err := repository.DB.QueryContext(c, statement)
 
 	// print
-	fmt.Println(statement)
+	// fmt.Println(statement)
 
 	if err != nil {
 		return data, err
