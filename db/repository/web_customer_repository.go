@@ -368,12 +368,16 @@ func (repository WebCustomerRepository) ReportSelect(c context.Context, paramete
 		conditionString += ` AND C.CUSTOMER_LEVEL_ID = '` + parameter.CustomerLevelID + `'`
 	}
 
+	if parameter.AdminUserID != "" {
+		conditionString += ` AND C.USER_ID = '` + parameter.CustomerLevelID + `'`
+	}
+
 	statement := models.WebCustomerSelectStatement + ` ` + models.WebCustomerWhereStatement +
 		` ` + conditionString
 	rows, err := repository.DB.QueryContext(c, statement)
 
 	// print
-	fmt.Println(statement)
+	// fmt.Println(statement)
 
 	if err != nil {
 		return data, err
