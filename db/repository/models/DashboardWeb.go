@@ -96,6 +96,7 @@ type DashboardWebParameter struct {
 	Sort      string `json:"sort"`
 	StartDate string `json:"start_date"`
 	EndDate   string `json:"end_date"`
+	GroupID   string `json:"group_id"`
 }
 
 type DashboardWebRegionParameter struct {
@@ -134,6 +135,83 @@ var (
 
 	DashboardWebSelectStatement = ` 
 	select * from os_fetch_dashborad_regiongroupdata($1,$2,null,null,null)
+	`
+
+	DashboardWebSelectByGroupIDStatement = ` 
+	with dataRepeatOrder as (
+		select c.id as customer_id, count(soh.id) as total_transaction
+		from customer c 
+		left join sales_order_header soh ON soh.cust_bill_to_id = c.id 
+		where lower(document_no) like '%oso%' 
+			and soh.status='submitted'
+			and soh.transaction_date between '{START_DATE}' and '{END_DATE}' 
+		group by c.id 
+	),
+	dataInvoice as (
+		select r.id region_id, count(sih.id) total_invoice
+		from sales_invoice_header sih 
+			join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
+			left join branch b on b.id = sih.branch_id 
+			left join region r on r.id = b.region_id 
+		where lower(sih.transaction_source_document_no) like '%co%'
+			and coh.status in ('submitted','finish')
+			and sih.transaction_date between '{START_DATE}' and '{END_DATE}' 
+		group by r.id
+	),
+	dataVisitedUser as (
+		select uca.user_id as user_id, count(uca.id) as visit_user
+		from user_checkin_activity uca
+		where uca.checkin_time between '{START_DATE}' and '{END_DATE}'
+		group by uca.user_id
+	),
+	dataOutlet as (
+		select r.id as region_id, count(distinct c.id) as total_outlet
+		from branch b 
+		left join customer c on c.branch_id = b.id
+		left join sales_invoice_header sih on sih.cust_bill_to_id = c.id
+		left join region r on r.id = b.region_id
+		where c.created_date IS not NULL 
+			and c.show_in_apps = 1 
+		group by r.id
+	), 
+	dataActiveOutlet as (
+		select r.id as region_id,
+		count(distinct sih.cust_bill_to_id) as active_outlet
+		from branch b 
+		left join customer c on c.branch_id = b.id
+		left join sales_invoice_header sih on sih.cust_bill_to_id = c.id
+		join customer_order_header coh on coh.document_no = sih.transaction_source_document_no 
+		left join region r on r.id = b.region_id
+		where c.created_date IS not NULL 
+			and c.show_in_apps = 1 and sih.transaction_date between '{START_DATE}' and '2023-05-31'
+			and lower(sih.transaction_source_document_no) like '%co%' 
+			and coh.status in ('submitted','finish')
+		group by r.id 
+	)
+	select r.id, r."_name",
+	coalesce(sum(dvs.visit_user),0) as total_visit_user,
+	sum(case when dro.total_transaction>1 then(dro.total_transaction-1) else 0 end) as total_repeat_order_user,
+	coalesce (sum(dro.total_transaction), 0) as total_order_user,
+	count(u.id) filter (
+		where u.fcm_token is not null 
+			and u.first_login_time between '{START_DATE}' and '{END_DATE}' 
+			and length(trim(u.fcm_token))>0
+	) as total_register_user,
+	coalesce(count(dro.customer_id) filter (where dro.total_transaction > 1), 0) as customer_count_repeat_order,
+	coalesce (ddo.total_outlet,0) as total_outlet,
+	coalesce(dao.active_outlet,0) as total_active_outlet,
+	coalesce (di.total_invoice,0) as total_invoice
+	from customer c 
+		left join branch b on b.id = c.branch_id
+		left join region r on r.id = b.region_id
+		left join "_user" u on u.id = c.user_id
+		left join dataRepeatOrder dro on dro.customer_id = c.id
+		left join dataVisitedUser dvs on dvs.user_id = u.id
+		left join dataOutlet ddo on ddo.region_id = r.id
+		left join dataActiveOutlet dao on dao.region_id= r.id
+		left join dataInvoice di on di.region_id = r.id
+	{WHERE_STATEMENT}
+	group by r.id, ddo.total_outlet, dao.active_outlet, di.total_invoice
 	`
 
 	DashboardWebRegionDetailSelectStatement = `

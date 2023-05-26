@@ -1,5 +1,18 @@
 package viewmodel
 
+type DashboardByGroupID struct {
+	RegionID                 *string `json:"region_id_detail"`
+	RegionName               *string `json:"region_name_detail"`
+	TotalVisitUser           *string `json:"total_visit_user_detail"`
+	TotalRepeatUser          *string `json:"total_repeat_order_user_detail"`
+	TotalOrderUser           *string `json:"total_order_user_detail"`
+	TotalInvoice             *string `json:"total_invoice_user_detail"`
+	TotalRegisteredUser      *string `json:"total_registered_user_detail"`
+	CustomerCountRepeatOrder *string `json:"customer_count_repeat_order_detail"`
+	TotalActiveOutlet        *string `json:"total_active_outlet_detail"`
+	TotalOutlet              *string `json:"total_outlet"`
+}
+
 type OmzetValueVM struct {
 	RegionGroupID   *string `json:"region_group_id"`
 	RegionGroupName *string `json:"region_group_name"`
