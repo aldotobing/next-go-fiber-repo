@@ -46,6 +46,7 @@ func (repository ItemDetailsRepository) scanRows(rows *sql.Rows) (res models.Ite
 		&res.UomLineConversion,
 		&res.ItemDetailsPrice,
 		&res.PriceListVersionId,
+		&res.ItemPriceCreatedAT,
 	)
 	if err != nil {
 
@@ -89,9 +90,8 @@ func (repository ItemDetailsRepository) scanRow(row *sql.Row) (res models.ItemDe
 		&res.UomLineConversion,
 		&res.ItemDetailsPrice,
 		&res.PriceListVersionId,
+		&res.ItemPriceCreatedAT,
 	)
-
-	fmt.Println(err)
 	if err != nil {
 		return res, err
 	}
@@ -227,8 +227,6 @@ func (repository ItemDetailsRepository) FindByIDs(c context.Context, parameter m
 	if err != nil {
 		return data, err
 	}
-
-	fmt.Println(statement)
 
 	defer rows.Close()
 	for rows.Next() {
