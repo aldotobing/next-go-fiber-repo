@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -96,7 +95,6 @@ func (uc ItemDetailsUC) FindByIDV2(c context.Context, parameter models.ItemDetai
 			lowestUOMName = *datum.UomName
 
 			updatedData = datum.ItemPriceCreatedAT.String
-			fmt.Println("append:", datum.ItemPriceCreatedAT.String)
 		}
 
 		dbUpdatedData, _ := time.Parse("2006-01-02T15:04:05.999999Z", datum.ItemPriceCreatedAT.String)
