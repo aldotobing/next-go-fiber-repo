@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strconv"
+	"time"
 
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -84,7 +85,7 @@ func (uc ItemDetailsUC) FindByIDV2(c context.Context, parameter models.ItemDetai
 
 	// Find Lowest Price and lowest conversion
 	var lowestPrice, lowestConversion float64
-	var lowestUOMName string
+	var lowestUOMName, updatedData string
 	for _, datum := range data {
 		price, _ := strconv.ParseFloat(*datum.ItemDetailsPrice, 64)
 		conversion, _ := strconv.ParseFloat(*datum.UomLineConversion, 64)
@@ -92,6 +93,18 @@ func (uc ItemDetailsUC) FindByIDV2(c context.Context, parameter models.ItemDetai
 			lowestPrice = price
 			lowestConversion = conversion
 			lowestUOMName = *datum.UomName
+
+			updatedData = datum.ItemPriceCreatedAT.String
+		}
+
+		dbUpdatedData, _ := time.Parse("2006-01-02T15:04:05.999999Z", datum.ItemPriceCreatedAT.String)
+		updatedDataTime, errParse := time.Parse("2006-01-02T15:04:05.999999Z", updatedData)
+		if lowestConversion == conversion && (updatedDataTime.Before(dbUpdatedData) || errParse != nil) {
+			lowestPrice = price
+			lowestConversion = conversion
+			lowestUOMName = *datum.UomName
+
+			updatedData = datum.ItemPriceCreatedAT.String
 		}
 		parameter.PriceListVersionId = *datum.PriceListVersionId
 	}
