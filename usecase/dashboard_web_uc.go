@@ -48,6 +48,33 @@ func (uc DashboardWebUC) GetData(c context.Context, parameter models.DashboardWe
 	return res, err
 }
 
+// GetDataByGroupID ...
+func (uc DashboardWebUC) GetDataByGroupID(c context.Context, parameter models.DashboardWebParameter) (res []viewmodel.DashboardByGroupID, err error) {
+	repo := repository.NewDashboardWebRepository(uc.DB)
+	data, err := repo.GetDataByGroupID(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	for i := range data {
+		res = append(res, viewmodel.DashboardByGroupID{
+			RegionID:                 data[i].RegionID,
+			RegionName:               data[i].RegionName,
+			TotalVisitUser:           data[i].TotalVisitUser,
+			TotalRepeatUser:          data[i].TotalRepeatUser,
+			TotalOrderUser:           data[i].TotalOrderUser,
+			TotalInvoice:             data[i].TotalInvoice,
+			TotalRegisteredUser:      data[i].TotalRegisteredUser,
+			CustomerCountRepeatOrder: data[i].CustomerCountRepeatOrder,
+			TotalActiveOutlet:        data[i].TotalActiveOutlet,
+			TotalOutlet:              data[i].TotalOutlet,
+		})
+	}
+
+	return res, err
+}
+
 // FindByID ...
 func (uc DashboardWebUC) GetRegionDetailData(c context.Context, parameter models.DashboardWebRegionParameter) (res []models.DashboardWebRegionDetail, err error) {
 	repo := repository.NewDashboardWebRepository(uc.DB)
