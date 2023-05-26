@@ -251,6 +251,19 @@ func (repository ItemRepository) SelectAllV2(c context.Context, parameter models
 		}
 	}
 
+	if parameter.PriceListId != "" {
+		conditionString += ` and ip.price_list_version_id= (
+		select plv.id 
+		from price_list pl
+		left join price_list_version plv on plv.price_list_id = pl.id
+		where pl.id = ` + parameter.PriceListId + `
+		order by plv.created_date desc
+		limit 1
+		)`
+	} else if parameter.PriceListVersionId != "" {
+		conditionString += ` and ip.price_list_version_id=` + parameter.PriceListId
+	}
+
 	if parameter.ExceptId != "" {
 		conditionString += ` AND DEF.id <> '` + parameter.ExceptId + `'`
 	}
@@ -270,7 +283,7 @@ func (repository ItemRepository) SelectAllV2(c context.Context, parameter models
 	statement := models.ItemV2SelectStatement + conditionString +
 		`GROUP by def.id, td.MULTIPLY_DATA ` +
 		`ORDER BY ` + parameter.By + ` ` + parameter.Sort
-	rows, err := repository.DB.QueryContext(c, statement, parameter.PriceListVersionId, "%"+strings.ToLower(parameter.Search)+"%")
+	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 	if err != nil {
 		return
 	}

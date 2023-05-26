@@ -57,6 +57,7 @@ func (h *ItemHandler) SelectAllV2(ctx *fiber.Ctx) error {
 		ItemCategoryId:     ctx.Query("item_category_id"),
 		UomID:              ctx.Query("uom_id"),
 		PriceListVersionId: ctx.Query("price_list_version_id"),
+		PriceListId:        ctx.Query("price_list_id"),
 		CustomerTypeId:     ctx.Query("customer_type_id"),
 		Search:             ctx.Query("search"),
 		By:                 ctx.Query("by"),
