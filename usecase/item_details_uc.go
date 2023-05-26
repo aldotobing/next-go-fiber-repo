@@ -93,6 +93,7 @@ func (uc ItemDetailsUC) FindByIDV2(c context.Context, parameter models.ItemDetai
 			lowestConversion = conversion
 			lowestUOMName = *datum.UomName
 		}
+		parameter.PriceListVersionId = *datum.PriceListVersionId
 	}
 
 	data, err = repo.FindByIDV2(c, parameter)

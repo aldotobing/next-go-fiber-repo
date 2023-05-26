@@ -210,6 +210,15 @@ func (repository ItemDetailsRepository) FindByIDs(c context.Context, parameter m
 
 	if parameter.PriceListVersionId != "" {
 		conditionString += ` AND IP.PRICE_LIST_VERSION_ID = '` + parameter.PriceListVersionId + `'`
+	} else if parameter.PriceListId != "" {
+		conditionString += ` AND IP.PRICE_LIST_VERSION_ID = (
+			select plv.id 
+			from price_list pl
+			left join price_list_version plv on plv.price_list_id = pl.id
+			where pl.id = ` + parameter.PriceListId + `
+			order by plv.created_date desc
+			limit 1
+		)`
 	}
 
 	statement := models.ItemDetailsSelectStatement + ` WHERE def.created_date IS NOT NULL AND def.id = $1` + conditionString + ``
@@ -218,6 +227,8 @@ func (repository ItemDetailsRepository) FindByIDs(c context.Context, parameter m
 	if err != nil {
 		return data, err
 	}
+
+	fmt.Println(statement)
 
 	defer rows.Close()
 	for rows.Next() {

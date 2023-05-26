@@ -261,7 +261,7 @@ func (repository ItemRepository) SelectAllV2(c context.Context, parameter models
 		limit 1
 		)`
 	} else if parameter.PriceListVersionId != "" {
-		conditionString += ` and ip.price_list_version_id=` + parameter.PriceListId
+		conditionString += ` and ip.price_list_version_id = ` + parameter.PriceListVersionId + ` `
 	}
 
 	if parameter.ExceptId != "" {
@@ -284,6 +284,7 @@ func (repository ItemRepository) SelectAllV2(c context.Context, parameter models
 		`GROUP by def.id, td.MULTIPLY_DATA ` +
 		`ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
+	fmt.Println(statement)
 	if err != nil {
 		return
 	}
