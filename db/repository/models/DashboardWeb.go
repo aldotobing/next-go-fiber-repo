@@ -101,6 +101,7 @@ type DashboardWebParameter struct {
 
 type DashboardWebRegionParameter struct {
 	GroupID   string `json:"group_id"`
+	RegionID  string `json:"region_id"`
 	Search    string `json:"search"`
 	Page      int    `json:"page"`
 	Offset    int    `json:"offset"`
@@ -219,6 +220,8 @@ var (
 	 
 		
 	 `
+	DashboardWebRegionDetailByRegionIDSelectStatement = `
+	select * from os_fetch_dashborad_regiongroupdetaildata_by_region_id($1::integer,$2,$3,null,null,null) `
 
 	DashboardWebBranchDetailOrderBy = []string{"def.id", "def.customer_name"}
 	// CustomerOrderLineOrderByrByString ...
