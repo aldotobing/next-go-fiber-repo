@@ -63,6 +63,7 @@ func (h *DashboardWebHandler) GetRegionDetailData(ctx *fiber.Ctx) error {
 	uc := usecase.DashboardWebUC{ContractUC: h.ContractUC}
 	res, err := uc.GetRegionDetailData(c, models.DashboardWebRegionParameter{
 		GroupID:   ctx.Query("group_id"),
+		RegionID:  ctx.Query("region_id"),
 		StartDate: ctx.Query("start_date"),
 		EndDate:   ctx.Query("end_date"),
 	})
