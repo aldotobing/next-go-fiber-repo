@@ -58,6 +58,9 @@ type WebCustomer struct {
 	ModifiedDate             *string `json:"modified_date"`
 	ModifiedBy               *string `json:"modified_by"`
 	UserID                   *int    `json:"user_id"`
+	RegionID                 *string `json:"region_id"`
+	RegionGroupID            *string `json:"region_group_id"`
+	CreatedDate              *string `json:"created_date"`
 }
 
 // CustomerParameter ...
