@@ -93,6 +93,55 @@ func (repository WebCustomerRepository) scanRows(rows *sql.Rows) (res models.Web
 	return res, nil
 }
 
+// scanRowsReport
+func (repository WebCustomerRepository) scanRowsReport(rows *sql.Rows) (res models.WebCustomer, err error) {
+	err = rows.Scan(
+		&res.ID,
+		&res.Code,
+		&res.CustomerName,
+		&res.CustomerCpName,
+		&res.CustomerAddress,
+		&res.CustomerProfilePicture,
+		&res.CustomerEmail,
+		&res.CustomerBirthDate,
+		&res.CustomerReligion,
+		&res.CustomerGender,
+		&res.CustomerActiveStatus,
+		&res.CustomerLatitude,
+		&res.CustomerLongitude,
+		&res.CustomerSalesCycle,
+		&res.CustomerTypeId,
+		&res.CustomerPhone,
+		&res.CustomerTaxCalcMethod,
+		&res.CustomerBranchID,
+		&res.CustomerSalesmanID,
+		&res.CustomerPhotoKtp,
+		&res.CustomerNik,
+		&res.CustomerLevelID,
+		&res.CustomerUserID,
+		&res.ModifiedDate,
+		&res.CreatedDate,
+		&res.RegionID,
+		&res.RegionGroupID,
+		&res.CustomerBranchCode,
+		&res.CustomerBranchName,
+		&res.CustomerBranchArea,
+		&res.CustomerBranchAddress,
+		&res.CustomerBranchLat,
+		&res.CustomerBranchLng,
+		&res.CustomerBranchPicPhoneNo,
+		&res.CustomerRegionCode,
+		&res.CustomerRegionName,
+		&res.CustomerRegionGroup,
+	)
+	if err != nil {
+
+		return res, err
+	}
+
+	return res, nil
+}
+
 // Scan row
 func (repository WebCustomerRepository) scanRow(row *sql.Row) (res models.WebCustomer, err error) {
 	err = row.Scan(
@@ -345,35 +394,34 @@ func (repository WebCustomerRepository) ReportSelect(c context.Context, paramete
 	conditionString := ``
 
 	if parameter.RegionID != "" {
-		conditionString += ` AND REG.id = '` + parameter.RegionID + `'`
+		conditionString += ` AND region_id = '` + parameter.RegionID + `'`
 	}
 
 	if parameter.RegionGroupID != "" {
-		conditionString += ` AND REG.GROUP_ID = '` + parameter.RegionGroupID + `'`
+		conditionString += ` AND region_group_id = '` + parameter.RegionGroupID + `'`
 	}
 
 	if parameter.BranchArea != "" {
-		conditionString += ` AND LOWER(B.AREA LIKE) LIKE LOWER('%` + parameter.BranchArea + `%')`
+		conditionString += ` AND LOWER(branch_area) LIKE LOWER('%` + parameter.BranchArea + `%')`
 	}
 
 	if parameter.CustomerTypeID != "" {
-		conditionString += ` AND C.CUSTOMER_TYPE_ID = '` + parameter.CustomerTypeID + `'`
+		conditionString += ` AND cust_type_id = '` + parameter.CustomerTypeID + `'`
 	}
 
 	if parameter.BranchIDs != "" {
-		conditionString += ` AND C.BRANCH_ID IN (` + parameter.BranchIDs + `)`
+		conditionString += ` AND c_branch_id IN (` + parameter.BranchIDs + `)`
 	}
 
 	if parameter.CustomerLevelID != "" {
-		conditionString += ` AND C.CUSTOMER_LEVEL_ID = '` + parameter.CustomerLevelID + `'`
+		conditionString += ` AND CUSTOMER_LEVEL_ID = '` + parameter.CustomerLevelID + `'`
 	}
 
 	if parameter.AdminUserID != "" {
-		conditionString += ` AND C.USER_ID = '` + parameter.CustomerLevelID + `'`
+		conditionString += ` AND user_id = '` + parameter.CustomerLevelID + `'`
 	}
 
-	statement := models.WebCustomerSelectStatement + ` ` + models.WebCustomerWhereStatement +
-		` ` + conditionString
+	statement := `select * from v_customer_report WHERE customer_created_date IS NOT NULL ` + conditionString
 	rows, err := repository.DB.QueryContext(c, statement)
 
 	// print
@@ -386,7 +434,7 @@ func (repository WebCustomerRepository) ReportSelect(c context.Context, paramete
 	defer rows.Close()
 	for rows.Next() {
 
-		temp, err := repository.scanRows(rows)
+		temp, err := repository.scanRowsReport(rows)
 		if err != nil {
 			return data, err
 		}
