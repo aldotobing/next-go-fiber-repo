@@ -222,7 +222,7 @@ func (repository WebCustomerRepository) SelectAll(c context.Context, parameter m
 	}
 
 	if parameter.PhoneNumber != "" {
-		conditionString += ` AND c.customer_phone LIKE '%` + parameter.PhoneNumber + `%'`
+		conditionString += ` AND c.customer_phone LIKE '` + parameter.PhoneNumber + `'`
 	}
 
 	statement := models.WebCustomerSelectStatement + ` ` + models.WebCustomerWhereStatement +

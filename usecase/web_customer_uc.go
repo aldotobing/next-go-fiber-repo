@@ -178,7 +178,7 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 		return
 	}
 
-	if *currentObjectUc.CustomerPhone != data.CustomerPhone {
+	if currentObjectUc.CustomerPhone != nil && *currentObjectUc.CustomerPhone != data.CustomerPhone {
 		checkerPhoneNumberData, _ := uc.SelectAll(c, models.WebCustomerParameter{
 			PhoneNumber: data.CustomerPhone,
 			By:          "c.created_date",
