@@ -133,6 +133,13 @@ func (repository WebCustomerRepository) scanRowsReport(rows *sql.Rows) (res mode
 		&res.CustomerRegionCode,
 		&res.CustomerRegionName,
 		&res.CustomerRegionGroup,
+		&res.CustomerProvinceID,
+		&res.CustomerCityID,
+		&res.CustomerDistrictID,
+		&res.CustomerSubdistrictID,
+		&res.CustomerSalesmanID,
+		&res.ModifiedBy,
+		&res.CustomerUserName,
 	)
 	if err != nil {
 
@@ -423,9 +430,6 @@ func (repository WebCustomerRepository) ReportSelect(c context.Context, paramete
 
 	statement := `select * from v_customer_report WHERE customer_created_date IS NOT NULL ` + conditionString
 	rows, err := repository.DB.QueryContext(c, statement)
-
-	// print
-	// fmt.Println(statement)
 
 	if err != nil {
 		return data, err

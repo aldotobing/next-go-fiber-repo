@@ -11,6 +11,7 @@ type CustomerLevel struct {
 
 // CustomerLevelParameter ...
 type CustomerLevelParameter struct {
+	IDs    string `json:"ids"`
 	Search string `json:"search"`
 	By     string `json:"by"`
 	Sort   string `json:"sort"`

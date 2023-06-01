@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"mime/multipart"
+	"strconv"
 	"strings"
 	"time"
 
@@ -345,8 +346,147 @@ func (uc WebCustomerUC) ReportSelect(c context.Context, parameter models.WebCust
 		return res, err
 	}
 
+	var cityIDs, proviceIDs, districtIDs, subDistrictids, salesmanIDs, customerLevelIDs, customerTypeIDs []string
+	cityIDChecker := make(map[string]string)
+	proviceIDChecker := make(map[string]string)
+	districtIDChecker := make(map[string]string)
+	subdistrictIDChecker := make(map[string]string)
+	salesmanIDChecker := make(map[string]string)
+	customerLevelIDChecker := make(map[int]string)
+	customerTypeIDChecker := make(map[string]string)
+	for i := range data {
+		if data[i].CustomerCityID != nil && cityIDChecker[*data[i].CustomerCityID] == "" {
+			cityIDChecker[*data[i].CustomerCityID] = "done"
+			cityIDs = append(cityIDs, *data[i].CustomerCityID)
+		}
+		if data[i].CustomerProvinceID != nil && proviceIDChecker[*data[i].CustomerProvinceID] == "" {
+			proviceIDChecker[*data[i].CustomerProvinceID] = "done"
+			proviceIDs = append(proviceIDs, *data[i].CustomerProvinceID)
+		}
+		if data[i].CustomerDistrictID != nil && districtIDChecker[*data[i].CustomerDistrictID] == "" {
+			districtIDChecker[*data[i].CustomerDistrictID] = "done"
+			districtIDs = append(districtIDs, *data[i].CustomerDistrictID)
+		}
+		if data[i].CustomerSubdistrictID != nil && subdistrictIDChecker[*data[i].CustomerSubdistrictID] == "" {
+			subdistrictIDChecker[*data[i].CustomerSubdistrictID] = "done"
+			subDistrictids = append(subDistrictids, *data[i].CustomerSubdistrictID)
+		}
+		if data[i].CustomerSalesmanID != nil && salesmanIDChecker[*data[i].CustomerSalesmanID] == "" {
+			salesmanIDChecker[*data[i].CustomerSalesmanID] = "done"
+			salesmanIDs = append(salesmanIDs, *data[i].CustomerSalesmanID)
+		}
+		if data[i].CustomerLevelID != nil && customerLevelIDChecker[*data[i].CustomerLevelID] == "" {
+			customerLevelIDChecker[*data[i].CustomerLevelID] = "done"
+			customerLevelIDs = append(customerLevelIDs, strconv.Itoa(*data[i].CustomerLevelID))
+		}
+		if data[i].CustomerTypeId != nil && customerTypeIDChecker[*data[i].CustomerTypeId] == "" {
+			customerTypeIDChecker[*data[i].CustomerTypeId] = "done"
+			customerTypeIDs = append(customerTypeIDs, *data[i].CustomerTypeId)
+		}
+	}
+
+	cityUC := CityUC{ContractUC: uc.ContractUC}
+	cityData, err := cityUC.SelectAll(c, models.CityParameter{IDs: strings.Join(cityIDs, ","), By: "def.id"})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "find_city_data", c.Value("requestid"))
+		return res, err
+	}
+
+	proviceUC := ProvinceUC{ContractUC: uc.ContractUC}
+	proviceData, err := proviceUC.SelectAll(c, models.ProvinceParameter{IDs: strings.Join(proviceIDs, ","), By: "def.id"})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "find_provice_data", c.Value("requestid"))
+		return res, err
+	}
+
+	districtUC := DistrictUC{ContractUC: uc.ContractUC}
+	districtData, err := districtUC.SelectAll(c, models.DistrictParameter{IDs: strings.Join(districtIDs, ","), By: "def.id"})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "find_district_data", c.Value("requestid"))
+		return res, err
+	}
+
+	subDistrictUC := SubDistrictUC{ContractUC: uc.ContractUC}
+	subDistrictData, err := subDistrictUC.SelectAll(c, models.SubDistrictParameter{IDs: strings.Join(subDistrictids, ","), By: "def.id"})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "find_subdistrict_data", c.Value("requestid"))
+		return res, err
+	}
+
+	salesmanUC := SalesmanUC{ContractUC: uc.ContractUC}
+	salesmanData, err := salesmanUC.SelectAll(c, models.SalesmanParameter{IDs: strings.Join(salesmanIDs, ","), By: "def.id"})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "find_salesman_data", c.Value("requestid"))
+		return res, err
+	}
+
+	customerLevelUC := CustomerLevelUC{ContractUC: uc.ContractUC}
+	customerLevelData, err := customerLevelUC.FindAll(c, models.CustomerLevelParameter{IDs: strings.Join(customerLevelIDs, ","), By: "def.id"})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "find_salesman_data", c.Value("requestid"))
+		return res, err
+	}
+
+	customerTypeUC := CustomerTypeUC{ContractUC: uc.ContractUC}
+	customerTypeData, err := customerTypeUC.SelectAll(c, models.CustomerTypeParameter{IDs: strings.Join(customerTypeIDs, ","), By: "def.id"})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "find_salesman_data", c.Value("requestid"))
+		return res, err
+	}
+
 	for i := range data {
 		var temp viewmodel.CustomerVM
+
+		for j := range cityData {
+			if data[i].CustomerCityID != nil && *data[i].CustomerCityID == *cityData[j].ID {
+				data[i].CustomerCityName = cityData[j].Name
+				break
+			}
+		}
+
+		for j := range proviceData {
+			if data[i].CustomerProvinceID != nil && *data[i].CustomerProvinceID == proviceData[j].ID {
+				data[i].CustomerProvinceName = proviceData[j].Name
+				break
+			}
+		}
+
+		for j := range districtData {
+			if data[i].CustomerDistrictID != nil && *data[i].CustomerDistrictID == districtData[j].ID {
+				data[i].CustomerDistrictName = &districtData[j].Name
+				break
+			}
+		}
+
+		for j := range subDistrictData {
+			if data[i].CustomerSubdistrictID != nil && *data[i].CustomerSubdistrictID == subDistrictData[j].ID {
+				data[i].CustomerSubdistrictName = &subDistrictData[j].Name
+				break
+			}
+		}
+
+		for j := range salesmanData {
+			if data[i].CustomerSalesmanID != nil && *data[i].CustomerSalesmanID == *salesmanData[j].ID {
+				data[i].CustomerSalesmanName = salesmanData[j].Name
+				data[i].CustomerSalesmanPhone = salesmanData[j].PhoneNo
+				data[i].CustomerSalesmanCode = salesmanData[j].Code
+				break
+			}
+		}
+
+		for j := range customerLevelData {
+			if data[i].CustomerLevelID != nil && strconv.Itoa(*data[i].CustomerLevelID) == customerLevelData[j].ID {
+				data[i].CustomerLevel = &customerLevelData[j].Name
+				break
+			}
+		}
+
+		for j := range customerTypeData {
+			if data[i].CustomerTypeId != nil && *data[i].CustomerTypeId == *customerTypeData[j].ID {
+				data[i].CustomerTypeName = customerTypeData[j].Name
+				break
+			}
+		}
 
 		if parameter.CustomerProfileStatus == "0" {
 			if data[i].CustomerNik == nil || *data[i].CustomerNik == "" ||

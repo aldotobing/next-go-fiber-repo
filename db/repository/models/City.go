@@ -20,6 +20,7 @@ type MpCityDataBreakDown struct {
 // CityParameter ...
 type CityParameter struct {
 	ID         string `json:"id_city"`
+	IDs        string `json:"ids_city"`
 	ProvinceID string `json:"id_province"`
 	Name       string `json:"name_city"`
 	Search     string `json:"search"`
