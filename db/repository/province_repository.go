@@ -59,6 +59,9 @@ func (repository ProvinceRepository) scanRow(row *sql.Row) (res models.Province,
 func (repository ProvinceRepository) SelectAll(c context.Context, parameter models.ProvinceParameter) (data []models.Province, err error) {
 	conditionString := ``
 
+	if parameter.IDs != "" {
+		conditionString += `AND DEF.ID IN(` + parameter.IDs + `)`
+	}
 	statement := models.ProvinceSelectStatement + ` ` + models.ProvinceWhereStatement +
 		` AND (LOWER(def."_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")

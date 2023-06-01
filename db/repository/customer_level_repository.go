@@ -52,6 +52,10 @@ func (repository CustomerLevelRepository) scanRow(row *sql.Row) (res models.Cust
 func (repository CustomerLevelRepository) FindAll(ctx context.Context, parameter models.CustomerLevelParameter) (data []models.CustomerLevel, err error) {
 	conditionString := ``
 
+	if parameter.IDs != "" {
+		conditionString += ` AND DEF.ID IN (` + parameter.IDs + `)`
+	}
+
 	query := models.CustomerLevelSelectStatement + ` ` +
 		models.CustomerLevelWhereStatement + ` ` +
 		conditionString +
