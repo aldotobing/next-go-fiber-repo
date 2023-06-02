@@ -11,7 +11,7 @@ import (
 
 func BuildProcessTransactionTemplate(customerOrderHeader models.CustomerOrderHeader, lineData []models.CustomerOrderLine, userData models.Customer) (res string) {
 	dateString := pkgtime.GetDate(*customerOrderHeader.TransactionDate+"T00:00:00Z", "02 - 01 - 2006", "Asia/Jakarta")
-	CretaedBy := ` oleh Toko : ` + *userData.CustomerName
+	CretaedBy := ` oleh Toko : ` + *userData.CustomerName + `(` + *userData.Code + `)`
 	msgbody := `*Kepada Yang Terhormat* \n\n`
 	msgbody += `*` + *userData.Code + ` - ` + *userData.CustomerName + `*`
 	msgbody += `\n\n*NO ORDERAN ` + *customerOrderHeader.DocumentNo + ` anda pada tanggal ` + dateString + CretaedBy + ` telah diproses*`
@@ -45,9 +45,9 @@ func BuildProcessSalesOrderTransactionTemplate(customerOrderHeader models.SalesO
 
 	CretaedBy := ``
 	if *customerOrderHeader.DocumentNo != "" && strings.Contains(*customerOrderHeader.DocumentNo, "OSO") {
-		CretaedBy += ` oleh Toko : ` + *userData.CustomerName
+		CretaedBy += ` oleh Toko : ` + *userData.CustomerName + `(` + *userData.Code + `)`
 	} else {
-		CretaedBy += ` oleh Salesman : ` + *userData.CustomerSalesmanName + `oleh Toko : ` + *userData.CustomerName
+		CretaedBy += ` oleh Salesman : ` + *userData.CustomerSalesmanName + `oleh Toko : ` + *userData.CustomerName + `(` + *userData.Code + `)`
 	}
 	msgbody := ``
 	if mode == 1 {
@@ -90,7 +90,7 @@ func BuildVoidTransactionTemplate(customerOrderHeader models.CustomerOrderHeader
 		voidReasonText = *customerOrderHeader.VoidReasonText
 	}
 	dateString := pkgtime.GetDate(*customerOrderHeader.TransactionDate+"T00:00:00Z", "02 - 01 - 2006", "Asia/Jakarta")
-	CretaedBy := ` oleh Toko : ` + *userData.CustomerName
+	CretaedBy := ` oleh Toko : ` + *userData.CustomerName + `(` + *userData.Code + `)`
 	msgbody := `*Kepada Yang Terhormat* \n\n`
 	msgbody += `*` + *userData.Code + ` - ` + *userData.CustomerName + `*`
 	msgbody += `\n\n*NO ORDERAN ` + *customerOrderHeader.DocumentNo + ` anda pada tanggal ` + dateString + CretaedBy + ` telah dibatalkan karena ` + voidReasonText + `*`
@@ -125,7 +125,7 @@ func BuildVoidTransactionTemplateForSalesman(customerOrderHeader models.Customer
 		voidReasonText = *customerOrderHeader.VoidReasonText
 	}
 	dateString := pkgtime.GetDate(*customerOrderHeader.TransactionDate+"T00:00:00Z", "02 - 01 - 2006", "Asia/Jakarta")
-	CretaedBy := ` oleh Toko : ` + *userData.CustomerName
+	CretaedBy := ` oleh Toko : ` + *userData.CustomerName + `(` + *userData.Code + `)`
 	msgbody := `*Kepada Yang Terhormat Salesman* \n\n`
 	msgbody += `*` + *salesman.Name + `*`
 	msgbody += `\n\n*NO ORDERAN ` + *customerOrderHeader.DocumentNo + ` pada tanggal ` + dateString + CretaedBy + ` telah dibatalkan karena ` + voidReasonText + `*`
@@ -153,7 +153,7 @@ func BuildVoidTransactionTemplateForSalesman(customerOrderHeader models.Customer
 
 func BuildProcessTransactionTemplateForSalesman(customerOrderHeader models.CustomerOrderHeader, lineData []models.CustomerOrderLine, userData models.Customer, salesman models.Salesman) (res string) {
 	dateString := pkgtime.GetDate(*customerOrderHeader.TransactionDate+"T00:00:00Z", "02 - 01 - 2006", "Asia/Jakarta")
-	CretaedBy := ` oleh Toko : ` + *userData.CustomerName
+	CretaedBy := ` oleh Toko : ` + *userData.CustomerName + `(` + *userData.Code + `)`
 	msgbody := `*Kepada Yang Terhormat Salesman* \n\n`
 	msgbody += `*` + *salesman.Name + `*`
 	msgbody += `\n\n*NO ORDERAN ` + *customerOrderHeader.DocumentNo + ` pada tanggal ` + dateString + CretaedBy + ` telah diproses*`
