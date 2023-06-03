@@ -425,7 +425,7 @@ func (repository WebCustomerRepository) ReportSelect(c context.Context, paramete
 	}
 
 	if parameter.AdminUserID != "" {
-		conditionString += ` AND user_id = ` + parameter.AdminUserID + ``
+		conditionString += ` AND C_BRANCH_ID IN (SELECT BRANCH_ID FROM USER_BRANCH UB WHERE UB.USER_ID = ` + parameter.AdminUserID + `)`
 	}
 
 	statement := `select * from v_customer_report WHERE customer_created_date IS NOT NULL ` + conditionString
