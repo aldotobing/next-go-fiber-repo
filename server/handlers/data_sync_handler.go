@@ -81,3 +81,37 @@ func (h *DataSyncHandler) ItemPriceDataSync(ctx *fiber.Ctx) error {
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
+
+// CustomerDataSync ...
+func (h *DataSyncHandler) CustomerDataSync(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.CustomerDataSyncParameter{
+		ID:     ctx.Params("id"),
+		Search: ctx.Query("search"),
+		By:     ctx.Query("by"),
+		Sort:   ctx.Query("sort"),
+	}
+
+	uc := usecase.CustomerDataSyncUC{ContractUC: h.ContractUC}
+	res, err := uc.DataSync(c, parameter)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+// CustomerDataSync ...
+func (h *DataSyncHandler) SalesmanDataSync(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.SalesmanDataSyncParameter{
+		ID:     ctx.Params("id"),
+		Search: ctx.Query("search"),
+		By:     ctx.Query("by"),
+		Sort:   ctx.Query("sort"),
+	}
+
+	uc := usecase.SalesmanDataSyncUC{ContractUC: h.ContractUC}
+	res, err := uc.DataSync(c, parameter)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
