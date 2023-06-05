@@ -106,7 +106,7 @@ func (uc PriceListSyncUC) DataSync(c context.Context, parameter models.PriceList
 	parameter.DateParam = strnow
 	jsonReq, err := json.Marshal(parameter)
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "http://localhost:8084/NEXTbasis-service-agon/rest/priceList/getData", bytes.NewBuffer(jsonReq))
+	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrv/rest/masterpricelist/get", bytes.NewBuffer(jsonReq))
 	if err != nil {
 		fmt.Println("client err")
 		fmt.Print(err.Error())
