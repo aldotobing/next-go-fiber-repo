@@ -58,7 +58,7 @@ func (uc ItemPriceSyncUC) Add(c context.Context, data *requests.ItemPriceSyncReq
 	// now := time.Now().UTC()
 	// strnow := now.Format(time.RFC3339)
 	res = models.ItemPriceSync{
-		ItemId: &data.ItemId,
+		ItemCode: &data.ItemCode,
 	}
 	res.ID, err = repo.Add(c, &res)
 	if err != nil {
@@ -77,7 +77,7 @@ func (uc ItemPriceSyncUC) Edit(c context.Context, id string, data *requests.Item
 	res = models.ItemPriceSync{
 		ID: &id,
 		// ProvinceID: &data.ProvinceID,
-		ItemId: &data.ItemId,
+		ItemCode: &data.ItemCode,
 		// Longitude:  &data.Lat,
 		// Latitude:   &data.Long,
 		// CreatedAt:  &strnow,
@@ -106,7 +106,7 @@ func (uc ItemPriceSyncUC) DataSync(c context.Context, parameter models.ItemPrice
 	parameter.DateParam = strnow
 	jsonReq, err := json.Marshal(parameter)
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "http://localhost:8084/NEXTbasis-service-agon/rest/itemPrice/getData", bytes.NewBuffer(jsonReq))
+	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrv/rest/masteritemprice/get", bytes.NewBuffer(jsonReq))
 	if err != nil {
 		fmt.Println("client err")
 		fmt.Print(err.Error())
@@ -135,9 +135,9 @@ func (uc ItemPriceSyncUC) DataSync(c context.Context, parameter models.ItemPrice
 	for _, itemObject := range res {
 
 		currentItem, _ := uc.FindItemPrice(c, models.ItemPriceSyncParameter{
-			ItemId:               *itemObject.ItemId,
+			ItemCode:             *itemObject.ItemCode,
 			PriceListVersionCode: *itemObject.PriceListVersionCode,
-			UomId:                *itemObject.UomId,
+			UomCode:              *itemObject.UomCode,
 			PriceListCode:        *itemObject.PriceListCode,
 		})
 
