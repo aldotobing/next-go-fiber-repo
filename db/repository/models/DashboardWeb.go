@@ -51,6 +51,7 @@ type DashboardWebBranchDetail struct {
 	TotalAktifOutlet        *string `json:"total_aktif_outlet"`
 	CustomerClassName       *string `json:"customer_class_name_detail"`
 	CustomerCityName        *string `json:"customer_city_name_detail"`
+	StatusInstall           *string `json:"status_install"`
 }
 
 type OmzetValueModel struct {
@@ -229,7 +230,7 @@ var (
 		"def.id",
 	}
 
-	DashboardWebBranchDetailSelectStatement = ` select * from os_fetch_dashborad_branchcustomerdata($1::integer,$2,$3,null,null,null)
+	DashboardWebBranchDetailSelectStatement = ` select * from os_fetch_dashborad_branchcustomerdata2($1::integer,$2,$3,null,null,null)
 	   `
 
 	DashboardWebBranchDetailSelectWithUserIDStatement = ` select * from os_fetch_dashborad_customerdata_using_user_id($1::integer,$2,$3,null,null,null)
