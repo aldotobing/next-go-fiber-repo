@@ -16,6 +16,7 @@ type IDashboardWebRepository interface {
 	GetRegionDetailData(c context.Context, parameter models.DashboardWebRegionParameter) ([]models.DashboardWebRegionDetail, error)
 	GetBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.DashboardWebBranchDetail, int, error)
 	GetAllBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.DashboardWebBranchDetail, error)
+	GetAllReportBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.DashboardWebBranchDetail, error)
 	GetAllDetailCustomerDataWithUserID(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.DashboardWebBranchDetail, error)
 	GetOmzetValue(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.OmzetValueModel, error)
 	GetOmzetValueByGroupID(ctx context.Context, parameter models.DashboardWebBranchParameter, groupID string) ([]models.OmzetValueModel, error)
@@ -107,6 +108,25 @@ func (repository DashboardWebRepository) scanBranchCustomerDetailRows(rows *sql.
 		&res.CustomerTypeName,
 		&res.TotalRepeatUser, &res.TotalOrderUser,
 		&res.TotalInvoice, &res.TotalCheckin, &res.TotalAktifOutlet, &res.CustomerClassName, &res.CustomerCityName,
+	)
+	if err != nil {
+
+		return res, err
+	}
+
+	return res, nil
+}
+
+// Scan rows
+func (repository DashboardWebRepository) scanBranchCustomerDetailReportRows(rows *sql.Rows) (res models.DashboardWebBranchDetail, err error) {
+	err = rows.Scan(
+		&res.CustomerID, &res.CustomerName, &res.CustomerCode,
+		&res.CustomerBranchName, &res.CustomerBranchCode,
+		&res.CustomerRegionName, &res.CustomerRegionGroupName,
+		&res.CustomerTypeName,
+		&res.TotalRepeatUser, &res.TotalOrderUser,
+		&res.TotalInvoice, &res.TotalCheckin, &res.TotalAktifOutlet, &res.CustomerClassName, &res.CustomerCityName,
+		&res.StatusInstall,
 	)
 	if err != nil {
 
@@ -236,6 +256,30 @@ func (repository DashboardWebRepository) GetAllBranchDetailCustomerData(ctx cont
 	defer rows.Close()
 	for rows.Next() {
 		temp, err := repository.scanBranchCustomerDetailRows(rows)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
+	}
+	err = rows.Err()
+	if err != nil {
+		return data, err
+	}
+
+	return data, err
+}
+
+func (repository DashboardWebRepository) GetAllReportBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) (data []models.DashboardWebBranchDetail, err error) {
+
+	query := models.DashboardWebReportBranchDetailSelectStatement
+	rows, err := repository.DB.Query(query, str.NullOrEmtyString(&parameter.BarnchID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
+	if err != nil {
+		return data, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		temp, err := repository.scanBranchCustomerDetailReportRows(rows)
 		if err != nil {
 			return data, err
 		}
