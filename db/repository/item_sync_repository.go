@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -79,6 +80,7 @@ func (repository ItemSyncRepository) FindByID(c context.Context, parameter model
 
 // Add ...
 func (repository ItemSyncRepository) Add(c context.Context, model *models.ItemSync) (res *string, err error) {
+	fmt.Println("insert item data")
 	statement := `INSERT INTO item (
 		_name, code, item_picture, item_category_id,
 		active, parent_id,have_variant,alias,
@@ -111,13 +113,13 @@ func (repository ItemSyncRepository) Edit(c context.Context, model *models.ItemS
 	description = $9, keterangan = $10 , modified_date = $11 ,
 	url_video = $12
 	
-	WHERE id = $13 RETURNING id`
+	WHERE code = $13 RETURNING id`
 
 	err = repository.DB.QueryRowContext(c, statement,
 		str.NullString(model.Name), str.NullString(model.Code), str.NullString(model.ItemPicture), str.NullString(model.ItemCategoryId),
 		str.NullString(model.ItemActive), str.NullString(model.ItemParentID), str.NullString(model.HaveVariant), str.NullString(model.ItemAlias),
 		str.NullString(model.Description), str.NullString(model.Keterangan), str.NullString(model.ModifiedDate), str.NullString(model.UrlVideo),
-		model.ID,
+		model.Code,
 	).Scan(&res)
 	if err != nil {
 		return res, err

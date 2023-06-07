@@ -16,19 +16,19 @@ import (
 	"nextbasis-service-v-0.1/server/requests"
 )
 
-// ItemSyncUC ...
-type ItemSyncUC struct {
+// SalesmanDataSyncUC ...
+type SalesmanDataSyncUC struct {
 	*ContractUC
 }
 
 // BuildBody ...
-func (uc ItemSyncUC) BuildBody(res *models.ItemSync) {
+func (uc SalesmanDataSyncUC) BuildBody(res *models.SalesmanDataSync) {
 }
 
 // FindByID ...
-func (uc ItemSyncUC) FindByID(c context.Context, parameter models.ItemSyncParameter) (res models.ItemSync, err error) {
-	repo := repository.NewItemSyncRepository(uc.DB)
-	res, err = repo.FindByID(c, parameter)
+func (uc SalesmanDataSyncUC) FindByCode(c context.Context, parameter models.SalesmanDataSyncParameter) (res models.SalesmanDataSync, err error) {
+	repo := repository.NewSalesmanDataSyncRepository(uc.DB)
+	res, err = repo.FindByCode(c, parameter)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
@@ -38,27 +38,14 @@ func (uc ItemSyncUC) FindByID(c context.Context, parameter models.ItemSyncParame
 	return res, err
 }
 
-// FindByID ...
-func (uc ItemSyncUC) FindByCode(c context.Context, parameter models.ItemSyncParameter) (res models.ItemSync, err error) {
-	repo := repository.NewItemSyncRepository(uc.DB)
-	res, err = repo.FindByCode(c, parameter)
-	if err != nil {
-		// logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
-		// return res, err
-	}
-	uc.BuildBody(&res)
-
-	return res, err
-}
-
 // Add ...
-func (uc ItemSyncUC) Add(c context.Context, data *requests.ItemSyncRequest) (res models.ItemSync, err error) {
+func (uc SalesmanDataSyncUC) Add(c context.Context, data *requests.SalesmanDataSyncRequest) (res models.SalesmanDataSync, err error) {
 
-	repo := repository.NewItemSyncRepository(uc.DB)
+	repo := repository.NewSalesmanDataSyncRepository(uc.DB)
 	// now := time.Now().UTC()
 	// strnow := now.Format(time.RFC3339)
-	res = models.ItemSync{
-		Name: &data.Name,
+	res = models.SalesmanDataSync{
+		// Name: &data.Name,
 	}
 	res.ID, err = repo.Add(c, &res)
 	if err != nil {
@@ -70,20 +57,17 @@ func (uc ItemSyncUC) Add(c context.Context, data *requests.ItemSyncRequest) (res
 }
 
 // Edit ,...
-func (uc ItemSyncUC) Edit(c context.Context, id string, data *requests.ItemSyncRequest) (res models.ItemSync, err error) {
-	repo := repository.NewItemSyncRepository(uc.DB)
-	// now := time.Now().UTC()
-	// strnow := now.Format(time.RFC3339)
-	res = models.ItemSync{
-		ID: &id,
-		// ProvinceID: &data.ProvinceID,
-		Name: &data.Name,
-		// Longitude:  &data.Lat,
-		// Latitude:   &data.Long,
-		// CreatedAt:  &strnow,
-		// UpdatedAt:  &strnow,
-		// CreatedBy:  &data.CreatedBy,
-		// UpdatedBy:  &data.UpdatedBy,
+func (uc SalesmanDataSyncUC) Edit(c context.Context, id string, data *requests.SalesmanDataSyncRequest) (res models.SalesmanDataSync, err error) {
+	repo := repository.NewSalesmanDataSyncRepository(uc.DB)
+	res = models.SalesmanDataSync{
+		ID:                &id,
+		Name:              data.Name,
+		Address:           data.Address,
+		PhoneNo:           data.PhoneNo,
+		Code:              data.Code,
+		SalesmanType:      data.SalesmanType,
+		EffectiveSalesman: data.EffectiveSalesman,
+		BranchID:          data.BranchID,
 	}
 
 	res.ID, err = repo.Edit(c, &res)
@@ -96,17 +80,18 @@ func (uc ItemSyncUC) Edit(c context.Context, id string, data *requests.ItemSyncR
 }
 
 // SelectAll ...
-func (uc ItemSyncUC) DataSync(c context.Context, parameter models.ItemSyncParameter) (res []models.ItemSync, err error) {
-	repo := repository.NewItemSyncRepository(uc.DB)
+func (uc SalesmanDataSyncUC) DataSync(c context.Context, parameter models.SalesmanDataSyncParameter) (res []models.SalesmanDataSync, err error) {
+	repo := repository.NewSalesmanDataSyncRepository(uc.DB)
 
 	loc, _ := time.LoadLocation("Asia/Jakarta")
 	now := time.Now().In(loc).Add(
-		time.Minute * time.Duration(-15))
+		time.Minute * time.Duration(-240))
 	strnow := now.Format(time.RFC3339)
 	parameter.DateParam = strnow
+	parameter.MysmOnly = "1"
 	jsonReq, err := json.Marshal(parameter)
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrv/rest/masteritem/get", bytes.NewBuffer(jsonReq))
+	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrv/rest/mastersalesman/get", bytes.NewBuffer(jsonReq))
 	if err != nil {
 		fmt.Println("client err")
 		fmt.Print(err.Error())
@@ -118,26 +103,28 @@ func (uc ItemSyncUC) DataSync(c context.Context, parameter models.ItemSyncParame
 
 	resp, err := client.Do(req)
 	if err != nil {
-
+		fmt.Println("error client")
 		fmt.Print(err.Error())
 	}
 	defer resp.Body.Close()
+
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		fmt.Println("error ")
 		fmt.Print(err.Error())
 	}
 
 	// var responseObject http.Response
 	json.Unmarshal(bodyBytes, &res)
-	// fmt.Printf("API Response as struct %+v\n", &responseObject)
+	fmt.Printf("API Response as struct %+v\n", &res)
 
-	var resBuilder []models.ItemSync
+	var resBuilder []models.SalesmanDataSync
 	for _, itemObject := range res {
-
-		currentItem, _ := uc.FindByCode(c, models.ItemSyncParameter{Code: *itemObject.Code})
+		fmt.Println("masuk perulangan")
+		currentItem, _ := uc.FindByCode(c, models.SalesmanDataSyncParameter{Code: *itemObject.Code})
 
 		if currentItem.ID != nil {
-			fmt.Println("not  null")
+			fmt.Println("not null")
 			itemObject.ID = currentItem.ID
 			_, errupdate := repo.Edit(c, &itemObject)
 			if errupdate != nil {
@@ -149,11 +136,6 @@ func (uc ItemSyncUC) DataSync(c context.Context, parameter models.ItemSyncParame
 				fmt.Print(errinsert)
 			}
 		}
-
-		// _, errinsert := repo.InsertDataWithLine(c, &invoiceObject)
-		// if errinsert != nil {
-		// 	fmt.Print("")
-		// }
 
 		resBuilder = append(resBuilder, itemObject)
 	}
