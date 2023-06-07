@@ -131,6 +131,31 @@ func (h *DashboardWebHandler) GetAllBranchCustomerData(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, res, meta, err, 0)
 }
 
+func (h *DashboardWebHandler) GetAllReportBranchCustomerData(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.DashboardWebBranchParameter{
+		BarnchID:  ctx.Query("branch_id"),
+		StartDate: ctx.Query("start_date"),
+		EndDate:   ctx.Query("end_date"),
+	}
+
+	uc := usecase.DashboardWebUC{ContractUC: h.ContractUC}
+	res, err := uc.GetAllReportBranchDetailCustomerData(c, parameter)
+
+	type StructObject struct {
+		ListObjcet []models.DashboardWebBranchDetail `json:"list_dashboard_branch_customer"`
+	}
+
+	ObjcetData := new(StructObject)
+
+	if res != nil {
+		ObjcetData.ListObjcet = res
+	}
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
 func (h *DashboardWebHandler) GetAllCustomerDataByUserID(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
