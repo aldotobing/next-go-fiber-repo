@@ -637,7 +637,7 @@ func (repo DashboardWebRepository) GetOmzetValueByCustomerID(ctx context.Context
 		left join branch b on b.id = sih.branch_id  
 		left join region r on r.id = b.region_id
 	WHERE sih.transaction_date is not null 
-		and coh.id is not null AND sih.transaction_date BETWEEN '2023-05-01' AND '2023-05-30'
+		and coh.id is not null 
 		` + whereStatement + `
 	group by i.id
 	order by i.id asc`
