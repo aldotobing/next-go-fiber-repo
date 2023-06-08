@@ -54,6 +54,28 @@ type DashboardWebBranchDetail struct {
 	StatusInstall           *string `json:"status_install"`
 }
 
+type DashboardWebGetWithUserID struct {
+	CustomerID              *string `json:"customer_id_detail"`
+	CustomerName            *string `json:"customer_name_detail"`
+	CustomerCode            *string `json:"customer_code_detail"`
+	CustomerBranchID        *string `json:"customer_branch_id"`
+	CustomerBranchName      *string `json:"customer_branch_name_detail"`
+	CustomerBranchCode      *string `json:"customer_branch_code_detail"`
+	CustomerRegionID        *string `json:"customer_region_id"`
+	CustomerRegionName      *string `json:"customer_region_name_detail"`
+	CustomerRegionGroupName *string `json:"customer_region_group_name_detail"`
+	CustomerTypeName        *string `json:"customer_type_name_detail"`
+	CustomerLevelName       *string `json:"customer_level_name"`
+	TotalRepeatUser         *string `json:"total_repeat_order_user_customer_detail"`
+	TotalOrderUser          *string `json:"total_order_user_customer_detail"`
+	TotalInvoice            *string `json:"total_invoice_user_customer_detail"`
+	TotalCheckin            *string `json:"total_checkin_user_customer_detail"`
+	TotalAktifOutlet        *string `json:"total_aktif_outlet"`
+	TotalOutlet             *string `json:"total_outlet"`
+	CustomerClassName       *string `json:"customer_class_name_detail"`
+	CustomerCityName        *string `json:"customer_city_name_detail"`
+	StatusInstall           *string `json:"status_install"`
+}
 type OmzetValueModel struct {
 	RegionID            sql.NullString `json:"region_id"`
 	RegionName          sql.NullString `json:"region_name"`
@@ -114,7 +136,7 @@ type DashboardWebRegionParameter struct {
 }
 
 type DashboardWebBranchParameter struct {
-	BarnchID        string `json:"branch_id"`
+	BranchID        string `json:"branch_id"`
 	Search          string `json:"search"`
 	Page            int    `json:"page"`
 	Offset          int    `json:"offset"`

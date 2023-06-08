@@ -16,8 +16,12 @@ type IDashboardWebRepository interface {
 	GetRegionDetailData(c context.Context, parameter models.DashboardWebRegionParameter) ([]models.DashboardWebRegionDetail, error)
 	GetBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.DashboardWebBranchDetail, int, error)
 	GetAllBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.DashboardWebBranchDetail, error)
+
 	GetAllReportBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.DashboardWebBranchDetail, error)
-	GetAllDetailCustomerDataWithUserID(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.DashboardWebBranchDetail, error)
+
+	GetAllBranchDataWithUserID(ctx context.Context, parameter models.DashboardWebBranchParameter) (data []models.DashboardWebGetWithUserID, err error)
+	GetAllDetailCustomerDataWithUserID(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.DashboardWebGetWithUserID, error)
+
 	GetOmzetValue(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.OmzetValueModel, error)
 	GetOmzetValueByGroupID(ctx context.Context, parameter models.DashboardWebBranchParameter, groupID string) ([]models.OmzetValueModel, error)
 	GetOmzetValueByRegionID(ctx context.Context, parameter models.DashboardWebBranchParameter, groupID string) ([]models.OmzetValueModel, error)
@@ -108,6 +112,39 @@ func (repository DashboardWebRepository) scanBranchCustomerDetailRows(rows *sql.
 		&res.CustomerTypeName,
 		&res.TotalRepeatUser, &res.TotalOrderUser,
 		&res.TotalInvoice, &res.TotalCheckin, &res.TotalAktifOutlet, &res.CustomerClassName, &res.CustomerCityName,
+	)
+	if err != nil {
+
+		return res, err
+	}
+
+	return res, nil
+}
+
+// scanGroupDetailWithUserIDRows
+func (repository DashboardWebRepository) scanGroupDetailWithUserIDRows(rows *sql.Rows) (res models.DashboardWebGetWithUserID, err error) {
+	err = rows.Scan(
+		&res.CustomerBranchID, &res.CustomerBranchName, &res.CustomerBranchCode,
+		&res.CustomerRegionName, &res.CustomerRegionGroupName,
+		&res.TotalRepeatUser, &res.TotalOrderUser,
+		&res.TotalInvoice, &res.TotalCheckin, &res.TotalAktifOutlet, &res.TotalOutlet,
+	)
+	if err != nil {
+
+		return res, err
+	}
+
+	return res, nil
+}
+
+// scanCustomerDetailWithUserIDRows
+func (repository DashboardWebRepository) scanCustomerDetailWithUserIDRows(rows *sql.Rows) (res models.DashboardWebGetWithUserID, err error) {
+	err = rows.Scan(
+		&res.CustomerID, &res.CustomerName, &res.CustomerCode,
+		&res.CustomerBranchCode, &res.CustomerBranchName,
+		&res.CustomerLevelName,
+		&res.TotalRepeatUser, &res.TotalOrderUser,
+		&res.TotalInvoice, &res.TotalCheckin, &res.TotalAktifOutlet,
 	)
 	if err != nil {
 
@@ -221,7 +258,7 @@ func (repository DashboardWebRepository) GetRegionDetailData(c context.Context, 
 func (repository DashboardWebRepository) GetBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) (data []models.DashboardWebBranchDetail, count int, err error) {
 
 	query := models.DashboardWebBranchDetailSelectStatement + ` OFFSET $4 LIMIT $5`
-	rows, err := repository.DB.Query(query, str.NullOrEmtyString(&parameter.BarnchID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate),
+	rows, err := repository.DB.Query(query, str.NullOrEmtyString(&parameter.BranchID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate),
 		parameter.Offset, parameter.Limit)
 	if err != nil {
 		return data, count, err
@@ -241,14 +278,14 @@ func (repository DashboardWebRepository) GetBranchDetailCustomerData(ctx context
 	}
 
 	query = ` select count(*) from os_fetch_dashborad_branchcustomerdata($1::integer,$2,$3,null,null,null) `
-	err = repository.DB.QueryRow(query, str.NullOrEmtyString(&parameter.BarnchID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate)).Scan(&count)
+	err = repository.DB.QueryRow(query, str.NullOrEmtyString(&parameter.BranchID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate)).Scan(&count)
 	return data, count, err
 }
 
 func (repository DashboardWebRepository) GetAllBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) (data []models.DashboardWebBranchDetail, err error) {
 
 	query := models.DashboardWebBranchDetailSelectStatement
-	rows, err := repository.DB.Query(query, str.NullOrEmtyString(&parameter.BarnchID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
+	rows, err := repository.DB.Query(query, str.NullOrEmtyString(&parameter.BranchID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
 	if err != nil {
 		return data, err
 	}
@@ -272,7 +309,7 @@ func (repository DashboardWebRepository) GetAllBranchDetailCustomerData(ctx cont
 func (repository DashboardWebRepository) GetAllReportBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) (data []models.DashboardWebBranchDetail, err error) {
 
 	query := models.DashboardWebReportBranchDetailSelectStatement
-	rows, err := repository.DB.Query(query, str.NullOrEmtyString(&parameter.BarnchID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
+	rows, err := repository.DB.Query(query, str.NullOrEmtyString(&parameter.BranchID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
 	if err != nil {
 		return data, err
 	}
@@ -293,17 +330,183 @@ func (repository DashboardWebRepository) GetAllReportBranchDetailCustomerData(ct
 	return data, err
 }
 
-func (repository DashboardWebRepository) GetAllDetailCustomerDataWithUserID(ctx context.Context, parameter models.DashboardWebBranchParameter) (data []models.DashboardWebBranchDetail, err error) {
+func (repository DashboardWebRepository) GetAllBranchDataWithUserID(ctx context.Context, parameter models.DashboardWebBranchParameter) (data []models.DashboardWebGetWithUserID, err error) {
+	var dateStartStatement, dateEndStatement string
+	if parameter.StartDate != "" && parameter.EndDate != "" {
+		dateStartStatement = parameter.StartDate
+		dateEndStatement = parameter.EndDate
+	} else {
+		dateStartStatement = `date_trunc('MONTH',now())::DATE`
+		dateEndStatement = `now()`
+	}
 
-	query := models.DashboardWebBranchDetailSelectWithUserIDStatement
-	rows, err := repository.DB.Query(query, str.NullOrEmtyString(&parameter.UserID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
+	if parameter.UserID == "" {
+		parameter.UserID = "0"
+	}
+
+	query := `with customer_repeat_order as(
+		select count(*), cust_bill_to_id
+		from sales_order_header 
+		where transaction_date between ` + dateStartStatement + ` and ` + dateEndStatement + ` 
+			and lower(document_no) like '%oso%' 
+			and status='submitted' 
+		group by cust_bill_to_id
+	), customer_total_transaction as (
+		select count(*), cust_bill_to_id
+		from sales_order_header 
+		where transaction_date between ` + dateStartStatement + ` and ` + dateEndStatement + ` 
+			and lower(document_no) like '%oso%' 
+		group by cust_bill_to_id
+	), customer_total_invoice as (
+		select count(*), sih.cust_bill_to_id
+		from sales_invoice_header sih
+		join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
+		where lower(sih.transaction_source_document_no) like '%co%'	and coh.status in ('submitted','finish')	
+			and sih.transaction_date between  ` + dateStartStatement + ` and ` + dateEndStatement + `
+		group by sih.cust_bill_to_id
+	), customer_total_check_in as (
+		select count(*), user_id
+		from user_checkin_activity 
+		where checkin_time::date between  ` + dateStartStatement + ` and ` + dateEndStatement + `
+	 	group by user_id
+	), customer_aktif_outlet as (
+		select count(*), sih.cust_bill_to_id
+		from sales_invoice_header sih
+		join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
+		where lower(sih.transaction_source_document_no) like '%co%'
+			and coh.status in ('submitted','finish')	
+			and sih.transaction_date between ` + dateStartStatement + ` and ` + dateEndStatement + ` 
+		group by sih.cust_bill_to_id
+	)
+	select b.id, b._name, b.branch_code, r._name, r.group_name,
+		sum(case when cro.count > 1 then 1 else 0 end) as repeat_order,
+		coalesce(sum(cto.count), 0) as total_transaction ,
+		coalesce(sum(cti.count), 0) as total_invoice,
+		coalesce(sum(ctci.count), 0) as total_check_id,
+		sum(case when cao.count >= 1 then 1 else 0 end) as aktif_outlet,
+		count(distinct(def.user_id)) as total_outlet
+	from customer def
+		left join branch b on b.id = def.branch_id
+		left join region r on r.id = b.region_id
+		left join customer_repeat_order cro on cro.cust_bill_to_id = def.id
+		left join customer_total_transaction cto on cto.cust_bill_to_id = def.id
+		left join customer_total_invoice cti on cti.cust_bill_to_id = def.id
+		left join customer_total_check_in ctci on ctci.user_id = def.user_id
+		left join customer_aktif_outlet cao on cao.cust_bill_to_id = def.id
+	WHERE def.created_date IS not NULL and def.user_id is not null and def.user_id in(select us.id from _user us join customer cs on cs.user_id = us.id where us.fcm_token is not null and length(trim(us.fcm_token))>0 ) 
+	AND (case when ` + parameter.UserID + ` != 0
+		then 
+			def.branch_id in(
+				select ub.branch_id  
+				from user_branch ub
+				where ub.user_id = ` + parameter.UserID + `
+			)
+		else 
+			true = true
+		end)
+	GROUP BY b.ID, r.id`
+	rows, err := repository.DB.Query(query)
 	if err != nil {
 		return data, err
 	}
 
 	defer rows.Close()
 	for rows.Next() {
-		temp, err := repository.scanBranchCustomerDetailRows(rows)
+		temp, err := repository.scanGroupDetailWithUserIDRows(rows)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
+	}
+	err = rows.Err()
+	if err != nil {
+		return data, err
+	}
+
+	return data, err
+}
+
+func (repository DashboardWebRepository) GetAllDetailCustomerDataWithUserID(ctx context.Context, parameter models.DashboardWebBranchParameter) (data []models.DashboardWebGetWithUserID, err error) {
+	var dateStartStatement, dateEndStatement string
+	if parameter.StartDate != "" && parameter.EndDate != "" {
+		dateStartStatement = parameter.StartDate
+		dateEndStatement = parameter.EndDate
+	} else {
+		dateStartStatement = `date_trunc('MONTH',now())::DATE`
+		dateEndStatement = `now()`
+	}
+
+	if parameter.BranchID == "" {
+		parameter.BranchID = "0"
+	}
+
+	query := `with customer_repeat_order as(
+		select count(*), cust_bill_to_id
+		from sales_order_header 
+		where transaction_date between ` + dateStartStatement + ` and ` + dateEndStatement + ` 
+			and lower(document_no) like '%oso%' 
+			and status='submitted' 
+		group by cust_bill_to_id
+	), customer_total_transaction as (
+		select count(*), cust_bill_to_id
+		from sales_order_header 
+		where transaction_date between ` + dateStartStatement + ` and ` + dateEndStatement + ` 
+			and lower(document_no) like '%oso%' 
+		group by cust_bill_to_id
+	), customer_total_invoice as (
+		select count(*), sih.cust_bill_to_id
+		from sales_invoice_header sih
+		join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
+		where lower(sih.transaction_source_document_no) like '%co%'	and coh.status in ('submitted','finish')	
+			and sih.transaction_date between  ` + dateStartStatement + ` and ` + dateEndStatement + `
+		group by sih.cust_bill_to_id
+	), customer_total_check_in as (
+		select count(*), user_id
+		from user_checkin_activity 
+		where checkin_time::date between  ` + dateStartStatement + ` and ` + dateEndStatement + `
+	 	group by user_id
+	), customer_aktif_outlet as (
+		select count(*), sih.cust_bill_to_id
+		from sales_invoice_header sih
+		join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
+		where lower(sih.transaction_source_document_no) like '%co%'
+			and coh.status in ('submitted','finish')	
+			and sih.transaction_date between ` + dateStartStatement + ` and ` + dateEndStatement + ` 
+		group by sih.cust_bill_to_id
+	)
+	select def.id, def.customer_name, def.customer_code, b.branch_code, b._name,
+		clv._name,
+		case when cro.count > 1 then 1 else 0 end as repeat_order,
+		coalesce(cto.count, 0) as total_transaction ,
+		coalesce(cti.count, 0) as total_invoice,
+		coalesce(ctci.count, 0) as total_check_id,
+		case when cao.count >= 1 then 1 else 0 end as aktif_outlet
+	from customer def
+		left join branch b on b.id = def.branch_id
+		left join region r on r.id = b.region_id
+		left join customer_type ctp on ctp.id = def.customer_type_id
+		left join customer_level clv on clv.id = def.customer_level_id
+		left join city cty on cty.id = def.customer_city_id
+		left join customer_repeat_order cro on cro.cust_bill_to_id = def.id
+		left join customer_total_transaction cto on cto.cust_bill_to_id = def.id
+		left join customer_total_invoice cti on cti.cust_bill_to_id = def.id
+		left join customer_total_check_in ctci on ctci.user_id = def.user_id
+		left join customer_aktif_outlet cao on cao.cust_bill_to_id = def.id
+	WHERE def.created_date IS not NULL and def.user_id is not null and def.user_id in(select us.id from _user us join customer cs on cs.user_id = us.id where us.fcm_token is not null and length(trim(us.fcm_token))>0 ) 
+	AND (case when ` + parameter.BranchID + ` != 0
+		then
+			def.branch_id = ` + parameter.BranchID + `
+		else
+			true = true
+		end)`
+	rows, err := repository.DB.Query(query)
+	if err != nil {
+		return data, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		temp, err := repository.scanCustomerDetailWithUserIDRows(rows)
 		if err != nil {
 			return data, err
 		}

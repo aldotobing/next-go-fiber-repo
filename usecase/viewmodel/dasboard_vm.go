@@ -13,6 +13,34 @@ type DashboardByGroupID struct {
 	TotalOutlet              *string `json:"total_outlet"`
 }
 
+type DashboardGroupByUserID struct {
+	BranchID         *string `json:"branch_id"`
+	BranchName       *string `json:"branch_name"`
+	BranchCode       *string `json:"branch_code"`
+	RegionName       *string `json:"region_name"`
+	RegionGroupName  *string `json:"region_group_name"`
+	TotalRepeatUser  *string `json:"total_repeat_order_user"`
+	TotalOrderUser   *string `json:"total_order_user"`
+	TotalInvoice     *string `json:"total_invoice_user"`
+	TotalCheckin     *string `json:"total_checkin_user"`
+	TotalAktifOutlet *string `json:"total_aktif_outlet"`
+	TotalOutlet      *string `json:"total_outlet"`
+}
+
+type DashboardCustomerByUserID struct {
+	CustomerID        *string `json:"customer_id"`
+	CustomerName      *string `json:"customer_name"`
+	CustomerCode      *string `json:"customer_code"`
+	BranchName        *string `json:"branch_name"`
+	BranchCode        *string `json:"branch_code"`
+	CustomerLevelName *string `json:"customer_level_name"`
+	TotalRepeatUser   *string `json:"total_repeat_order_user"`
+	TotalOrderUser    *string `json:"total_order_user"`
+	TotalInvoice      *string `json:"total_invoice_user"`
+	TotalCheckin      *string `json:"total_checkin_user"`
+	TotalAktifOutlet  *string `json:"total_aktif_outlet"`
+}
+
 type OmzetValueVM struct {
 	RegionGroupID   *string `json:"region_group_id"`
 	RegionGroupName *string `json:"region_group_name"`
