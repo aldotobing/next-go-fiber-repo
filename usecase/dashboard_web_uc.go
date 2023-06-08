@@ -142,20 +142,66 @@ func (uc DashboardWebUC) GetAllReportBranchDetailCustomerData(c context.Context,
 	return res, err
 }
 
-func (uc DashboardWebUC) GetAllDetailCustomerDataWithUserID(c context.Context, parameter models.DashboardWebBranchParameter) (res []models.DashboardWebBranchDetail, p viewmodel.PaginationVM, err error) {
-	parameter.Offset, parameter.Limit, parameter.Page, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.DashboardWebBranchDetailOrderBy, models.DashboardWebBranchDetailOrderByrByString)
-
-	var count int
+func (uc DashboardWebUC) GetAllBranchDataWithUserID(c context.Context, parameter models.DashboardWebBranchParameter) (res []viewmodel.DashboardGroupByUserID, err error) {
 	repo := repository.NewDashboardWebRepository(uc.DB)
-	res, err = repo.GetAllDetailCustomerDataWithUserID(c, parameter)
+	data, err := repo.GetAllBranchDataWithUserID(c, parameter)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
-		return res, p, err
+		return res, err
 	}
 
-	p = uc.setPaginationResponse(parameter.Page, parameter.Limit, count)
+	for i := range data {
+		res = append(res, viewmodel.DashboardGroupByUserID{
+			BranchID:         data[i].CustomerBranchID,
+			BranchName:       data[i].CustomerBranchName,
+			BranchCode:       data[i].CustomerBranchCode,
+			RegionName:       data[i].CustomerRegionName,
+			RegionGroupName:  data[i].CustomerRegionGroupName,
+			TotalRepeatUser:  data[i].TotalRepeatUser,
+			TotalOrderUser:   data[i].TotalOrderUser,
+			TotalInvoice:     data[i].TotalInvoice,
+			TotalCheckin:     data[i].TotalCheckin,
+			TotalAktifOutlet: data[i].TotalAktifOutlet,
+			TotalOutlet:      data[i].TotalOutlet,
+		})
+	}
 
-	return res, p, err
+	if res == nil {
+		res = make([]viewmodel.DashboardGroupByUserID, 0)
+	}
+
+	return res, err
+}
+
+func (uc DashboardWebUC) GetAllDetailCustomerDataWithUserID(c context.Context, parameter models.DashboardWebBranchParameter) (res []viewmodel.DashboardCustomerByUserID, err error) {
+	repo := repository.NewDashboardWebRepository(uc.DB)
+	data, err := repo.GetAllDetailCustomerDataWithUserID(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	for i := range data {
+		res = append(res, viewmodel.DashboardCustomerByUserID{
+			CustomerID:        data[i].CustomerID,
+			CustomerName:      data[i].CustomerName,
+			CustomerCode:      data[i].CustomerCode,
+			BranchName:        data[i].CustomerBranchName,
+			BranchCode:        data[i].CustomerBranchCode,
+			CustomerLevelName: data[i].CustomerLevelName,
+			TotalRepeatUser:   data[i].TotalRepeatUser,
+			TotalOrderUser:    data[i].TotalOrderUser,
+			TotalInvoice:      data[i].TotalInvoice,
+			TotalCheckin:      data[i].TotalCheckin,
+			TotalAktifOutlet:  data[i].TotalAktifOutlet,
+		})
+	}
+
+	if res == nil {
+		res = make([]viewmodel.DashboardCustomerByUserID, 0)
+	}
+
+	return res, err
 }
 
 func (uc DashboardWebUC) GetOmzetValue(c context.Context, parameter models.DashboardWebBranchParameter) (res []viewmodel.OmzetValueVM, err error) {

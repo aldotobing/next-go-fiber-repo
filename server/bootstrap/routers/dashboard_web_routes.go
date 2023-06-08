@@ -30,7 +30,9 @@ func (route DashboardWebRoutes) RegisterRoute() {
 	r.Get("/branch", handler.GetBranchCustomerData)
 	r.Get("/branch/select", handler.GetAllBranchCustomerData)
 	r.Get("/branch/select/report", handler.GetAllReportBranchCustomerData)
-	r.Get("/branch/select/user_id", handler.GetAllCustomerDataByUserID)
+
+	r.Get("/select/branch", handler.GetAllBranchDataByUserID)
+	r.Get("/select/user", handler.GetAllCustomerDataByUserID)
 
 	r.Get("/omzet", handler.GetOmzetValue)
 	r.Get("/omzet/group", handler.GetOmzetValueByRegionGroupID)
