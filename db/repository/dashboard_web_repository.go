@@ -333,8 +333,8 @@ func (repository DashboardWebRepository) GetAllReportBranchDetailCustomerData(ct
 func (repository DashboardWebRepository) GetAllBranchDataWithUserID(ctx context.Context, parameter models.DashboardWebBranchParameter) (data []models.DashboardWebGetWithUserID, err error) {
 	var dateStartStatement, dateEndStatement string
 	if parameter.StartDate != "" && parameter.EndDate != "" {
-		dateStartStatement = parameter.StartDate
-		dateEndStatement = parameter.EndDate
+		dateStartStatement = `'` + parameter.StartDate + `'`
+		dateEndStatement = `'` + parameter.EndDate + `'`
 	} else {
 		dateStartStatement = `date_trunc('MONTH',now())::DATE`
 		dateEndStatement = `now()`
@@ -429,8 +429,8 @@ func (repository DashboardWebRepository) GetAllBranchDataWithUserID(ctx context.
 func (repository DashboardWebRepository) GetAllDetailCustomerDataWithUserID(ctx context.Context, parameter models.DashboardWebBranchParameter) (data []models.DashboardWebGetWithUserID, err error) {
 	var dateStartStatement, dateEndStatement string
 	if parameter.StartDate != "" && parameter.EndDate != "" {
-		dateStartStatement = parameter.StartDate
-		dateEndStatement = parameter.EndDate
+		dateStartStatement = `'` + parameter.StartDate + `'`
+		dateEndStatement = `'` + parameter.EndDate + `'`
 	} else {
 		dateStartStatement = `date_trunc('MONTH',now())::DATE`
 		dateEndStatement = `now()`
