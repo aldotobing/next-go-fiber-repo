@@ -158,6 +158,7 @@ func (uc DashboardWebUC) GetAllBranchDataWithUserID(c context.Context, parameter
 			RegionName:          data[i].CustomerRegionName,
 			RegionGroupName:     data[i].CustomerRegionGroupName,
 			TotalRepeatUser:     data[i].TotalRepeatUser,
+			TotalRepeatToko:     data[i].TotalRepeatToko,
 			TotalOrderUser:      data[i].TotalOrderUser,
 			TotalInvoice:        data[i].TotalInvoice,
 			TotalCheckin:        data[i].TotalCheckin,
