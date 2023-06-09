@@ -142,7 +142,8 @@ func (repository DashboardWebRepository) scanCustomerDetailWithUserIDRows(rows *
 	err = rows.Scan(
 		&res.CustomerID, &res.CustomerName, &res.CustomerCode,
 		&res.CustomerBranchCode, &res.CustomerBranchName,
-		&res.CustomerLevelName,
+		&res.CustomerRegionName, &res.CustomerRegionGroupName,
+		&res.CustomerTypeName, &res.CustomerLevelName, &res.CustomerCityName,
 		&res.TotalRepeatUser, &res.TotalOrderUser,
 		&res.TotalInvoice, &res.TotalCheckin, &res.TotalAktifOutlet,
 	)
@@ -475,7 +476,8 @@ func (repository DashboardWebRepository) GetAllDetailCustomerDataWithUserID(ctx 
 		group by sih.cust_bill_to_id
 	)
 	select def.id, def.customer_name, def.customer_code, b.branch_code, b._name,
-		clv._name,
+		r."_name", r.group_name,
+		ctp._name, clv._name, cty."_name",
 		case when cro.count > 1 then 1 else 0 end as repeat_order,
 		coalesce(cto.count, 0) as total_transaction ,
 		coalesce(cti.count, 0) as total_invoice,
@@ -499,6 +501,7 @@ func (repository DashboardWebRepository) GetAllDetailCustomerDataWithUserID(ctx 
 		else
 			true = true
 		end)`
+
 	rows, err := repository.DB.Query(query)
 	if err != nil {
 		return data, err

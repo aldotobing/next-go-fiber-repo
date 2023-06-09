@@ -33,7 +33,11 @@ type DashboardCustomerByUserID struct {
 	CustomerCode      *string `json:"customer_code"`
 	BranchName        *string `json:"branch_name"`
 	BranchCode        *string `json:"branch_code"`
+	RegionName        *string `json:"region_name"`
+	RegionGroupName   *string `json:"region_group_name"`
 	CustomerLevelName *string `json:"customer_level_name"`
+	CustomerTypeName  *string `json:"customer_type_name"`
+	CustomerCityName  *string `json:"cutomer_city_name"`
 	TotalRepeatUser   *string `json:"total_repeat_order_user"`
 	TotalOrderUser    *string `json:"total_order_user"`
 	TotalInvoice      *string `json:"total_invoice_user"`
