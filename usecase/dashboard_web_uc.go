@@ -142,7 +142,7 @@ func (uc DashboardWebUC) GetAllReportBranchDetailCustomerData(c context.Context,
 	return res, err
 }
 
-func (uc DashboardWebUC) GetAllBranchDataWithUserID(c context.Context, parameter models.DashboardWebBranchParameter) (res []viewmodel.DashboardGroupByUserID, err error) {
+func (uc DashboardWebUC) GetAllBranchDataWithUserID(c context.Context, parameter models.DashboardWebBranchParameter) (res []viewmodel.DashboardBranchByUserID, err error) {
 	repo := repository.NewDashboardWebRepository(uc.DB)
 	data, err := repo.GetAllBranchDataWithUserID(c, parameter)
 	if err != nil {
@@ -151,23 +151,25 @@ func (uc DashboardWebUC) GetAllBranchDataWithUserID(c context.Context, parameter
 	}
 
 	for i := range data {
-		res = append(res, viewmodel.DashboardGroupByUserID{
-			BranchID:         data[i].CustomerBranchID,
-			BranchName:       data[i].CustomerBranchName,
-			BranchCode:       data[i].CustomerBranchCode,
-			RegionName:       data[i].CustomerRegionName,
-			RegionGroupName:  data[i].CustomerRegionGroupName,
-			TotalRepeatUser:  data[i].TotalRepeatUser,
-			TotalOrderUser:   data[i].TotalOrderUser,
-			TotalInvoice:     data[i].TotalInvoice,
-			TotalCheckin:     data[i].TotalCheckin,
-			TotalAktifOutlet: data[i].TotalAktifOutlet,
-			TotalOutlet:      data[i].TotalOutlet,
+		res = append(res, viewmodel.DashboardBranchByUserID{
+			BranchID:            data[i].CustomerBranchID,
+			BranchName:          data[i].CustomerBranchName,
+			BranchCode:          data[i].CustomerBranchCode,
+			RegionName:          data[i].CustomerRegionName,
+			RegionGroupName:     data[i].CustomerRegionGroupName,
+			TotalRepeatUser:     data[i].TotalRepeatUser,
+			TotalOrderUser:      data[i].TotalOrderUser,
+			TotalInvoice:        data[i].TotalInvoice,
+			TotalCheckin:        data[i].TotalCheckin,
+			TotalAktifOutlet:    data[i].TotalAktifOutlet,
+			TotalOutlet:         data[i].TotalOutlet,
+			TotalOutletAll:      data[i].TotalOutletAll,
+			TotalRegisteredUser: data[i].TotalRegisteredUser,
 		})
 	}
 
 	if res == nil {
-		res = make([]viewmodel.DashboardGroupByUserID, 0)
+		res = make([]viewmodel.DashboardBranchByUserID, 0)
 	}
 
 	return res, err

@@ -13,18 +13,20 @@ type DashboardByGroupID struct {
 	TotalOutlet              *string `json:"total_outlet"`
 }
 
-type DashboardGroupByUserID struct {
-	BranchID         *string `json:"branch_id"`
-	BranchName       *string `json:"branch_name"`
-	BranchCode       *string `json:"branch_code"`
-	RegionName       *string `json:"region_name"`
-	RegionGroupName  *string `json:"region_group_name"`
-	TotalRepeatUser  *string `json:"total_repeat_order_user"`
-	TotalOrderUser   *string `json:"total_order_user"`
-	TotalInvoice     *string `json:"total_invoice_user"`
-	TotalCheckin     *string `json:"total_checkin_user"`
-	TotalAktifOutlet *string `json:"total_aktif_outlet"`
-	TotalOutlet      *string `json:"total_outlet"`
+type DashboardBranchByUserID struct {
+	BranchID            *string `json:"branch_id"`
+	BranchName          *string `json:"branch_name"`
+	BranchCode          *string `json:"branch_code"`
+	RegionName          *string `json:"region_name"`
+	RegionGroupName     *string `json:"region_group_name"`
+	TotalRepeatUser     *string `json:"total_repeat_order_user"`
+	TotalOrderUser      *string `json:"total_order_user"`
+	TotalInvoice        *string `json:"total_invoice_user"`
+	TotalCheckin        *string `json:"total_checkin_user"`
+	TotalAktifOutlet    *string `json:"total_aktif_outlet"`
+	TotalOutlet         *string `json:"total_outlet"`
+	TotalOutletAll      *string `json:"total_outlet_all"`
+	TotalRegisteredUser *string `json:"total_registered_user"`
 }
 
 type DashboardCustomerByUserID struct {

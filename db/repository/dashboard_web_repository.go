@@ -126,8 +126,9 @@ func (repository DashboardWebRepository) scanGroupDetailWithUserIDRows(rows *sql
 	err = rows.Scan(
 		&res.CustomerBranchID, &res.CustomerBranchName, &res.CustomerBranchCode,
 		&res.CustomerRegionName, &res.CustomerRegionGroupName,
-		&res.TotalRepeatUser, &res.TotalOrderUser,
-		&res.TotalInvoice, &res.TotalCheckin, &res.TotalAktifOutlet, &res.TotalOutlet,
+		&res.TotalRepeatUser, &res.TotalRepeatToko, &res.TotalOrderUser,
+		&res.TotalInvoice, &res.TotalCheckin, &res.TotalAktifOutlet, &res.TotalOutlet, &res.TotalOutletAll,
+		&res.TotalRegisteredUser,
 	)
 	if err != nil {
 
@@ -352,6 +353,14 @@ func (repository DashboardWebRepository) GetAllBranchDataWithUserID(ctx context.
 			and lower(document_no) like '%oso%' 
 			and status='submitted' 
 		group by cust_bill_to_id
+	), customer_repeat_order_toko as(
+		select count(*), sih.cust_bill_to_id
+		from sales_invoice_header sih
+		join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
+		where sih.transaction_date between ` + dateStartStatement + ` and ` + dateEndStatement + `  
+				and lower(sih.transaction_source_document_no) like '%co%' 
+				and coh.status in ('submitted','finish')
+		group by sih.cust_bill_to_id
 	), customer_total_transaction as (
 		select count(*), cust_bill_to_id
 		from sales_order_header 
@@ -378,23 +387,36 @@ func (repository DashboardWebRepository) GetAllBranchDataWithUserID(ctx context.
 			and coh.status in ('submitted','finish')	
 			and sih.transaction_date between ` + dateStartStatement + ` and ` + dateEndStatement + ` 
 		group by sih.cust_bill_to_id
+	), registered_user as (
+		select count(*), us.id
+		from _user us 
+		where us.fcm_token is not null 
+			and first_login_time::date between ` + dateStartStatement + ` and ` + dateEndStatement + ` 
+			and length(trim(us.fcm_token))>0 
+		group by us.id
 	)
 	select b.id, b._name, b.branch_code, r._name, r.group_name,
 		sum(case when cro.count > 1 then 1 else 0 end) as repeat_order,
+		sum(case when crot.count > 1 then 1 else 0 end) as repeat_order_toko,
 		coalesce(sum(cto.count), 0) as total_transaction ,
 		coalesce(sum(cti.count), 0) as total_invoice,
 		coalesce(sum(ctci.count), 0) as total_check_id,
 		sum(case when cao.count >= 1 then 1 else 0 end) as aktif_outlet,
-		count(distinct(def.user_id)) as total_outlet
+		count(distinct(case when us.fcm_token is not null and length(trim(us.fcm_token))>0 then us.id end)) as total_outlet,
+		count(distinct(def.user_id)) as total_outlet_all,
+		coalesce(sum(ru.count),0) as registered_user
 	from customer def
 		left join branch b on b.id = def.branch_id
 		left join region r on r.id = b.region_id
+		left join _user us on us.id = def.user_id
 		left join customer_repeat_order cro on cro.cust_bill_to_id = def.id
+		left join customer_repeat_order_toko crot on crot.cust_bill_to_id = def.id
 		left join customer_total_transaction cto on cto.cust_bill_to_id = def.id
 		left join customer_total_invoice cti on cti.cust_bill_to_id = def.id
 		left join customer_total_check_in ctci on ctci.user_id = def.user_id
 		left join customer_aktif_outlet cao on cao.cust_bill_to_id = def.id
-	WHERE def.created_date IS not NULL and def.user_id is not null and def.user_id in(select us.id from _user us join customer cs on cs.user_id = us.id where us.fcm_token is not null and length(trim(us.fcm_token))>0 ) 
+		left join registered_user ru on ru.id = def.user_id
+	WHERE def.created_date IS not NULL and def.user_id is not null
 	AND (case when ` + parameter.UserID + ` != 0
 		then 
 			def.branch_id in(

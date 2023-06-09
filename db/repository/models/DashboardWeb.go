@@ -67,11 +67,14 @@ type DashboardWebGetWithUserID struct {
 	CustomerTypeName        *string `json:"customer_type_name_detail"`
 	CustomerLevelName       *string `json:"customer_level_name"`
 	TotalRepeatUser         *string `json:"total_repeat_order_user_customer_detail"`
+	TotalRepeatToko         *string `json:"total_repeat_order_toko"`
 	TotalOrderUser          *string `json:"total_order_user_customer_detail"`
 	TotalInvoice            *string `json:"total_invoice_user_customer_detail"`
 	TotalCheckin            *string `json:"total_checkin_user_customer_detail"`
 	TotalAktifOutlet        *string `json:"total_aktif_outlet"`
 	TotalOutlet             *string `json:"total_outlet"`
+	TotalOutletAll          *string `json:"total_outlet_all"`
+	TotalRegisteredUser     *string `json:"total_registered_user_detail"`
 	CustomerClassName       *string `json:"customer_class_name_detail"`
 	CustomerCityName        *string `json:"customer_city_name_detail"`
 	StatusInstall           *string `json:"status_install"`
