@@ -1,20 +1,23 @@
 package models
 
+import "database/sql"
+
 // ItemDetailsDetails ...
 type ItemDetails struct {
-	ID                      *string `json:"item_id"`
-	Code                    *string `json:"item_code"`
-	Name                    *string `json:"item_name"`
-	Description             *string `json:"item_description"`
-	ItemDetailsCategoryId   *string `json:"item_category_id"`
-	ItemDetailsCategoryName *string `json:"item_category_name"`
-	ItemDetailsPicture      *string `json:"item_picture"`
-	UomID                   *string `json:"uom_id"`
-	UomName                 *string `json:"uom_name"`
-	UomLineConversion       *string `json:"uom_line_conversion"`
-	ItemDetailsPrice        *string `json:"item_price"`
-	PriceListVersionId      *string `json:"price_list_version_id"`
-	Visibility              *string `json:"visibility"`
+	ID                      *string        `json:"item_id"`
+	Code                    *string        `json:"item_code"`
+	Name                    *string        `json:"item_name"`
+	Description             *string        `json:"item_description"`
+	ItemDetailsCategoryId   *string        `json:"item_category_id"`
+	ItemDetailsCategoryName *string        `json:"item_category_name"`
+	ItemDetailsPicture      *string        `json:"item_picture"`
+	UomID                   *string        `json:"uom_id"`
+	UomName                 *string        `json:"uom_name"`
+	UomLineConversion       *string        `json:"uom_line_conversion"`
+	ItemDetailsPrice        *string        `json:"item_price"`
+	PriceListVersionId      *string        `json:"price_list_version_id"`
+	Visibility              *string        `json:"visibility"`
+	ItemPriceCreatedAT      sql.NullString `json:"item_price_crated_at"`
 }
 
 // ItemDetailsParameter ...
@@ -25,6 +28,7 @@ type ItemDetailsParameter struct {
 	Name                  string `json:"item_name"`
 	ItemDetailsCategoryId string `json:"item_category_id"`
 	PriceListVersionId    string `json:"price_list_version_id"`
+	PriceListId           string `json:"price_list_id"`
 	Search                string `json:"search"`
 	Page                  int    `json:"page"`
 	Offset                int    `json:"offset"`
@@ -60,7 +64,8 @@ var (
 		UOM._NAME AS UOM_NAME,
 		IUL.CONVERSION AS IUL_CONVERSION,
 		IP.PRICE AS ITEM_PRICE,
-		IP.PRICE_LIST_VERSION_ID AS PRICE_LIST_VERSION_ID
+		IP.PRICE_LIST_VERSION_ID AS PRICE_LIST_VERSION_ID,
+		IP.created_date
 	FROM ITEM_UOM_LINE IUL
 	LEFT JOIN ITEM DEF ON IUL.ITEM_ID = DEF.ID
 	LEFT JOIN ITEM_CATEGORY IC ON IC.ID = DEF.ITEM_CATEGORY_ID

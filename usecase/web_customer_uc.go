@@ -2,7 +2,9 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"mime/multipart"
+	"strconv"
 	"strings"
 	"time"
 
@@ -21,16 +23,14 @@ type WebCustomerUC struct {
 
 // BuildBody ...
 func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.CustomerVM, birthdateFull bool) {
-	if data.CustomerProfilePicture == nil || *data.CustomerProfilePicture == "" ||
+	if data.CustomerNik == nil || *data.CustomerNik == "" ||
 		data.CustomerName == nil || *data.CustomerName == "" ||
-		data.CustomerBranchName == nil || *data.CustomerBranchName == "" ||
-		data.CustomerBranchCode == nil || *data.CustomerBranchCode == "" ||
-		data.CustomerPhone == nil || *data.CustomerPhone == "" ||
-		data.CustomerBranchPicPhoneNo == nil || *data.CustomerBranchPicPhoneNo == "" ||
-		data.CustomerReligion == nil || *data.CustomerReligion == "" ||
 		data.CustomerBirthDate == nil || *data.CustomerBirthDate == "" ||
-		data.CustomerNik == nil || *data.CustomerNik == "" ||
-		data.CustomerPhotoKtp == nil || *data.CustomerPhotoKtp == "" {
+		data.CustomerReligion == nil || *data.CustomerReligion == "" ||
+		data.CustomerPhotoKtp == nil || *data.CustomerPhotoKtp == "" ||
+		data.CustomerProfilePicture == nil || *data.CustomerProfilePicture == "" ||
+		data.CustomerPhone == nil || *data.CustomerPhone == "" ||
+		data.Code == nil || *data.Code == "" {
 		res.CustomerProfileStatus = &models.CustomerProfileStatusIncomplete
 	} else {
 		res.CustomerProfileStatus = &models.CustomerProfileStatusComplete
@@ -108,6 +108,8 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 	res.CustomerUserID = data.CustomerUserID
 	res.CustomerUserName = data.CustomerUserName
 	res.CustomerGender = data.CustomerGender
+	res.ModifiedBy = data.ModifiedBy
+	res.ModifiedDate = data.ModifiedDate
 }
 
 // SelectAll ...
@@ -168,36 +170,72 @@ func (uc WebCustomerUC) FindByID(c context.Context, parameter models.WebCustomer
 	return res, err
 }
 
-func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCustomerRequest, imgProfile *multipart.FileHeader) (res models.WebCustomer, err error) {
+func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCustomerRequest, imgProfile, imgKtp *multipart.FileHeader) (res models.WebCustomer, err error) {
 
 	// currentObjectUc, err := uc.FindByID(c, models.MpBankParameter{ID: id})
 	currentObjectUc, err := uc.FindByID(c, models.WebCustomerParameter{ID: id})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "invalid id", uc.ReqID)
+		return
+	}
+
+	if currentObjectUc.CustomerPhone != nil && *currentObjectUc.CustomerPhone != data.CustomerPhone {
+		checkerPhoneNumberData, _ := uc.SelectAll(c, models.WebCustomerParameter{
+			PhoneNumber: data.CustomerPhone,
+			By:          "c.created_date",
+		})
+		if len(checkerPhoneNumberData) > 0 {
+			err = errors.New("Duplicate Phone Number")
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "duplicate phone number", uc.ReqID)
+			return
+		}
+	}
+
 	ctx := "FileUC.Upload"
 	awsUc := AwsUC{ContractUC: uc.ContractUC}
 
 	var strImgprofile = ""
-
 	if currentObjectUc.CustomerProfilePicture != nil && *currentObjectUc.CustomerProfilePicture != "" {
 		strImgprofile = strings.ReplaceAll(*currentObjectUc.CustomerProfilePicture, models.CustomerImagePath, "")
 	}
-
 	if imgProfile != nil {
+		awsUc.AWSS3.Directory = "image/customer"
 		if &strImgprofile != nil && strings.Trim(strImgprofile, " ") != "" {
-			_, err = awsUc.Delete("image/customer", strImgprofile)
+			_, err = awsUc.Delete(awsUc.AWSS3.Directory, strImgprofile)
 			if err != nil {
 				logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "s3", uc.ReqID)
 			}
 		}
 
-		awsUc.AWSS3.Directory = "image/customer"
-		imgBannerFile, err := awsUc.Upload("image/customer", imgProfile)
+		imgBannerFile, err := awsUc.Upload(awsUc.AWSS3.Directory, imgProfile)
 		if err != nil {
 			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "upload_file", c.Value("requestid"))
 			return res, err
 		}
-		strImgprofile = imgBannerFile.FilePath
-
+		strImgprofile = imgBannerFile.FileName
 	}
+
+	var stringImageKTP string
+	if currentObjectUc.CustomerPhotoKtp != nil && *currentObjectUc.CustomerPhotoKtp != "" {
+		stringImageKTP = strings.ReplaceAll(*currentObjectUc.CustomerPhotoKtp, models.CustomerImagePath, "")
+	}
+	if imgKtp != nil {
+		awsUc.AWSS3.Directory = "image/customer"
+		if &stringImageKTP != nil && strings.Trim(stringImageKTP, " ") != "" {
+			_, err = awsUc.Delete(awsUc.AWSS3.Directory, stringImageKTP)
+			if err != nil {
+				logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "s3", uc.ReqID)
+			}
+		}
+
+		imgBannerFile, err := awsUc.Upload(awsUc.AWSS3.Directory, imgKtp)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "upload_file", c.Value("requestid"))
+			return res, err
+		}
+		stringImageKTP = imgBannerFile.FileName
+	}
+
 	repo := repository.NewWebCustomerRepository(uc.DB)
 	// now := time.Now().UTC()
 	// strnow := now.Format(time.RFC3339)
@@ -224,6 +262,8 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 		CustomerLevelID:        &data.CustomerLevelID,
 		CustomerGender:         &data.CustomerGender,
 		CustomerBirthDate:      &data.CustomerBirthDate,
+		CustomerPhotoKtp:       &stringImageKTP,
+		UserID:                 &data.UserID,
 	}
 
 	res.ID, err = repo.Edit(c, &res)
@@ -240,6 +280,16 @@ func (uc WebCustomerUC) Add(c context.Context, data *requests.WebCustomerRequest
 	// currentObjectUc, err := uc.FindByID(c, models.MpBankParameter{ID: id})
 	ctx := "FileUC.Upload"
 	awsUc := AwsUC{ContractUC: uc.ContractUC}
+
+	checkerPhoneNumberData, _ := uc.SelectAll(c, models.WebCustomerParameter{
+		PhoneNumber: data.CustomerPhone,
+		By:          "c.created_date",
+	})
+	if len(checkerPhoneNumberData) > 0 {
+		err = errors.New("Duplicate Phone Number")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "duplicate phone number", uc.ReqID)
+		return
+	}
 
 	var strImgprofile = ""
 
@@ -282,6 +332,190 @@ func (uc WebCustomerUC) Add(c context.Context, data *requests.WebCustomerRequest
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
+	}
+
+	return res, err
+}
+
+// ReportSelect ...
+func (uc WebCustomerUC) ReportSelect(c context.Context, parameter models.WebCustomerReportParameter) (res []viewmodel.CustomerVM, err error) {
+	repo := repository.NewWebCustomerRepository(uc.DB)
+	data, err := repo.ReportSelect(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	var cityIDs, proviceIDs, districtIDs, subDistrictids, salesmanIDs, customerLevelIDs, customerTypeIDs []string
+	cityIDChecker := make(map[string]string)
+	proviceIDChecker := make(map[string]string)
+	districtIDChecker := make(map[string]string)
+	subdistrictIDChecker := make(map[string]string)
+	salesmanIDChecker := make(map[string]string)
+	customerLevelIDChecker := make(map[int]string)
+	customerTypeIDChecker := make(map[string]string)
+	for i := range data {
+		if data[i].CustomerCityID != nil && cityIDChecker[*data[i].CustomerCityID] == "" {
+			cityIDChecker[*data[i].CustomerCityID] = "done"
+			cityIDs = append(cityIDs, *data[i].CustomerCityID)
+		}
+		if data[i].CustomerProvinceID != nil && proviceIDChecker[*data[i].CustomerProvinceID] == "" {
+			proviceIDChecker[*data[i].CustomerProvinceID] = "done"
+			proviceIDs = append(proviceIDs, *data[i].CustomerProvinceID)
+		}
+		if data[i].CustomerDistrictID != nil && districtIDChecker[*data[i].CustomerDistrictID] == "" {
+			districtIDChecker[*data[i].CustomerDistrictID] = "done"
+			districtIDs = append(districtIDs, *data[i].CustomerDistrictID)
+		}
+		if data[i].CustomerSubdistrictID != nil && subdistrictIDChecker[*data[i].CustomerSubdistrictID] == "" {
+			subdistrictIDChecker[*data[i].CustomerSubdistrictID] = "done"
+			subDistrictids = append(subDistrictids, *data[i].CustomerSubdistrictID)
+		}
+		if data[i].CustomerSalesmanID != nil && salesmanIDChecker[*data[i].CustomerSalesmanID] == "" {
+			salesmanIDChecker[*data[i].CustomerSalesmanID] = "done"
+			salesmanIDs = append(salesmanIDs, *data[i].CustomerSalesmanID)
+		}
+		if data[i].CustomerLevelID != nil && customerLevelIDChecker[*data[i].CustomerLevelID] == "" {
+			customerLevelIDChecker[*data[i].CustomerLevelID] = "done"
+			customerLevelIDs = append(customerLevelIDs, strconv.Itoa(*data[i].CustomerLevelID))
+		}
+		if data[i].CustomerTypeId != nil && customerTypeIDChecker[*data[i].CustomerTypeId] == "" {
+			customerTypeIDChecker[*data[i].CustomerTypeId] = "done"
+			customerTypeIDs = append(customerTypeIDs, *data[i].CustomerTypeId)
+		}
+	}
+
+	cityUC := CityUC{ContractUC: uc.ContractUC}
+	cityData, err := cityUC.SelectAll(c, models.CityParameter{IDs: strings.Join(cityIDs, ","), By: "def.id"})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "find_city_data", c.Value("requestid"))
+		return res, err
+	}
+
+	proviceUC := ProvinceUC{ContractUC: uc.ContractUC}
+	proviceData, err := proviceUC.SelectAll(c, models.ProvinceParameter{IDs: strings.Join(proviceIDs, ","), By: "def.id"})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "find_provice_data", c.Value("requestid"))
+		return res, err
+	}
+
+	districtUC := DistrictUC{ContractUC: uc.ContractUC}
+	districtData, err := districtUC.SelectAll(c, models.DistrictParameter{IDs: strings.Join(districtIDs, ","), By: "def.id"})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "find_district_data", c.Value("requestid"))
+		return res, err
+	}
+
+	subDistrictUC := SubDistrictUC{ContractUC: uc.ContractUC}
+	subDistrictData, err := subDistrictUC.SelectAll(c, models.SubDistrictParameter{IDs: strings.Join(subDistrictids, ","), By: "def.id"})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "find_subdistrict_data", c.Value("requestid"))
+		return res, err
+	}
+
+	salesmanUC := SalesmanUC{ContractUC: uc.ContractUC}
+	salesmanData, err := salesmanUC.SelectAll(c, models.SalesmanParameter{IDs: strings.Join(salesmanIDs, ","), By: "def.id"})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "find_salesman_data", c.Value("requestid"))
+		return res, err
+	}
+
+	customerLevelUC := CustomerLevelUC{ContractUC: uc.ContractUC}
+	customerLevelData, err := customerLevelUC.FindAll(c, models.CustomerLevelParameter{IDs: strings.Join(customerLevelIDs, ","), By: "def.id"})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "find_salesman_data", c.Value("requestid"))
+		return res, err
+	}
+
+	customerTypeUC := CustomerTypeUC{ContractUC: uc.ContractUC}
+	customerTypeData, err := customerTypeUC.SelectAll(c, models.CustomerTypeParameter{IDs: strings.Join(customerTypeIDs, ","), By: "def.id"})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "find_salesman_data", c.Value("requestid"))
+		return res, err
+	}
+
+	for i := range data {
+		var temp viewmodel.CustomerVM
+
+		for j := range cityData {
+			if data[i].CustomerCityID != nil && *data[i].CustomerCityID == *cityData[j].ID {
+				data[i].CustomerCityName = cityData[j].Name
+				break
+			}
+		}
+
+		for j := range proviceData {
+			if data[i].CustomerProvinceID != nil && *data[i].CustomerProvinceID == proviceData[j].ID {
+				data[i].CustomerProvinceName = proviceData[j].Name
+				break
+			}
+		}
+
+		for j := range districtData {
+			if data[i].CustomerDistrictID != nil && *data[i].CustomerDistrictID == districtData[j].ID {
+				data[i].CustomerDistrictName = &districtData[j].Name
+				break
+			}
+		}
+
+		for j := range subDistrictData {
+			if data[i].CustomerSubdistrictID != nil && *data[i].CustomerSubdistrictID == subDistrictData[j].ID {
+				data[i].CustomerSubdistrictName = &subDistrictData[j].Name
+				break
+			}
+		}
+
+		for j := range salesmanData {
+			if data[i].CustomerSalesmanID != nil && *data[i].CustomerSalesmanID == *salesmanData[j].ID {
+				data[i].CustomerSalesmanName = salesmanData[j].Name
+				data[i].CustomerSalesmanPhone = salesmanData[j].PhoneNo
+				data[i].CustomerSalesmanCode = salesmanData[j].Code
+				break
+			}
+		}
+
+		for j := range customerLevelData {
+			if data[i].CustomerLevelID != nil && strconv.Itoa(*data[i].CustomerLevelID) == customerLevelData[j].ID {
+				data[i].CustomerLevel = &customerLevelData[j].Name
+				break
+			}
+		}
+
+		for j := range customerTypeData {
+			if data[i].CustomerTypeId != nil && *data[i].CustomerTypeId == *customerTypeData[j].ID {
+				data[i].CustomerTypeName = customerTypeData[j].Name
+				break
+			}
+		}
+
+		if parameter.CustomerProfileStatus == "0" {
+			if data[i].CustomerNik == nil || *data[i].CustomerNik == "" ||
+				data[i].CustomerName == nil || *data[i].CustomerName == "" ||
+				data[i].CustomerBirthDate == nil || *data[i].CustomerBirthDate == "" ||
+				data[i].CustomerReligion == nil || *data[i].CustomerReligion == "" ||
+				data[i].CustomerPhotoKtp == nil || *data[i].CustomerPhotoKtp == "" ||
+				data[i].CustomerProfilePicture == nil || *data[i].CustomerProfilePicture == "" ||
+				data[i].CustomerPhone == nil || *data[i].CustomerPhone == "" ||
+				data[i].Code == nil || *data[i].Code == "" {
+				uc.BuildBody(&data[i], &temp, true)
+				res = append(res, temp)
+			}
+		} else if parameter.CustomerProfileStatus == "1" {
+			if data[i].CustomerNik != nil && *data[i].CustomerNik != "" &&
+				data[i].CustomerName != nil && *data[i].CustomerName != "" &&
+				data[i].CustomerBirthDate != nil && *data[i].CustomerBirthDate != "" &&
+				data[i].CustomerReligion != nil && *data[i].CustomerReligion != "" &&
+				data[i].CustomerPhotoKtp != nil && *data[i].CustomerPhotoKtp != "" &&
+				data[i].CustomerProfilePicture != nil && *data[i].CustomerProfilePicture != "" &&
+				data[i].CustomerPhone != nil && *data[i].CustomerPhone != "" &&
+				data[i].Code != nil && *data[i].Code != "" {
+				uc.BuildBody(&data[i], &temp, true)
+				res = append(res, temp)
+			}
+		} else {
+			uc.BuildBody(&data[i], &temp, true)
+			res = append(res, temp)
+		}
 	}
 
 	return res, err

@@ -9,8 +9,8 @@ type WebPromo struct {
 	PromoUrlBanner     *string                         `json:"promo_url_banner"`
 	StartDate          *string                         `json:"start_date"`
 	EndDate            *string                         `json:"end_date"`
-	Active             *string                         `json:"active"`
-	ShowInApp          *string                         `json:"show_in_app"`
+	Active             *int                            `json:"active"`
+	ShowInApp          *int                            `json:"show_in_app"`
 	CustomerTypeIdList *string                         `json:"customer_type_id_list"`
 	CustomerTypeList   *[]WebCustomerTypeEligiblePromo `json:"customer_type_list"`
 	RegionAreaIdList   *string                         `json:"region_area_id_list"`

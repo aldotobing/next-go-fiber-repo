@@ -144,13 +144,13 @@ func (uc SalesOrderCustomerSyncUC) DataSync(c context.Context, parameter models.
 								}
 
 								if useraccount.CustomerPhone != nil && *useraccount.CustomerPhone != "" {
-									if messageTemplate != "" {
-										senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.CustomerPhone, messageTemplate)
-										if senDwaMessage != nil {
-											fmt.Println("sukses")
-										}
+									// if messageTemplate != "" {
+									// senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.CustomerPhone, messageTemplate)
+									// if senDwaMessage != nil {
+									// 	fmt.Println("sukses")
+									// }
 
-									}
+									// }
 
 									if useraccount.CustomerSalesmanID != nil {
 										salesmanmessageTemplate := ""

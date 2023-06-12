@@ -29,8 +29,12 @@ func NewBranchRepository(DB *sql.DB) IBranchRepository {
 func (repository BranchRepository) scanRows(rows *sql.Rows) (res models.Branch, err error) {
 	err = rows.Scan(
 		&res.ID,
-		&res.Code,
 		&res.Name,
+		&res.Code,
+		&res.RegionID,
+		&res.RegionName,
+		&res.RegionGroupID,
+		&res.RegionGroupName,
 	)
 	if err != nil {
 
@@ -46,6 +50,10 @@ func (repository BranchRepository) scanRow(row *sql.Row) (res models.Branch, err
 		&res.ID,
 		&res.Code,
 		&res.Name,
+		&res.RegionID,
+		&res.RegionName,
+		&res.RegionGroupID,
+		&res.RegionGroupName,
 	)
 
 	if err != nil {
@@ -61,6 +69,10 @@ func (repository BranchRepository) SelectAll(c context.Context, parameter models
 
 	if parameter.UserID != "" {
 		conditionString += " and def.id in (select branch_id from user_branch where user_id = " + parameter.UserID + ")"
+	}
+
+	if parameter.RegionID != "" && parameter.RegionID != "0" {
+		conditionString += " and def.region_id = '" + parameter.RegionID + "'"
 	}
 
 	statement := models.BranchSelectStatement + ` ` + models.BranchWhereStatement +

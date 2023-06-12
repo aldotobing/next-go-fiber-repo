@@ -10,6 +10,7 @@ type SubDistrict struct {
 // SubDistrictParameter ...
 type SubDistrictParameter struct {
 	ID         string `json:"id"`
+	IDs        string `json:"ids"`
 	DistrictID string `json:"district_id"`
 	Code       string `json:"code"`
 	Name       string `json:"name"`

@@ -225,14 +225,16 @@ func (repository WebItemRepository) Edit(c context.Context, model *models.WebIte
 	item_picture = $2,
 	item_category_id = $3,
 	hide = $4,
-	description = $5
-	WHERE id = $6 
+	active = $5,
+	description = $6
+	WHERE id = $7
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		model.Name,
 		model.ItemPicture,
 		model.ItemCategoryId,
 		model.ItemHide,
+		model.ItemActive,
 		model.ItemDescription,
 		model.ID).Scan(&res)
 	if err != nil {

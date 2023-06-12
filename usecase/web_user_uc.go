@@ -82,6 +82,7 @@ func (uc WebUserUC) Add(c context.Context, data *requests.WebUserRequest) (res m
 		Login:               &data.Login,
 		Password:            &data.Password,
 		UserRoleGroupIDList: &data.UserRoleGroupIDList,
+		BranchIDList:        data.BranchIDList,
 	}
 	res.ID, err = repo.Add(c, &res)
 	if err != nil {
@@ -101,6 +102,7 @@ func (uc WebUserUC) Edit(c context.Context, id string, data *requests.WebUserReq
 		Login:               &data.Login,
 		Password:            &data.Password,
 		UserRoleGroupIDList: &data.UserRoleGroupIDList,
+		BranchIDList:        data.BranchIDList,
 	}
 
 	res.ID, err = repo.Edit(c, &res)

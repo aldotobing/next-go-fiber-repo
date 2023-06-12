@@ -106,7 +106,7 @@ func (uc ItemSyncUC) DataSync(c context.Context, parameter models.ItemSyncParame
 	parameter.DateParam = strnow
 	jsonReq, err := json.Marshal(parameter)
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "http://localhost:8084/NEXTbasis-service-agon/rest/item/getData/2", bytes.NewBuffer(jsonReq))
+	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrv/rest/masteritem/get", bytes.NewBuffer(jsonReq))
 	if err != nil {
 		fmt.Println("client err")
 		fmt.Print(err.Error())
@@ -137,7 +137,7 @@ func (uc ItemSyncUC) DataSync(c context.Context, parameter models.ItemSyncParame
 		currentItem, _ := uc.FindByCode(c, models.ItemSyncParameter{Code: *itemObject.Code})
 
 		if currentItem.ID != nil {
-			fmt.Println("not null")
+			fmt.Println("not  null")
 			itemObject.ID = currentItem.ID
 			_, errupdate := repo.Edit(c, &itemObject)
 			if errupdate != nil {

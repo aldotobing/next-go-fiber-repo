@@ -25,7 +25,18 @@ func (route DashboardWebRoutes) RegisterRoute() {
 	// r.Use(jwtMiddleware.VerifyUser)
 	r.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
 	r.Get("/", handler.GetData)
+	r.Get("/group", handler.GetDataByGroupID)
 	r.Get("/detail", handler.GetRegionDetailData)
 	r.Get("/branch", handler.GetBranchCustomerData)
 	r.Get("/branch/select", handler.GetAllBranchCustomerData)
+	r.Get("/branch/select/report", handler.GetAllReportBranchCustomerData)
+
+	r.Get("/select/branch", handler.GetAllBranchDataByUserID)
+	r.Get("/select/customer", handler.GetAllCustomerDataByUserID)
+
+	r.Get("/omzet", handler.GetOmzetValue)
+	r.Get("/omzet/group", handler.GetOmzetValueByRegionGroupID)
+	r.Get("/omzet/region", handler.GetOmzetValueByRegionID)
+	r.Get("/omzet/branch", handler.GetOmzetValueByBranchID)
+	r.Get("/omzet/customer", handler.GetOmzetValueByCustomerID)
 }

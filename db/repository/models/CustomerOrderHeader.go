@@ -52,6 +52,8 @@ type CustomerOrderHeaderParameter struct {
 	Limit      int    `json:"limit"`
 	By         string `json:"by"`
 	Sort       string `json:"sort"`
+	StartDate  string `json:"start_date"`
+	EndDate    string `json:"end_date"`
 }
 
 var (

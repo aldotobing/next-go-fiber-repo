@@ -67,6 +67,7 @@ func (h *WebCustomerHandler) FindAll(ctx *fiber.Ctx) error {
 		Limit:          str.StringToInt(ctx.Query("limit")),
 		By:             ctx.Query("by"),
 		Sort:           ctx.Query("sort"),
+		PhoneNumber:    ctx.Query("phone_number"),
 	}
 	uc := usecase.WebCustomerUC{ContractUC: h.ContractUC}
 	res, meta, err := uc.FindAll(c, parameter)
@@ -174,8 +175,9 @@ func (h *WebCustomerHandler) Edit(ctx *fiber.Ctx) error {
 	}
 
 	imgProfile, _ := ctx.FormFile("img_profile")
+	imgKtp, _ := ctx.FormFile("img_ktp")
 	uc := usecase.WebCustomerUC{ContractUC: h.ContractUC}
-	res, err := uc.Edit(c, id, input, imgProfile)
+	res, err := uc.Edit(c, id, input, imgProfile, imgKtp)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
@@ -201,6 +203,34 @@ func (h *WebCustomerHandler) Add(ctx *fiber.Ctx) error {
 	imgProfile, _ := ctx.FormFile("img_profile")
 	uc := usecase.WebCustomerUC{ContractUC: h.ContractUC}
 	res, err := uc.Add(c, input, imgProfile)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+// ReportSelect ...
+func (h *WebCustomerHandler) ReportSelect(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.WebCustomerReportParameter{
+		RegionGroupID:         ctx.Query("region_group_id"),
+		RegionID:              ctx.Query("region_id"),
+		BranchArea:            ctx.Query("branch_area"),
+		CustomerTypeID:        ctx.Query("customer_type_id"),
+		BranchIDs:             ctx.Query("branch_ids"),
+		CustomerLevelID:       ctx.Query("customer_level_id"),
+		CustomerProfileStatus: ctx.Query("customer_profile_status"),
+		AdminUserID:           ctx.Query("admin_user_id"),
+	}
+	uc := usecase.WebCustomerUC{ContractUC: h.ContractUC}
+	res, err := uc.ReportSelect(c, parameter)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, errors.New(helper.InvalidGender), http.StatusBadRequest)
+	}
+
+	if res == nil {
+		err = errors.New("There is no customer with this filter")
+		return h.SendResponse(ctx, res, nil, err, 0)
+	}
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }

@@ -27,6 +27,7 @@ func (route WebPromoRoutes) RegisterRoute() {
 	r.Get("/select", handler.SelectAll)
 	r.Get("/id/:id", handler.FindByID)
 	r.Post("/", handler.Add)
+	r.Put("/id/:id", handler.Edit)
 	r.Delete("/id/:id", handler.Delete)
 
 }

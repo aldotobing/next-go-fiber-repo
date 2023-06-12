@@ -161,10 +161,10 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 			harga := strings.ReplaceAll(number.FormatCurrency(bayar, "IDR", ".", "", 0), "Rp", "")
 			msgtitle := "Checkout " + *order.DocumentNo
 			msgsalesmanheader := `*Kepada Yang Terhormat* \n\n *` + *useraccount.CustomerSalesmanName + `*`
-			msgsalesmanheader += `\n\n*NO ORDERAN ` + *order.DocumentNo + ` pada tanggal ` + dateString + ` oleh Toko : (` + *useraccount.CustomerName + `) telah berhasil dan akan diproses*`
+			msgsalesmanheader += `\n\n*NO ORDERAN ` + *order.DocumentNo + ` pada tanggal ` + dateString + ` oleh Toko : (` + *useraccount.CustomerName + `(` + *useraccount.Code + `)) telah berhasil dan akan diproses*`
 
 			msgcustomerheader := `*Kepada Yang Terhormat* \n\n *` + *useraccount.Code + ` - ` + *useraccount.CustomerName + `*`
-			msgcustomerheader += `\n\n*NO ORDERAN ` + *order.DocumentNo + ` anda pada tanggal ` + dateString + ` oleh Toko : (` + *useraccount.CustomerName + `) telah berhasil dan akan diproses*`
+			msgcustomerheader += `\n\n*NO ORDERAN ` + *order.DocumentNo + ` anda pada tanggal ` + dateString + ` oleh Toko : (` + *useraccount.CustomerName + `(` + *useraccount.Code + `)) telah berhasil dan akan diproses*`
 
 			msgbody := `\n\n*Berikut merupakan rincian pesanan anda:*`
 			orderline, errline := orderlinerepo.SelectAll(c, models.CustomerOrderLineParameter{
@@ -210,11 +210,11 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 
 			}
 			if useraccount.CustomerPhone != nil && *useraccount.CustomerPhone != "" {
-				msgcustomer := msgcustomerheader + msgbody
-				senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.CustomerPhone, msgcustomer)
-				if senDwaMessage != nil {
-					fmt.Println("sukses")
-				}
+				// msgcustomer := msgcustomerheader + msgbody
+				// senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.CustomerPhone, msgcustomer)
+				// if senDwaMessage != nil {
+				// 	fmt.Println("sukses")
+				// }
 				if useraccount.CustomerSalesmanID != nil {
 					salesmannRepo := repository.NewSalesmanRepository(uc.DB)
 					customerSales, errcustsales := salesmannRepo.FindByID(c, models.SalesmanParameter{ID: *useraccount.CustomerSalesmanID})
@@ -331,13 +331,13 @@ func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter mode
 						}
 
 						if useraccount.CustomerPhone != nil && *useraccount.CustomerPhone != "" {
-							if messageTemplate != "" {
-								senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.CustomerPhone, messageTemplate)
-								if senDwaMessage != nil {
-									fmt.Println("sukses")
-								}
+							// if messageTemplate != "" {
+							// 	senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.CustomerPhone, messageTemplate)
+							// 	if senDwaMessage != nil {
+							// 		fmt.Println("sukses")
+							// 	}
 
-							}
+							// }
 
 							if useraccount.CustomerSalesmanID != nil {
 								salesmannRepo := repository.NewSalesmanRepository(uc.DB)

@@ -11,6 +11,8 @@ import (
 // IWebRegionAreaRepository ...
 type IWebRegionAreaRepository interface {
 	SelectAll(c context.Context, parameter models.WebRegionAreaParameter) ([]models.WebRegionArea, error)
+	SelectAllGroupByRegion(c context.Context) (data []models.WebRegionArea, err error)
+	SelectByRegionGroupID(c context.Context, groupID string) (data []models.WebRegionArea, err error)
 	FindAll(ctx context.Context, parameter models.WebRegionAreaParameter) ([]models.WebRegionArea, int, error)
 	FindByID(c context.Context, parameter models.WebRegionAreaParameter) (models.WebRegionArea, error)
 }
@@ -66,6 +68,61 @@ func (repository WebRegionAreaRepository) SelectAll(c context.Context, parameter
 	for rows.Next() {
 
 		temp, err := repository.scanRows(rows)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
+	}
+
+	return data, err
+}
+
+// SelectAllGroupByRegion ...
+func (repository WebRegionAreaRepository) SelectAllGroupByRegion(c context.Context) (data []models.WebRegionArea, err error) {
+
+	statement := `SELECT def.group_id, def.group_name
+		FROM region def ` +
+		models.WebRegionAreaWhereStatement +
+		`GROUP BY def.group_id, def.group_name ` +
+		`ORDER BY def.group_id asc`
+	rows, err := repository.DB.QueryContext(c, statement)
+	if err != nil {
+		return data, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var temp models.WebRegionArea
+		err := rows.Scan(&temp.GroupID, &temp.GroupName)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
+	}
+
+	return data, err
+}
+
+// SelectByRegionGroupID ...
+func (repo WebRegionAreaRepository) SelectByRegionGroupID(c context.Context, groupID string) (data []models.WebRegionArea, err error) {
+	var whereStatement string
+	if groupID != "" && groupID != "0" {
+		whereStatement += ` AND def.group_id='` + groupID + `' `
+	}
+	statement := `SELECT def.id, def._name, def.group_id, def.group_name 
+		FROM region def ` +
+		models.WebRegionAreaWhereStatement + whereStatement +
+		`GROUP BY def.id ` +
+		`ORDER BY def.id asc`
+	rows, err := repo.DB.QueryContext(c, statement)
+	if err != nil {
+		return data, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var temp models.WebRegionArea
+		err := rows.Scan(&temp.ID, &temp.Name, &temp.GroupID, &temp.GroupName)
 		if err != nil {
 			return data, err
 		}

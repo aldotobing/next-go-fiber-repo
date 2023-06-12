@@ -16,6 +16,7 @@ type IWebCustomerRepository interface {
 	FindByID(c context.Context, parameter models.WebCustomerParameter) (models.WebCustomer, error)
 	Edit(c context.Context, model *models.WebCustomer) (*string, error)
 	Add(c context.Context, model *models.WebCustomer) (*string, error)
+	ReportSelect(c context.Context, parameter models.WebCustomerReportParameter) ([]models.WebCustomer, error)
 }
 
 // CustomerRepository ...
@@ -81,6 +82,64 @@ func (repository WebCustomerRepository) scanRows(rows *sql.Rows) (res models.Web
 		&res.CustomerLevelID,
 		&res.CustomerUserID,
 		&res.CustomerUserName,
+		&res.ModifiedBy,
+		&res.ModifiedDate,
+	)
+	if err != nil {
+
+		return res, err
+	}
+
+	return res, nil
+}
+
+// scanRowsReport
+func (repository WebCustomerRepository) scanRowsReport(rows *sql.Rows) (res models.WebCustomer, err error) {
+	err = rows.Scan(
+		&res.ID,
+		&res.Code,
+		&res.CustomerName,
+		&res.CustomerCpName,
+		&res.CustomerAddress,
+		&res.CustomerProfilePicture,
+		&res.CustomerEmail,
+		&res.CustomerBirthDate,
+		&res.CustomerReligion,
+		&res.CustomerGender,
+		&res.CustomerActiveStatus,
+		&res.CustomerLatitude,
+		&res.CustomerLongitude,
+		&res.CustomerSalesCycle,
+		&res.CustomerTypeId,
+		&res.CustomerPhone,
+		&res.CustomerTaxCalcMethod,
+		&res.CustomerBranchID,
+		&res.CustomerSalesmanID,
+		&res.CustomerPhotoKtp,
+		&res.CustomerNik,
+		&res.CustomerLevelID,
+		&res.CustomerUserID,
+		&res.ModifiedDate,
+		&res.CreatedDate,
+		&res.RegionID,
+		&res.RegionGroupID,
+		&res.CustomerBranchCode,
+		&res.CustomerBranchName,
+		&res.CustomerBranchArea,
+		&res.CustomerBranchAddress,
+		&res.CustomerBranchLat,
+		&res.CustomerBranchLng,
+		&res.CustomerBranchPicPhoneNo,
+		&res.CustomerRegionCode,
+		&res.CustomerRegionName,
+		&res.CustomerRegionGroup,
+		&res.CustomerProvinceID,
+		&res.CustomerCityID,
+		&res.CustomerDistrictID,
+		&res.CustomerSubdistrictID,
+		&res.CustomerSalesmanID,
+		&res.ModifiedBy,
+		&res.CustomerUserName,
 	)
 	if err != nil {
 
@@ -143,6 +202,8 @@ func (repository WebCustomerRepository) scanRow(row *sql.Row) (res models.WebCus
 		&res.CustomerLevelID,
 		&res.CustomerUserID,
 		&res.CustomerUserName,
+		&res.ModifiedBy,
+		&res.ModifiedDate,
 	)
 	if err != nil {
 		return res, err
@@ -165,6 +226,10 @@ func (repository WebCustomerRepository) SelectAll(c context.Context, parameter m
 
 	if parameter.BranchId != "" {
 		conditionString += ` AND C.BRANCH_ID= ` + parameter.BranchId
+	}
+
+	if parameter.PhoneNumber != "" {
+		conditionString += ` AND c.customer_phone LIKE '` + parameter.PhoneNumber + `'`
 	}
 
 	statement := models.WebCustomerSelectStatement + ` ` + models.WebCustomerWhereStatement +
@@ -205,6 +270,10 @@ func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter m
 
 	if parameter.BranchId != "" {
 		conditionString += ` AND C.BRANCH_ID= ` + parameter.BranchId
+	}
+
+	if parameter.PhoneNumber != "" {
+		conditionString += ` AND c.customer_phone LIKE '%` + parameter.PhoneNumber + `%'`
 	}
 
 	query := models.WebCustomerSelectStatement + ` ` + models.WebCustomerWhereStatement + ` ` + conditionString + `
@@ -262,8 +331,13 @@ func (repository WebCustomerRepository) Edit(c context.Context, model *models.We
 		customer_gender = $8,
 		customer_code = $9,
 		customer_email = $10,
-		customer_birthdate = $11
-	WHERE id = $12
+		customer_birthdate = $11,
+		customer_profile_picture = $12,
+		customer_photo_ktp = $13,
+		customer_cp_name = $14,
+		modified_date = now(),
+		modified_by = $15
+	WHERE id = $16
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		model.CustomerName,
@@ -277,6 +351,10 @@ func (repository WebCustomerRepository) Edit(c context.Context, model *models.We
 		model.Code,
 		model.CustomerEmail,
 		model.CustomerBirthDate,
+		model.CustomerProfilePicture,
+		model.CustomerPhotoKtp,
+		model.CustomerCpName,
+		model.UserID,
 		model.ID).Scan(&res)
 
 	if err != nil {
@@ -316,4 +394,56 @@ func (repository WebCustomerRepository) Add(c context.Context, model *models.Web
 		return res, err
 	}
 	return res, err
+}
+
+// ReportSelect ...
+func (repository WebCustomerRepository) ReportSelect(c context.Context, parameter models.WebCustomerReportParameter) (data []models.WebCustomer, err error) {
+	conditionString := ``
+
+	if parameter.RegionID != "" {
+		conditionString += ` AND region_id = '` + parameter.RegionID + `'`
+	}
+
+	if parameter.RegionGroupID != "" {
+		conditionString += ` AND region_group_id = '` + parameter.RegionGroupID + `'`
+	}
+
+	if parameter.BranchArea != "" {
+		conditionString += ` AND LOWER(branch_area) LIKE LOWER('%` + parameter.BranchArea + `%')`
+	}
+
+	if parameter.CustomerTypeID != "" {
+		conditionString += ` AND cust_type_id = '` + parameter.CustomerTypeID + `'`
+	}
+
+	if parameter.BranchIDs != "" {
+		conditionString += ` AND c_branch_id IN (` + parameter.BranchIDs + `)`
+	}
+
+	if parameter.CustomerLevelID != "" {
+		conditionString += ` AND CUSTOMER_LEVEL_ID = '` + parameter.CustomerLevelID + `'`
+	}
+
+	if parameter.AdminUserID != "" {
+		conditionString += ` AND C_BRANCH_ID IN (SELECT BRANCH_ID FROM USER_BRANCH UB WHERE UB.USER_ID = ` + parameter.AdminUserID + `)`
+	}
+
+	statement := `select * from v_customer_report WHERE customer_created_date IS NOT NULL ` + conditionString
+	rows, err := repository.DB.QueryContext(c, statement)
+
+	if err != nil {
+		return data, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+
+		temp, err := repository.scanRowsReport(rows)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
+	}
+
+	return data, err
 }

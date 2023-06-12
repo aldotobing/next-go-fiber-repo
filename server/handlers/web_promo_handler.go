@@ -99,6 +99,33 @@ func (h *WebPromoHandler) Add(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
+// Edit ...
+func (h *WebPromoHandler) Edit(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	id := ctx.Params("id")
+	if id == "" {
+		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
+	}
+
+	input := new(requests.WebPromoRequest)
+	err := json.Unmarshal([]byte(ctx.FormValue("form_data")), input)
+	if err := ctx.BodyParser(input); err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+	if err := h.Validator.Struct(input); err != nil {
+		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
+		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+	}
+
+	imgBanner, _ := ctx.FormFile("img_banner")
+
+	uc := usecase.WebPromoUC{ContractUC: h.ContractUC}
+	res, err := uc.Edit(c, input, imgBanner, id)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
 // Delete ...
 func (h *WebPromoHandler) Delete(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)

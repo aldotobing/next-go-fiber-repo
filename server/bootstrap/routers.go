@@ -268,6 +268,9 @@ func (boot Bootstrap) RegisterRouters() {
 	TicketDokterRoutes := routers.TicketDokterRoutes{RouterGroup: apiV1, Handler: handler}
 	TicketDokterRoutes.RegisterRoute()
 
+	ticketDokterChatRoutes := routers.TicketDokterChatRoutes{RouterGroup: apiV1, Handler: handler}
+	ticketDokterChatRoutes.RegisterRoute()
+
 	UserCheckinActivityRoute := routers.UserCheckinActivityRoutes{RouterGroup: apiV1, Handler: handler}
 	UserCheckinActivityRoute.RegisterRoute()
 

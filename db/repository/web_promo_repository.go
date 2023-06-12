@@ -14,6 +14,7 @@ type IWebPromo interface {
 	SelectAll(c context.Context, parameter models.WebPromoParameter) ([]models.WebPromo, error)
 	FindAll(ctx context.Context, parameter models.WebPromoParameter) ([]models.WebPromo, int, error)
 	Add(c context.Context, parameter *models.WebPromo) (*string, error)
+	Edit(c context.Context, parameter *models.WebPromo) (*string, error)
 	Delete(c context.Context, id string) (string, error)
 	FindByID(c context.Context, parameter models.WebPromoParameter) (models.WebPromo, error)
 	// 	Edit(c context.Context, model *models.WebPromo) (*string, error)
@@ -154,30 +155,32 @@ func (repository WebPromo) FindByID(c context.Context, parameter models.WebPromo
 	return data, nil
 }
 
-// // Edit ...
-// func (repository WebPromo) Edit(c context.Context, model *models.WebPromo) (res *string, err error) {
-// 	statement := `UPDATE customer SET
-// 	customer_name = $1,
-// 	customer_address = $2,
-// 	customer_phone = $3,
-// 	customer_email = $4,
-// 	customer_cp_name = $5,
-// 	customer_profile_picture = $6
-// 	WHERE id = $7
-// 	RETURNING id`
-// 	err = repository.DB.QueryRowContext(c, statement,
-// 		model.WebPromoName,
-// 		model.WebPromoAddress,
-// 		model.WebPromoPhone,
-// 		model.WebPromoEmail,
-// 		model.WebPromoCpName,
-// 		model.WebPromoProfilePicture,
-// 		model.ID).Scan(&res)
-// 	if err != nil {
-// 		return res, err
-// 	}
-// 	return res, err
-// }
+// Edit ...
+func (repository WebPromo) Edit(c context.Context, model *models.WebPromo) (res *string, err error) {
+	statement := `UPDATE promo SET
+	_name = $1,
+	description = $2,
+	url_banner = $3,
+	show_in_app = $4,
+	start_date = $5,
+	end_date = $6,
+	active = $7
+	WHERE id = $8
+	RETURNING id`
+	err = repository.DB.QueryRowContext(c, statement,
+		model.PromoName,
+		model.PromoDescription,
+		model.PromoUrlBanner,
+		model.ShowInApp,
+		model.StartDate,
+		model.EndDate,
+		model.Active,
+		model.ID).Scan(&res)
+	if err != nil {
+		return res, err
+	}
+	return res, err
+}
 
 func (repository WebPromo) Add(c context.Context, model *models.WebPromo) (res *string, err error) {
 

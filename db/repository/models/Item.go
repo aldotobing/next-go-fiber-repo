@@ -41,6 +41,7 @@ type ItemParameter struct {
 	ItemCategoryId     string `json:"item_category_id"`
 	ItemCategoryName   string `json:"item_category_name"`
 	PriceListVersionId string `json:"price_list_version_id"`
+	PriceListId        string `json:"price_list_id"`
 	UomID              string `json:"uom_id"`
 	CustomerTypeId     string `json:"customer_type_id"`
 	Search             string `json:"search"`
@@ -132,7 +133,7 @@ var (
 	    WHERE def.created_date IS NOT NULL
 		AND DEF.ACTIVE = 1
 		AND DEF.HIDE = 0
-		AND (LOWER(def."_name") LIKE LOWER($2))
+		AND (LOWER(def."_name") LIKE LOWER($1))
 		group by def.id 
 		order by DEF.ID asc
 	)   
@@ -148,11 +149,11 @@ var (
 	FROM ITEM DEF
 	LEFT JOIN ITEM_CATEGORY IC ON IC.ID = DEF.ITEM_CATEGORY_ID
 	left JOIN ITEM_UOM_LINE IUL ON IUL.ITEM_ID = DEF.ID
-	left join item_price ip on ip.item_id = iul.item_id and ip.uom_id = iul.uom_id and ip.price_list_version_id=$1
+	left join item_price ip on ip.item_id = iul.item_id and ip.uom_id = iul.uom_id
 	left JOIN UOM U ON U.ID = IP.UOM_ID
 	left join TEMP_DATA TD on TD.ID = DEF.ID
 	WHERE def.created_date IS NOT NULL
 		AND DEF.ACTIVE = 1
 		AND DEF.HIDE = 0
-		AND (LOWER(def."_name") LIKE LOWER($2)) `
+		AND (LOWER(def."_name") LIKE LOWER($1)) `
 )

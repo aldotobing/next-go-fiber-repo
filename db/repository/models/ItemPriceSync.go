@@ -7,8 +7,8 @@ type ItemPriceSync struct {
 	PriceListCode        *string `json:"price_list_code"`
 	PriceListVersionID   *string `json:"price_list_version_id"`
 	PriceListVersionCode *string `json:"price_list_version_desc"`
-	ItemId               *string `json:"item_id"`
-	UomId                *string `json:"uom_id"`
+	ItemCode             *string `json:"item_code"`
+	UomCode              *string `json:"uom_code"`
 	Price                *string `json:"price"`
 	CreatedDate          *string `json:"created_date"`
 	ModifiedDate         *string `json:"modified_date"`
@@ -21,8 +21,8 @@ type ItemPriceSyncParameter struct {
 	PriceListVersionId   string `json:"price_list_version_id"`
 	PriceListVersionCode string `json:"price_list_version_desc"`
 	PriceListCode        string `json:"price_list_code"`
-	ItemId               string `json:"item_id"`
-	UomId                string `json:"uom_id"`
+	ItemCode             string `json:"item_code"`
+	UomCode              string `json:"uom_code"`
 	Search               string `json:"search"`
 	Page                 int    `json:"page"`
 	Offset               int    `json:"offset"`
@@ -39,8 +39,8 @@ var (
     def.id::varchar as item_price_id
     , plv.id::varchar as price_list_version_id
     , plv.description as price_list_version_desc
-    , def.item_id::varchar as item_id
-    , def.uom_id::varchar as uom_id
+    , i.code::varchar as item_code
+    , u.code::varchar as uom_code
     , def.price::varchar as price
     , to_char(def.created_date,'YYYY-MM-DD HH24:mi:ss')  as created_date
     , to_char(def.modified_date,'YYYY-MM-DD HH24:mi:ss')  as modified_date

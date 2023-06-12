@@ -101,7 +101,7 @@ AND IP.ITEM_ID = IUL.ITEM_ID`
 		I.DESCRIPTION,
 		I.ITEM_PICTURE AS ITEM_PICTURE,
 		array_to_string((array_agg(distinct ic.id || '#sep#' ||ic."_name")),'|') AS category,
-		array_to_string((array_agg(U.ID || '#sep#' || u."_name" || '#sep#' || IUL.conversion::text || '#sep#' || ip.price::text || '#sep#' || ip.price_list_version_id || '#sep#' || IUL.visibility order by iul."conversion" asc)),'|') AS additional_data,
+		array_to_string((array_agg(U.ID || '#sep#' || u."_name" || '#sep#' || IUL.conversion::text || '#sep#' || ip.price::text || '#sep#' || ip.price_list_version_id || '#sep#' || IUL.visibility || '#sep#' || ip.created_date order by iul."conversion" asc)),'|') AS additional_data,
         td.MULTIPLY_DATA
 	FROM PRODUCT_FOCUS DEF
 	JOIN ITEM I ON I.ID = DEF.ITEM_ID

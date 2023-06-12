@@ -18,6 +18,7 @@ type MpProvinceDataBreakDown struct {
 // ProvinceParameter ...
 type ProvinceParameter struct {
 	ID       string `json:"id_province"`
+	IDs      string `json:"ids_province"`
 	Code     string `json:"code_province"`
 	Name     string `json:"name_province"`
 	IdNation string `json:"id_nation"`
@@ -34,7 +35,7 @@ var (
 	ProvinceOrderBy = []string{"def.id", "def.code", "def._name", "def.created_date"}
 	// ProvinceOrderByrByString ...
 	ProvinceOrderByrByString = []string{
-		"def.id", "def._name",
+		"def._name",
 	}
 
 	// ProvinceSelectStatement ...

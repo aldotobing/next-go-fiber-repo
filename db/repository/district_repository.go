@@ -62,6 +62,10 @@ func (repository DistrictRepository) SelectAll(c context.Context, parameter mode
 		conditionString += ` AND def.city_id = '` + parameter.CityID + `'`
 	}
 
+	if parameter.IDs != "" {
+		conditionString += ` AND def.id in (` + parameter.IDs + `)`
+	}
+
 	statement := models.DistrictSelectStatement + ` ` + models.DistrictWhereStatement +
 		` AND (LOWER(def."_name") LIKE $1  ) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")

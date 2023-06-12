@@ -31,6 +31,7 @@ func (repository SalesmanRepository) scanRows(rows *sql.Rows) (res models.Salesm
 		&res.ID,
 		&res.Name,
 		&res.PhoneNo,
+		&res.Code,
 	)
 	if err != nil {
 
@@ -46,6 +47,7 @@ func (repository SalesmanRepository) scanRow(row *sql.Row) (res models.Salesman,
 		&res.ID,
 		&res.Name,
 		&res.PhoneNo,
+		&res.Code,
 	)
 
 	if err != nil {
@@ -61,6 +63,10 @@ func (repository SalesmanRepository) SelectAll(c context.Context, parameter mode
 
 	if parameter.UserID != "" {
 		conditionString += " and def.branch_id in (select branch_id from user_branch where user_id = " + parameter.UserID + ")"
+	}
+
+	if parameter.IDs != "" {
+		conditionString += ` AND DEF.ID IN(` + parameter.IDs + `)`
 	}
 
 	statement := models.SalesmanSelectStatement + ` ` + models.SalesmanWhereStatement +
