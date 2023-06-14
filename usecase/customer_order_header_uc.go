@@ -430,3 +430,16 @@ func (uc CustomerOrderHeaderUC) AppsFindByID(c context.Context, parameter models
 
 	return res, err
 }
+
+// FindByID ...
+func (uc CustomerOrderHeaderUC) ReUpdateModifiedDate(c context.Context) (res *string, err error) {
+	repo := repository.NewCustomerOrderHeaderRepository(uc.DB)
+	res, err = repo.ReUpdateModifiedDate(c)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+	// uc.BuildBody(&res)
+
+	return res, err
+}

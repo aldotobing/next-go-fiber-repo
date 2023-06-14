@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/joho/godotenv"
@@ -144,6 +145,20 @@ func SetCronJobs() {
 		url := envConfig["APP_BASE_URL"] + "/v1/api/sync/master/item_price"
 		client := &http.Client{}
 		req, _ := http.NewRequest("GET", url, nil)
+		req.Header.Set("Authorization", "Basic Og==")
+		res, _ := client.Do(req)
+
+		if res != nil {
+			// fmt.Println("error")
+		}
+
+	})
+
+	c.AddFunc("CRON_TZ=Asia/Jakarta 15 7 * * *", func() {
+		fmt.Println("execute procedure reupdate co modifieddate")
+		url := envConfig["APP_BASE_URL"] + "/v1/api/apps/customerorder/reupdate"
+		client := &http.Client{}
+		req, _ := http.NewRequest("PUT", url, nil)
 		req.Header.Set("Authorization", "Basic Og==")
 		res, _ := client.Do(req)
 
