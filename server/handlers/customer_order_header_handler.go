@@ -101,6 +101,19 @@ func (h *CustomerOrderHeaderHandler) FindByID(ctx *fiber.Ctx) error {
 	uc := usecase.CustomerOrderHeaderUC{ContractUC: h.ContractUC}
 	res, err := uc.FindByID(c, parameter)
 
+	lineuc := usecase.CustomerOrderLineUC{ContractUC: h.ContractUC}
+	lineparameter := models.CustomerOrderLineParameter{
+		HeaderID: *res.ID,
+		Search:   ctx.Query("search"),
+		By:       "def.created_date",
+		Sort:     ctx.Query("sort"),
+	}
+	listLine, _ := lineuc.SelectAll(c, lineparameter)
+
+	if listLine != nil {
+		res.ListLine = listLine
+	}
+
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
