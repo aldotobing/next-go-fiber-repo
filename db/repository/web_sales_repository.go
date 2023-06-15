@@ -112,6 +112,10 @@ func (repository WebSalesmanRepository) FindAll(ctx context.Context, parameter m
 		conditionString += ` AND def.branch_id = '` + parameter.BranchID + `'`
 	}
 
+	if parameter.UserId != "" {
+		conditionString += ` AND def.branch_id in ( select branch_id from user_branch where user_id = ` + parameter.UserId + `)`
+	}
+
 	query := models.WebSalesmanSelectStatement + ` ` + models.WebSalesmanWhereStatement + ` ` + conditionString + `
 		AND (LOWER(def."salesman_name") LIKE $1 or LOWER(def."salesman_code") LIKE $1 ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
 	fmt.Println(query)
