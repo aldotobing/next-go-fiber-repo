@@ -315,3 +315,28 @@ func (h *DashboardWebHandler) GetOmzetValueByCustomerID(ctx *fiber.Ctx) error {
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
+
+func (h *DashboardWebHandler) GetTrackingInvoiceData(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.DashboardWebBranchParameter{
+		By:              ctx.Query("by"),
+		Sort:            ctx.Query("sort"),
+		StartDate:       ctx.Query("start_date"),
+		EndDate:         ctx.Query("end_date"),
+		RegionGroupID:   ctx.Query("region_group_id"),
+		RegionID:        ctx.Query("region_id"),
+		BranchID:        ctx.Query("branch_id"),
+		BranchArea:      ctx.Query("branch_area"),
+		CustomerLevelID: ctx.Query("customer_level_id"),
+		CustomerTypeID:  ctx.Query("customer_type_id"),
+	}
+
+	uc := usecase.DashboardWebUC{ContractUC: h.ContractUC}
+	res, err := uc.GetTrackingInvoiceData(c, parameter)
+	if err != nil {
+		h.SendResponse(ctx, res, nil, err, 0)
+	}
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}

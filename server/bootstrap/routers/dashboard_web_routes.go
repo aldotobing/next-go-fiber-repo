@@ -39,4 +39,6 @@ func (route DashboardWebRoutes) RegisterRoute() {
 	r.Get("/omzet/region", handler.GetOmzetValueByRegionID)
 	r.Get("/omzet/branch", handler.GetOmzetValueByBranchID)
 	r.Get("/omzet/customer", handler.GetOmzetValueByCustomerID)
+
+	r.Get("/tracking/invoice", handler.GetTrackingInvoiceData)
 }

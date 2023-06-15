@@ -152,8 +152,13 @@ type DashboardWebBranchParameter struct {
 	ItemID          string `json:"item_id"`
 	ItemCategoryID  string `json:"item_category_id"`
 	GroupID         string `json:"group_id"`
-	ItemIDs         string `json:"item_id"`
-	ItemCategoryIDs string `json:"item_category_id"`
+	ItemIDs         string `json:"item_ids"`
+	ItemCategoryIDs string `json:"item_category_ids"`
+	RegionGroupID   string `json:"region_group_id"`
+	RegionID        string `json:"region_id"`
+	CustomerLevelID string `json:"customer_level_id"`
+	CustomerTypeID  string `json:"customer_type_id"`
+	BranchArea      string `json:"branch_area"`
 }
 
 var (
@@ -258,7 +263,7 @@ var (
 	DashboardWebBranchDetailSelectStatement = ` select * from os_fetch_dashborad_branchcustomerdata($1::integer,$2,$3,null,null,null)
 	   `
 
-	DashboardWebReportBranchDetailSelectStatement = ` select * from os_fetch_dashborad_branchcustomerdata2($1::integer,$2,$3,null,null,null)
+	DashboardWebReportBranchDetailSelectStatement = ` select * from os_fetch_dashborad_branchcustomerdata2($1::varchar,$2,$3,null,null,null)
 	   `
 
 	DashboardWebBranchDetailSelectWithUserIDStatement = ` select * from os_fetch_dashborad_customerdata_using_user_id($1::integer,$2,$3,null,null,null)
