@@ -350,7 +350,7 @@ func (repository DashboardWebRepository) GetAllBranchDataWithUserID(ctx context.
 		select count(*), cust_bill_to_id
 		from sales_order_header 
 		where transaction_date between ` + dateStartStatement + ` and ` + dateEndStatement + ` 
-			and lower(document_no) like '%oso%' 
+			and lower(document_no) like 'oso%' 
 			and status='submitted' 
 		group by cust_bill_to_id
 	), customer_repeat_order_toko as(
@@ -358,20 +358,20 @@ func (repository DashboardWebRepository) GetAllBranchDataWithUserID(ctx context.
 		from sales_invoice_header sih
 		join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
 		where sih.transaction_date between ` + dateStartStatement + ` and ` + dateEndStatement + `  
-				and lower(sih.transaction_source_document_no) like '%co%' 
+				and lower(sih.transaction_source_document_no) like 'co%' 
 				and coh.status in ('submitted','finish')
 		group by sih.cust_bill_to_id
 	), customer_total_transaction as (
 		select count(*), cust_bill_to_id
 		from sales_order_header 
 		where transaction_date between ` + dateStartStatement + ` and ` + dateEndStatement + ` 
-			and lower(document_no) like '%oso%' 
+			and lower(document_no) like 'oso%' 
 		group by cust_bill_to_id
 	), customer_total_invoice as (
 		select count(*), sih.cust_bill_to_id
 		from sales_invoice_header sih
 		join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
-		where lower(sih.transaction_source_document_no) like '%co%'	and coh.status in ('submitted','finish')	
+		where lower(sih.transaction_source_document_no) like 'co%'	and coh.status in ('submitted','finish')	
 			and sih.transaction_date between  ` + dateStartStatement + ` and ` + dateEndStatement + `
 		group by sih.cust_bill_to_id
 	), customer_total_check_in as (
@@ -383,7 +383,7 @@ func (repository DashboardWebRepository) GetAllBranchDataWithUserID(ctx context.
 		select count(*), sih.cust_bill_to_id
 		from sales_invoice_header sih
 		join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
-		where lower(sih.transaction_source_document_no) like '%co%'
+		where lower(sih.transaction_source_document_no) like 'co%'
 			and coh.status in ('submitted','finish')	
 			and sih.transaction_date between ` + dateStartStatement + ` and ` + dateEndStatement + ` 
 		group by sih.cust_bill_to_id
@@ -402,8 +402,8 @@ func (repository DashboardWebRepository) GetAllBranchDataWithUserID(ctx context.
 		coalesce(sum(cti.count), 0) as total_invoice,
 		coalesce(sum(ctci.count), 0) as total_check_id,
 		sum(case when cao.count >= 1 then 1 else 0 end) as aktif_outlet,
-		count(distinct(case when us.fcm_token is not null and length(trim(us.fcm_token))>0 then us.id end)) as total_outlet,
-		count(distinct(def.user_id)) as total_outlet_all,
+		count(distinct(case when length(trim(us.fcm_token))>0 and us.fcm_token is not null then us.id end)) as total_outlet,
+		count(distinct(case when def.show_in_apps = 1 and def.created_date IS not null then def.user_id end )) as total_outlet_all,
 		coalesce(sum(ru.count),0) as registered_user
 	from customer def
 		left join branch b on b.id = def.branch_id
@@ -416,8 +416,7 @@ func (repository DashboardWebRepository) GetAllBranchDataWithUserID(ctx context.
 		left join customer_total_check_in ctci on ctci.user_id = def.user_id
 		left join customer_aktif_outlet cao on cao.cust_bill_to_id = def.id
 		left join registered_user ru on ru.id = def.user_id
-	WHERE def.created_date IS not NULL and def.user_id is not null
-	AND (case when ` + parameter.UserID + ` != 0
+	WHERE (case when ` + parameter.UserID + ` != 0
 		then 
 			def.branch_id in(
 				select ub.branch_id  
@@ -427,6 +426,8 @@ func (repository DashboardWebRepository) GetAllBranchDataWithUserID(ctx context.
 		else 
 			true = true
 		end)
+		AND def.created_date IS not NULL 
+		and def.user_id is not null
 	GROUP BY b.ID, r.id`
 	rows, err := repository.DB.Query(query)
 	if err != nil {
@@ -467,20 +468,20 @@ func (repository DashboardWebRepository) GetAllDetailCustomerDataWithUserID(ctx 
 		select count(*), cust_bill_to_id
 		from sales_order_header 
 		where transaction_date between ` + dateStartStatement + ` and ` + dateEndStatement + ` 
-			and lower(document_no) like '%oso%' 
+			and lower(document_no) like 'oso%' 
 			and status='submitted' 
 		group by cust_bill_to_id
 	), customer_total_transaction as (
 		select count(*), cust_bill_to_id
 		from sales_order_header 
 		where transaction_date between ` + dateStartStatement + ` and ` + dateEndStatement + ` 
-			and lower(document_no) like '%oso%' 
+			and lower(document_no) like 'oso%' 
 		group by cust_bill_to_id
 	), customer_total_invoice as (
 		select count(*), sih.cust_bill_to_id
 		from sales_invoice_header sih
 		join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
-		where lower(sih.transaction_source_document_no) like '%co%'	and coh.status in ('submitted','finish')	
+		where lower(sih.transaction_source_document_no) like 'co%'	and coh.status in ('submitted','finish')	
 			and sih.transaction_date between  ` + dateStartStatement + ` and ` + dateEndStatement + `
 		group by sih.cust_bill_to_id
 	), customer_total_check_in as (
@@ -492,7 +493,7 @@ func (repository DashboardWebRepository) GetAllDetailCustomerDataWithUserID(ctx 
 		select count(*), sih.cust_bill_to_id
 		from sales_invoice_header sih
 		join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
-		where lower(sih.transaction_source_document_no) like '%co%'
+		where lower(sih.transaction_source_document_no) like 'co%'
 			and coh.status in ('submitted','finish')	
 			and sih.transaction_date between ` + dateStartStatement + ` and ` + dateEndStatement + ` 
 		group by sih.cust_bill_to_id
