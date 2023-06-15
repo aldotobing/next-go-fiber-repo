@@ -23,6 +23,8 @@ type ICustomerOrderHeaderRepository interface {
 	AppsSelectAll(c context.Context, parameter models.CustomerOrderHeaderParameter) ([]models.CustomerOrderHeader, error)
 	AppsFindAll(ctx context.Context, parameter models.CustomerOrderHeaderParameter) ([]models.CustomerOrderHeader, int, error)
 	AppsFindByID(c context.Context, parameter models.CustomerOrderHeaderParameter) (models.CustomerOrderHeader, error)
+
+	ReUpdateModifiedDate(c context.Context) (*string, error)
 }
 
 // CustomerOrderHeaderRepository ...
@@ -245,6 +247,15 @@ func (repository CustomerOrderHeaderRepository) SyncVoid(c context.Context, mode
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		model.Status, model.VoidReasonCode, model.DocumentNo).Scan(&res)
+	if err != nil {
+		return res, err
+	}
+	return res, err
+}
+
+func (repository CustomerOrderHeaderRepository) ReUpdateModifiedDate(c context.Context) (res *string, err error) {
+	statement := `select update_order_mod_date from update_order_mod_date(10) `
+	err = repository.DB.QueryRowContext(c, statement).Scan(&res)
 	if err != nil {
 		return res, err
 	}

@@ -121,7 +121,8 @@ func main() {
 		Translator: translator,
 	}
 	boot.App.Use(limiter.New(limiter.Config{
-		Max:        100,
+		Max: 50,
+		// Max:	100,
 		Expiration: 1 * time.Second,
 		KeyGenerator: func(c *fiber.Ctx) string {
 			return c.IP()
@@ -129,6 +130,11 @@ func main() {
 		LimitReached: func(c *fiber.Ctx) error {
 			return c.SendStatus(fiber.StatusTooManyRequests)
 		},
+		//14-06-2023
+		SkipFailedRequests:     false,
+		SkipSuccessfulRequests: false,
+		LimiterMiddleware:      limiter.FixedWindow{},
+		//----------------
 	}))
 
 	boot.App.Use(recover.New())

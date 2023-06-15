@@ -287,3 +287,12 @@ func (h *CustomerOrderHeaderHandler) AppsFindByID(ctx *fiber.Ctx) error {
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
+
+// FindByID ...
+func (h *CustomerOrderHeaderHandler) ReUpdateDate(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+	uc := usecase.CustomerOrderHeaderUC{ContractUC: h.ContractUC}
+	res, err := uc.ReUpdateModifiedDate(c)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
