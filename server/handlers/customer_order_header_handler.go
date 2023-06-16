@@ -114,7 +114,14 @@ func (h *CustomerOrderHeaderHandler) FindByID(ctx *fiber.Ctx) error {
 		res.ListLine = listLine
 	}
 
-	return h.SendResponse(ctx, res, nil, err, 0)
+	type StructObject struct {
+		ListObjcet []models.CustomerOrderHeader `json:"list_customer_order"`
+	}
+
+	ObjcetData := new(StructObject)
+	ObjcetData.ListObjcet = append(ObjcetData.ListObjcet, res)
+
+	return h.SendResponse(ctx, ObjcetData, nil, err, 0)
 }
 
 // rest
