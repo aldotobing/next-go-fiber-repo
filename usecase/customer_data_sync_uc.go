@@ -86,7 +86,7 @@ func (uc CustomerDataSyncUC) DataSync(c context.Context, parameter models.Custom
 
 	loc, _ := time.LoadLocation("Asia/Jakarta")
 	now := time.Now().In(loc).Add(
-		time.Minute * time.Duration(-240))
+		time.Minute * time.Duration(-15))
 	strnow := now.Format(time.RFC3339)
 	parameter.DateParam = strnow
 	parameter.MysmOnly = "1"
