@@ -15,6 +15,7 @@ type DashboardWeb struct {
 	CustomerCountRepeatOrder *string                    `json:"customer_count_repeat_order"`
 	TotalActiveOutlet        *string                    `json:"total_active_outlet"`
 	TotalOutlet              *string                    `json:"total_outlet"`
+	TotalCompleteCustomer    *string                    `json:"total_complete_customer"`
 }
 
 type DashboardWebRegionDetail struct {
@@ -152,8 +153,13 @@ type DashboardWebBranchParameter struct {
 	ItemID          string `json:"item_id"`
 	ItemCategoryID  string `json:"item_category_id"`
 	GroupID         string `json:"group_id"`
-	ItemIDs         string `json:"item_id"`
-	ItemCategoryIDs string `json:"item_category_id"`
+	ItemIDs         string `json:"item_ids"`
+	ItemCategoryIDs string `json:"item_category_ids"`
+	RegionGroupID   string `json:"region_group_id"`
+	RegionID        string `json:"region_id"`
+	CustomerLevelID string `json:"customer_level_id"`
+	CustomerTypeID  string `json:"customer_type_id"`
+	BranchArea      string `json:"branch_area"`
 }
 
 var (
