@@ -69,6 +69,7 @@ func (uc DashboardWebUC) GetDataByGroupID(c context.Context, parameter models.Da
 			CustomerCountRepeatOrder: data[i].CustomerCountRepeatOrder,
 			TotalActiveOutlet:        data[i].TotalActiveOutlet,
 			TotalOutlet:              data[i].TotalOutlet,
+			TotalCompleteCustomer:    data[i].TotalCompleteCustomer,
 		})
 	}
 

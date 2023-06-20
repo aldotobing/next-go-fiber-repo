@@ -75,7 +75,7 @@ func (repository DashboardWebRepository) scanByRegionIDRows(rows *sql.Rows) (res
 		&res.TotalVisitUser, &res.TotalRepeatUser, &res.TotalOrderUser,
 		&res.TotalRegisteredUser, &res.CustomerCountRepeatOrder, &res.TotalOutlet,
 		&res.TotalActiveOutlet,
-		&res.TotalInvoice,
+		&res.TotalInvoice, &res.TotalCompleteCustomer,
 	)
 	if err != nil {
 
@@ -93,7 +93,7 @@ func (repository DashboardWebRepository) scanRegionDetailRows(rows *sql.Rows) (r
 		&res.TotalRegisteredUser, &res.TotalRepeatUser, &res.TotalOrderUser,
 		&res.TotalInvoice, &res.TotalVisitUser, &res.CustomerCountRepeatOrder,
 		&res.TotalActiveOutlet,
-		&res.TotalOutlet,
+		&res.TotalOutlet, &res.TotalCompleteCustomer,
 	)
 	if err != nil {
 
