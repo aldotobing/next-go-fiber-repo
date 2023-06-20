@@ -15,6 +15,7 @@ type DashboardWeb struct {
 	CustomerCountRepeatOrder *string                    `json:"customer_count_repeat_order"`
 	TotalActiveOutlet        *string                    `json:"total_active_outlet"`
 	TotalOutlet              *string                    `json:"total_outlet"`
+	TotalCompleteCustomer    *string                    `json:"total_complete_customer"`
 }
 
 type DashboardWebRegionDetail struct {
