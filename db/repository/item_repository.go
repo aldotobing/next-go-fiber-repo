@@ -284,7 +284,6 @@ func (repository ItemRepository) SelectAllV2(c context.Context, parameter models
 		`GROUP by def.id, td.MULTIPLY_DATA ` +
 		`ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
-	fmt.Println(statement)
 	if err != nil {
 		return
 	}
