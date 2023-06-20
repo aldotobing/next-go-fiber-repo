@@ -4,6 +4,7 @@ import (
 	"context"
 	"strconv"
 	"strings"
+	"time"
 
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -58,13 +59,17 @@ func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter) 
 		if len(additional) > 0 && additional[0] != "" {
 			// Find Lowest Price and lowest conversion
 			var lowestPrice, lowestConversion float64
+			var newestModifiedDate time.Time
 			for _, addDatum := range additional {
 				perAddDatum := strings.Split(addDatum, "#sep#")
-				price, _ := strconv.ParseFloat(perAddDatum[3], 64)
+				price, _ := strconv.ParseFloat(perAddDatum[4], 64)
 				conversion, _ := strconv.ParseFloat(perAddDatum[2], 64)
-				if price < lowestPrice || lowestPrice == 0 {
+
+				dbUpdatedDate, errParse := time.Parse("2006-01-02 15:04:05.999999", perAddDatum[3])
+				if (newestModifiedDate.Before(dbUpdatedDate) && errParse != nil) || lowestPrice == 0 {
 					lowestPrice = price
 					lowestConversion = conversion
+					newestModifiedDate = dbUpdatedDate
 				}
 			}
 

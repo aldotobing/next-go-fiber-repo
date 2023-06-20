@@ -143,7 +143,7 @@ var (
 		DEF.DESCRIPTION AS I_DESCRIPT,
 		DEF.ITEM_CATEGORY_ID AS CAT_IHalobroD,
 		array_to_string((array_agg(distinct ic."_name")),'|') AS category_name,
-		array_to_string((array_agg(U.ID || '#sep#' || u."_name" || '#sep#' || IUL.conversion::text || '#sep#' || ip.price::text || '#sep#' || ip.price_list_version_id || '#sep#' || IUL.visibility order by iul."conversion" asc)),'|') AS additional_data,
+		array_to_string((array_agg(U.ID || '#sep#' || u."_name" || '#sep#' || IUL.conversion::text || '#sep#' || ip.modified_date || '#sep#' || ip.price::text || '#sep#' || ip.price_list_version_id || '#sep#' || IUL.visibility order by iul."conversion" asc)),'|') AS additional_data,
 		td.MULTIPLY_DATA,
 		DEF.ITEM_PICTURE
 	FROM ITEM DEF
