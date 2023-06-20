@@ -523,3 +523,38 @@ func (uc DashboardWebUC) GetOmzetValueByCustomerID(c context.Context, parameter 
 
 	return res, err
 }
+
+func (uc DashboardWebUC) GetTrackingInvoiceData(c context.Context, parameter models.DashboardWebBranchParameter) (res []viewmodel.DashboardCustomerByUserID, err error) {
+	repo := repository.NewDashboardWebRepository(uc.DB)
+	data, err := repo.GetAllDetailCustomerDataWithUserID(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	for i := range data {
+		res = append(res, viewmodel.DashboardCustomerByUserID{
+			CustomerID:        data[i].CustomerID,
+			CustomerName:      data[i].CustomerName,
+			CustomerCode:      data[i].CustomerCode,
+			BranchName:        data[i].CustomerBranchName,
+			BranchCode:        data[i].CustomerBranchCode,
+			RegionName:        data[i].CustomerRegionName,
+			RegionGroupName:   data[i].CustomerRegionGroupName,
+			CustomerTypeName:  data[i].CustomerTypeName,
+			CustomerLevelName: data[i].CustomerLevelName,
+			CustomerCityName:  data[i].CustomerCityName,
+			TotalRepeatUser:   data[i].TotalRepeatUser,
+			TotalOrderUser:    data[i].TotalOrderUser,
+			TotalInvoice:      data[i].TotalInvoice,
+			TotalCheckin:      data[i].TotalCheckin,
+			TotalAktifOutlet:  data[i].TotalAktifOutlet,
+		})
+	}
+
+	if res == nil {
+		res = make([]viewmodel.DashboardCustomerByUserID, 0)
+	}
+
+	return res, err
+}
