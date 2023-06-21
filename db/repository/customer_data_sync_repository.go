@@ -113,7 +113,7 @@ func (repository CustomerDataSyncRepository) Add(c context.Context, model *model
 		(select id from salesman where partner_id =(select id from partner where code =$7)),
 		(select id from customer_level where code = $8),
 		$9,$10,
-		customer_type_id =(select code from customer_type where code = $11)
+		customer_type_id =(select id from customer_type where code = $11)
 		) RETURNING id `
 
 	var rescus string
@@ -159,7 +159,7 @@ func (repository CustomerDataSyncRepository) Edit(c context.Context, model *mode
 	salesman_id =(select id from salesman where partner_id =(select id from partner where code =$5)),
 	customer_level_id =(select id from customer_level where code = $6),
 	branch_id = $7,
-	customer_type_id =(select code from customer_type where code = $8)
+	customer_type_id =(select id from customer_type where code = $8)
 	where partner_id = (select id from partner where code = $9)
 	returning id `
 
