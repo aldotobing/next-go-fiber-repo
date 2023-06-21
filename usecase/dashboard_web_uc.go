@@ -92,6 +92,17 @@ func (uc DashboardWebUC) GetRegionDetailData(c context.Context, parameter models
 	return res, err
 }
 
+func (uc DashboardWebUC) GetUserByRegionDetailData(c context.Context, parameter models.DashboardWebRegionParameter) (res []models.DashboardWebBranchDetail, err error) {
+	repo := repository.NewDashboardWebRepository(uc.DB)
+	res, err = repo.GetUserByRegionDetailData(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	return res, err
+}
+
 func (uc DashboardWebUC) GetBranchDetailCustomerData(c context.Context, parameter models.DashboardWebBranchParameter) (res []models.DashboardWebBranchDetail, p viewmodel.PaginationVM, err error) {
 	parameter.Offset, parameter.Limit, parameter.Page, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.DashboardWebBranchDetailOrderBy, models.DashboardWebBranchDetailOrderByrByString)
 

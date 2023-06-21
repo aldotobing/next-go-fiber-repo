@@ -130,6 +130,7 @@ type DashboardWebParameter struct {
 }
 
 type DashboardWebRegionParameter struct {
+	BranchID  string `json:"branch_id"`
 	GroupID   string `json:"group_id"`
 	RegionID  string `json:"region_id"`
 	Search    string `json:"search"`
@@ -277,6 +278,9 @@ var (
 	 `
 	DashboardWebRegionDetailByRegionIDSelectStatement = `
 	select * from os_fetch_dashborad_regiongroupdetaildata_by_region_id($1::integer,$2,$3,null,null,null) `
+
+	DashboardWebCustomerDetailByRegionDetailByRegionIDSelectStatement = `
+	select * from os_fetch_dashborad_get_total_user_by_branch_id($1::integer,$2,$3) `
 
 	DashboardWebBranchDetailOrderBy = []string{"def.id", "def.customer_name"}
 	// CustomerOrderLineOrderByrByString ...

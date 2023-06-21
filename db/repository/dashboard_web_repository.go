@@ -14,6 +14,7 @@ type IDashboardWebRepository interface {
 	GetData(c context.Context, parameter models.DashboardWebParameter) ([]models.DashboardWeb, error)
 	GetDataByGroupID(c context.Context, parameter models.DashboardWebParameter) ([]models.DashboardWebRegionDetail, error)
 	GetRegionDetailData(c context.Context, parameter models.DashboardWebRegionParameter) ([]models.DashboardWebRegionDetail, error)
+	GetUserByRegionDetailData(c context.Context, parameter models.DashboardWebRegionParameter) ([]models.DashboardWebBranchDetail, error)
 	GetBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.DashboardWebBranchDetail, int, error)
 	GetAllBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.DashboardWebBranchDetail, error)
 
@@ -249,6 +250,25 @@ func (repository DashboardWebRepository) GetRegionDetailData(c context.Context, 
 	for rows.Next() {
 
 		temp, err := repository.scanRegionDetailRows(rows)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
+	}
+
+	return data, err
+}
+
+func (repository DashboardWebRepository) GetUserByRegionDetailData(c context.Context, parameter models.DashboardWebRegionParameter) (data []models.DashboardWebBranchDetail, err error) {
+	statement := models.DashboardWebCustomerDetailByRegionDetailByRegionIDSelectStatement
+	rows, err := repository.DB.QueryContext(c, statement, str.NullOrEmtyString(&parameter.BranchID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
+	if err != nil {
+		return data, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		temp, err := repository.scanBranchCustomerDetailRows(rows)
 		if err != nil {
 			return data, err
 		}

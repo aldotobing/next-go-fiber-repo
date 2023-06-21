@@ -71,6 +71,19 @@ func (h *DashboardWebHandler) GetRegionDetailData(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
+func (h *DashboardWebHandler) GetUserByRegionDetailData(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	uc := usecase.DashboardWebUC{ContractUC: h.ContractUC}
+	res, err := uc.GetUserByRegionDetailData(c, models.DashboardWebRegionParameter{
+		BranchID:  ctx.Query("branch_id"),
+		StartDate: ctx.Query("start_date"),
+		EndDate:   ctx.Query("end_date"),
+	})
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
 func (h *DashboardWebHandler) GetBranchCustomerData(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
