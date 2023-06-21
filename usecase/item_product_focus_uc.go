@@ -98,6 +98,11 @@ func (uc ItemProductFocusUC) SelectAllV2(c context.Context, parameter models.Ite
 		userData.CustomerBranchID = &customerBranchID
 	}
 
+	if userData.CustomerPriceListID == nil {
+		priceListDefault := "5"
+		userData.CustomerPriceListID = &priceListDefault
+	}
+
 	repo := repository.NewItemProductFocusRepository(uc.DB)
 	data, err := repo.SelectAllV2(c, parameter, *userData.CustomerBranchID, *userData.CustomerTypeId, *userData.CustomerPriceListID)
 	if err != nil {
