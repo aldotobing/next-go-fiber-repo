@@ -229,7 +229,7 @@ var (
 		from region r 
 		left join branch b on b.region_id = r.id
 		left join customer c on c.branch_id = b.id
-		where c.modified_date between '{START_DATE}' and '{END_DATE}'
+		where c.modified_date::date between '{START_DATE}' and '{END_DATE}'
 			and(c.customer_nik is not null or c.customer_nik != '')
 			and (c.customer_name is not null or c.customer_name != '')
 			and (c.customer_birthdate is not null)
