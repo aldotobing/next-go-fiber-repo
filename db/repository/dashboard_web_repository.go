@@ -129,7 +129,7 @@ func (repository DashboardWebRepository) scanGroupDetailWithUserIDRows(rows *sql
 		&res.CustomerRegionName, &res.CustomerRegionGroupName,
 		&res.TotalRepeatUser, &res.TotalRepeatToko, &res.TotalOrderUser,
 		&res.TotalInvoice, &res.TotalCheckin, &res.TotalAktifOutlet, &res.TotalOutlet, &res.TotalOutletAll,
-		&res.TotalRegisteredUser,
+		&res.TotalRegisteredUser, &res.CompleteCustomer,
 	)
 	if err != nil {
 
@@ -147,7 +147,7 @@ func (repository DashboardWebRepository) scanCustomerDetailWithUserIDRows(rows *
 		&res.CustomerRegionName, &res.CustomerRegionGroupName,
 		&res.CustomerTypeName, &res.CustomerLevelName, &res.CustomerCityName,
 		&res.TotalRepeatUser, &res.TotalOrderUser,
-		&res.TotalInvoice, &res.TotalCheckin, &res.TotalAktifOutlet,
+		&res.TotalInvoice, &res.TotalCheckin, &res.TotalAktifOutlet, &res.CompleteCustomer,
 	)
 	if err != nil {
 
@@ -395,6 +395,22 @@ func (repository DashboardWebRepository) GetAllBranchDataWithUserID(ctx context.
 			and first_login_time::date between ` + dateStartStatement + ` and ` + dateEndStatement + ` 
 			and length(trim(us.fcm_token))>0 
 		group by us.id
+	), dataCompleteCustomer as (
+		select b.id as branch_id,
+		count(c.id) as total_complete_customer
+		from branch b
+		left join customer c on c.branch_id = b.id
+		where c.modified_date::date between ` + dateStartStatement + ` and ` + dateEndStatement + `
+			and(c.customer_nik is not null or c.customer_nik != '')
+			and (c.customer_name is not null or c.customer_name != '')
+			and (c.customer_birthdate is not null)
+			and (c.customer_religion is not null or c.customer_religion != '')
+			and (c.customer_photo_ktp is not null or c.customer_photo_ktp != '')
+			and (c.customer_profile_picture is not null or c.customer_profile_picture != '')
+			and (c.customer_phone is not null or c.customer_phone != '')
+			and (c.customer_code is not null or c.customer_code != '')
+			and c.created_date IS not null and c.show_in_apps = 1
+		group by b.id
 	)
 	select b.id, b._name, b.branch_code, r._name, r.group_name,
 		sum(case when cro.count > 1 then 1 else 0 end) as repeat_order,
@@ -405,7 +421,8 @@ func (repository DashboardWebRepository) GetAllBranchDataWithUserID(ctx context.
 		sum(case when cao.count >= 1 then 1 else 0 end) as aktif_outlet,
 		count(distinct(case when length(trim(us.fcm_token))>0 and us.fcm_token is not null then us.id end)) as total_outlet,
 		count(distinct(case when def.show_in_apps = 1 and def.created_date IS not null then def.user_id end )) as total_outlet_all,
-		coalesce(sum(ru.count),0) as registered_user
+		coalesce(sum(ru.count),0) as registered_user,
+		coalesce(dcc.total_complete_customer,0) as total_complete_customer
 	from customer def
 		left join branch b on b.id = def.branch_id
 		left join region r on r.id = b.region_id
@@ -417,6 +434,7 @@ func (repository DashboardWebRepository) GetAllBranchDataWithUserID(ctx context.
 		left join customer_total_check_in ctci on ctci.user_id = def.user_id
 		left join customer_aktif_outlet cao on cao.cust_bill_to_id = def.id
 		left join registered_user ru on ru.id = def.user_id
+		left join dataCompleteCustomer dcc on dcc.branch_id = b.id
 	WHERE (case when ` + parameter.UserID + ` != 0
 		then 
 			def.branch_id in(
@@ -429,7 +447,7 @@ func (repository DashboardWebRepository) GetAllBranchDataWithUserID(ctx context.
 		end)
 		AND def.created_date IS not NULL 
 		and def.user_id is not null
-	GROUP BY b.ID, r.id`
+	GROUP BY b.ID, r.id, dcc.total_complete_customer`
 	rows, err := repository.DB.Query(query)
 	if err != nil {
 		return data, err
@@ -506,7 +524,19 @@ func (repository DashboardWebRepository) GetAllDetailCustomerDataWithUserID(ctx 
 		coalesce(cto.count, 0) as total_transaction ,
 		coalesce(cti.count, 0) as total_invoice,
 		coalesce(ctci.count, 0) as total_check_id,
-		case when cao.count >= 1 then 1 else 0 end as aktif_outlet
+		case when cao.count >= 1 then 1 else 0 end as aktif_outlet,
+		case when def.created_date IS not null and def.show_in_apps = 1
+				and (def.customer_nik is not null or def.customer_nik != '')
+				and (def.customer_name is not null or def.customer_name != '')
+				and (def.customer_birthdate is not null)
+				and (def.customer_religion is not null or def.customer_religion != '')
+				and (def.customer_photo_ktp is not null or def.customer_photo_ktp != '')
+				and (def.customer_profile_picture is not null or def.customer_profile_picture != '')
+				and (def.customer_phone is not null or def.customer_phone != '')
+				and (def.customer_code is not null or def.customer_code != '')
+				and def.modified_date::date between  ` + dateStartStatement + ` and ` + dateEndStatement + `
+			then 1 else 0 end
+		as status_complete_customer
 	from customer def
 		left join branch b on b.id = def.branch_id
 		left join region r on r.id = b.region_id

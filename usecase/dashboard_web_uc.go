@@ -153,20 +153,21 @@ func (uc DashboardWebUC) GetAllBranchDataWithUserID(c context.Context, parameter
 
 	for i := range data {
 		res = append(res, viewmodel.DashboardBranchByUserID{
-			BranchID:            data[i].CustomerBranchID,
-			BranchName:          data[i].CustomerBranchName,
-			BranchCode:          data[i].CustomerBranchCode,
-			RegionName:          data[i].CustomerRegionName,
-			RegionGroupName:     data[i].CustomerRegionGroupName,
-			TotalRepeatUser:     data[i].TotalRepeatUser,
-			TotalRepeatToko:     data[i].TotalRepeatToko,
-			TotalOrderUser:      data[i].TotalOrderUser,
-			TotalInvoice:        data[i].TotalInvoice,
-			TotalCheckin:        data[i].TotalCheckin,
-			TotalAktifOutlet:    data[i].TotalAktifOutlet,
-			TotalOutlet:         data[i].TotalOutlet,
-			TotalOutletAll:      data[i].TotalOutletAll,
-			TotalRegisteredUser: data[i].TotalRegisteredUser,
+			BranchID:              data[i].CustomerBranchID,
+			BranchName:            data[i].CustomerBranchName,
+			BranchCode:            data[i].CustomerBranchCode,
+			RegionName:            data[i].CustomerRegionName,
+			RegionGroupName:       data[i].CustomerRegionGroupName,
+			TotalRepeatUser:       data[i].TotalRepeatUser,
+			TotalRepeatToko:       data[i].TotalRepeatToko,
+			TotalOrderUser:        data[i].TotalOrderUser,
+			TotalInvoice:          data[i].TotalInvoice,
+			TotalCheckin:          data[i].TotalCheckin,
+			TotalAktifOutlet:      data[i].TotalAktifOutlet,
+			TotalOutlet:           data[i].TotalOutlet,
+			TotalOutletAll:        data[i].TotalOutletAll,
+			TotalRegisteredUser:   data[i].TotalRegisteredUser,
+			TotalCompleteCustomer: data[i].CompleteCustomer,
 		})
 	}
 
@@ -187,21 +188,22 @@ func (uc DashboardWebUC) GetAllDetailCustomerDataWithUserID(c context.Context, p
 
 	for i := range data {
 		res = append(res, viewmodel.DashboardCustomerByUserID{
-			CustomerID:        data[i].CustomerID,
-			CustomerName:      data[i].CustomerName,
-			CustomerCode:      data[i].CustomerCode,
-			BranchName:        data[i].CustomerBranchName,
-			BranchCode:        data[i].CustomerBranchCode,
-			RegionName:        data[i].CustomerRegionName,
-			RegionGroupName:   data[i].CustomerRegionGroupName,
-			CustomerTypeName:  data[i].CustomerTypeName,
-			CustomerLevelName: data[i].CustomerLevelName,
-			CustomerCityName:  data[i].CustomerCityName,
-			TotalRepeatUser:   data[i].TotalRepeatUser,
-			TotalOrderUser:    data[i].TotalOrderUser,
-			TotalInvoice:      data[i].TotalInvoice,
-			TotalCheckin:      data[i].TotalCheckin,
-			TotalAktifOutlet:  data[i].TotalAktifOutlet,
+			CustomerID:             data[i].CustomerID,
+			CustomerName:           data[i].CustomerName,
+			CustomerCode:           data[i].CustomerCode,
+			BranchName:             data[i].CustomerBranchName,
+			BranchCode:             data[i].CustomerBranchCode,
+			RegionName:             data[i].CustomerRegionName,
+			RegionGroupName:        data[i].CustomerRegionGroupName,
+			CustomerTypeName:       data[i].CustomerTypeName,
+			CustomerLevelName:      data[i].CustomerLevelName,
+			CustomerCityName:       data[i].CustomerCityName,
+			TotalRepeatUser:        data[i].TotalRepeatUser,
+			TotalOrderUser:         data[i].TotalOrderUser,
+			TotalInvoice:           data[i].TotalInvoice,
+			TotalCheckin:           data[i].TotalCheckin,
+			TotalAktifOutlet:       data[i].TotalAktifOutlet,
+			StatusCompleteCustomer: data[i].CompleteCustomer,
 		})
 	}
 

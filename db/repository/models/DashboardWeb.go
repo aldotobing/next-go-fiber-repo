@@ -81,6 +81,7 @@ type DashboardWebGetWithUserID struct {
 	CustomerClassName       *string `json:"customer_class_name_detail"`
 	CustomerCityName        *string `json:"customer_city_name_detail"`
 	StatusInstall           *string `json:"status_install"`
+	CompleteCustomer        *string `json:"complete_customer"`
 }
 type OmzetValueModel struct {
 	RegionID            sql.NullString `json:"region_id"`
