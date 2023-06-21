@@ -15,38 +15,40 @@ type DashboardByGroupID struct {
 }
 
 type DashboardBranchByUserID struct {
-	BranchID            *string `json:"branch_id"`
-	BranchName          *string `json:"branch_name"`
-	BranchCode          *string `json:"branch_code"`
-	RegionName          *string `json:"region_name"`
-	RegionGroupName     *string `json:"region_group_name"`
-	TotalRepeatUser     *string `json:"total_repeat_order_user_detail"`
-	TotalRepeatToko     *string `json:"customer_count_repeat_order_detail"`
-	TotalOrderUser      *string `json:"total_order_user_detail"`
-	TotalInvoice        *string `json:"total_invoice_user_detail"`
-	TotalCheckin        *string `json:"total_visit_user_detail"`
-	TotalAktifOutlet    *string `json:"total_active_outlet_detail"`
-	TotalOutlet         *string `json:"total_outlet"`
-	TotalOutletAll      *string `json:"total_outlet_all"`
-	TotalRegisteredUser *string `json:"total_registered_user_detail"`
+	BranchID              *string `json:"branch_id"`
+	BranchName            *string `json:"branch_name"`
+	BranchCode            *string `json:"branch_code"`
+	RegionName            *string `json:"region_name"`
+	RegionGroupName       *string `json:"region_group_name"`
+	TotalRepeatUser       *string `json:"total_repeat_order_user_detail"`
+	TotalRepeatToko       *string `json:"customer_count_repeat_order_detail"`
+	TotalOrderUser        *string `json:"total_order_user_detail"`
+	TotalInvoice          *string `json:"total_invoice_user_detail"`
+	TotalCheckin          *string `json:"total_visit_user_detail"`
+	TotalAktifOutlet      *string `json:"total_active_outlet_detail"`
+	TotalOutlet           *string `json:"total_outlet"`
+	TotalOutletAll        *string `json:"total_outlet_all"`
+	TotalRegisteredUser   *string `json:"total_registered_user_detail"`
+	TotalCompleteCustomer *string `json:"total_complete_customer"`
 }
 
 type DashboardCustomerByUserID struct {
-	CustomerID        *string `json:"customer_id"`
-	CustomerName      *string `json:"customer_name"`
-	CustomerCode      *string `json:"customer_code"`
-	BranchName        *string `json:"branch_name"`
-	BranchCode        *string `json:"branch_code"`
-	RegionName        *string `json:"region_name"`
-	RegionGroupName   *string `json:"region_group_name"`
-	CustomerLevelName *string `json:"customer_level_name"`
-	CustomerTypeName  *string `json:"customer_type_name"`
-	CustomerCityName  *string `json:"cutomer_city_name"`
-	TotalRepeatUser   *string `json:"total_repeat_order_user"`
-	TotalOrderUser    *string `json:"total_order_user"`
-	TotalInvoice      *string `json:"total_invoice_user"`
-	TotalCheckin      *string `json:"total_checkin_user"`
-	TotalAktifOutlet  *string `json:"total_aktif_outlet"`
+	CustomerID             *string `json:"customer_id"`
+	CustomerName           *string `json:"customer_name"`
+	CustomerCode           *string `json:"customer_code"`
+	BranchName             *string `json:"branch_name"`
+	BranchCode             *string `json:"branch_code"`
+	RegionName             *string `json:"region_name"`
+	RegionGroupName        *string `json:"region_group_name"`
+	CustomerLevelName      *string `json:"customer_level_name"`
+	CustomerTypeName       *string `json:"customer_type_name"`
+	CustomerCityName       *string `json:"cutomer_city_name"`
+	TotalRepeatUser        *string `json:"total_repeat_order_user"`
+	TotalOrderUser         *string `json:"total_order_user"`
+	TotalInvoice           *string `json:"total_invoice_user"`
+	TotalCheckin           *string `json:"total_checkin_user"`
+	TotalAktifOutlet       *string `json:"total_aktif_outlet"`
+	StatusCompleteCustomer *string `json:"status_complete_customer"`
 }
 
 type OmzetValueVM struct {
