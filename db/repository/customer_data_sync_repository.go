@@ -105,7 +105,7 @@ func (repository CustomerDataSyncRepository) Add(c context.Context, model *model
 	customerstatement := ` insert into customer(device_id,partner_id,customer_name,customer_address,customer_phone,
 		created_date, modified_date,
 		payment_terms_id,price_list_id,salesman_id,customer_level_id,
-		branch_id,customer_code)
+		branch_id,customer_code,customer_type_id)
 	values
 	(433,$1,$2,$3,$4,now(),now(),
 		(select id from term_of_payment where code =$5),
@@ -113,7 +113,7 @@ func (repository CustomerDataSyncRepository) Add(c context.Context, model *model
 		(select id from salesman where partner_id =(select id from partner where code =$7)),
 		(select id from customer_level where code = $8),
 		$9,$10,
-		customer_type_id =(select id from customer_type where code = $11)
+		(select id from customer_type where code = $11)
 		) RETURNING id `
 
 	var rescus string
