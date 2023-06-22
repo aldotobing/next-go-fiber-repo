@@ -10,6 +10,7 @@ import (
 
 func SetCronJobs() {
 	c := cron.New()
+	c.Stop()
 	var envConfig, _ = godotenv.Read("../.env")
 	c.AddFunc("CRON_TZ=Asia/Jakarta 0/2 * * * *", func() {
 		url := envConfig["APP_BASE_URL"] + "/v1/api/apps/firebaseuid/sync"
