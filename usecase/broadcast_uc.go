@@ -2,11 +2,9 @@ package usecase
 
 import (
 	"context"
-	"strconv"
 	"strings"
 	"time"
 
-	"github.com/gomodul/envy"
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/pkg/functioncaller"
 	"nextbasis-service-v-0.1/pkg/logruslogger"
@@ -21,10 +19,10 @@ type BroadcastUC struct {
 func (uc BroadcastUC) greetingTime(message string) (res string) {
 	loc, _ := time.LoadLocation("Asia/Jakarta")
 	now := time.Now().In(loc)
-	envTimeMorning, _ := strconv.Atoi(envy.Get("TIME_MORNING"))
-	envTimeAfternoon, _ := strconv.Atoi(envy.Get("TIME_AFTERNOON"))
-	envTimeEvening, _ := strconv.Atoi(envy.Get("TIME_EVENING"))
-	envTimeNight, _ := strconv.Atoi(envy.Get("TIME_NIGHT"))
+	envTimeMorning := 5
+	envTimeAfternoon := 11
+	envTimeEvening := 14
+	envTimeNight := 18
 
 	timeMorning := time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), envTimeMorning, 0, 1, 0, loc)
 	timeAfternoon := time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), envTimeAfternoon, 0, 1, 0, loc)
@@ -32,13 +30,13 @@ func (uc BroadcastUC) greetingTime(message string) (res string) {
 	timeNight := time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), envTimeNight, 0, 1, 0, loc)
 
 	if now.After(timeMorning) && now.Before(timeAfternoon) {
-		res = strings.Replace(message, "{GREETING_TIME}", "Pagi", 5)
+		res = strings.ReplaceAll(message, "{GREETING_TIME}", "Pagi")
 	} else if now.After(timeAfternoon) && now.Before(timeEvening) {
-		res = strings.Replace(message, "{GREETING_TIME}", "Siang", 5)
+		res = strings.ReplaceAll(message, "{GREETING_TIME}", "Siang")
 	} else if now.After(timeEvening) && now.Before(timeNight) {
-		res = strings.Replace(message, "{GREETING_TIME}", "Sore", 5)
+		res = strings.ReplaceAll(message, "{GREETING_TIME}", "Sore")
 	} else if now.After(timeNight) || now.Before(timeMorning) {
-		res = strings.Replace(message, "{GREETING_TIME}", "Malam", 5)
+		res = strings.ReplaceAll(message, "{GREETING_TIME}", "Malam")
 	} else {
 		res = message
 	}
