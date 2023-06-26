@@ -276,4 +276,7 @@ func (boot Bootstrap) RegisterRouters() {
 
 	WebRegionAreaRoute := routers.WebRegionAreaRoutes{RouterGroup: apiV1, Handler: handler}
 	WebRegionAreaRoute.RegisterRoute()
+
+	BroadcastRoute := routers.BroadcastRoutes{RouterGroup: apiV1, Handler: handler}
+	BroadcastRoute.RegisterRoute()
 }
