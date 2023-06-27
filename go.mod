@@ -18,7 +18,6 @@ require (
 	github.com/gofiber/fiber/v2 v2.40.0
 	github.com/gofiber/jwt/v2 v2.2.7
 	github.com/gofiber/swagger v0.1.7
-	github.com/gomodul/envy v0.0.0-20211124105017-fee723c3f791
 	github.com/joho/godotenv v1.4.0
 	github.com/keighl/mandrill v0.0.0-20170605120353-1775dd4b3b41
 	github.com/labstack/echo v3.3.10+incompatible
