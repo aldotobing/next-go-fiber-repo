@@ -289,7 +289,7 @@ func (repository ShoppingCartRepository) GetTotal(c context.Context, parameter m
 	select 
 		((case when ( (select sum(price*qty) from cart where id in(select  unnest(ARRAY(select string_to_array($1,',')))::integer))<( select coalesce(min_omzet_amount,0) from branch where id = (select branch_id from customer where id = $2) )) then 0 else 1 end)) as total_amount,
 		(select coalesce(min_omzet_amount,0) from branch where id = (select branch_id from customer where id = $2) )::integer as min_amount,
-		(case when('-52' < (select def.min_order from customer_type_branch_min_omzet def where def.branch_id = (select branch_id from customer where id = $2) and def.customer_type_id = (select c1.customer_type_id from customer c1 where id = $2) limit 1)) then 0 else 1 end),
+		(case when((select sum(price*qty) from cart where id in(select  unnest(ARRAY(select string_to_array('2330',',')))::integer)) < (select def.min_order from customer_type_branch_min_omzet def where def.branch_id = (select branch_id from customer where id = $2) and def.customer_type_id = (select c1.customer_type_id from customer c1 where id = $2) limit 1)) then 0 else 1 end),
 		(select def.min_order from customer_type_branch_min_omzet def where def.branch_id = (select branch_id from customer where id = $2) and def.customer_type_id = (select c1.customer_type_id from customer c1 where id = $2) limit 1)
 	`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ListLine, parameter.CustomerID)
