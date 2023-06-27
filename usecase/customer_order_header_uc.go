@@ -100,13 +100,14 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 	}
 
 	switch {
-	case checkAble.IsAble == nil || *checkAble.IsAble == "0":
-		bayar, _ := strconv.ParseFloat(*checkAble.MinOmzet, 0)
+	// case checkAble.IsAble == nil || *checkAble.IsAble == "0":
+	// 	bayar, _ := strconv.ParseFloat(*checkAble.MinOmzet, 0)
+	// 	minOrder := strings.ReplaceAll(number.FormatCurrency(bayar, "IDR", ".", "", 0), "Rp", "")
+	// 	return res, errors.New(helper.InvalidMinimumAmountOrder + minOrder + ` rupiah.`)
+	case checkAble.IsMinOrder == nil || *checkAble.MinOrder == "0":
+		bayar, _ := strconv.ParseFloat(*checkAble.MinOrder, 0)
 		minOrder := strings.ReplaceAll(number.FormatCurrency(bayar, "IDR", ".", "", 0), "Rp", "")
 		return res, errors.New(helper.InvalidMinimumAmountOrder + minOrder + ` rupiah.`)
-		// case checkAble.IsMinOrder == nil || *checkAble.IsMinOrder == "0":
-		// 	minOmsetFloat, _ := strconv.ParseFloat(*checkAble.MinOrder, 0)
-		// 	return res, errors.New(helper.InvalidMinimumAmountOrder + strconv.Itoa(int(minOmsetFloat)) + ` items.`)
 	}
 
 	// now := time.Now().UTC()

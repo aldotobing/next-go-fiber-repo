@@ -168,6 +168,10 @@ func (repository CustomerRepository) SelectAll(c context.Context, parameter mode
 		conditionString += ` AND C.BRANCH_ID IN (SELECT BRANCH_ID FROM USER_BRANCH UB WHERE UB.USER_ID = ` + parameter.UserId + `) `
 	}
 
+	if parameter.FlagToken {
+		conditionString += ` AND us.FCM_TOKEN IS NOT NULL `
+	}
+
 	statement := models.CustomerSelectStatement + ` ` + models.CustomerWhereStatement +
 		` AND (LOWER(c."customer_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")

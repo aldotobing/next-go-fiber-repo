@@ -47,8 +47,9 @@ func (uc BroadcastUC) greetingTime(message string) (res string) {
 // FindAll ...
 func (uc BroadcastUC) Broadcast(c context.Context, input *requests.BroadcastRequest) (err error) {
 	data, err := CustomerUC{ContractUC: uc.ContractUC}.SelectAll(c, models.CustomerParameter{
-		By:   "c.created_date",
-		Sort: "desc",
+		By:        "c.created_date",
+		Sort:      "desc",
+		FlagToken: true,
 	})
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
@@ -59,9 +60,9 @@ func (uc BroadcastUC) Broadcast(c context.Context, input *requests.BroadcastRequ
 	for i := range data {
 		if data[i].CustomerFCMToken != nil && *data[i].CustomerFCMToken != "" {
 			var body string
-			body = uc.greetingTime(input.Body)
+			body = input.Body
+			body = uc.greetingTime(body)
 			body = strings.ReplaceAll(body, "{NAMA_TOKO}", *data[i].CustomerName)
-
 			_, err = fcmUC.SendFCMMessage(c, input.Title, body, *data[i].CustomerFCMToken)
 			if err != nil {
 				logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "send_message", c.Value("requestid"))
