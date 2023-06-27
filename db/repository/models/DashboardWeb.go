@@ -231,6 +231,8 @@ var (
 		from region r 
 		left join branch b on b.region_id = r.id
 		left join customer c on c.branch_id = b.id
+		left join sales_invoice_header sih on sih.cust_bill_to_id = c.id
+		left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
 		where c.modified_date::date between '{START_DATE}' and '{END_DATE}'
 			and(c.customer_nik is not null or c.customer_nik != '')
 			and (c.customer_name is not null or c.customer_name != '')
@@ -241,6 +243,8 @@ var (
 			and (c.customer_phone is not null or c.customer_phone != '')
 			and (c.customer_code is not null or c.customer_code != '')
 			and c.created_date IS not null and c.show_in_apps = 1
+			and sih.transaction_date between '{START_DATE}' and '{END_DATE}' 
+			and lower(sih.transaction_source_document_no) like 'co%' and coh.status in ('submitted','finish')
 		group by r.id
 	)
 	select r.id, r."_name",
