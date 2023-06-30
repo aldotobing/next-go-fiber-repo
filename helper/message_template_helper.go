@@ -47,7 +47,7 @@ func BuildProcessSalesOrderTransactionTemplate(customerOrderHeader models.SalesO
 	if *customerOrderHeader.DocumentNo != "" && strings.Contains(*customerOrderHeader.DocumentNo, "OSO") {
 		CretaedBy += ` oleh Toko : ` + *userData.CustomerName + `(` + *userData.Code + `)`
 	} else {
-		CretaedBy += ` oleh Salesman : ` + *userData.CustomerSalesmanName + `oleh Toko : ` + *userData.CustomerName + `(` + *userData.Code + `)`
+		CretaedBy += ` oleh Salesman : ` + *userData.CustomerSalesmanName + ` untuk Toko : ` + *userData.CustomerName + `(` + *userData.Code + `)`
 	}
 	msgbody := ``
 	if mode == 1 {
