@@ -91,3 +91,14 @@ func (uc WebPromoBonusItemLineUC) Add(c context.Context, data *requests.WebPromo
 
 	return res, err
 }
+
+func (uc WebPromoBonusItemLineUC) Delete(c context.Context, id string) (res models.WebPromoBonusItemLineBreakDown, err error) {
+	repo := repository.NewWebPromoBonusItemLineRepository(uc.DB)
+	_, err = repo.Delete(c, id)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	return
+}

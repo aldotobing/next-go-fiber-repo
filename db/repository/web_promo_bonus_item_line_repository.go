@@ -17,7 +17,7 @@ type IWebPromoBonusItemLineRepository interface {
 	FindByID(c context.Context, parameter models.WebPromoBonusItemLineParameter) (models.WebPromoBonusItemLine, error)
 	Add(c context.Context, model *models.WebPromoBonusItemLineBreakDown) (*string, error)
 	// Edit(c context.Context, model *models.WebPromoBonusItemLine) (*string, error)
-	// Delete(c context.Context, id string, now time.Time) (string, error)
+	Delete(c context.Context, id string) (string, error)
 }
 
 // WebPromoBonusItemLineRepository ...
@@ -202,4 +202,14 @@ func (repository WebPromoBonusItemLineRepository) Add(c context.Context, model *
 		return res, err
 	}
 	return res, err
+}
+
+func (repository WebPromoBonusItemLineRepository) Delete(c context.Context, id string) (res string, err error) {
+	statement := `
+		DELETE FROM promo_bonus_line WHERE id = $1 RETURNING id`
+
+	err = repository.DB.QueryRowContext(c, statement,
+		id).Scan(&res)
+
+	return
 }
