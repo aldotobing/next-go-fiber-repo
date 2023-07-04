@@ -975,7 +975,11 @@ func (repo DashboardWebRepository) TrackingInvoice(ctx context.Context, input mo
 		whereStatement += ` AND ct.customer_level_id = ` + input.CustomerLevelID
 	}
 	if input.UserID != "" {
-		whereStatement += ` AND ct.customer_user_id = ` + input.UserID
+		whereStatement += ` AND ct.branch_id in(
+			select ub.branch_id  
+			from user_branch ub
+			where ub.user_id = ` + input.UserID + `
+		) `
 	}
 	queryStatement := `with customer_temp as (
 		select r.group_id as group_id, r.group_name as group_name , 
