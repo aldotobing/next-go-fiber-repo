@@ -966,7 +966,7 @@ func (repo DashboardWebRepository) TrackingInvoice(ctx context.Context, input mo
 		whereStatement += ` AND ct.region_id = ` + input.RegionID
 	}
 	if input.BranchID != "" {
-		whereStatement += ` AND ct.branch_id = ` + input.BranchID
+		whereStatement += ` AND ct.branch_id in (` + input.BranchID + `)`
 	}
 	if input.BranchArea != "" {
 		whereStatement += ` AND ct.branch_area = '` + input.BranchArea + `'`
@@ -974,12 +974,16 @@ func (repo DashboardWebRepository) TrackingInvoice(ctx context.Context, input mo
 	if input.CustomerLevelID != "" {
 		whereStatement += ` AND ct.customer_level_id = ` + input.CustomerLevelID
 	}
+	if input.UserID != "" {
+		whereStatement += ` AND ct.customer_user_id = ` + input.UserID
+	}
 	queryStatement := `with customer_temp as (
 		select r.group_id as group_id, r.group_name as group_name , 
 			r.id as region_id, r."_name" as region_name, 
 			b.id as branch_id, b.area as branch_area, b.branch_code as branch_code, b."_name" as branch_name,
 			c.id as customer_id, c.customer_name, c.customer_code, 
-			c.customer_level_id as customer_level_id, cl."_name" as customer_level_name
+			c.customer_level_id as customer_level_id, cl."_name" as customer_level_name,
+			c.user_id as customer_user_id
 		from customer c 
 		left join customer_level cl on cl.id = c.customer_level_id 
 		left join branch b on b.id= c.branch_id 
