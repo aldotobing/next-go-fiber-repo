@@ -105,3 +105,18 @@ func (h *WebPromoBonusItemLineHandler) Add(ctx *fiber.Ctx) error {
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
+
+// Delete ...
+func (h *WebPromoBonusItemLineHandler) Delete(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	id := ctx.Params("id")
+
+	uc := usecase.WebPromoBonusItemLineUC{ContractUC: h.ContractUC}
+	_, err := uc.Delete(c, id)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+
+	return h.SendResponse(ctx, nil, nil, err, 0)
+}
