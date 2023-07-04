@@ -115,6 +115,25 @@ type OmzetValueBranchModel struct {
 	TotalQuantity    string  `json:"total_quantity"`
 }
 
+type DashboardTrackingInvoice struct {
+	RegionGroupName          string         `json:"region_group_name"`
+	RegionName               string         `json:"region_name"`
+	BranchName               string         `json:"branch_name"`
+	BranchArea               sql.NullString `json:"branch_area"`
+	BranchCode               string         `json:"branch_code"`
+	CustomerName             string         `json:"customer_name"`
+	CustomerCode             string         `json:"customer_code"`
+	CustomerLevel            sql.NullString `json:"customer_level"`
+	InvoiceNumber            string         `json:"invoice_number"`
+	CustomerOrderDocumentNo  sql.NullString `json:"customer_order_document_no"`
+	CustomerOrderCreatedDate sql.NullString `json:"customer_order_created_date"`
+	SalesOrderDocumentNo     sql.NullString `json:"sales_order_document_no"`
+	SalesOrderCreatedDate    sql.NullString `json:"sales_order_created_date"`
+	InvoiceCreatedDate       sql.NullString `json:"invoice_created_date"`
+	InvoiceUpdatedDate       sql.NullString `json:"invoice_updated-date"`
+	DueDate                  sql.NullString `json:"due_date"`
+}
+
 // DashboardWebParameter ...
 type DashboardWebParameter struct {
 	ID        string `json:"id"`

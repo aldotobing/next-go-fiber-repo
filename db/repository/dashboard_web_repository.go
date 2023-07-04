@@ -28,6 +28,8 @@ type IDashboardWebRepository interface {
 	GetOmzetValueByRegionID(ctx context.Context, parameter models.DashboardWebBranchParameter, groupID string) ([]models.OmzetValueModel, error)
 	GetOmzetValueByBranchID(ctx context.Context, parameter models.DashboardWebBranchParameter, branchID string) ([]models.OmzetValueBranchModel, error)
 	GetOmzetValueByCustomerID(ctx context.Context, parameter models.DashboardWebBranchParameter, customerID string) (res []models.OmzetValueModel, err error)
+
+	TrackingInvoice(ctx context.Context, input models.DashboardWebBranchParameter) (res []models.DashboardTrackingInvoice, err error)
 }
 
 // DashboardWebRepository ...
@@ -936,6 +938,87 @@ func (repo DashboardWebRepository) GetOmzetValueByCustomerID(ctx context.Context
 			&temp.TotalGrossAmount,
 			&temp.TotalNettAmount,
 			&temp.TotalQuantity)
+		if err != nil {
+			return
+		}
+
+		res = append(res, temp)
+	}
+
+	return
+}
+
+func (repo DashboardWebRepository) TrackingInvoice(ctx context.Context, input models.DashboardWebBranchParameter) (res []models.DashboardTrackingInvoice, err error) {
+	var startDate, endDate string
+	if input.StartDate != "" && input.EndDate != "" {
+		startDate = "'" + input.StartDate + "'"
+		endDate = "'" + input.EndDate + "'"
+	} else {
+		startDate = "date_trunc('MONTH',now())::DATE"
+		endDate = "now()"
+	}
+
+	var whereStatement string
+	if input.RegionGroupID != "" {
+		whereStatement += " AND ct.group_id = " + input.RegionGroupID
+	}
+	if input.RegionID != "" {
+		whereStatement += ` AND ct.region_id = ` + input.RegionID
+	}
+	if input.BranchID != "" {
+		whereStatement += ` AND ct.branch_id = ` + input.BranchID
+	}
+	if input.BranchArea != "" {
+		whereStatement += ` AND ct.branch_area = '` + input.BranchArea + `'`
+	}
+	if input.CustomerLevelID != "" {
+		whereStatement += ` AND ct.customer_level_id = ` + input.CustomerLevelID
+	}
+	queryStatement := `with customer_temp as (
+		select r.group_id as group_id, r.group_name as group_name , 
+			r.id as region_id, r."_name" as region_name, 
+			b.id as branch_id, b.area as branch_area, b.branch_code as branch_code, b."_name" as branch_name,
+			c.id as customer_id, c.customer_name, c.customer_code, 
+			c.customer_level_id as customer_level_id, cl."_name" as customer_level_name
+		from customer c 
+		left join customer_level cl on cl.id = c.customer_level_id 
+		left join branch b on b.id= c.branch_id 
+		left join region r on r.id = b.region_id 
+	)
+	select ct.group_name, ct.region_name,
+		ct.branch_name, ct.branch_area, ct.branch_code,
+		ct.customer_name, ct.customer_code, ct.customer_level_name,
+		sih.document_no as invoice_no,
+		coh.document_no as customer_order_document_no, coh.created_date as customer_order_created_date,
+		soh.document_no as sales_order_document_no, soh.created_date as sales_order_created_date,
+		sih.created_date as invoice_created_date, sih.modified_date as invoice_updated_date,
+		top.days
+	from sales_invoice_header sih 
+		left join term_of_payment top on top.id = sih.payment_terms_id 
+		left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
+		left join sales_order_header soh on soh.request_document_no = sih.transaction_source_document_no 
+		left join customer_temp ct on ct.customer_id = sih.cust_bill_to_id 
+	where sih.transaction_date between ` + startDate + ` and ` + endDate + `
+		` + whereStatement + `
+	order by sih.transaction_date desc, sih.transaction_time desc`
+
+	rows, err := repo.DB.Query(queryStatement)
+	if err != nil {
+		return
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var temp models.DashboardTrackingInvoice
+		err = rows.Scan(&temp.RegionGroupName, &temp.RegionName,
+			&temp.BranchName, &temp.BranchArea, &temp.BranchCode,
+			&temp.CustomerName, &temp.CustomerCode, &temp.CustomerLevel,
+			&temp.InvoiceNumber,
+			&temp.CustomerOrderDocumentNo, &temp.CustomerOrderCreatedDate,
+			&temp.SalesOrderDocumentNo, &temp.SalesOrderCreatedDate,
+			&temp.InvoiceCreatedDate, &temp.InvoiceUpdatedDate,
+			&temp.DueDate)
 		if err != nil {
 			return
 		}
