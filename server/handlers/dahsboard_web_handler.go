@@ -343,6 +343,7 @@ func (h *DashboardWebHandler) GetTrackingInvoiceData(ctx *fiber.Ctx) error {
 		BranchArea:      ctx.Query("branch_area"),
 		CustomerLevelID: ctx.Query("customer_level_id"),
 		CustomerTypeID:  ctx.Query("customer_type_id"),
+		UserID:          ctx.Query("user_id"),
 	}
 
 	uc := usecase.DashboardWebUC{ContractUC: h.ContractUC}
