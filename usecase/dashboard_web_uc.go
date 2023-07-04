@@ -584,6 +584,7 @@ func (uc DashboardWebUC) GetTrackingInvoiceData(c context.Context, parameter mod
 			CustomerName:      datum.CustomerName,
 			CustomerCode:      datum.CustomerCode,
 			CustomerLevelName: datum.CustomerLevel.String,
+			InvoiceID:         datum.InvoiceID,
 			InvoiceNumber:     datum.InvoiceNumber,
 			InvoiceDate:       datum.InvoiceCreatedDate.String,
 			ProcessedDate:     processedDate,
