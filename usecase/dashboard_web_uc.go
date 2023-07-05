@@ -549,7 +549,7 @@ func (uc DashboardWebUC) GetTrackingInvoiceData(c context.Context, parameter mod
 	}
 
 	for _, datum := range data {
-		var processedDate, confirmationDate, dueDate, sourceTransaction, invoiceCreatedDate string
+		var processedDate, confirmationDate, dueDate, sourceTransaction string
 
 		if strings.Contains(datum.CustomerOrderDocumentNo.String, "CO") || strings.Contains(datum.SalesOrderDocumentNo.String, "OSO") {
 			sourceTransaction = "MYSM"
@@ -561,20 +561,12 @@ func (uc DashboardWebUC) GetTrackingInvoiceData(c context.Context, parameter mod
 			confirmationDate = datum.SalesOrderCreatedDate.String
 		}
 
-		if datum.CustomerOrderCreatedDate.Valid {
-			invoiceCreatedDate = datum.CustomerOrderCreatedDate.String
-		} else if datum.SalesOrderCreatedDate.Valid {
-			invoiceCreatedDate = datum.SalesOrderCreatedDate.String
+		var dueDateday int
+		invoiceDate, _ := time.Parse("2006-01-02T15:04:05.999999Z", datum.InvoiceCreatedDate.String)
+		if datum.DueDate.Valid {
+			dueDateday, _ = strconv.Atoi(datum.DueDate.String)
 		}
-
-		if invoiceCreatedDate != "" {
-			var dueDateday int
-			invoiceDate, _ := time.Parse("2006-01-02T15:04:05.999999Z", invoiceCreatedDate)
-			if datum.DueDate.Valid {
-				dueDateday, _ = strconv.Atoi(datum.DueDate.String)
-			}
-			dueDate = invoiceDate.AddDate(0, 0, dueDateday).Format("2006-01-02T15:04:05.999999Z")
-		}
+		dueDate = invoiceDate.AddDate(0, 0, dueDateday).Format("2006-01-02T15:04:05.999999Z")
 
 		res = append(res, viewmodel.DashboardTrackingInvoiceVM{
 			RegionGroupName:             datum.RegionGroupName,
@@ -589,7 +581,7 @@ func (uc DashboardWebUC) GetTrackingInvoiceData(c context.Context, parameter mod
 			CustomerOrderDocumentNumber: datum.CustomerOrderDocumentNo.String,
 			InvoiceID:                   datum.InvoiceID,
 			InvoiceNumber:               datum.InvoiceNumber,
-			InvoiceDate:                 invoiceCreatedDate,
+			InvoiceDate:                 datum.InvoiceCreatedDate.String,
 			ProcessedDate:               processedDate,
 			ConfimationDate:             confirmationDate,
 			DueDate:                     dueDate,
