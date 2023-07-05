@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/leekchan/accounting"
@@ -550,30 +551,22 @@ func (uc DashboardWebUC) GetTrackingInvoiceData(c context.Context, parameter mod
 	for _, datum := range data {
 		var processedDate, confirmationDate, dueDate, sourceTransaction string
 
-		switch {
-		case datum.SalesOrderDocumentNo.Valid != false && datum.CustomerOrderDocumentNo.Valid != false:
-			sourceTransaction = "SFA"
-			processedDate = datum.CustomerOrderCreatedDate.String
-			confirmationDate = datum.SalesOrderCreatedDate.String
-		case datum.SalesOrderDocumentNo.Valid != false:
-			sourceTransaction = "SFA"
-			processedDate = datum.CustomerOrderCreatedDate.String
-			confirmationDate = datum.SalesOrderCreatedDate.String
-		case datum.CustomerOrderDocumentNo.Valid != false:
+		if strings.Contains(datum.CustomerOrderDocumentNo.String, "CO") || strings.Contains(datum.SalesOrderDocumentNo.String, "OSO") {
 			sourceTransaction = "MYSM"
 			processedDate = datum.CustomerOrderCreatedDate.String
-		default:
+			confirmationDate = datum.SalesOrderCreatedDate.String
+		} else {
 			sourceTransaction = "SFA"
+			processedDate = datum.CustomerOrderCreatedDate.String
+			confirmationDate = datum.SalesOrderCreatedDate.String
 		}
 
-		if datum.InvoiceCreatedDate.Valid {
-			var dueDateday int
-			invoiceDate, _ := time.Parse("2006-01-02T15:04:05.999999Z", datum.InvoiceCreatedDate.String)
-			if datum.DueDate.Valid {
-				dueDateday, _ = strconv.Atoi(datum.DueDate.String)
-			}
-			dueDate = invoiceDate.AddDate(0, 0, dueDateday).Format("2006-01-02T15:04:05.999999Z")
+		var dueDateday int
+		invoiceDate, _ := time.Parse("2006-01-02T15:04:05.999999Z", datum.InvoiceCreatedDate.String)
+		if datum.DueDate.Valid {
+			dueDateday, _ = strconv.Atoi(datum.DueDate.String)
 		}
+		dueDate = invoiceDate.AddDate(0, 0, dueDateday).Format("2006-01-02T15:04:05.999999Z")
 
 		res = append(res, viewmodel.DashboardTrackingInvoiceVM{
 			RegionGroupName:             datum.RegionGroupName,
