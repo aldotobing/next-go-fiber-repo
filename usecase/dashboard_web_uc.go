@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/leekchan/accounting"
@@ -548,27 +549,27 @@ func (uc DashboardWebUC) GetTrackingInvoiceData(c context.Context, parameter mod
 	}
 
 	for _, datum := range data {
-		var processedDate, confirmationDate, dueDate, sourceTransaction string
+		var processedDate, confirmationDate, dueDate, sourceTransaction, invoiceCreatedDate string
 
-		switch {
-		case datum.SalesOrderDocumentNo.Valid != false && datum.CustomerOrderDocumentNo.Valid != false:
-			sourceTransaction = "SFA"
-			processedDate = datum.CustomerOrderCreatedDate.String
-			confirmationDate = datum.SalesOrderCreatedDate.String
-		case datum.SalesOrderDocumentNo.Valid != false:
-			sourceTransaction = "SFA"
-			processedDate = datum.CustomerOrderCreatedDate.String
-			confirmationDate = datum.SalesOrderCreatedDate.String
-		case datum.CustomerOrderDocumentNo.Valid != false:
+		if strings.Contains(datum.CustomerOrderDocumentNo.String, "CO") || strings.Contains(datum.SalesOrderDocumentNo.String, "OSO") {
 			sourceTransaction = "MYSM"
 			processedDate = datum.CustomerOrderCreatedDate.String
-		default:
+			confirmationDate = datum.SalesOrderCreatedDate.String
+		} else {
 			sourceTransaction = "SFA"
+			processedDate = datum.CustomerOrderCreatedDate.String
+			confirmationDate = datum.SalesOrderCreatedDate.String
 		}
 
-		if datum.InvoiceCreatedDate.Valid {
+		if datum.CustomerOrderCreatedDate.Valid {
+			invoiceCreatedDate = datum.CustomerOrderCreatedDate.String
+		} else if datum.SalesOrderCreatedDate.Valid {
+			invoiceCreatedDate = datum.SalesOrderCreatedDate.String
+		}
+
+		if invoiceCreatedDate != "" {
 			var dueDateday int
-			invoiceDate, _ := time.Parse("2006-01-02T15:04:05.999999Z", datum.InvoiceCreatedDate.String)
+			invoiceDate, _ := time.Parse("2006-01-02T15:04:05.999999Z", invoiceCreatedDate)
 			if datum.DueDate.Valid {
 				dueDateday, _ = strconv.Atoi(datum.DueDate.String)
 			}
@@ -588,7 +589,7 @@ func (uc DashboardWebUC) GetTrackingInvoiceData(c context.Context, parameter mod
 			CustomerOrderDocumentNumber: datum.CustomerOrderDocumentNo.String,
 			InvoiceID:                   datum.InvoiceID,
 			InvoiceNumber:               datum.InvoiceNumber,
-			InvoiceDate:                 datum.InvoiceCreatedDate.String,
+			InvoiceDate:                 invoiceCreatedDate,
 			ProcessedDate:               processedDate,
 			ConfimationDate:             confirmationDate,
 			DueDate:                     dueDate,
