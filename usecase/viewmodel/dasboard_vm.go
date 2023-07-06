@@ -125,3 +125,24 @@ type OmzetValueItemVM struct {
 	Quantity *string `json:"quantity"`
 	Omzet    *string `json:"omzet"`
 }
+
+type DashboardTrackingInvoiceVM struct {
+	RegionGroupName             string `json:"region_group_name"`
+	RegionName                  string `json:"region_name"`
+	BranchName                  string `json:"branch_name"`
+	BranchArea                  string `json:"branch_area"`
+	BranchCode                  string `json:"branch_code"`
+	CustomerName                string `json:"customer_name"`
+	CustomerCode                string `json:"customer_code"`
+	CustomerLevelName           string `json:"customer_level_name"`
+	SalesOrderDocumentNumber    string `json:"sales_order_document_number"`
+	CustomerOrderDocumentNumber string `json:"customer_order_document_number"`
+	InvoiceID                   string `json:"invoice_id"`
+	InvoiceNumber               string `json:"invoice_number"`
+	InvoiceDate                 string `json:"invoice_date"`
+	ProcessedDate               string `json:"processed_date"`
+	ConfimationDate             string `json:"confirmation_date"`
+	DueDate                     string `json:"due_date"`
+	PaidOffDate                 string `json:"paid_off_date"`
+	SourceTransaction           string `json:"source_transaction"`
+}

@@ -3,6 +3,8 @@ package usecase
 import (
 	"context"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/leekchan/accounting"
 	"nextbasis-service-v-0.1/db/repository"
@@ -538,36 +540,58 @@ func (uc DashboardWebUC) GetOmzetValueByCustomerID(c context.Context, parameter 
 	return res, err
 }
 
-func (uc DashboardWebUC) GetTrackingInvoiceData(c context.Context, parameter models.DashboardWebBranchParameter) (res []viewmodel.DashboardCustomerByUserID, err error) {
+func (uc DashboardWebUC) GetTrackingInvoiceData(c context.Context, parameter models.DashboardWebBranchParameter) (res []viewmodel.DashboardTrackingInvoiceVM, err error) {
 	repo := repository.NewDashboardWebRepository(uc.DB)
-	data, err := repo.GetAllDetailCustomerDataWithUserID(c, parameter)
+	data, err := repo.TrackingInvoice(c, parameter)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
 	}
 
-	for i := range data {
-		res = append(res, viewmodel.DashboardCustomerByUserID{
-			CustomerID:        data[i].CustomerID,
-			CustomerName:      data[i].CustomerName,
-			CustomerCode:      data[i].CustomerCode,
-			BranchName:        data[i].CustomerBranchName,
-			BranchCode:        data[i].CustomerBranchCode,
-			RegionName:        data[i].CustomerRegionName,
-			RegionGroupName:   data[i].CustomerRegionGroupName,
-			CustomerTypeName:  data[i].CustomerTypeName,
-			CustomerLevelName: data[i].CustomerLevelName,
-			CustomerCityName:  data[i].CustomerCityName,
-			TotalRepeatUser:   data[i].TotalRepeatUser,
-			TotalOrderUser:    data[i].TotalOrderUser,
-			TotalInvoice:      data[i].TotalInvoice,
-			TotalCheckin:      data[i].TotalCheckin,
-			TotalAktifOutlet:  data[i].TotalAktifOutlet,
+	for _, datum := range data {
+		var processedDate, confirmationDate, dueDate, sourceTransaction string
+
+		if strings.Contains(datum.CustomerOrderDocumentNo.String, "CO") || strings.Contains(datum.SalesOrderDocumentNo.String, "OSO") {
+			sourceTransaction = "MYSM"
+			processedDate = datum.CustomerOrderCreatedDate.String
+			confirmationDate = datum.SalesOrderCreatedDate.String
+		} else {
+			sourceTransaction = "SFA"
+			processedDate = datum.CustomerOrderCreatedDate.String
+			confirmationDate = datum.SalesOrderCreatedDate.String
+		}
+
+		var dueDateday int
+		invoiceDate, _ := time.Parse("2006-01-02T15:04:05.999999Z", datum.InvoiceCreatedDate.String)
+		if datum.DueDate.Valid {
+			dueDateday, _ = strconv.Atoi(datum.DueDate.String)
+		}
+		dueDate = invoiceDate.AddDate(0, 0, dueDateday).Format("2006-01-02T15:04:05.999999Z")
+
+		res = append(res, viewmodel.DashboardTrackingInvoiceVM{
+			RegionGroupName:             datum.RegionGroupName,
+			RegionName:                  datum.RegionName,
+			BranchName:                  datum.BranchName,
+			BranchArea:                  datum.BranchArea.String,
+			BranchCode:                  datum.BranchCode,
+			CustomerName:                datum.CustomerName,
+			CustomerCode:                datum.CustomerCode,
+			CustomerLevelName:           datum.CustomerLevel.String,
+			SalesOrderDocumentNumber:    datum.SalesOrderDocumentNo.String,
+			CustomerOrderDocumentNumber: datum.CustomerOrderDocumentNo.String,
+			InvoiceID:                   datum.InvoiceID,
+			InvoiceNumber:               datum.InvoiceNumber,
+			InvoiceDate:                 datum.InvoiceCreatedDate.String,
+			ProcessedDate:               processedDate,
+			ConfimationDate:             confirmationDate,
+			DueDate:                     dueDate,
+			PaidOffDate:                 datum.InvoiceUpdatedDate.String,
+			SourceTransaction:           sourceTransaction,
 		})
 	}
 
 	if res == nil {
-		res = make([]viewmodel.DashboardCustomerByUserID, 0)
+		res = make([]viewmodel.DashboardTrackingInvoiceVM, 0)
 	}
 
 	return res, err
