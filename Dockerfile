@@ -1,5 +1,5 @@
-# Use the official GoLang Docker image with Go 1.19 as the base image for build
-FROM golang:1.19-alpine AS builder
+# Use the official GoLang Docker image with Go 1.19 as the base image
+FROM golang:1.19-alpine
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -9,9 +9,6 @@ COPY go.mod go.sum ./
 
 # Download the dependencies
 RUN go mod download
-
-# Copy the .env file to the working directory
-COPY .env ./
 
 # Copy the rest of the application source code to the working directory
 COPY . .
