@@ -128,6 +128,7 @@ func (uc WebPromoUC) Edit(c context.Context, data *requests.WebPromoRequest, img
 	repo := repository.NewWebPromoRepository(uc.DB)
 	res = models.WebPromo{
 		ID:                 &id,
+		Code:               &data.Code,
 		PromoName:          &data.PromoName,
 		PromoDescription:   &data.PromoDescription,
 		PromoUrlBanner:     &strImgBanner,

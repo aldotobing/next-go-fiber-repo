@@ -158,14 +158,15 @@ func (repository WebPromo) FindByID(c context.Context, parameter models.WebPromo
 // Edit ...
 func (repository WebPromo) Edit(c context.Context, model *models.WebPromo) (res *string, err error) {
 	statement := `UPDATE promo SET
-	_name = $1,
-	description = $2,
-	url_banner = $3,
-	show_in_app = $4,
-	start_date = $5,
-	end_date = $6,
-	active = $7
-	WHERE id = $8
+		_name = $1,
+		description = $2,
+		url_banner = $3,
+		show_in_app = $4,
+		start_date = $5,
+		end_date = $6,
+		active = $7
+		code = $8
+	WHERE id = $9
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		model.PromoName,
@@ -175,6 +176,7 @@ func (repository WebPromo) Edit(c context.Context, model *models.WebPromo) (res 
 		model.StartDate,
 		model.EndDate,
 		model.Active,
+		model.Code,
 		model.ID).Scan(&res)
 	if err != nil {
 		return res, err
