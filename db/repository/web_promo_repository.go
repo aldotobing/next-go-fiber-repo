@@ -179,6 +179,50 @@ func (repository WebPromo) Edit(c context.Context, model *models.WebPromo) (res 
 	if err != nil {
 		return res, err
 	}
+
+	if *model.CustomerTypeIdList != "" {
+		customerTypeIDArr := strings.Split(*model.CustomerTypeIdList, ",")
+
+		var customerTypeIDValuesStatement string
+		for _, datum := range customerTypeIDArr {
+			if customerTypeIDValuesStatement == "" {
+				customerTypeIDValuesStatement = `(` + datum + `, ` + *res + `, now(), now())`
+			} else {
+				customerTypeIDValuesStatement = `, (` + datum + `, ` + *res + `, now(), now())`
+			}
+		}
+		customerTypeUpdateStatement := `insert into customer_type_eligible_promo 
+		(customer_type_id, promo_id, created_date, modified_date)
+		Values ` + customerTypeIDValuesStatement + `
+		on conflict (customer_type_id, promo_id) do nothing`
+
+		err = repository.DB.QueryRowContext(c, customerTypeUpdateStatement).Err()
+		if err != nil {
+			return
+		}
+	}
+
+	if *model.RegionAreaIdList != "" {
+		regionAreaIDArr := strings.Split(*model.RegionAreaIdList, ",")
+
+		var regionAreaValuesStatement string
+		for _, datum := range regionAreaIDArr {
+			if regionAreaValuesStatement == "" {
+				regionAreaValuesStatement = `(` + datum + `, ` + *res + `, now(), now())`
+			} else {
+				regionAreaValuesStatement = `, (` + datum + `, ` + *res + `, now(), now())`
+			}
+		}
+		regionAreaUpdateStatement := `insert into region_area_eligible_promo 
+		(region_id, promo_id, created_date, modified_date)
+		Values ` + regionAreaValuesStatement + `
+		on conflict (region_id, promo_id) do nothing`
+
+		err = repository.DB.QueryRowContext(c, regionAreaUpdateStatement).Err()
+		if err != nil {
+			return
+		}
+	}
 	return res, err
 }
 
