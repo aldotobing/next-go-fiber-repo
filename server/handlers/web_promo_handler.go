@@ -161,8 +161,20 @@ func (h *WebPromoHandler) FindByID(ctx *fiber.Ctx) error {
 		By:      "pr._name",
 	})
 
+	if resEligible == nil {
+		resEligible = make([]models.WebCustomerTypeEligiblePromo, 0)
+	}
+	var customerTypeIDList string
+	for i := range resEligible {
+		if customerTypeIDList == "" {
+			customerTypeIDList += *resEligible[i].ID
+		} else {
+			customerTypeIDList += "," + *resEligible[i].ID
+		}
+	}
 	if errEligible == nil {
 		res.CustomerTypeList = &resEligible
+		res.CustomerTypeIdList = &customerTypeIDList
 	}
 
 	ucRegionEligible := usecase.WebRegionAreaEligiblePromoUC{ContractUC: h.ContractUC}
@@ -171,8 +183,21 @@ func (h *WebPromoHandler) FindByID(ctx *fiber.Ctx) error {
 		By:      "pr._name",
 	})
 
+	if resRegionEligible == nil {
+		resRegionEligible = make([]models.WebRegionAreaEligiblePromo, 0)
+	}
+
+	var regionAreaIDList string
+	for i := range resRegionEligible {
+		if regionAreaIDList == "" {
+			regionAreaIDList += *resRegionEligible[i].ID
+		} else {
+			regionAreaIDList += "," + *resRegionEligible[i].ID
+		}
+	}
 	if errRegionEligible == nil {
 		res.RegionAreaList = &resRegionEligible
+		res.RegionAreaIdList = &regionAreaIDList
 	}
 
 	return h.SendResponse(ctx, res, nil, err, 0)
