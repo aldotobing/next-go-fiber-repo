@@ -164,7 +164,7 @@ func (repository WebPromo) Edit(c context.Context, model *models.WebPromo) (res 
 		show_in_app = $4,
 		start_date = $5,
 		end_date = $6,
-		active = $7
+		active = $7,
 		code = $8
 	WHERE id = $9
 	RETURNING id`
@@ -188,9 +188,9 @@ func (repository WebPromo) Edit(c context.Context, model *models.WebPromo) (res 
 		var customerTypeIDValuesStatement string
 		for _, datum := range customerTypeIDArr {
 			if customerTypeIDValuesStatement == "" {
-				customerTypeIDValuesStatement = `(` + datum + `, ` + *res + `, now(), now())`
+				customerTypeIDValuesStatement += `(` + datum + `, ` + *res + `, now(), now())`
 			} else {
-				customerTypeIDValuesStatement = `, (` + datum + `, ` + *res + `, now(), now())`
+				customerTypeIDValuesStatement += `, (` + datum + `, ` + *res + `, now(), now())`
 			}
 		}
 		customerTypeUpdateStatement := `insert into customer_type_eligible_promo 
@@ -210,9 +210,9 @@ func (repository WebPromo) Edit(c context.Context, model *models.WebPromo) (res 
 		var regionAreaValuesStatement string
 		for _, datum := range regionAreaIDArr {
 			if regionAreaValuesStatement == "" {
-				regionAreaValuesStatement = `(` + datum + `, ` + *res + `, now(), now())`
+				regionAreaValuesStatement += `(` + datum + `, ` + *res + `, now(), now())`
 			} else {
-				regionAreaValuesStatement = `, (` + datum + `, ` + *res + `, now(), now())`
+				regionAreaValuesStatement += `, (` + datum + `, ` + *res + `, now(), now())`
 			}
 		}
 		regionAreaUpdateStatement := `insert into region_area_eligible_promo 
