@@ -190,9 +190,9 @@ func (h *WebPromoHandler) FindByID(ctx *fiber.Ctx) error {
 	var regionAreaIDList string
 	for i := range resRegionEligible {
 		if regionAreaIDList == "" {
-			regionAreaIDList += *resRegionEligible[i].ID
+			regionAreaIDList += *resRegionEligible[i].RegionID
 		} else {
-			regionAreaIDList += "," + *resRegionEligible[i].ID
+			regionAreaIDList += "," + *resRegionEligible[i].RegionID
 		}
 	}
 	if errRegionEligible == nil {
