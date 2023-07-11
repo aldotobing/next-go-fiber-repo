@@ -166,10 +166,12 @@ func (h *WebPromoHandler) FindByID(ctx *fiber.Ctx) error {
 	}
 	var customerTypeIDList string
 	for i := range resEligible {
-		if customerTypeIDList == "" {
-			customerTypeIDList += *resEligible[i].ID
-		} else {
-			customerTypeIDList += "," + *resEligible[i].ID
+		if resEligible[i].CustomerTypeId != nil {
+			if customerTypeIDList == "" {
+				customerTypeIDList += *resEligible[i].CustomerTypeId
+			} else {
+				customerTypeIDList += "," + *resEligible[i].CustomerTypeId
+			}
 		}
 	}
 	if errEligible == nil {
@@ -189,10 +191,12 @@ func (h *WebPromoHandler) FindByID(ctx *fiber.Ctx) error {
 
 	var regionAreaIDList string
 	for i := range resRegionEligible {
-		if regionAreaIDList == "" {
-			regionAreaIDList += *resRegionEligible[i].ID
-		} else {
-			regionAreaIDList += "," + *resRegionEligible[i].ID
+		if resRegionEligible[i].RegionID != nil {
+			if regionAreaIDList == "" {
+				regionAreaIDList += *resRegionEligible[i].RegionID
+			} else {
+				regionAreaIDList += "," + *resRegionEligible[i].RegionID
+			}
 		}
 	}
 	if errRegionEligible == nil {
