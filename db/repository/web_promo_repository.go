@@ -183,6 +183,12 @@ func (repository WebPromo) Edit(c context.Context, model *models.WebPromo) (res 
 	}
 
 	if *model.CustomerTypeIdList != "" {
+		customerTypeDeleteStatement := `DELETE FROM customer_type_eligible_promo where promo_id = $1`
+		err = repository.DB.QueryRowContext(c, customerTypeDeleteStatement, *res).Err()
+		if err != nil {
+			return
+		}
+
 		customerTypeIDArr := strings.Split(*model.CustomerTypeIdList, ",")
 
 		var customerTypeIDValuesStatement string
@@ -195,8 +201,7 @@ func (repository WebPromo) Edit(c context.Context, model *models.WebPromo) (res 
 		}
 		customerTypeUpdateStatement := `insert into customer_type_eligible_promo 
 		(customer_type_id, promo_id, created_date, modified_date)
-		Values ` + customerTypeIDValuesStatement + `
-		on conflict (customer_type_id, promo_id) do nothing`
+		Values ` + customerTypeIDValuesStatement
 
 		err = repository.DB.QueryRowContext(c, customerTypeUpdateStatement).Err()
 		if err != nil {
@@ -205,6 +210,12 @@ func (repository WebPromo) Edit(c context.Context, model *models.WebPromo) (res 
 	}
 
 	if *model.RegionAreaIdList != "" {
+		regionAreaDeleteStatement := `DELETE FROM region_area_eligible_promo where promo_id = $1`
+		err = repository.DB.QueryRowContext(c, regionAreaDeleteStatement, *res).Err()
+		if err != nil {
+			return
+		}
+
 		regionAreaIDArr := strings.Split(*model.RegionAreaIdList, ",")
 
 		var regionAreaValuesStatement string
@@ -217,8 +228,7 @@ func (repository WebPromo) Edit(c context.Context, model *models.WebPromo) (res 
 		}
 		regionAreaUpdateStatement := `insert into region_area_eligible_promo 
 		(region_id, promo_id, created_date, modified_date)
-		Values ` + regionAreaValuesStatement + `
-		on conflict (region_id, promo_id) do nothing`
+		Values ` + regionAreaValuesStatement
 
 		err = repository.DB.QueryRowContext(c, regionAreaUpdateStatement).Err()
 		if err != nil {
