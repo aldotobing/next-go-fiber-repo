@@ -84,7 +84,7 @@ func (repository WebRegionAreaRepository) SelectAllGroupByRegion(c context.Conte
 		FROM region def ` +
 		models.WebRegionAreaWhereStatement +
 		`GROUP BY def.group_id, def.group_name ` +
-		`ORDER BY def.group_id asc`
+		`ORDER BY def.group_id desc`
 	rows, err := repository.DB.QueryContext(c, statement)
 	if err != nil {
 		return data, err
