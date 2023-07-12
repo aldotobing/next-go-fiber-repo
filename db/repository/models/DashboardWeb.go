@@ -218,7 +218,9 @@ var (
 	dataVisitedUser as (
 		select uca.user_id as user_id, count(uca.id) as visit_user
 		from user_checkin_activity uca
-		where uca.checkin_time between '{START_DATE}' and '{END_DATE}'
+			left join _user us on us.id = uca.user_id
+			left join customer cus on cus.customer_code = us.login
+		where  cus.show_in_apps = 1 and uca.checkin_time between '{START_DATE}' and '{END_DATE}'
 		group by uca.user_id
 	),
 	dataOutlet as (
