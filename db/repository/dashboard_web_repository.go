@@ -633,7 +633,7 @@ func (repo DashboardWebRepository) GetOmzetValue(ctx context.Context, parameter 
 		WHERE sih.transaction_date is not null 
 			and coh.id is not null` + whereStatement + `
 			group by r.group_id
-			order by r.group_id asc`
+			order by r.group_id desc`
 
 	rows, err := repo.DB.Query(query)
 	if err != nil {
