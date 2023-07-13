@@ -204,6 +204,15 @@ var (
 			and soh.transaction_date between '{START_DATE}' and '{END_DATE}' 
 		group by c.id 
 	),
+	dataTransaction as (
+		select c.id as customer_id, count(soh.id) as total_transaction
+		from customer c 
+		left join sales_order_header soh ON soh.cust_bill_to_id = c.id 
+		where lower(document_no) like '%oso%' 
+			and soh.status='submitted'
+			and soh.transaction_date between '{START_DATE}' and '{END_DATE}' 
+		group by c.id 
+	),
 	dataInvoice as (
 		select r.id region_id, count(sih.id) total_invoice
 		from sales_invoice_header sih 
@@ -270,7 +279,7 @@ var (
 	select r.id, r."_name",
 	coalesce(sum(dvs.visit_user),0) as total_visit_user,
 	sum(case when dro.total_transaction>1 then(dro.total_transaction-1) else 0 end) as total_repeat_order_user,
-	coalesce (sum(dro.total_transaction), 0) as total_order_user,
+	coalesce (sum(dt.total_transaction), 0) as total_order_user,
 	count(u.id) filter (
 		where u.fcm_token is not null 
 			and u.first_login_time between '{START_DATE}' and '{END_DATE}' 
@@ -291,6 +300,7 @@ var (
 		left join dataActiveOutlet dao on dao.region_id= r.id
 		left join dataInvoice di on di.region_id = r.id
 		left join dataCompleteCustomer dcc on dcc.region_id = r.id
+		left join dataTransaction dt on dt.customer_id = c.id
 	{WHERE_STATEMENT}
 	group by r.id, ddo.total_outlet, dao.active_outlet, di.total_invoice, dcc.total_complete_customer
 	`
