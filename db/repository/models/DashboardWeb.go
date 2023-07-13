@@ -198,9 +198,9 @@ var (
 	with dataRepeatOrder as (
 		select c.id as customer_id, count(soh.id) as total_transaction
 		from customer c 
-		left join sales_order_header soh ON soh.cust_bill_to_id = c.id 
-		where lower(document_no) like '%oso%' 
-			and soh.status='submitted'
+		left join sales_invoice_header soh ON soh.cust_bill_to_id = c.id 
+		where soh.status='submitted'
+			and soh.transaction_source_document_no like 'CO%'
 			and soh.transaction_date between '{START_DATE}' and '{END_DATE}' 
 		group by c.id 
 	),
