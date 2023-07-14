@@ -282,7 +282,7 @@ var (
 	coalesce (sum(dt.total_transaction), 0) as total_order_user,
 	count(u.id) filter (
 		where u.fcm_token is not null 
-			and u.first_login_time between '{START_DATE}' and '{END_DATE}' 
+			and u.first_login_time::date between '{START_DATE}' and '{END_DATE}' 
 			and length(trim(u.fcm_token))>0
 	) as total_register_user,
 	coalesce(count(dro.customer_id) filter (where dro.total_transaction > 1), 0) as customer_count_repeat_order,
