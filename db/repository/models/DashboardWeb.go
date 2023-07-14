@@ -251,7 +251,7 @@ var (
 		join customer_order_header coh on coh.document_no = sih.transaction_source_document_no 
 		left join region r on r.id = b.region_id
 		where c.created_date IS not NULL 
-			and c.show_in_apps = 1 and sih.transaction_date between '{START_DATE}' and '{END_DATE}'
+			and sih.transaction_date between '{START_DATE}' and '{END_DATE}'
 			and lower(sih.transaction_source_document_no) like 'co%' 
 			and coh.status in ('submitted','finish')
 		group by r.id 
