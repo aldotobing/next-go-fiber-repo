@@ -273,7 +273,6 @@ var (
 			and (c.customer_phone is not null or c.customer_phone != '')
 			and (c.customer_code is not null or c.customer_code != '')
 			and c.created_date IS not null and c.show_in_apps = 1
-			and us.first_login_time::date between '{START_DATE}' and '{END_DATE}'
 		group by r.id
 	)
 	select r.id, r."_name",
