@@ -113,7 +113,7 @@ func (repository DashboardWebRepository) scanBranchCustomerDetailRows(rows *sql.
 		&res.CustomerBranchName, &res.CustomerBranchCode,
 		&res.CustomerRegionName, &res.CustomerRegionGroupName,
 		&res.CustomerTypeName,
-		&res.TotalRepeatUser, &res.TotalOrderUser,
+		&res.TotalRepeatUser, &res.CustomerCountRepeatOrder, &res.TotalOrderUser,
 		&res.TotalInvoice, &res.TotalCheckin, &res.TotalAktifOutlet, &res.CustomerClassName, &res.CustomerCityName,
 		&res.StatusComplete,
 	)
@@ -167,7 +167,7 @@ func (repository DashboardWebRepository) scanBranchCustomerDetailReportRows(rows
 		&res.CustomerBranchName, &res.CustomerBranchCode,
 		&res.CustomerRegionName, &res.CustomerRegionGroupName,
 		&res.CustomerTypeName,
-		&res.TotalRepeatUser, &res.TotalOrderUser,
+		&res.TotalRepeatUser, &res.CustomerCountRepeatOrder, &res.TotalOrderUser,
 		&res.TotalInvoice, &res.TotalCheckin, &res.TotalAktifOutlet, &res.CustomerClassName, &res.CustomerCityName,
 		&res.StatusInstall, &res.StatusComplete,
 	)

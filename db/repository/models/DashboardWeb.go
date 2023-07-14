@@ -38,23 +38,24 @@ type DashboardWebRegionDetail struct {
 }
 
 type DashboardWebBranchDetail struct {
-	CustomerID              *string `json:"customer_id_detail"`
-	CustomerName            *string `json:"customer_name_detail"`
-	CustomerCode            *string `json:"customer_code_detail"`
-	CustomerBranchName      *string `json:"customer_branch_name_detail"`
-	CustomerBranchCode      *string `json:"customer_branch_code_detail"`
-	CustomerRegionName      *string `json:"customer_region_name_detail"`
-	CustomerRegionGroupName *string `json:"customer_region_group_name_detail"`
-	CustomerTypeName        *string `json:"customer_type_name_detail"`
-	TotalRepeatUser         *string `json:"total_repeat_order_user_customer_detail"`
-	TotalOrderUser          *string `json:"total_order_user_customer_detail"`
-	TotalInvoice            *string `json:"total_invoice_user_customer_detail"`
-	TotalCheckin            *string `json:"total_checkin_user_customer_detail"`
-	TotalAktifOutlet        *string `json:"total_aktif_outlet"`
-	CustomerClassName       *string `json:"customer_class_name_detail"`
-	CustomerCityName        *string `json:"customer_city_name_detail"`
-	StatusInstall           *string `json:"status_install"`
-	StatusComplete          *string `json:"status_complete"`
+	CustomerID               *string `json:"customer_id_detail"`
+	CustomerName             *string `json:"customer_name_detail"`
+	CustomerCode             *string `json:"customer_code_detail"`
+	CustomerBranchName       *string `json:"customer_branch_name_detail"`
+	CustomerBranchCode       *string `json:"customer_branch_code_detail"`
+	CustomerRegionName       *string `json:"customer_region_name_detail"`
+	CustomerRegionGroupName  *string `json:"customer_region_group_name_detail"`
+	CustomerTypeName         *string `json:"customer_type_name_detail"`
+	TotalRepeatUser          *string `json:"total_repeat_order_user_customer_detail"`
+	CustomerCountRepeatOrder *string `json:"customer_count_repeat_order_detail"`
+	TotalOrderUser           *string `json:"total_order_user_customer_detail"`
+	TotalInvoice             *string `json:"total_invoice_user_customer_detail"`
+	TotalCheckin             *string `json:"total_checkin_user_customer_detail"`
+	TotalAktifOutlet         *string `json:"total_aktif_outlet"`
+	CustomerClassName        *string `json:"customer_class_name_detail"`
+	CustomerCityName         *string `json:"customer_city_name_detail"`
+	StatusInstall            *string `json:"status_install"`
+	StatusComplete           *string `json:"status_complete"`
 }
 
 type DashboardWebGetWithUserID struct {
