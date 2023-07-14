@@ -273,6 +273,7 @@ var (
 			and (c.customer_phone is not null or c.customer_phone != '')
 			and (c.customer_code is not null or c.customer_code != '')
 			and c.created_date IS not null and c.show_in_apps = 1
+			and us.fcm_token is not null and length(trim(us.fcm_token))>0
 		group by r.id
 	)
 	select r.id, r."_name",
