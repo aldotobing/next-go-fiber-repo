@@ -131,6 +131,7 @@ type DashboardTrackingInvoice struct {
 	CustomerOrderCreatedDate sql.NullString `json:"customer_order_created_date"`
 	SalesOrderDocumentNo     sql.NullString `json:"sales_order_document_no"`
 	SalesOrderCreatedDate    sql.NullString `json:"sales_order_created_date"`
+	InvoiceAcceptedDate      sql.NullString `json:"invoice_accepted_date"`
 	InvoiceCreatedDate       sql.NullString `json:"invoice_created_date"`
 	InvoiceUpdatedDate       sql.NullString `json:"invoice_updated_date"`
 	DueDate                  sql.NullString `json:"due_date"`
