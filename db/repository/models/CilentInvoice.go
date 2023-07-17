@@ -40,7 +40,6 @@ type CilentInvoice struct {
 	GlobalDiscAmount     *string              `json:"global_disc_amount"`
 	ListLine             *[]CilentInvoiceLine `json:"list_line"`
 	InvoiceDate          *string              `json:"invoice_date"`
-	PaidDate             *string              `json:"paid_date"`
 }
 
 // CilentInvoiceParameter ...
