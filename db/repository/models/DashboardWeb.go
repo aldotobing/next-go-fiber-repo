@@ -38,23 +38,24 @@ type DashboardWebRegionDetail struct {
 }
 
 type DashboardWebBranchDetail struct {
-	CustomerID              *string `json:"customer_id_detail"`
-	CustomerName            *string `json:"customer_name_detail"`
-	CustomerCode            *string `json:"customer_code_detail"`
-	CustomerBranchName      *string `json:"customer_branch_name_detail"`
-	CustomerBranchCode      *string `json:"customer_branch_code_detail"`
-	CustomerRegionName      *string `json:"customer_region_name_detail"`
-	CustomerRegionGroupName *string `json:"customer_region_group_name_detail"`
-	CustomerTypeName        *string `json:"customer_type_name_detail"`
-	TotalRepeatUser         *string `json:"total_repeat_order_user_customer_detail"`
-	TotalOrderUser          *string `json:"total_order_user_customer_detail"`
-	TotalInvoice            *string `json:"total_invoice_user_customer_detail"`
-	TotalCheckin            *string `json:"total_checkin_user_customer_detail"`
-	TotalAktifOutlet        *string `json:"total_aktif_outlet"`
-	CustomerClassName       *string `json:"customer_class_name_detail"`
-	CustomerCityName        *string `json:"customer_city_name_detail"`
-	StatusInstall           *string `json:"status_install"`
-	StatusComplete          *string `json:"status_complete"`
+	CustomerID               *string `json:"customer_id_detail"`
+	CustomerName             *string `json:"customer_name_detail"`
+	CustomerCode             *string `json:"customer_code_detail"`
+	CustomerBranchName       *string `json:"customer_branch_name_detail"`
+	CustomerBranchCode       *string `json:"customer_branch_code_detail"`
+	CustomerRegionName       *string `json:"customer_region_name_detail"`
+	CustomerRegionGroupName  *string `json:"customer_region_group_name_detail"`
+	CustomerTypeName         *string `json:"customer_type_name_detail"`
+	TotalRepeatUser          *string `json:"total_repeat_order_user_customer_detail"`
+	CustomerCountRepeatOrder *string `json:"customer_count_repeat_order_detail"`
+	TotalOrderUser           *string `json:"total_order_user_customer_detail"`
+	TotalInvoice             *string `json:"total_invoice_user_customer_detail"`
+	TotalCheckin             *string `json:"total_checkin_user_customer_detail"`
+	TotalAktifOutlet         *string `json:"total_aktif_outlet"`
+	CustomerClassName        *string `json:"customer_class_name_detail"`
+	CustomerCityName         *string `json:"customer_city_name_detail"`
+	StatusInstall            *string `json:"status_install"`
+	StatusComplete           *string `json:"status_complete"`
 }
 
 type DashboardWebGetWithUserID struct {
@@ -198,6 +199,15 @@ var (
 	with dataRepeatOrder as (
 		select c.id as customer_id, count(soh.id) as total_transaction
 		from customer c 
+		left join sales_invoice_header soh ON soh.cust_bill_to_id = c.id 
+		where soh.status='submitted'
+			and soh.transaction_source_document_no like 'CO%'
+			and soh.transaction_date between '{START_DATE}' and '{END_DATE}' 
+		group by c.id 
+	),
+	dataTransaction as (
+		select c.id as customer_id, count(soh.id) as total_transaction
+		from customer c 
 		left join sales_order_header soh ON soh.cust_bill_to_id = c.id 
 		where lower(document_no) like '%oso%' 
 			and soh.status='submitted'
@@ -218,7 +228,9 @@ var (
 	dataVisitedUser as (
 		select uca.user_id as user_id, count(uca.id) as visit_user
 		from user_checkin_activity uca
-		where uca.checkin_time between '{START_DATE}' and '{END_DATE}'
+			left join _user us on us.id = uca.user_id
+			left join customer cus on cus.customer_code = us.login
+		where  cus.show_in_apps = 1 and uca.checkin_time::date between '{START_DATE}' and '{END_DATE}'
 		group by uca.user_id
 	),
 	dataOutlet as (
@@ -240,7 +252,7 @@ var (
 		join customer_order_header coh on coh.document_no = sih.transaction_source_document_no 
 		left join region r on r.id = b.region_id
 		where c.created_date IS not NULL 
-			and c.show_in_apps = 1 and sih.transaction_date between '{START_DATE}' and '{END_DATE}'
+			and sih.transaction_date between '{START_DATE}' and '{END_DATE}'
 			and lower(sih.transaction_source_document_no) like 'co%' 
 			and coh.status in ('submitted','finish')
 		group by r.id 
@@ -262,16 +274,16 @@ var (
 			and (c.customer_phone is not null or c.customer_phone != '')
 			and (c.customer_code is not null or c.customer_code != '')
 			and c.created_date IS not null and c.show_in_apps = 1
-			and us.first_login_time::date between '{START_DATE}' and '{END_DATE}'
+			and us.fcm_token is not null and length(trim(us.fcm_token))>0
 		group by r.id
 	)
 	select r.id, r."_name",
 	coalesce(sum(dvs.visit_user),0) as total_visit_user,
 	sum(case when dro.total_transaction>1 then(dro.total_transaction-1) else 0 end) as total_repeat_order_user,
-	coalesce (sum(dro.total_transaction), 0) as total_order_user,
+	coalesce (sum(dt.total_transaction), 0) as total_order_user,
 	count(u.id) filter (
 		where u.fcm_token is not null 
-			and u.first_login_time between '{START_DATE}' and '{END_DATE}' 
+			and u.first_login_time::date between '{START_DATE}' and '{END_DATE}' 
 			and length(trim(u.fcm_token))>0
 	) as total_register_user,
 	coalesce(count(dro.customer_id) filter (where dro.total_transaction > 1), 0) as customer_count_repeat_order,
@@ -289,6 +301,7 @@ var (
 		left join dataActiveOutlet dao on dao.region_id= r.id
 		left join dataInvoice di on di.region_id = r.id
 		left join dataCompleteCustomer dcc on dcc.region_id = r.id
+		left join dataTransaction dt on dt.customer_id = c.id
 	{WHERE_STATEMENT}
 	group by r.id, ddo.total_outlet, dao.active_outlet, di.total_invoice, dcc.total_complete_customer
 	`

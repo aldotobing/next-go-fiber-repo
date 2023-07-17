@@ -113,7 +113,7 @@ func (repository DashboardWebRepository) scanBranchCustomerDetailRows(rows *sql.
 		&res.CustomerBranchName, &res.CustomerBranchCode,
 		&res.CustomerRegionName, &res.CustomerRegionGroupName,
 		&res.CustomerTypeName,
-		&res.TotalRepeatUser, &res.TotalOrderUser,
+		&res.TotalRepeatUser, &res.CustomerCountRepeatOrder, &res.TotalOrderUser,
 		&res.TotalInvoice, &res.TotalCheckin, &res.TotalAktifOutlet, &res.CustomerClassName, &res.CustomerCityName,
 		&res.StatusComplete,
 	)
@@ -167,9 +167,9 @@ func (repository DashboardWebRepository) scanBranchCustomerDetailReportRows(rows
 		&res.CustomerBranchName, &res.CustomerBranchCode,
 		&res.CustomerRegionName, &res.CustomerRegionGroupName,
 		&res.CustomerTypeName,
-		&res.TotalRepeatUser, &res.TotalOrderUser,
+		&res.TotalRepeatUser, &res.CustomerCountRepeatOrder, &res.TotalOrderUser,
 		&res.TotalInvoice, &res.TotalCheckin, &res.TotalAktifOutlet, &res.CustomerClassName, &res.CustomerCityName,
-		&res.StatusInstall, &res.StatusComplete,
+		&res.StatusComplete, &res.StatusInstall,
 	)
 	if err != nil {
 
@@ -633,7 +633,7 @@ func (repo DashboardWebRepository) GetOmzetValue(ctx context.Context, parameter 
 		WHERE sih.transaction_date is not null 
 			and coh.id is not null` + whereStatement + `
 			group by r.group_id
-			order by r.group_id asc`
+			order by r.group_id desc`
 
 	rows, err := repo.DB.Query(query)
 	if err != nil {
