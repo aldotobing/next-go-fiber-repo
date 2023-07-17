@@ -1025,7 +1025,7 @@ func (repo DashboardWebRepository) TrackingInvoice(ctx context.Context, input mo
 			&temp.InvoiceID, &temp.InvoiceNumber,
 			&temp.CustomerOrderDocumentNo, &temp.CustomerOrderCreatedDate,
 			&temp.SalesOrderDocumentNo, &temp.SalesOrderCreatedDate,
-			&temp.InvoiceAcceptedDate, &temp.InvoiceCreatedDate, &temp.InvoiceUpdatedDate,
+			&temp.InvoiceCreatedDate, &temp.InvoiceAcceptedDate, &temp.InvoiceUpdatedDate,
 			&temp.DueDate)
 		if err != nil {
 			return
