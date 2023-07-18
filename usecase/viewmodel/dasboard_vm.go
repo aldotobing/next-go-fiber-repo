@@ -140,6 +140,7 @@ type DashboardTrackingInvoiceVM struct {
 	InvoiceID                   string `json:"invoice_id"`
 	InvoiceNumber               string `json:"invoice_number"`
 	InvoiceDate                 string `json:"invoice_date"`
+	AcceptedDate                string `json:"accepted_date"`
 	ProcessedDate               string `json:"processed_date"`
 	ConfimationDate             string `json:"confirmation_date"`
 	DueDate                     string `json:"due_date"`
