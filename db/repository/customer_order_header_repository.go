@@ -128,7 +128,7 @@ func (repository CustomerOrderHeaderRepository) FindAll(ctx context.Context, par
 	}
 
 	query := models.CustomerOrderHeaderSelectStatement + ` ` + models.CustomerOrderHeaderWhereStatement + ` ` + conditionString + `
-		AND (LOWER(cus."customer_name") LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
+		AND (LOWER(cus."customer_name") LIKE $1 or LOWER(def."document_no") LIKE $1) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
 	if err != nil {
 		return data, count, err
