@@ -42,7 +42,7 @@ var (
 	// CustomerSelectStatement ...
 
 	TransactionVASelectStatement = `
-	select def.id,def.invoice_code, def.va_code, def.amount,def.va_pair_id,
+	select def.id,def.invoice_code, def.va_code, ROUND(def.amount) as _amount,def.va_pair_id,
 	def.va_ref1,def.va_ref2, def.start_date, def.end_date, def.va_partner_code, def.paid_status,
 	c.customer_name as cus_name
 		from virtual_account_transaction def
