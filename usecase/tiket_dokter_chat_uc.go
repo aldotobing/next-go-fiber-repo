@@ -17,7 +17,7 @@ type TicketDokterChatUC struct {
 }
 
 // BuildBody ...
-func (uc TicketDokterChatUC) BuildBody(data *models.TicketDokterChat, res *viewmodel.TicketDocterChatVM) {
+func (uc TicketDokterChatUC) BuildBody(data *models.TicketDokterChat, res *viewmodel.TicketDocterChatDetailVM) {
 	res.ID = data.ID
 	res.TicketDokterID = data.TicketDokterID
 	res.ChatBy = data.ChatBy
@@ -26,7 +26,7 @@ func (uc TicketDokterChatUC) BuildBody(data *models.TicketDokterChat, res *viewm
 }
 
 // SelectAll ...
-func (uc TicketDokterChatUC) FindByTicketDocterID(c context.Context, parameter models.TicketDokterChatParameter, ticketDokterID string) (res []viewmodel.TicketDocterChatVM, err error) {
+func (uc TicketDokterChatUC) FindByTicketDocterID(c context.Context, parameter models.TicketDokterChatParameter, ticketDokterID string) (res viewmodel.TicketDocterChatVM, err error) {
 	_, _, _, _, parameter.Sort = uc.setPaginationParameter(0, 0, parameter.By, parameter.Sort, models.TicketDokterChatOrderBy, models.TicketDokterChatOrderByrByString)
 
 	repo := repository.NewTicketDokterChatRepository(uc.DB)
@@ -36,22 +36,27 @@ func (uc TicketDokterChatUC) FindByTicketDocterID(c context.Context, parameter m
 		return res, err
 	}
 
+	var detailData []viewmodel.TicketDocterChatDetailVM
 	for i := range data {
-		var temp viewmodel.TicketDocterChatVM
+		var temp viewmodel.TicketDocterChatDetailVM
 		uc.BuildBody(&data[i], &temp)
 
-		res = append(res, temp)
+		detailData = append(detailData, temp)
 	}
 
-	if res == nil {
-		res = make([]viewmodel.TicketDocterChatVM, 0)
+	if detailData == nil {
+		detailData = make([]viewmodel.TicketDocterChatDetailVM, 0)
+	}
+
+	res = viewmodel.TicketDocterChatVM{
+		ListTicketChatDoctor: detailData,
 	}
 
 	return res, err
 }
 
 // Add ...
-func (uc TicketDokterChatUC) Add(c context.Context, in *requests.TicketDokterChatRequest) (res viewmodel.TicketDocterChatVM, err error) {
+func (uc TicketDokterChatUC) Add(c context.Context, in *requests.TicketDokterChatRequest) (res viewmodel.TicketDocterChatDetailVM, err error) {
 	repo := repository.NewTicketDokterChatRepository(uc.DB)
 	data := models.TicketDokterChat{
 		TicketDokterID: &in.TicketDocterID,
@@ -65,7 +70,7 @@ func (uc TicketDokterChatUC) Add(c context.Context, in *requests.TicketDokterCha
 		return res, err
 	}
 
-	res = viewmodel.TicketDocterChatVM{
+	res = viewmodel.TicketDocterChatDetailVM{
 		ID:             data.ID,
 		TicketDokterID: data.TicketDokterID,
 		Description:    data.Description,
