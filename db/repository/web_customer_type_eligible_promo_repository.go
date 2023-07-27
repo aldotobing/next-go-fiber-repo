@@ -12,7 +12,6 @@ import (
 // IWebCustomerTypeEligiblePromo ...
 type IWebCustomerTypeEligiblePromo interface {
 	SelectAll(c context.Context, parameter models.WebCustomerTypeEligiblePromoParameter) ([]models.WebCustomerTypeEligiblePromo, error)
-	FindAll(ctx context.Context, parameter models.WebCustomerTypeEligiblePromoParameter) ([]models.WebCustomerTypeEligiblePromo, int, error)
 }
 
 // WebCustomerTypeEligiblePromo ...
@@ -90,41 +89,4 @@ func (repository WebCustomerTypeEligiblePromo) SelectAll(c context.Context, para
 	}
 
 	return data, err
-}
-
-// FindAll ...
-func (repository WebCustomerTypeEligiblePromo) FindAll(ctx context.Context, parameter models.WebCustomerTypeEligiblePromoParameter) (data []models.WebCustomerTypeEligiblePromo, count int, err error) {
-	conditionString := ``
-
-	if parameter.PromoID != "" {
-		conditionString += ` AND PR.ID = ` + parameter.PromoID + ` `
-	}
-
-	query := models.WebCustomerTypeEligiblePromoSelectStatement + ` ` + models.WebCustomerTypeEligiblePromoWhereStatement + ` ` + conditionString + `
-		AND (LOWER(pr."_name") LIKE $1  )` + `GROUP BY ` + `ORDER BY` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
-	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
-	if err != nil {
-		return data, count, err
-	}
-
-	defer rows.Close()
-	for rows.Next() {
-		temp, err := repository.scanRows(rows)
-		if err != nil {
-			return data, count, err
-		}
-		data = append(data, temp)
-	}
-	err = rows.Err()
-	if err != nil {
-		return data, count, err
-	}
-
-	query = `SELECT COUNT (CTEP.ID)
-			FROM customer_type_eligible_promo CTEP
-			LEFT JOIN customer_type ct ON ct.id = CTEP.customer_type_id
-			LEFT JOIN promo PR ON PR.ID = CTEP.promo_id ` + models.WebCustomerTypeEligiblePromoWhereStatement + ` ` +
-		conditionString + ` AND (LOWER(pr."_name") LIKE $1)`
-	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
-	return data, count, err
 }

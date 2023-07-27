@@ -7,7 +7,6 @@ import (
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/pkg/functioncaller"
 	"nextbasis-service-v-0.1/pkg/logruslogger"
-	"nextbasis-service-v-0.1/usecase/viewmodel"
 )
 
 // WebCustomerTypeEligiblePromoUC ...
@@ -36,24 +35,4 @@ func (uc WebCustomerTypeEligiblePromoUC) SelectAll(c context.Context, parameter 
 	}
 
 	return res, err
-}
-
-// FindAll ...
-func (uc WebCustomerTypeEligiblePromoUC) FindAll(c context.Context, parameter models.WebCustomerTypeEligiblePromoParameter) (res []models.WebCustomerTypeEligiblePromo, p viewmodel.PaginationVM, err error) {
-	parameter.Offset, parameter.Limit, parameter.Page, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.WebCustomerTypeEligiblePromoOrderBy, models.WebCustomerTypeEligiblePromoOrderByrByString)
-
-	var count int
-	repo := repository.NewWebCustomerTypeEligiblePromoRepository(uc.DB)
-	res, count, err = repo.FindAll(c, parameter)
-	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
-		return res, p, err
-	}
-
-	p = uc.setPaginationResponse(parameter.Page, parameter.Limit, count)
-	for i := range res {
-		uc.BuildBody(&res[i])
-	}
-
-	return res, p, err
 }

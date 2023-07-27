@@ -80,16 +80,16 @@ func (uc WebPromoUC) Add(c context.Context, data *requests.WebPromoRequest, imgB
 	// now := time.Now().UTC()
 	// strNow := now.Format(time.RFC3339)
 	res = models.WebPromo{
-
-		Code:               &data.Code,
-		PromoName:          &data.PromoName,
-		PromoDescription:   &data.PromoDescription,
-		PromoUrlBanner:     &strImgBanner,
-		StartDate:          &data.StartDate,
-		EndDate:            &data.EndDate,
-		ShowInApp:          &data.ShowInApp,
-		CustomerTypeIdList: &data.CustomerTypeIdList,
-		RegionAreaIdList:   &data.RegionIDList,
+		Code:                &data.Code,
+		PromoName:           &data.PromoName,
+		PromoDescription:    &data.PromoDescription,
+		PromoUrlBanner:      &strImgBanner,
+		StartDate:           &data.StartDate,
+		EndDate:             &data.EndDate,
+		ShowInApp:           &data.ShowInApp,
+		CustomerTypeIdList:  &data.CustomerTypeIdList,
+		RegionAreaIdList:    &data.RegionIDList,
+		CustomerLevelIdList: &data.CustomerLevelIDList,
 	}
 	res.ID, err = repo.Add(c, &res)
 	if err != nil {
@@ -127,17 +127,18 @@ func (uc WebPromoUC) Edit(c context.Context, data *requests.WebPromoRequest, img
 
 	repo := repository.NewWebPromoRepository(uc.DB)
 	res = models.WebPromo{
-		ID:                 &id,
-		Code:               &data.Code,
-		PromoName:          &data.PromoName,
-		PromoDescription:   &data.PromoDescription,
-		PromoUrlBanner:     &strImgBanner,
-		StartDate:          &data.StartDate,
-		EndDate:            &data.EndDate,
-		ShowInApp:          &data.ShowInApp,
-		Active:             &data.Active,
-		CustomerTypeIdList: &data.CustomerTypeIdList,
-		RegionAreaIdList:   &data.RegionIDList,
+		ID:                  &id,
+		Code:                &data.Code,
+		PromoName:           &data.PromoName,
+		PromoDescription:    &data.PromoDescription,
+		PromoUrlBanner:      &strImgBanner,
+		StartDate:           &data.StartDate,
+		EndDate:             &data.EndDate,
+		ShowInApp:           &data.ShowInApp,
+		Active:              &data.Active,
+		CustomerTypeIdList:  &data.CustomerTypeIdList,
+		RegionAreaIdList:    &data.RegionIDList,
+		CustomerLevelIdList: &data.CustomerLevelIDList,
 	}
 
 	res.ID, err = repo.Edit(c, &res)

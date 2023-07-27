@@ -235,6 +235,33 @@ func (repository WebPromo) Edit(c context.Context, model *models.WebPromo) (res 
 			return
 		}
 	}
+
+	if *model.CustomerLevelIdList != "" {
+		regionAreaDeleteStatement := `DELETE FROM customer_level_eligible_promo where promo_id = $1`
+		err = repository.DB.QueryRowContext(c, regionAreaDeleteStatement, *res).Err()
+		if err != nil {
+			return
+		}
+
+		regionAreaIDArr := strings.Split(*model.CustomerLevelIdList, ",")
+
+		var customerLevelValuesStatement string
+		for _, datum := range regionAreaIDArr {
+			if customerLevelValuesStatement == "" {
+				customerLevelValuesStatement += `(` + datum + `, ` + *res + `, now(), now())`
+			} else {
+				customerLevelValuesStatement += `, (` + datum + `, ` + *res + `, now(), now())`
+			}
+		}
+		customerLevelUpdateStatement := `insert into customer_level_eligible_promo 
+		(customer_level_id, promo_id, created_date, modified_date)
+		Values ` + customerLevelValuesStatement
+
+		_, err = repository.DB.Query(customerLevelUpdateStatement)
+		if err != nil {
+			return
+		}
+	}
 	return res, err
 }
 
@@ -287,6 +314,27 @@ func (repository WebPromo) Add(c context.Context, model *models.WebPromo) (res *
 			if err != nil {
 				return res, err
 			}
+		}
+	}
+
+	if *model.CustomerLevelIdList != "" {
+		customerLevelIDs := strings.Split(*model.CustomerLevelIdList, ",")
+		var customerLevelValuesStatement string
+		for _, datum := range customerLevelIDs {
+			if customerLevelValuesStatement == "" {
+				customerLevelValuesStatement += `(` + datum + `, ` + *res + `, now(), now())`
+			} else {
+				customerLevelValuesStatement += `, (` + datum + `, ` + *res + `, now(), now())`
+			}
+		}
+
+		insertStatement := `insert into customer_level_eligible_promo 
+		(customer_level_id, promo_id, created_date, modified_date)
+		Values ` + customerLevelValuesStatement
+
+		err = repository.DB.QueryRowContext(c, insertStatement).Err()
+		if err != nil {
+			return
 		}
 	}
 
