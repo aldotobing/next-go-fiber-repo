@@ -204,5 +204,29 @@ func (h *WebPromoHandler) FindByID(ctx *fiber.Ctx) error {
 		res.RegionAreaIdList = &regionAreaIDList
 	}
 
+	customerLevelUCEligible := usecase.WebCustomerLevelEligiblePromoUC{ContractUC: h.ContractUC}
+	customerLevelresEligible, errEligible := customerLevelUCEligible.SelectAll(c, models.WebCustomerLevelEligiblePromoParameter{
+		PromoID: *res.ID,
+		By:      "pr._name",
+	})
+
+	if customerLevelresEligible == nil {
+		customerLevelresEligible = make([]models.WebCustomerLevelEligiblePromo, 0)
+	}
+	var customerLevelIDList string
+	for i := range customerLevelresEligible {
+		if customerLevelresEligible[i].CustomerLevelId != nil {
+			if customerLevelIDList == "" {
+				customerLevelIDList += *customerLevelresEligible[i].CustomerLevelId
+			} else {
+				customerLevelIDList += "," + *customerLevelresEligible[i].CustomerLevelId
+			}
+		}
+	}
+	if errEligible == nil {
+		res.CustomerLevelList = &customerLevelresEligible
+		res.CustomerLevelIdList = &customerLevelIDList
+	}
+
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
