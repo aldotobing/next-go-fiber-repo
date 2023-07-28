@@ -52,7 +52,8 @@ var (
 	ps.code as salesman_code ,b.id::character varying as branch_id
 	from customer c  
 	left join partner p on p.id=c.partner_id 
-	left join salesman s on s.id = c.salesman_id join partner ps on ps.id = s.partner_id 
+	left join salesman s on s.id = c.salesman_id 
+	left join partner ps on ps.id = s.partner_id 
 	left join customer_type ctp on ctp.id = c.customer_type_id 
 	left join price_list pl on pl.id =c.price_list_id 
 	left join country cntr on cntr.id = p.country_id 
