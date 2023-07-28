@@ -69,8 +69,7 @@ var (
 										JOIN ITEM I ON I.ID = SIL.ITEM_ID
 										JOIN UOM U ON U.ID = SIL.UOM_ID
 										JOIN CUSTOMER C ON C.ID = subDEF.CUST_BILL_TO_ID
-										WHERE SIL.HEADER_ID = subDEF.ID AND subDEF.CUST_BILL_TO_ID = DEF.CUST_BILL_TO_ID
-										AND subdef.transaction_date = def.transaction_date) T),
+										WHERE SUBDEF.id = DEF.ID) T),
 	DEF.TOTAL_PAID,
 	DEF.PAYMENT_METHOD
 	FROM SALES_INVOICE_HEADER DEF

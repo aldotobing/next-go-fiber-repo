@@ -66,6 +66,7 @@ type CustomerParameter struct {
 	Name           string `json:"customer_name"`
 	CustomerTypeId string `json:"custome_type_id"`
 	UserId         string `json:"admin_user_id"`
+	FlagToken      bool   `json:"flag_token"`
 	Search         string `json:"search"`
 	Page           int    `json:"page"`
 	Offset         int    `json:"offset"`

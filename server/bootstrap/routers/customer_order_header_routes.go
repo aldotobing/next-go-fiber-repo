@@ -27,6 +27,7 @@ func (route CustomerOrderHeaderRoutes) RegisterRoute() {
 	r.Get("/:customer_id", handler.AppsFindAll)
 	r.Get("/select/:customer_id", handler.AppsSelectAll)
 	r.Get("/id/:id", handler.AppsFindByID)
+	r.Put("/reupdate", handler.ReUpdateDate)
 
 	r2 := route.RouterGroup.Group("/api/rest/customerorder")
 	// r.Use(jwtMiddleware.VerifyUser)

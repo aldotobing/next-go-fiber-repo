@@ -158,14 +158,15 @@ func (repository WebPromo) FindByID(c context.Context, parameter models.WebPromo
 // Edit ...
 func (repository WebPromo) Edit(c context.Context, model *models.WebPromo) (res *string, err error) {
 	statement := `UPDATE promo SET
-	_name = $1,
-	description = $2,
-	url_banner = $3,
-	show_in_app = $4,
-	start_date = $5,
-	end_date = $6,
-	active = $7
-	WHERE id = $8
+		_name = $1,
+		description = $2,
+		url_banner = $3,
+		show_in_app = $4,
+		start_date = $5,
+		end_date = $6,
+		active = $7,
+		code = $8
+	WHERE id = $9
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		model.PromoName,
@@ -175,9 +176,91 @@ func (repository WebPromo) Edit(c context.Context, model *models.WebPromo) (res 
 		model.StartDate,
 		model.EndDate,
 		model.Active,
+		model.Code,
 		model.ID).Scan(&res)
 	if err != nil {
 		return res, err
+	}
+
+	if *model.CustomerTypeIdList != "" {
+		customerTypeDeleteStatement := `DELETE FROM customer_type_eligible_promo where promo_id = $1`
+		err = repository.DB.QueryRowContext(c, customerTypeDeleteStatement, *res).Err()
+		if err != nil {
+			return
+		}
+
+		customerTypeIDArr := strings.Split(*model.CustomerTypeIdList, ",")
+
+		var customerTypeIDValuesStatement string
+		for _, datum := range customerTypeIDArr {
+			if customerTypeIDValuesStatement == "" {
+				customerTypeIDValuesStatement += `(` + datum + `, ` + *res + `, now(), now())`
+			} else {
+				customerTypeIDValuesStatement += `, (` + datum + `, ` + *res + `, now(), now())`
+			}
+		}
+		customerTypeUpdateStatement := `insert into customer_type_eligible_promo 
+		(customer_type_id, promo_id, created_date, modified_date)
+		Values ` + customerTypeIDValuesStatement
+
+		err = repository.DB.QueryRowContext(c, customerTypeUpdateStatement).Err()
+		if err != nil {
+			return
+		}
+	}
+
+	if *model.RegionAreaIdList != "" {
+		regionAreaDeleteStatement := `DELETE FROM region_area_eligible_promo where promo_id = $1`
+		err = repository.DB.QueryRowContext(c, regionAreaDeleteStatement, *res).Err()
+		if err != nil {
+			return
+		}
+
+		regionAreaIDArr := strings.Split(*model.RegionAreaIdList, ",")
+
+		var regionAreaValuesStatement string
+		for _, datum := range regionAreaIDArr {
+			if regionAreaValuesStatement == "" {
+				regionAreaValuesStatement += `(` + datum + `, ` + *res + `, now(), now())`
+			} else {
+				regionAreaValuesStatement += `, (` + datum + `, ` + *res + `, now(), now())`
+			}
+		}
+		regionAreaUpdateStatement := `insert into region_area_eligible_promo 
+		(region_id, promo_id, created_date, modified_date)
+		Values ` + regionAreaValuesStatement
+
+		err = repository.DB.QueryRowContext(c, regionAreaUpdateStatement).Err()
+		if err != nil {
+			return
+		}
+	}
+
+	if *model.CustomerLevelIdList != "" {
+		regionAreaDeleteStatement := `DELETE FROM customer_level_eligible_promo where promo_id = $1`
+		err = repository.DB.QueryRowContext(c, regionAreaDeleteStatement, *res).Err()
+		if err != nil {
+			return
+		}
+
+		regionAreaIDArr := strings.Split(*model.CustomerLevelIdList, ",")
+
+		var customerLevelValuesStatement string
+		for _, datum := range regionAreaIDArr {
+			if customerLevelValuesStatement == "" {
+				customerLevelValuesStatement += `(` + datum + `, ` + *res + `, now(), now())`
+			} else {
+				customerLevelValuesStatement += `, (` + datum + `, ` + *res + `, now(), now())`
+			}
+		}
+		customerLevelUpdateStatement := `insert into customer_level_eligible_promo 
+		(customer_level_id, promo_id, created_date, modified_date)
+		Values ` + customerLevelValuesStatement
+
+		_, err = repository.DB.Query(customerLevelUpdateStatement)
+		if err != nil {
+			return
+		}
 	}
 	return res, err
 }
@@ -231,6 +314,27 @@ func (repository WebPromo) Add(c context.Context, model *models.WebPromo) (res *
 			if err != nil {
 				return res, err
 			}
+		}
+	}
+
+	if *model.CustomerLevelIdList != "" {
+		customerLevelIDs := strings.Split(*model.CustomerLevelIdList, ",")
+		var customerLevelValuesStatement string
+		for _, datum := range customerLevelIDs {
+			if customerLevelValuesStatement == "" {
+				customerLevelValuesStatement += `(` + datum + `, ` + *res + `, now(), now())`
+			} else {
+				customerLevelValuesStatement += `, (` + datum + `, ` + *res + `, now(), now())`
+			}
+		}
+
+		insertStatement := `insert into customer_level_eligible_promo 
+		(customer_level_id, promo_id, created_date, modified_date)
+		Values ` + customerLevelValuesStatement
+
+		err = repository.DB.QueryRowContext(c, insertStatement).Err()
+		if err != nil {
+			return
 		}
 	}
 

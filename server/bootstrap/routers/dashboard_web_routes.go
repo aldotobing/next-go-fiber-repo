@@ -27,6 +27,7 @@ func (route DashboardWebRoutes) RegisterRoute() {
 	r.Get("/", handler.GetData)
 	r.Get("/group", handler.GetDataByGroupID)
 	r.Get("/detail", handler.GetRegionDetailData)
+	r.Get("/detail/total/registered-user", handler.GetUserByRegionDetailData)
 	r.Get("/branch", handler.GetBranchCustomerData)
 	r.Get("/branch/select", handler.GetAllBranchCustomerData)
 	r.Get("/branch/select/report", handler.GetAllReportBranchCustomerData)
@@ -39,4 +40,6 @@ func (route DashboardWebRoutes) RegisterRoute() {
 	r.Get("/omzet/region", handler.GetOmzetValueByRegionID)
 	r.Get("/omzet/branch", handler.GetOmzetValueByBranchID)
 	r.Get("/omzet/customer", handler.GetOmzetValueByCustomerID)
+
+	r.Get("/tracking/invoice", handler.GetTrackingInvoiceData)
 }

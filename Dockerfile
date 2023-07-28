@@ -1,23 +1,26 @@
-# specify the base image to  be used for the application, alpine or ubuntu
-FROM golang:1.17-alpine
+# Use the official GoLang Docker image with Go 1.19 as the base image
+FROM golang:1.19-alpine
 
-# create a working directory inside the image
-WORKDIR /nextbasis-service-golang
+# Set the working directory inside the container
+WORKDIR /app
 
-# copy Go modules and dependencies to image
-COPY go.mod ./
+# Copy the Go module files to the working directory
+COPY go.mod go.sum ./
 
-# download Go modules and dependencies
+# Download the dependencies
 RUN go mod download
 
-# copy directory files i.e all files ending with .go
-COPY *.go ./
+# Copy the rest of the application source code to the working directory
+COPY . .
 
-# compile application
-RUN go build -o /nextbasis-service-golang/server
+# Change the working directory to the /server subdirectory
+WORKDIR /app/server
 
-# tells Docker that the container listens on specified network ports at runtime
-EXPOSE 8080
+# Build the Go application
+RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 
-# command to be used to execute when the image is used to start a container
-CMD [ "/nextbasis-service-golang" ]
+# Expose port 5050 for the API service
+EXPOSE 5000
+
+# Set the entry point of the container
+CMD ["./main"]

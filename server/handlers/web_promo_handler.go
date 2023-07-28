@@ -161,8 +161,22 @@ func (h *WebPromoHandler) FindByID(ctx *fiber.Ctx) error {
 		By:      "pr._name",
 	})
 
+	if resEligible == nil {
+		resEligible = make([]models.WebCustomerTypeEligiblePromo, 0)
+	}
+	var customerTypeIDList string
+	for i := range resEligible {
+		if resEligible[i].CustomerTypeId != nil {
+			if customerTypeIDList == "" {
+				customerTypeIDList += *resEligible[i].CustomerTypeId
+			} else {
+				customerTypeIDList += "," + *resEligible[i].CustomerTypeId
+			}
+		}
+	}
 	if errEligible == nil {
 		res.CustomerTypeList = &resEligible
+		res.CustomerTypeIdList = &customerTypeIDList
 	}
 
 	ucRegionEligible := usecase.WebRegionAreaEligiblePromoUC{ContractUC: h.ContractUC}
@@ -171,8 +185,47 @@ func (h *WebPromoHandler) FindByID(ctx *fiber.Ctx) error {
 		By:      "pr._name",
 	})
 
+	if resRegionEligible == nil {
+		resRegionEligible = make([]models.WebRegionAreaEligiblePromo, 0)
+	}
+
+	var regionAreaIDList string
+	for i := range resRegionEligible {
+		if resRegionEligible[i].RegionID != nil {
+			if regionAreaIDList == "" {
+				regionAreaIDList += *resRegionEligible[i].RegionID
+			} else {
+				regionAreaIDList += "," + *resRegionEligible[i].RegionID
+			}
+		}
+	}
 	if errRegionEligible == nil {
 		res.RegionAreaList = &resRegionEligible
+		res.RegionAreaIdList = &regionAreaIDList
+	}
+
+	customerLevelUCEligible := usecase.WebCustomerLevelEligiblePromoUC{ContractUC: h.ContractUC}
+	customerLevelresEligible, errEligible := customerLevelUCEligible.SelectAll(c, models.WebCustomerLevelEligiblePromoParameter{
+		PromoID: *res.ID,
+		By:      "pr._name",
+	})
+
+	if customerLevelresEligible == nil {
+		customerLevelresEligible = make([]models.WebCustomerLevelEligiblePromo, 0)
+	}
+	var customerLevelIDList string
+	for i := range customerLevelresEligible {
+		if customerLevelresEligible[i].CustomerLevelId != nil {
+			if customerLevelIDList == "" {
+				customerLevelIDList += *customerLevelresEligible[i].CustomerLevelId
+			} else {
+				customerLevelIDList += "," + *customerLevelresEligible[i].CustomerLevelId
+			}
+		}
+	}
+	if errEligible == nil {
+		res.CustomerLevelList = &customerLevelresEligible
+		res.CustomerLevelIdList = &customerLevelIDList
 	}
 
 	return h.SendResponse(ctx, res, nil, err, 0)

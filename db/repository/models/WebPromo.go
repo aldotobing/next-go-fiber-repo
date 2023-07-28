@@ -2,19 +2,21 @@ package models
 
 // WebPromo ...
 type WebPromo struct {
-	ID                 *string                         `json:"promo_id"`
-	Code               *string                         `json:"promo_code"`
-	PromoName          *string                         `json:"promo_name"`
-	PromoDescription   *string                         `json:"promo_description"`
-	PromoUrlBanner     *string                         `json:"promo_url_banner"`
-	StartDate          *string                         `json:"start_date"`
-	EndDate            *string                         `json:"end_date"`
-	Active             *int                            `json:"active"`
-	ShowInApp          *int                            `json:"show_in_app"`
-	CustomerTypeIdList *string                         `json:"customer_type_id_list"`
-	CustomerTypeList   *[]WebCustomerTypeEligiblePromo `json:"customer_type_list"`
-	RegionAreaIdList   *string                         `json:"region_area_id_list"`
-	RegionAreaList     *[]WebRegionAreaEligiblePromo   `json:"region_area_list"`
+	ID                  *string                          `json:"promo_id"`
+	Code                *string                          `json:"promo_code"`
+	PromoName           *string                          `json:"promo_name"`
+	PromoDescription    *string                          `json:"promo_description"`
+	PromoUrlBanner      *string                          `json:"promo_url_banner"`
+	StartDate           *string                          `json:"start_date"`
+	EndDate             *string                          `json:"end_date"`
+	Active              *int                             `json:"active"`
+	ShowInApp           *int                             `json:"show_in_app"`
+	CustomerTypeIdList  *string                          `json:"customer_type_id_list"`
+	CustomerTypeList    *[]WebCustomerTypeEligiblePromo  `json:"customer_type_list"`
+	RegionAreaIdList    *string                          `json:"region_area_id_list"`
+	RegionAreaList      *[]WebRegionAreaEligiblePromo    `json:"region_area_list"`
+	CustomerLevelIdList *string                          `json:"customer_Level_id_list"`
+	CustomerLevelList   *[]WebCustomerLevelEligiblePromo `json:"customer_Level_list"`
 }
 
 // WebPromoParameter ...
