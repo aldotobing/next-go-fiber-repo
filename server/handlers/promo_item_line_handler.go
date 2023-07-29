@@ -10,6 +10,7 @@ import (
 	"nextbasis-service-v-0.1/pkg/str"
 	"nextbasis-service-v-0.1/server/requests"
 	"nextbasis-service-v-0.1/usecase"
+	"nextbasis-service-v-0.1/usecase/viewmodel"
 )
 
 // PromoItemLineHandler ...
@@ -39,7 +40,7 @@ func (h *PromoItemLineHandler) SelectAll(ctx *fiber.Ctx) error {
 	// }
 
 	type StructObject struct {
-		ListObject []models.PromoItemLine `json:"list_promo_item_line"`
+		ListObject []viewmodel.PromoItemLineVM `json:"list_promo_item_line"`
 	}
 
 	ObjcetData := new(StructObject)
