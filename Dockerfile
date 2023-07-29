@@ -11,8 +11,9 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy the .env file and firebaseconfig.json to the working directory
-COPY .env ./
-COPY firebaseconfig.json ./
+COPY .env .env
+COPY firebaseconfig.json firebaseconfig.json
+
 
 # Copy the rest of the application source code to the working directory
 COPY . .
