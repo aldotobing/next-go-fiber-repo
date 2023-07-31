@@ -13,6 +13,7 @@ type IBranchRepository interface {
 	SelectAll(c context.Context, parameter models.BranchParameter) ([]models.Branch, error)
 	FindAll(ctx context.Context, parameter models.BranchParameter) ([]models.Branch, int, error)
 	FindByID(c context.Context, parameter models.BranchParameter) (models.Branch, error)
+	Update(c context.Context, in models.Branch) (res *string, err error)
 }
 
 // BranchRepository ...
@@ -142,4 +143,19 @@ func (repository BranchRepository) FindByID(c context.Context, parameter models.
 	}
 
 	return data, nil
+}
+
+func (repository BranchRepository) Update(c context.Context, in models.Branch) (res *string, err error) {
+	statement := `UPDATE branch SET 
+			pic_phone_no = $1
+		WHERE id = $2
+		RETURNING id`
+	err = repository.DB.QueryRowContext(c, statement,
+		in.PICPhoneNo,
+		in.ID).Scan(&res)
+	if err != nil {
+		return
+	}
+
+	return
 }
