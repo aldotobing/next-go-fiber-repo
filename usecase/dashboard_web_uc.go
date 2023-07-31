@@ -586,7 +586,7 @@ func (uc DashboardWebUC) GetTrackingInvoiceData(c context.Context, parameter mod
 			ProcessedDate:               processedDate,
 			ConfimationDate:             confirmationDate,
 			DueDate:                     dueDate,
-			PaidOffDate:                 datum.InvoiceUpdatedDate.String,
+			PaidOffDate:                 datum.PaidOffDate.String,
 			SourceTransaction:           sourceTransaction,
 		})
 	}
