@@ -31,10 +31,12 @@ func (repository BranchRepository) scanRows(rows *sql.Rows) (res models.Branch, 
 		&res.ID,
 		&res.Name,
 		&res.Code,
+		&res.Area,
 		&res.RegionID,
 		&res.RegionName,
 		&res.RegionGroupID,
 		&res.RegionGroupName,
+		&res.PICPhoneNo,
 	)
 	if err != nil {
 
