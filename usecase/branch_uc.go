@@ -76,6 +76,7 @@ func (uc BranchUC) Update(c context.Context, id string, in *requests.BranchReque
 	res = models.Branch{
 		ID:         &id,
 		PICPhoneNo: &in.PICPhoneNo,
+		PICName:    &in.PICName,
 	}
 
 	repo := repository.NewBranchRepository(uc.DB)

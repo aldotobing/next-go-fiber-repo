@@ -38,6 +38,7 @@ func (repository BranchRepository) scanRows(rows *sql.Rows) (res models.Branch, 
 		&res.RegionGroupID,
 		&res.RegionGroupName,
 		&res.PICPhoneNo,
+		&res.PICName,
 	)
 	if err != nil {
 
@@ -148,10 +149,12 @@ func (repository BranchRepository) FindByID(c context.Context, parameter models.
 func (repository BranchRepository) Update(c context.Context, in models.Branch) (res *string, err error) {
 	statement := `UPDATE branch SET 
 			pic_phone_no = $1
-		WHERE id = $2
+			pic_name = $2
+		WHERE id = $3
 		RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		in.PICPhoneNo,
+		in.PICName,
 		in.ID).Scan(&res)
 	if err != nil {
 		return
