@@ -36,4 +36,5 @@ func (route BranchRoutes) RegisterRoute() {
 	r2.Get("/select", handler.SelectAll)
 	r2.Get("/id/:id", handler.FindByID)
 	r2.Get("/except", handler.SelectAll)
+	r2.Put("/id/:id", handler.Update)
 }

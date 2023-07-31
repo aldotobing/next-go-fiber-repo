@@ -7,6 +7,7 @@ import (
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/pkg/functioncaller"
 	"nextbasis-service-v-0.1/pkg/logruslogger"
+	"nextbasis-service-v-0.1/server/requests"
 	"nextbasis-service-v-0.1/usecase/viewmodel"
 )
 
@@ -69,4 +70,20 @@ func (uc BranchUC) FindByID(c context.Context, parameter models.BranchParameter)
 	uc.BuildBody(&res)
 
 	return res, err
+}
+
+func (uc BranchUC) Update(c context.Context, id string, in *requests.BranchRequest) (res models.Branch, err error) {
+	res = models.Branch{
+		ID:         &id,
+		PICPhoneNo: &in.PICPhoneNo,
+	}
+
+	repo := repository.NewBranchRepository(uc.DB)
+	_, err = repo.Update(c, res)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	return
 }

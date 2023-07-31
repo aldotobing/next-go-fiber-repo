@@ -5,10 +5,12 @@ type Branch struct {
 	ID              *string `json:"branch_id"`
 	Code            *string `json:"branch_code"`
 	Name            *string `json:"branch_name"`
+	Area            *string `json:"branch_area"`
 	RegionID        *string `json:"region_id"`
 	RegionName      *string `json:"region_name"`
 	RegionGroupID   *string `json:"region_group_id"`
 	RegionGroupName *string `json:"region_group_name"`
+	PICPhoneNo      *string `json:"branch_pic_phone_no"`
 }
 
 // BranchParameter ...
@@ -36,10 +38,10 @@ var (
 	// BranchSelectStatement ...
 
 	BranchSelectStatement = `
-	select def.id, def._name, def.branch_code, r.id, r._name, r.group_id, r.group_name
+	select def.id, def._name, def.branch_code, def.area, r.id, r._name, r.group_id, r.group_name, def.pic_phone_no
 	from branch def
 	left join region r on r.id = def.region_id
-		`
+	`
 
 	// BranchWhereStatement ...
 	BranchWhereStatement = ` WHERE def.created_date IS not NULL `
