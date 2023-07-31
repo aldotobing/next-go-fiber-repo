@@ -303,7 +303,8 @@ func (h *TransactionVAHandler) PaidTransactionByVaCode(ctx *fiber.Ctx) error {
 		inputUpdate.VaRef1 = input.PaymentRequestBody.Reference1
 		inputUpdate.VaRef2 = input.PaymentRequestBody.Reference2
 		inputUpdate.VaPairID = input.PaymentRequestBody.TransactionID
-		_, errpaid := uc.PaidTransaction(c, *res.ID, inputUpdate)
+		inputUpdate.Amount = input.PaymentRequestBody.Billkey2
+		_, errpaid := uc.PaidTransaction(c, *res.ID, inputUpdate, res)
 
 		if errpaid == nil {
 
