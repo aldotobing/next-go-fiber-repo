@@ -2,11 +2,15 @@ package usecase
 
 import (
 	"context"
+	"fmt"
+	"strconv"
+	"strings"
 
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/pkg/functioncaller"
 	"nextbasis-service-v-0.1/pkg/logruslogger"
+	"nextbasis-service-v-0.1/pkg/number"
 	"nextbasis-service-v-0.1/server/requests"
 	"nextbasis-service-v-0.1/usecase/viewmodel"
 )
@@ -149,7 +153,7 @@ func (uc TransactionVAUC) Add(c context.Context, data *requests.TransactionVAReq
 	return res, err
 }
 
-func (uc TransactionVAUC) PaidTransaction(c context.Context, id string, data *requests.TransactionVARequest) (res models.TransactionVA, err error) {
+func (uc TransactionVAUC) PaidTransaction(c context.Context, id string, data *requests.TransactionVARequest, transactionVa models.TransactionVA) (res models.TransactionVA, err error) {
 
 	repo := repository.NewTransactionVARepository(uc.DB)
 
@@ -164,6 +168,64 @@ func (uc TransactionVAUC) PaidTransaction(c context.Context, id string, data *re
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
+	}
+
+	cusrepo := repository.NewCustomerRepository(uc.DB)
+
+	fcustomer, erruser := cusrepo.FindByID(c, models.CustomerParameter{ID: *transactionVa.CustomerID})
+	// fmt.Println("va code ", data.VACode)
+	if erruser == nil {
+		FcmUc := FCMUC{ContractUC: uc.ContractUC}
+		messageType := "15"
+		bayar, _ := strconv.ParseFloat(*&data.Amount, 0)
+		harga := strings.ReplaceAll(number.FormatCurrency(bayar, "IDR", ".", "", 0), "Rp", "")
+		msgtitle := "Checkout " + *transactionVa.BasicInvoiceCode
+		msgcustomerheader := `*Pembayaran dari Toko* \n\n *` + *fcustomer.Code + ` - ` + *fcustomer.CustomerName + `*`
+		msgcustomerheader += ` *untuk invoice No. ` + *transactionVa.BasicInvoiceCode + ` senilai Rp.` + harga + ` telah berhasil.*`
+
+		if fcustomer.CustomerFCMToken != nil && *fcustomer.CustomerFCMToken != "" {
+
+			msgcustomer := msgcustomerheader
+			_, errfcm := FcmUc.SendFCMMessage(c, msgtitle, msgcustomer, *fcustomer.CustomerFCMToken)
+			if errfcm == nil {
+
+			}
+
+			userNotificationRepo := repository.NewUserNotificationRepository(uc.DB)
+			_, errnotifinsert := userNotificationRepo.Add(c, &models.UserNotification{
+				Title:  &msgtitle,
+				Text:   &msgcustomer,
+				Type:   &messageType,
+				UserID: transactionVa.CustomerID,
+				RowID:  transactionVa.ID,
+			})
+			if errnotifinsert == nil {
+
+			}
+
+		}
+
+		if fcustomer.CustomerPhone != nil && *fcustomer.CustomerPhone != "" {
+			msgcustomer := msgcustomerheader
+			senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*fcustomer.CustomerPhone, msgcustomer)
+			if senDwaMessage != nil {
+				fmt.Println("sukses")
+			}
+			// if fcustomer.CustomerSalesmanID != nil {
+			// 	salesmannRepo := repository.NewSalesmanRepository(uc.DB)
+			// 	customerSales, errcustsales := salesmannRepo.FindByID(c, models.SalesmanParameter{ID: *useraccount.CustomerSalesmanID})
+			// 	if errcustsales == nil {
+			// 		if customerSales.PhoneNo != nil {
+			// 			msgSalesman := msgsalesmanheader + msgbody
+			// 			senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*customerSales.PhoneNo, msgSalesman)
+			// 			if senDwaMessage != nil {
+			// 				fmt.Println("sukses")
+			// 			}
+			// 		}
+			// 	}
+			// }
+		}
+
 	}
 
 	return res, err
