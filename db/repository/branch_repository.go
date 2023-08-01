@@ -151,7 +151,7 @@ func (repository BranchRepository) FindByID(c context.Context, parameter models.
 
 func (repository BranchRepository) Update(c context.Context, in models.Branch) (res *string, err error) {
 	statement := `UPDATE branch SET 
-			pic_phone_no = $1
+			pic_phone_no = $1,
 			pic_name = $2
 		WHERE id = $3
 		RETURNING id`
