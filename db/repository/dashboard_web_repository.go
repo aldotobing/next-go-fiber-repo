@@ -1000,6 +1000,7 @@ func (repo DashboardWebRepository) TrackingInvoice(ctx context.Context, input mo
 		coh.document_no as customer_order_document_no, coh.created_date as customer_order_created_date,
 		soh.document_no as sales_order_document_no, soh.created_date as sales_order_created_date,
 		sih.transaction_date + sih.transaction_time as invoice_created_date, sih.invoice_date, sih.modified_date as invoice_updated_date,
+		sih.paid_date,
 		top.days
 	from sales_invoice_header sih 
 		left join term_of_payment top on top.id = sih.payment_terms_id 
@@ -1026,6 +1027,7 @@ func (repo DashboardWebRepository) TrackingInvoice(ctx context.Context, input mo
 			&temp.CustomerOrderDocumentNo, &temp.CustomerOrderCreatedDate,
 			&temp.SalesOrderDocumentNo, &temp.SalesOrderCreatedDate,
 			&temp.InvoiceCreatedDate, &temp.InvoiceAcceptedDate, &temp.InvoiceUpdatedDate,
+			&temp.PaidOffDate,
 			&temp.DueDate)
 		if err != nil {
 			return

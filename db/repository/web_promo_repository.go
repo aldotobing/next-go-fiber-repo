@@ -243,10 +243,10 @@ func (repository WebPromo) Edit(c context.Context, model *models.WebPromo) (res 
 			return
 		}
 
-		regionAreaIDArr := strings.Split(*model.CustomerLevelIdList, ",")
+		customerLevelIDArr := strings.Split(*model.CustomerLevelIdList, ",")
 
 		var customerLevelValuesStatement string
-		for _, datum := range regionAreaIDArr {
+		for _, datum := range customerLevelIDArr {
 			if customerLevelValuesStatement == "" {
 				customerLevelValuesStatement += `(` + datum + `, ` + *res + `, now(), now())`
 			} else {
@@ -257,7 +257,7 @@ func (repository WebPromo) Edit(c context.Context, model *models.WebPromo) (res 
 		(customer_level_id, promo_id, created_date, modified_date)
 		Values ` + customerLevelValuesStatement
 
-		_, err = repository.DB.Query(customerLevelUpdateStatement)
+		err = repository.DB.QueryRowContext(c, customerLevelUpdateStatement).Err()
 		if err != nil {
 			return
 		}

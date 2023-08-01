@@ -53,8 +53,9 @@ func main() {
 
 	// init fiber app
 	app := fiber.New(fiber.Config{
-		BodyLimit:    str.StringToInt(configs.EnvConfig["FILE_MAX_UPLOAD_SIZE"]),
-		ErrorHandler: middlewares.InternalServer,
+		BodyLimit:         str.StringToInt(configs.EnvConfig["FILE_MAX_UPLOAD_SIZE"]),
+		ErrorHandler:      middlewares.InternalServer,
+		ReduceMemoryUsage: true,
 	})
 	app.Get("/swagger/*", swagger.New(swagger.Config{ // custom
 		URL:         "/swagger/doc.json",
@@ -121,7 +122,7 @@ func main() {
 		Translator: translator,
 	}
 	boot.App.Use(limiter.New(limiter.Config{
-		Max: 50,
+		Max: 10,
 		// Max:	100,
 		Expiration: 1 * time.Second,
 		KeyGenerator: func(c *fiber.Ctx) string {
@@ -133,7 +134,7 @@ func main() {
 		//14-06-2023
 		SkipFailedRequests:     false,
 		SkipSuccessfulRequests: false,
-		LimiterMiddleware:      limiter.FixedWindow{},
+		LimiterMiddleware:      limiter.SlidingWindow{},
 		//----------------
 	}))
 
