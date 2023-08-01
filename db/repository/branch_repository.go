@@ -52,12 +52,15 @@ func (repository BranchRepository) scanRows(rows *sql.Rows) (res models.Branch, 
 func (repository BranchRepository) scanRow(row *sql.Row) (res models.Branch, err error) {
 	err = row.Scan(
 		&res.ID,
-		&res.Code,
 		&res.Name,
+		&res.Code,
+		&res.Area,
 		&res.RegionID,
 		&res.RegionName,
 		&res.RegionGroupID,
 		&res.RegionGroupName,
+		&res.PICPhoneNo,
+		&res.PICName,
 	)
 
 	if err != nil {
