@@ -301,6 +301,15 @@ func (uc CustomerUC) EditAddress(c context.Context, id string, data *requests.Cu
 
 func (uc CustomerUC) BackendEdit(c context.Context, id string, data *requests.CustomerRequest, imgProfile *multipart.FileHeader) (res models.Customer, err error) {
 
+	// Invalidate the cache before update
+	cacheKey := CustomerCacheKey + id
+	err = uc.RedisClient.Client.Del(cacheKey).Err()
+	if err != nil {
+		// Log error
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_del", uc.ReqID)
+		return res, err
+	}
+
 	// currentObjectUc, err := uc.FindByID(c, models.MpBankParameter{ID: id})
 	currentObjectUc, err := uc.FindByID(c, models.CustomerParameter{ID: id})
 	ctx := "FileUC.Upload"
@@ -352,22 +361,22 @@ func (uc CustomerUC) BackendEdit(c context.Context, id string, data *requests.Cu
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
 	}
-	// Redis integration
-	cacheKey := CustomerCacheKey + id
-
-	// Update the cache with new data
-	jsonData, err := json.Marshal(res)
+	// Invalidate the cache before refresh
+	err = uc.RedisClient.Client.Del(cacheKey).Err()
 	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
-		return res, err
-	}
-	err = uc.RedisClient.Client.Set(cacheKey, jsonData, time.Hour).Err()
-	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
+		// Log error
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_del", uc.ReqID)
 		return res, err
 	}
 
-	return res, err
+	// Refresh the data from the repository
+	refreshedRes, err := repo.FindByID(c, models.CustomerParameter{ID: *res.ID})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	return refreshedRes, err
 }
 
 func (uc CustomerUC) BackendAdd(c context.Context, data *requests.CustomerRequest, imgProfile *multipart.FileHeader) (res models.Customer, err error) {
