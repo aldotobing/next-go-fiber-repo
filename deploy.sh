@@ -9,8 +9,11 @@ main() {
 
   echo "Killing running GO process on port 5000 ..."
   sleep 2
-  sudo kill -9 $(sudo lsof -t -i:5000) && echo "Proc Killed!" || { echo "Failed: Killing running GO process"; exit 1; }
-
+    if [ -n "$(sudo lsof -t -i:5000)" ]; then
+      sudo kill -9 $(sudo lsof -t -i:5000) && echo "Proc Killed!" || { echo "Failed: Killing running GO process"; exit 1; }
+  else
+    echo "No process to kill on port 5000. Continuing..."
+  fi
   sleep 1
   echo "Activating SSH Agent ..."
   eval `ssh-agent -s` && echo OK || { echo "Failed: Activating SSH Agent"; exit 1; }
