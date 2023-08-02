@@ -2,12 +2,14 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"mime/multipart"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/go-redis/redis/v7"
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/pkg/functioncaller"
@@ -155,22 +157,147 @@ func (uc WebCustomerUC) FindAll(c context.Context, parameter models.WebCustomerP
 	return res, p, err
 }
 
+// func (uc WebCustomerUC) SelectAll(c context.Context, parameter models.WebCustomerParameter) (res []viewmodel.CustomerVM, err error) {
+// 	// Define cache key
+// 	cacheKey := "web_customers:SelectAll:" + parameter.By + ":" + parameter.Sort
+
+// 	// Try to fetch the data from Redis first
+// 	err = uc.RedisClient.Client.Get(cacheKey).Scan(&res)
+// 	if err == nil {
+// 		// Data was found in Redis, return it
+// 		return res, nil
+// 	} else if err != nil && err != redis.Nil {
+// 		// An error occurred that wasn't just "key doesn't exist"
+// 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_get", uc.ReqID)
+// 		return res, err
+// 	}
+
+// 	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(0, 0, parameter.By, parameter.Sort, models.WebCustomerOrderBy, models.WebCustomerOrderByrByString)
+
+// 	repo := repository.NewWebCustomerRepository(uc.DB)
+// 	data, err := repo.SelectAll(c, parameter)
+// 	if err != nil {
+// 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+// 		return res, err
+// 	}
+
+// 	for i := range data {
+// 		var temp viewmodel.CustomerVM
+// 		uc.BuildBody(&data[i], &temp, true)
+// 		res = append(res, temp)
+// 	}
+
+// 	// Cache the data in Redis, ignore the result
+// 	err = uc.StoreToRedis(cacheKey, res)
+// 	if err != nil {
+// 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), "StoreToRedis", "redis_set", uc.ReqID)
+// 	}
+
+// 	return res, err
+// }
+
+// FindAll ...
+// func (uc WebCustomerUC) FindAll(c context.Context, parameter models.WebCustomerParameter) (res []viewmodel.CustomerVM, p viewmodel.PaginationVM, err error) {
+// 	parameter.Offset, parameter.Limit, parameter.Page, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.WebCustomerOrderBy, models.WebCustomerOrderByrByString)
+
+// 	// Redis integration
+// 	cacheKey := "web_customers_findAll:" + strconv.Itoa(parameter.Page) + ":" + strconv.Itoa(parameter.Limit)
+
+// 	val, err := uc.RedisClient.Client.Get(cacheKey).Result()
+// 	if err == nil {
+// 		// If cache exists
+// 		err = json.Unmarshal([]byte(val), &res)
+// 		if err == nil {
+// 			return res, p, nil
+// 		}
+// 	}
+
+// 	var count int
+// 	repo := repository.NewWebCustomerRepository(uc.DB)
+// 	data, count, err := repo.FindAll(c, parameter)
+// 	if err != nil {
+// 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+// 		return res, p, err
+// 	}
+
+// 	p = uc.setPaginationResponse(parameter.Page, parameter.Limit, count)
+// 	for i := range data {
+// 		var temp viewmodel.CustomerVM
+// 		uc.BuildBody(&data[i], &temp, false)
+// 		res = append(res, temp)
+// 	}
+
+// 	// Save result into Redis
+// 	jsonData, errRedis := json.Marshal(res)
+// 	if errRedis != nil {
+// 		logruslogger.Log(logruslogger.WarnLevel, errRedis.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
+// 	} else {
+// 		errRedis = uc.RedisClient.Client.Set(cacheKey, jsonData, time.Hour).Err()
+// 		if errRedis != nil {
+// 			logruslogger.Log(logruslogger.WarnLevel, errRedis.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
+// 		}
+// 	}
+
+// 	return res, p, err
+// }
+
 // FindByID ...
 func (uc WebCustomerUC) FindByID(c context.Context, parameter models.WebCustomerParameter) (res viewmodel.CustomerVM, err error) {
+	// Redis integration
+	cacheKey := CustomerCacheKey + parameter.ID
 
-	repo := repository.NewWebCustomerRepository(uc.DB)
-	datum, err := repo.FindByID(c, parameter)
+	val, err := uc.RedisClient.Client.Get(cacheKey).Result()
+
 	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
-		return res, err
+		if errors.Is(err, redis.Nil) {
+			// If cache does not exist, fetch from the repository
+			repo := repository.NewWebCustomerRepository(uc.DB)
+			datum, err := repo.FindByID(c, parameter)
+			if err != nil {
+				logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+				return res, err
+			}
+
+			uc.BuildBody(&datum, &res, false)
+
+			// Save result into Redis
+			jsonData, err := json.Marshal(res)
+			if err != nil {
+				logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
+				return res, err // return here if error occurred
+			}
+			err = uc.RedisClient.Client.Set(cacheKey, jsonData, time.Hour).Err()
+			if err != nil {
+				logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
+				return res, err // return here if error occurred
+			}
+
+			return res, nil
+		} else {
+			// If there is an error other than "key does not exist", log and return error
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_get", uc.ReqID)
+			return res, err
+		}
+	} else {
+		err = json.Unmarshal([]byte(val), &res)
+		if err != nil {
+			// If there is an error in unmarshaling, log it
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_unmarshal", uc.ReqID)
+		}
+		return res, nil
 	}
-
-	uc.BuildBody(&datum, &res, false)
-
-	return res, err
 }
 
 func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCustomerRequest, imgProfile, imgKtp *multipart.FileHeader) (res models.WebCustomer, err error) {
+
+	// Invalidate the cache before update
+	cacheKey := CustomerCacheKey + id
+	err = uc.RedisClient.Client.Del(cacheKey).Err()
+	if err != nil {
+		// Log error
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_del", uc.ReqID)
+		return res, err
+	}
 
 	// currentObjectUc, err := uc.FindByID(c, models.MpBankParameter{ID: id})
 	currentObjectUc, err := uc.FindByID(c, models.WebCustomerParameter{ID: id})
@@ -179,15 +306,29 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 		return
 	}
 
+	// if currentObjectUc.CustomerPhone != nil && *currentObjectUc.CustomerPhone != data.CustomerPhone {
+	// 	checkerPhoneNumberData, _ := uc.SelectAll(c, models.WebCustomerParameter{
+	// 		PhoneNumber: data.CustomerPhone,
+	// 		By:          "c.created_date",
+	// 	})
+	// 	if len(checkerPhoneNumberData) > 0 {
+	// 		err = errors.New("Duplicate Phone Number")
+	// 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "duplicate phone number", uc.ReqID)
+	// 		return
+	// 	}
+	// }
+
+	// If the phone number has changed, check if it's unique
 	if currentObjectUc.CustomerPhone != nil && *currentObjectUc.CustomerPhone != data.CustomerPhone {
 		checkerPhoneNumberData, _ := uc.SelectAll(c, models.WebCustomerParameter{
 			PhoneNumber: data.CustomerPhone,
 			By:          "c.created_date",
 		})
+
+		// If phone number is not unique, return error
 		if len(checkerPhoneNumberData) > 0 {
-			err = errors.New("Duplicate Phone Number")
-			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "duplicate phone number", uc.ReqID)
-			return
+			err = errors.New("Duplicate phone number")
+			return res, err
 		}
 	}
 
@@ -272,8 +413,128 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 		return res, err
 	}
 
-	return res, err
+	// Invalidate the cache before refresh
+	err = uc.RedisClient.Client.Del(cacheKey).Err()
+	if err != nil {
+		// Log error
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_del", uc.ReqID)
+		return res, err
+	}
+
+	// Refresh the data from the repository
+	refreshedRes, err := repo.FindByID(c, models.WebCustomerParameter{ID: *res.ID})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	return refreshedRes, err
 }
+
+// func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCustomerRequest, imgProfile, imgKtp *multipart.FileHeader) (res models.WebCustomer, err error) {
+
+// 	// currentObjectUc, err := uc.FindByID(c, models.MpBankParameter{ID: id})
+// 	currentObjectUc, err := uc.FindByID(c, models.WebCustomerParameter{ID: id})
+// 	if err != nil {
+// 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "invalid id", uc.ReqID)
+// 		return
+// 	}
+
+// 	if currentObjectUc.CustomerPhone != nil && *currentObjectUc.CustomerPhone != data.CustomerPhone {
+// 		checkerPhoneNumberData, _ := uc.SelectAll(c, models.WebCustomerParameter{
+// 			PhoneNumber: data.CustomerPhone,
+// 			By:          "c.created_date",
+// 		})
+// 		if len(checkerPhoneNumberData) > 0 {
+// 			err = errors.New("Duplicate Phone Number")
+// 			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "duplicate phone number", uc.ReqID)
+// 			return
+// 		}
+// 	}
+
+// 	ctx := "FileUC.Upload"
+// 	awsUc := AwsUC{ContractUC: uc.ContractUC}
+
+// 	var strImgprofile = ""
+// 	if currentObjectUc.CustomerProfilePicture != nil && *currentObjectUc.CustomerProfilePicture != "" {
+// 		strImgprofile = strings.ReplaceAll(*currentObjectUc.CustomerProfilePicture, models.CustomerImagePath, "")
+// 	}
+// 	if imgProfile != nil {
+// 		awsUc.AWSS3.Directory = "image/customer"
+// 		if &strImgprofile != nil && strings.Trim(strImgprofile, " ") != "" {
+// 			_, err = awsUc.Delete(awsUc.AWSS3.Directory, strImgprofile)
+// 			if err != nil {
+// 				logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "s3", uc.ReqID)
+// 			}
+// 		}
+
+// 		imgBannerFile, err := awsUc.Upload(awsUc.AWSS3.Directory, imgProfile)
+// 		if err != nil {
+// 			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "upload_file", c.Value("requestid"))
+// 			return res, err
+// 		}
+// 		strImgprofile = imgBannerFile.FileName
+// 	}
+
+// 	var stringImageKTP string
+// 	if currentObjectUc.CustomerPhotoKtp != nil && *currentObjectUc.CustomerPhotoKtp != "" {
+// 		stringImageKTP = strings.ReplaceAll(*currentObjectUc.CustomerPhotoKtp, models.CustomerImagePath, "")
+// 	}
+// 	if imgKtp != nil {
+// 		awsUc.AWSS3.Directory = "image/customer"
+// 		if &stringImageKTP != nil && strings.Trim(stringImageKTP, " ") != "" {
+// 			_, err = awsUc.Delete(awsUc.AWSS3.Directory, stringImageKTP)
+// 			if err != nil {
+// 				logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "s3", uc.ReqID)
+// 			}
+// 		}
+
+// 		imgBannerFile, err := awsUc.Upload(awsUc.AWSS3.Directory, imgKtp)
+// 		if err != nil {
+// 			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "upload_file", c.Value("requestid"))
+// 			return res, err
+// 		}
+// 		stringImageKTP = imgBannerFile.FileName
+// 	}
+
+// 	repo := repository.NewWebCustomerRepository(uc.DB)
+// 	// now := time.Now().UTC()
+// 	// strnow := now.Format(time.RFC3339)
+
+// 	birthDate, _ := time.Parse("2006-01-02", data.CustomerBirthDate)
+// 	data.CustomerBirthDate = birthDate.Format("2006-01-02")
+
+// 	res = models.WebCustomer{
+// 		ID:                     &id,
+// 		Code:                   &data.Code,
+// 		CustomerName:           &data.CustomerName,
+// 		CustomerAddress:        &data.CustomerAddress,
+// 		CustomerPhone:          &data.CustomerPhone,
+// 		CustomerEmail:          &data.CustomerEmail,
+// 		CustomerCpName:         &data.CustomerCpName,
+// 		CustomerProfilePicture: &strImgprofile,
+// 		CustomerTaxCalcMethod:  &data.CustomerTaxCalcMethod,
+// 		CustomerActiveStatus:   &data.CustomerActiveStatus,
+// 		CustomerSalesmanID:     &data.CustomerSalesmanID,
+// 		CustomerBranchID:       &data.CustomerBranchID,
+// 		CustomerNik:            &data.CustomerNik,
+// 		CustomerUserID:         &data.CustomerUserID,
+// 		CustomerReligion:       &data.CustomerReligion,
+// 		CustomerLevelID:        &data.CustomerLevelID,
+// 		CustomerGender:         &data.CustomerGender,
+// 		CustomerBirthDate:      &data.CustomerBirthDate,
+// 		CustomerPhotoKtp:       &stringImageKTP,
+// 		UserID:                 &data.UserID,
+// 	}
+
+// 	res.ID, err = repo.Edit(c, &res)
+// 	if err != nil {
+// 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+// 		return res, err
+// 	}
+
+// 	return res, err
+// }
 
 func (uc WebCustomerUC) Add(c context.Context, data *requests.WebCustomerRequest, imgProfile *multipart.FileHeader) (res models.WebCustomer, err error) {
 
