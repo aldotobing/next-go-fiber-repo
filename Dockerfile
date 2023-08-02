@@ -1,5 +1,5 @@
-# Use the official GoLang Docker image with Go 1.19 as the base image
-FROM golang:1.19-alpine
+# Use the official GoLang Docker image with Go 1.19 as the base image for build
+FROM golang:1.19-alpine AS builder
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -9,6 +9,10 @@ COPY go.mod go.sum ./
 
 # Download the dependencies
 RUN go mod download
+
+# Copy the .env file and firebaseconfig.json to the working directory
+COPY .env ./
+COPY firebaseconfig.json ./
 
 # Copy the rest of the application source code to the working directory
 COPY . .
