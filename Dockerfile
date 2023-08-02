@@ -1,5 +1,5 @@
-# Use the official GoLang Docker image with Go 1.19 as the base image
-FROM golang:1.19-alpine
+# Use the official GoLang Docker image with Go 1.19 as the base image for build
+FROM golang:1.19-alpine AS builder
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -33,8 +33,8 @@ WORKDIR /root/
 COPY --from=builder /app/server/main .
 
 # Copy the .env file and firebaseconfig.json from the build stage
-COPY --from=builder /app/.env .
-COPY --from=builder /app/firebaseconfig.json .
+COPY --from=builder /app/.env ../
+COPY --from=builder /app/firebaseconfig.json ../
 
 # Expose port 5050 for the API service
 EXPOSE 5050
