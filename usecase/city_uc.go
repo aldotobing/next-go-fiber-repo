@@ -2,8 +2,10 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
+	"github.com/go-redis/redis/v8"
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/pkg/functioncaller"
@@ -22,8 +24,38 @@ func (uc CityUC) BuildBody(res *models.City) {
 }
 
 // SelectAll ...
+// func (uc CityUC) SelectAll(c context.Context, parameter models.CityParameter) (res []models.City, err error) {
+// 	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(0, 0, parameter.By, parameter.Sort, models.CityOrderBy, models.CityOrderByrByString)
+
+// 	repo := repository.NewCityRepository(uc.DB)
+// 	res, err = repo.SelectAll(c, parameter)
+
+// 	if err != nil {
+// 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+// 		return res, err
+// 	}
+
+// 	for i := range res {
+// 		uc.BuildBody(&res[i])
+// 	}
+
+// 	return res, err
+// }
+
 func (uc CityUC) SelectAll(c context.Context, parameter models.CityParameter) (res []models.City, err error) {
 	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(0, 0, parameter.By, parameter.Sort, models.CityOrderBy, models.CityOrderByrByString)
+
+	// Redis integration
+	cacheKey := "cities:" + parameter.IDs // cacheKey can be different based on your needs
+
+	val, err := uc.RedisClient.Client.Get(cacheKey).Result()
+	if err == nil {
+		// If cache exists
+		err = json.Unmarshal([]byte(val), &res)
+		if err == nil {
+			return res, nil
+		}
+	}
 
 	repo := repository.NewCityRepository(uc.DB)
 	res, err = repo.SelectAll(c, parameter)
@@ -31,6 +63,17 @@ func (uc CityUC) SelectAll(c context.Context, parameter models.CityParameter) (r
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
+	}
+
+	// Save result into Redis
+	jsonData, err := json.Marshal(res)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
+	} else {
+		err = uc.RedisClient.Client.Set(cacheKey, jsonData, time.Hour).Err()
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
+		}
 	}
 
 	for i := range res {
@@ -61,7 +104,31 @@ func (uc CityUC) FindAll(c context.Context, parameter models.CityParameter) (res
 }
 
 // FindByID ...
+// func (uc CityUC) FindByID(c context.Context, parameter models.CityParameter) (res models.City, err error) {
+// 	repo := repository.NewCityRepository(uc.DB)
+// 	res, err = repo.FindByID(c, parameter)
+// 	if err != nil {
+// 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+// 		return res, err
+// 	}
+// 	uc.BuildBody(&res)
+
+// 	return res, err
+// }
+
 func (uc CityUC) FindByID(c context.Context, parameter models.CityParameter) (res models.City, err error) {
+	// Try to fetch the data from Redis first
+	cacheKey := "city:" + parameter.ID // Directly use parameter.ID
+	err = uc.RedisClient.Client.Get(cacheKey).Scan(&res)
+	if err == nil {
+		// Data was found in Redis, return it
+		return res, nil
+	} else if err != redis.Nil {
+		// An error occurred that wasn't just "key doesn't exist"
+		return res, err
+	}
+
+	// Data was not found in Redis, fetch from DB instead
 	repo := repository.NewCityRepository(uc.DB)
 	res, err = repo.FindByID(c, parameter)
 	if err != nil {
@@ -69,6 +136,9 @@ func (uc CityUC) FindByID(c context.Context, parameter models.CityParameter) (re
 		return res, err
 	}
 	uc.BuildBody(&res)
+
+	// Cache the data in Redis, ignore the result
+	uc.StoreToRedis(cacheKey, res)
 
 	return res, err
 }
@@ -113,6 +183,7 @@ func (uc CityUC) Edit(c context.Context, id string, data *requests.CityRequest) 
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
 	}
+	uc.RedisClient.Client.Del("city:" + id)
 
 	return res, err
 }
