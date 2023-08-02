@@ -21,7 +21,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	enTranslations "github.com/go-playground/validator/v10/translations/en"
 	idTranslations "github.com/go-playground/validator/v10/translations/id"
-	redis "github.com/go-redis/redis/v7"
+	"github.com/go-redis/redis/v7"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
@@ -51,15 +51,12 @@ func main() {
 	defer configs.DBMS.Close()
 
 	// Set up Redis client
+	// Set up base Redis client
 	baseClient := redis.NewClient(&redis.Options{
 		Addr:     configs.EnvConfig["REDIS_URL"],
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
-
-	redisStorage := &redisPkg.RedisClient{
-		Client: baseClient,
-	}
 
 	// Wrap base client in your custom RedisClient type
 	configs.RedisClient = redisPkg.RedisClient{
@@ -117,7 +114,7 @@ func main() {
 		Translator: translator,
 	}
 	boot.App.Use(limiter.New(limiter.Config{
-		Max: 3,
+		Max: 20,
 		// Max:	100,
 		Expiration: 1 * time.Second,
 		KeyGenerator: func(c *fiber.Ctx) string {

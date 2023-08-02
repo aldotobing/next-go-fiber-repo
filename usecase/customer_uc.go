@@ -361,11 +361,18 @@ func (uc CustomerUC) BackendEdit(c context.Context, id string, data *requests.Cu
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
 	}
-	// Invalidate the cache before refresh
-	err = uc.RedisClient.Client.Del(cacheKey).Err()
+	// Redis integration
+	cacheKey := CustomerCacheKey + id
+
+	// Update the cache with new data
+	jsonData, err := json.Marshal(res)
 	if err != nil {
-		// Log error
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_del", uc.ReqID)
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
+		return res, err
+	}
+	err = uc.RedisClient.Client.Set(cacheKey, jsonData, time.Hour).Err()
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
 		return res, err
 	}
 
