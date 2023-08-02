@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	redisPkg "nextbasis-service-v-0.1/pkg/redis"
+
 	conf "nextbasis-service-v-0.1/config"
 	"nextbasis-service-v-0.1/helper"
 	"nextbasis-service-v-0.1/pkg/str"
@@ -20,6 +22,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	enTranslations "github.com/go-playground/validator/v10/translations/en"
 	idTranslations "github.com/go-playground/validator/v10/translations/id"
+	"github.com/go-redis/redis/v7"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
@@ -48,6 +51,26 @@ func main() {
 	defer configs.DB.Close()
 	defer configs.DBMS.Close()
 
+	// Set up Redis client
+	// Set up base Redis client
+	baseClient := redis.NewClient(&redis.Options{
+		Addr:     configs.EnvConfig["REDIS_URL"],
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
+
+	// Wrap base client in your custom RedisClient type
+	configs.RedisClient = redisPkg.RedisClient{
+		Client: baseClient,
+	}
+
+	pong, err := baseClient.Ping().Result()
+	if err != nil {
+		log.Fatalf("Could not connect to Redis: %v", err)
+	} else {
+		log.Printf("Connected to Redis: %v", pong)
+	}
+
 	// init validation driver
 	validatorInit(&configs)
 
@@ -61,36 +84,6 @@ func main() {
 		URL:         "/swagger/doc.json",
 		DeepLinking: false,
 	}))
-
-	// // Certificate manager
-	// m := &autocert.Manager{
-	// 	Prompt: autocert.AcceptTOS,
-	// 	// Replace with your domain
-	// 	HostPolicy: autocert.HostWhitelist("mysidomuncul.sidomuncul.co.id"),
-	// 	// Folder to store the certificates
-	// 	Cache: autocert.DirCache("../cert"),
-	// }
-
-	// // TLS Config
-	// cfg := &tls.Config{
-	// 	// Get Certificate from Let's Encrypt
-	// 	GetCertificate: m.GetCertificate,
-	// 	// By default NextProtos contains the "h2"
-	// 	// This has to be removed since Fasthttp does not support HTTP/2
-	// 	// Or it will cause a flood of PRI method logs
-	// 	// http://webconcepts.info/concepts/http-method/PRI
-	// 	NextProtos: []string{
-	// 		"http/1.1", "acme-tls/1",
-	// 	},
-	// }
-
-	// ln, err := tls.Listen("tcp", ":8443", cfg)
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	// Start server
-	// log.Fatal(app.Listener(ln))
 
 	ContractUC := usecase.ContractUC{
 		ReqID:       xid.New().String(),
@@ -122,7 +115,7 @@ func main() {
 		Translator: translator,
 	}
 	boot.App.Use(limiter.New(limiter.Config{
-		Max: 10,
+		Max: 20,
 		// Max:	100,
 		Expiration: 1 * time.Second,
 		KeyGenerator: func(c *fiber.Ctx) string {
