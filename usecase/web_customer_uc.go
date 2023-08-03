@@ -146,7 +146,7 @@ func (uc WebCustomerUC) FindAll(c context.Context, parameter models.WebCustomerP
 	cacheKey := fmt.Sprintf("customers:%v:%v", parameter.Page, parameter.Limit)
 
 	// Check if the data is available in the cache
-	data, err := uc.RedisClient.Get(cacheKey).Result()
+	data, err := uc.RedisClient.Client.Get(cacheKey).Result()
 	if err == redis.Nil {
 		// Data not found in cache. Fetch data from repository
 		var count int
@@ -163,7 +163,7 @@ func (uc WebCustomerUC) FindAll(c context.Context, parameter models.WebCustomerP
 			// Handle error
 			return res, p, err
 		}
-		err = uc.RedisClient.Set(cacheKey, jsonData, 30*time.Minute).Err() // Set cache to expire after 30 minutes
+		err = uc.RedisClient.Client.Set(cacheKey, jsonData, 30*time.Minute).Err() // Set cache to expire after 30 minutes
 		if err != nil {
 			// Handle error
 			return res, p, err
