@@ -84,6 +84,10 @@ func (repository PromoContent) SelectAll(c context.Context, parameter models.Pro
 			` OR PC.ID NOT IN (SELECT promo_id FROM customer_type_eligible_promo)) `
 	}
 
+	if parameter.CustomerLevelID != "" {
+		conditionString += ` AND PC.ID IN (SELECT promo_id FROM customer_level_eligible_promo ctep WHERE customer_level_id = ` + parameter.CustomerLevelID + `) `
+	}
+
 	statement := models.PromoContentSelectStatement + ` ` + models.PromoContentWhereStatement +
 		` AND (LOWER(pc._name) LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 
