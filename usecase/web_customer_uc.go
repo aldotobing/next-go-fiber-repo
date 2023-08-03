@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"mime/multipart"
 	"strconv"
 	"strings"
@@ -139,20 +140,44 @@ func (uc WebCustomerUC) SelectAll(c context.Context, parameter models.WebCustome
 func (uc WebCustomerUC) FindAll(c context.Context, parameter models.WebCustomerParameter) (res []viewmodel.CustomerVM, p viewmodel.PaginationVM, err error) {
 	parameter.Offset, parameter.Limit, parameter.Page, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.WebCustomerOrderBy, models.WebCustomerOrderByrByString)
 
-	var count int
-	repo := repository.NewWebCustomerRepository(uc.DB)
-	data, count, err := repo.FindAll(c, parameter)
-	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+	cacheKey := fmt.Sprintf("customers:%v:%v", parameter.Page, parameter.Limit)
+
+	// Check if the data is available in the cache
+	data, err := uc.RedisClient.Client.Get(cacheKey).Result()
+	if err == redis.Nil {
+		// Data not found in cache. Fetch data from repository
+		var count int
+		repo := repository.NewWebCustomerRepository(uc.DB)
+		data, count, err := repo.FindAll(c, parameter)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+			return res, p, err
+		}
+
+		// Store the data in the cache
+		jsonData, err := json.Marshal(data)
+		if err != nil {
+			// Handle error
+			return res, p, err
+		}
+		err = uc.RedisClient.Client.Set(cacheKey, jsonData, 30*time.Minute).Err() // Set cache to expire after 30 minutes
+		if err != nil {
+			// Handle error
+			return res, p, err
+		}
+	} else if err != nil {
+		// Handle error
 		return res, p, err
 	}
 
-	p = uc.setPaginationResponse(parameter.Page, parameter.Limit, count)
-	for i := range data {
-		var temp viewmodel.CustomerVM
-		uc.BuildBody(&data[i], &temp, false)
-		res = append(res, temp)
+	// Unmarshal the data
+	err = json.Unmarshal([]byte(data), &res)
+	if err != nil {
+		// Handle error
+		return res, p, err
 	}
+
+	p = uc.setPaginationResponse(parameter.Page, parameter.Limit, len(res))
 
 	return res, p, err
 }
