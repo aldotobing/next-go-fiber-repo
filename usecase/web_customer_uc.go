@@ -144,9 +144,11 @@ func (uc WebCustomerUC) FindAll(c context.Context, parameter models.WebCustomerP
 
 	// Check if the data is available in the cache
 	data, err := uc.RedisClient.Client.Get(cacheKey).Result()
-	if err == redis.Nil {
+	countStr, countErr := uc.RedisClient.Client.Get(cacheKey + ":count").Result()
+	count, _ := strconv.Atoi(countStr) // Convert string to int
+
+	if err == redis.Nil || countErr == redis.Nil {
 		// Data not found in cache. Fetch data from repository
-		var count int
 		repo := repository.NewWebCustomerRepository(uc.DB)
 		data, count, err := repo.FindAll(c, parameter)
 		if err != nil {
@@ -157,27 +159,37 @@ func (uc WebCustomerUC) FindAll(c context.Context, parameter models.WebCustomerP
 		// Store the data in the cache
 		jsonData, err := json.Marshal(data)
 		if err != nil {
-			// Handle error
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "jsonMarshal", c.Value("requestid"))
 			return res, p, err
 		}
 		err = uc.RedisClient.Client.Set(cacheKey, jsonData, 30*time.Minute).Err() // Set cache to expire after 30 minutes
 		if err != nil {
-			// Handle error
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redisSet", c.Value("requestid"))
+			return res, p, err
+		}
+
+		// Store count in cache
+		err = uc.RedisClient.Client.Set(cacheKey+":count", count, 30*time.Minute).Err()
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redisSetCount", c.Value("requestid"))
 			return res, p, err
 		}
 	} else if err != nil {
-		// Handle error
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redisGet", c.Value("requestid"))
 		return res, p, err
+	} else if countErr != nil {
+		logruslogger.Log(logruslogger.WarnLevel, countErr.Error(), functioncaller.PrintFuncName(), "redisGetCount", c.Value("requestid"))
+		return res, p, countErr
 	}
 
 	// Unmarshal the data
 	err = json.Unmarshal([]byte(data), &res)
 	if err != nil {
-		// Handle error
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "jsonUnmarshal", c.Value("requestid"))
 		return res, p, err
 	}
 
-	p = uc.setPaginationResponse(parameter.Page, parameter.Limit, len(res))
+	p = uc.setPaginationResponse(parameter.Page, parameter.Limit, count)
 
 	return res, p, err
 }
