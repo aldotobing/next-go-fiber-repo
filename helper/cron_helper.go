@@ -25,18 +25,18 @@ func SetCronJobs() {
 
 	})
 
-	// c.AddFunc("CRON_TZ=Asia/Jakarta 0/14 * * * *", func() {
-	// 	url := envConfig["APP_BASE_URL"] + "/v1/api/sync/transaction/invoicedata"
-	// 	client := &http.Client{}
-	// 	req, _ := http.NewRequest("GET", url, nil)
-	// 	req.Header.Set("Authorization", "Basic Og==")
-	// 	res, _ := client.Do(req)
+	c.AddFunc("CRON_TZ=Asia/Jakarta 0/14 * * * *", func() {
+		url := envConfig["APP_BASE_URL"] + "/v1/api/sync/transaction/invoicedata"
+		client := &http.Client{}
+		req, _ := http.NewRequest("GET", url, nil)
+		req.Header.Set("Authorization", "Basic Og==")
+		res, _ := client.Do(req)
 
-	// 	if res != nil {
-	// 		// fmt.Println("error")
-	// 	}
+		if res != nil {
+			// fmt.Println("error")
+		}
 
-	// })
+	})
 
 	c.AddFunc("CRON_TZ=Asia/Jakarta 0/2 * * * *", func() {
 		url := envConfig["APP_BASE_URL"] + "/v1/api/sync/transaction/voidedrequest"
