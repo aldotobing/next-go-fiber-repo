@@ -24,14 +24,15 @@ func (h *PromoContentHandler) SelectAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.PromoContentParameter{
-		ID:             ctx.Query("promo_id"),
-		CustomerTypeId: ctx.Query("customer_type_id"),
-		Code:           ctx.Query("promo_code"),
-		StartDate:      ctx.Query("start_date"),
-		EndDate:        ctx.Query("end_date"),
-		Search:         ctx.Query("search"),
-		By:             ctx.Query("by"),
-		Sort:           ctx.Query("sort"),
+		ID:              ctx.Query("promo_id"),
+		CustomerTypeId:  ctx.Query("customer_type_id"),
+		CustomerLevelID: ctx.Query("customer_level_id"),
+		Code:            ctx.Query("promo_code"),
+		StartDate:       ctx.Query("start_date"),
+		EndDate:         ctx.Query("end_date"),
+		Search:          ctx.Query("search"),
+		By:              ctx.Query("by"),
+		Sort:            ctx.Query("sort"),
 	}
 	uc := usecase.PromoContentUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectAll(c, parameter)
