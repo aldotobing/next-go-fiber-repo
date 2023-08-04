@@ -26,10 +26,11 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 
-WORKDIR /root/
+# Set the working directory
+WORKDIR /app/
 
-# Copy the pre-built binary file from the previous stage to /app/
-COPY --from=builder /app/server/main /app/
+# Copy the pre-built binary file from the previous stage to /app/server/
+COPY --from=builder /app/server/main /app/server/
 
 # Copy the .env file and firebaseconfig.json from the build stage to /app/
 COPY --from=builder /app/.env /app/
@@ -38,6 +39,7 @@ COPY --from=builder /app/firebaseconfig.json /app/
 # Expose port 5050 for the API service
 EXPOSE 5050
 
-# Set the working directory to /app/ and the entry point of the container
-WORKDIR /app/
+# Set the working directory to /app/server/ and the entry point of the container
+WORKDIR /app/server/
+
 CMD ["./main"]
