@@ -75,8 +75,7 @@ definitions:
               SERVER: "$SSH_ADDR"
               COMMAND: "docker pull $DOCKERHUB_USERNAME/nextapi:latest && docker stop go-api-service || true && docker rm go-api-service || true && docker run -d --name go-api-service -p 5050:5050 $DOCKERHUB_USERNAME/nextapi:latest && echo 'Docker run command executed.' && sleep 5 && docker ps -f name=go-api-service"
         after-script:
-          - ALERT_TYPE="success"
-          - if [[ $BITBUCKET_EXIT_CODE -ne 0 ]]; then ALERT_TYPE="error" ; fi
+          - if [[ $BITBUCKET_EXIT_CODE -ne 0 ]]; then ALERT_TYPE="error"; else ALERT_TYPE="success"; fi
           # - pipe: atlassian/email-notify:0.3.12
           - pipe: atlassian/email-notify:0.8.0
             variables:
@@ -87,9 +86,6 @@ definitions:
               HOST: "$EMAIL_HOST"
               SUBJECT: "${BITBUCKET_REPO_FULL_NAME} : Deploy ${ALERT_TYPE} : Bitbucket Pipe Notification for branch : ${BITBUCKET_BRANCH}"
               BODY_HTML: "mail_template.html"
-
-          - ALERT_TYPE="success"
-          - if [[ $BITBUCKET_EXIT_CODE -ne 0 ]]; then ALERT_TYPE="error" ; fi
           - pipe: atlassian/slack-notify:2.1.0
             variables:
               WEBHOOK_URL: $SLACK_WEB_HOOK_URL
