@@ -40,7 +40,7 @@ definitions:
           - pipe: atlassian/git-secrets-scan:1.2.1
             variables:
               # FILES: '<string>' # Optional.
-              # FILES_IGNORED: '<string>' # Optional.
+              FILES_IGNORED: ".json" # Optional.
               # CUSTOM_PATTERN_ARGS: '<list>' of strings # Optional.
               # ANNOTATION_SUMMARY: '<string>' # Optional.
               # ANNOTATION_DESCRIPTION: '<string>' # Optional.
