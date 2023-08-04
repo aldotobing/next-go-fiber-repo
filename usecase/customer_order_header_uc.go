@@ -147,6 +147,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 
 	useraccount, erruser := userrepo.FindByID(c, models.CustomerParameter{ID: *res.CustomerID})
 
+	var msgbody string
 	if erruser == nil {
 
 		FcmUc := FCMUC{ContractUC: uc.ContractUC}
@@ -167,7 +168,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 			msgcustomerheader := `*Kepada Yang Terhormat* \n\n *` + *useraccount.Code + ` - ` + *useraccount.CustomerName + `*`
 			msgcustomerheader += `\n\n*NO ORDERAN ` + *order.DocumentNo + ` anda pada tanggal ` + dateString + ` oleh Toko : (` + *useraccount.CustomerName + `(` + *useraccount.Code + `)) telah berhasil dan akan diproses*`
 
-			msgbody := `\n\n*Berikut merupakan rincian pesanan anda:*`
+			msgbody = `\n\n*Berikut merupakan rincian pesanan anda:*`
 			orderline, errline := orderlinerepo.SelectAll(c, models.CustomerOrderLineParameter{
 				HeaderID: *order.ID,
 				By:       "def.created_date",
@@ -232,6 +233,18 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 			}
 		}
 
+	}
+
+	branchData, err := BranchUC{ContractUC: uc.ContractUC}.FindByID(c, models.BranchParameter{ID: data.BranchID})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "select_branch_by_id", c.Value("requestid"))
+		return res, err
+	}
+	if branchData.PICName != nil && *branchData.PICName != "" && branchData.PICPhoneNo != nil && *branchData.PICPhoneNo != "" {
+		msgToPIC := `*Kepada Yang Terhormat*\n\n *` + *branchData.PICName + `*`
+		msgToPIC += msgbody
+
+		_ = uc.ContractUC.WhatsApp.SendTransactionWA(*branchData.PICPhoneNo, msgToPIC)
 	}
 
 	return res, err
