@@ -28,18 +28,16 @@ RUN apk --no-cache add ca-certificates
 
 WORKDIR /root/
 
-# Copy the pre-built binary file from the previous stage
+# Copy the pre-built binary file from the previous stage to /app/
 COPY --from=builder /app/server/main /app/
 
-# Copy the .env file and firebaseconfig.json from the build stage
-COPY --from=builder /app/.env ./
-COPY --from=builder /app/firebaseconfig.json ./
+# Copy the .env file and firebaseconfig.json from the build stage to /app/
+COPY --from=builder /app/.env /app/
+COPY --from=builder /app/firebaseconfig.json /app/
 
 # Expose port 5050 for the API service
 EXPOSE 5050
 
-# Set the working directory and the entry point of the container
+# Set the working directory to /app/ and the entry point of the container
 WORKDIR /app/
-
-# Set the entry point of the container
 CMD ["./main"]
