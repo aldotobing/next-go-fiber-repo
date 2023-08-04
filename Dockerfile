@@ -33,8 +33,8 @@ WORKDIR /root/
 COPY --from=builder /app/server/main .
 
 # Copy the .env file and firebaseconfig.json from the build stage
-COPY --from=builder /app/.env ../
-COPY --from=builder /app/firebaseconfig.json ../
+COPY --from=builder /app/.env .
+COPY --from=builder /app/firebaseconfig.json .
 
 # Start a new stage from scratch
 FROM alpine:latest
