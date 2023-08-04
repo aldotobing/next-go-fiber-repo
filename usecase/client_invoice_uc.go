@@ -144,11 +144,7 @@ func (uc CilentInvoiceUC) FindByDocumentNo(c context.Context, parameter models.C
 func (uc CilentInvoiceUC) DataSync(c context.Context, parameter models.CilentInvoiceParameter) ([]models.CilentInvoice, error) {
 	repo := repository.NewCilentInvoiceRepository(uc.DB)
 
-	loc, err := time.LoadLocation("Asia/Jakarta")
-	if err != nil {
-		return nil, fmt.Errorf("failed to load location: %w", err)
-	}
-
+	loc, _ := time.LoadLocation("Asia/Jakarta")
 	now := time.Now().In(loc).Add(time.Minute * time.Duration(-30))
 	strnow := now.Format(time.RFC3339)
 	parameter.DateParam = strnow
