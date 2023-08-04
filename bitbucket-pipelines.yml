@@ -68,6 +68,7 @@ definitions:
           - docker push $DOCKERHUB_USERNAME/nextapi:latest
     - step: &deploy
         name: Deploy to EC2
+        deployment: Production
         script:
           - pipe: atlassian/ssh-run:0.4.1
             variables:
