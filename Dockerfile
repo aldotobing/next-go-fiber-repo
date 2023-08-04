@@ -14,7 +14,6 @@ RUN go mod download
 COPY .env .env
 COPY firebaseconfig.json firebaseconfig.json
 
-
 # Copy the rest of the application source code to the working directory
 COPY . .
 
@@ -34,8 +33,8 @@ WORKDIR /root/
 COPY --from=builder /app/server/main .
 
 # Copy the .env file and firebaseconfig.json from the build stage
-COPY --from=builder /app/.env ../
-COPY --from=builder /app/firebaseconfig.json ../
+COPY --from=builder /app/.env .
+COPY --from=builder /app/firebaseconfig.json .
 
 # Expose port 5050 for the API service
 EXPOSE 5050
