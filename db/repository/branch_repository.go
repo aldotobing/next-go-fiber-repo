@@ -83,7 +83,7 @@ func (repository BranchRepository) SelectAll(c context.Context, parameter models
 	}
 
 	statement := models.BranchSelectStatement + ` ` + models.BranchWhereStatement +
-		` AND (LOWER(def."_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+		` AND (LOWER(def."_name") LIKE $1 or LOWER(def."branch_code") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 
 	if err != nil {
