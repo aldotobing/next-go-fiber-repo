@@ -165,14 +165,14 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 		branch_id ,price_list_id ,price_list_version_id ,status ,gross_amount ,
 		disc_amount ,taxable_amount ,tax_amount ,rounding_amount ,net_amount ,
 		outstanding_amount ,paid_amount ,due_date ,no_ppn ,global_disc_amount,
-		transaction_point ,transaction_source_document_no, invoice_date,paid_date,outstanding_amount
+		transaction_point ,transaction_source_document_no, invoice_date,paid_date
 		)values(
 		$1, $2, $3, $4, (select id from customer where customer_code = $5),
 		$6, (select id from salesman where partner_id =(select id from partner where code = $7)), $8, $9, $10,
 		$11 ,$12, $13, $14, $15,
 		$16, $17, $18, $19, $20,
 		$21, $22, $23, $24, $25,
-		$26, $27, $28, $29, $30
+		$26, $27, $28, $29
 		)
 	RETURNING id`
 	transaction, err := repository.DB.BeginTx(c, nil)
@@ -194,15 +194,14 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 		deletedHeaderRow.Close()
 
 	}
-
+	//oustanding amount = net amount
 	err = transaction.QueryRowContext(c, statement,
 		model.DocumentNo, model.DocumentTypeID, model.TransactionDate, model.TransactionTime, model.CustomerCode,
 		model.TaxCalcMethod, model.SalesmanCode, model.PaymentTermsID, model.SalesOrderID, model.CompanyID,
 		model.BranchID, model.PriceLIstID, model.PriceLIstVersionID, str.EmptyString(*model.Status), str.EmptyString(*model.GrossAmount),
 		model.DiscAmount, model.TaxableAmount, model.TaxAmount, model.RoundingAmount, model.NetAmount,
-		str.EmptyString(*model.OutstandingAmount), str.EmptyString(*model.PaidAmount), model.DueDate, model.NoPPN, model.GlobalDiscAmount,
+		str.EmptyString(*model.NetAmount), str.EmptyString(*model.PaidAmount), model.DueDate, model.NoPPN, model.GlobalDiscAmount,
 		str.EmptyString(*model.TransactionPoint), str.NullString(model.SalesRequestCode), str.NullString(model.InvoiceDate), str.NullString(model.PaidDate),
-		str.NullString(model.PaidDate),
 	).Scan(&res)
 
 	if err != nil {
