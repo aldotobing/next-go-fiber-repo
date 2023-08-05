@@ -24,8 +24,12 @@ WORKDIR /app/server
 RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 
 # Start a new stage from scratch
-FROM alpine:latest
-RUN apk --no-cache add ca-certificates
+FROM debian:10-slim
+# Install the ca-certificates and tzdata packages.
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    tzdata \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory
 WORKDIR /app/
