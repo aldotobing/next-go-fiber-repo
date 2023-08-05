@@ -188,7 +188,7 @@ func (uc CilentInvoiceUC) DataSync(c context.Context, parameter models.CilentInv
 	for _, invoiceObject := range res {
 		_, err := repo.InsertDataWithLine(c, &invoiceObject)
 		if err != nil {
-			return nil, fmt.Errorf("failed to insert data: %w", err)
+			return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
 		}
 		resBuilder = append(resBuilder, invoiceObject)
 	}
