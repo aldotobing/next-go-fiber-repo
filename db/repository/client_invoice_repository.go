@@ -172,7 +172,7 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 		$11 ,$12, $13, $14, $15,
 		$16, $17, $18, $19, $20,
 		$21, $22, $23, $24, $25,
-		$26, $27, $28, $29
+		$26, $27, $28, $29 
 		)
 	RETURNING id`
 	transaction, err := repository.DB.BeginTx(c, nil)
