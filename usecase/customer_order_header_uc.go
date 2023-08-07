@@ -171,6 +171,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 			msgcustomerheader += `\n\n*NO ORDERAN ` + *order.DocumentNo + ` anda pada tanggal ` + dateString + ` oleh Toko : (` + *useraccount.CustomerName + `(` + *useraccount.Code + `)) telah berhasil dan akan diproses*`
 
 			msgbody = `\n\n*Berikut merupakan rincian pesanan anda:*`
+			msgSubBody += `\n\n*Berikut merupakan rincian pesanan:*`
 			orderline, errline := orderlinerepo.SelectAll(c, models.CustomerOrderLineParameter{
 				HeaderID: *order.ID,
 				By:       "def.created_date",
@@ -190,6 +191,15 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 				msgbody += `\nSalam Sehat`
 				msgbody += `\n`
 				msgbody += `\nNB : Bila ini bukan transaksi dari Toko Bapak/Ibu, silahkan menghubungi Distributor Produk Sido Muncul.`
+
+				msgSubBody += `\n`
+				msgSubBody += `Total ` + strconv.Itoa(ordercount) + ` item, senilai ` + harga
+				msgSubBody += `\n`
+				msgSubBody += `\nTerima kasih atas pemesanan anda`
+				msgSubBody += `\n`
+				msgSubBody += `\nSalam Sehat`
+				msgSubBody += `\n`
+				msgSubBody += `\nNB : Bila ini bukan transaksi dari Toko Bapak/Ibu, silahkan menghubungi Distributor Produk Sido Muncul.`
 			}
 
 			if useraccount.CustomerFCMToken != nil && *useraccount.CustomerFCMToken != "" {
@@ -244,7 +254,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 	}
 	if branchData.PICName != nil && *branchData.PICName != "" && branchData.PICPhoneNo != nil && *branchData.PICPhoneNo != "" {
 		msgToPIC := `*Kepada Yang Terhormat PIC*\n\n *` + *branchData.PICName + `*`
-		msgToPIC += msgSubBody + msgbody
+		msgToPIC += msgSubBody
 
 		_ = uc.ContractUC.WhatsApp.SendTransactionWA(*branchData.PICPhoneNo, msgToPIC)
 	}
