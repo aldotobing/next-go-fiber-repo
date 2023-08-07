@@ -303,29 +303,37 @@ func (h *TransactionVAHandler) PaidTransactionByVaCode(ctx *fiber.Ctx) error {
 		inputUpdate.VaRef1 = input.PaymentRequestBody.Reference1
 		inputUpdate.VaRef2 = input.PaymentRequestBody.Reference2
 		inputUpdate.VaPairID = input.PaymentRequestBody.TransactionID
-		inputUpdate.Amount = input.PaymentRequestBody.Billkey2
-		_, errpaid := uc.PaidTransaction(c, *res.ID, inputUpdate, res)
+		inputUpdate.Amount = input.PaymentRequestBody.PaymentAmount
 
-		if errpaid == nil {
+		if inputUpdate.Amount != *res.Amount {
+			ObjectData.InquiryResult.Status.ErrorCode = "B5"
+			ObjectData.InquiryResult.Status.IsError = "true"
+			ObjectData.InquiryResult.Status.StatusDescription = "Bill Not Found"
+		} else {
 
-			resafterupdate, errafter := uc.FindByCode(c, parameter)
+			_, errpaid := uc.PaidTransaction(c, *res.ID, inputUpdate, res)
 
-			if errafter != nil {
-				if errafter.Error() == "sql: no rows in result set" {
-					ObjectData.InquiryResult.Status.ErrorCode = "B5"
-					ObjectData.InquiryResult.Status.IsError = "true"
-					ObjectData.InquiryResult.Status.StatusDescription = "Bill Not Found"
-					errafter = nil
+			if errpaid == nil {
+
+				resafterupdate, errafter := uc.FindByCode(c, parameter)
+
+				if errafter != nil {
+					if errafter.Error() == "sql: no rows in result set" {
+						ObjectData.InquiryResult.Status.ErrorCode = "B5"
+						ObjectData.InquiryResult.Status.IsError = "true"
+						ObjectData.InquiryResult.Status.StatusDescription = "Bill Not Found"
+						errafter = nil
+					}
 				}
+
+				ObjectData.InquiryResult.BillInfo1 = *resafterupdate.VACode
+				ObjectData.InquiryResult.BillInfo2 = *resafterupdate.Customername
+
+				ObjectData.InquiryResult.Status.IsError = "false"
+				ObjectData.InquiryResult.Status.ErrorCode = "00"
+				ObjectData.InquiryResult.Status.StatusDescription = "Transaction Success"
+
 			}
-
-			ObjectData.InquiryResult.BillInfo1 = *resafterupdate.VACode
-			ObjectData.InquiryResult.BillInfo2 = *resafterupdate.Customername
-
-			ObjectData.InquiryResult.Status.IsError = "false"
-			ObjectData.InquiryResult.Status.ErrorCode = "00"
-			ObjectData.InquiryResult.Status.StatusDescription = "Transaction Success"
-
 		}
 	}
 
