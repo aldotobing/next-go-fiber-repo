@@ -147,7 +147,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 
 	useraccount, erruser := userrepo.FindByID(c, models.CustomerParameter{ID: *res.CustomerID})
 
-	var msgbody, msgSubBody string
+	var msgSubBody string
 	if erruser == nil {
 
 		FcmUc := FCMUC{ContractUC: uc.ContractUC}
@@ -170,7 +170,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 			msgcustomerheader := `*Kepada Yang Terhormat* \n\n *` + *useraccount.Code + ` - ` + *useraccount.CustomerName + `*`
 			msgcustomerheader += `\n\n*NO ORDERAN ` + *order.DocumentNo + ` anda pada tanggal ` + dateString + ` oleh Toko : (` + *useraccount.CustomerName + `(` + *useraccount.Code + `)) telah berhasil dan akan diproses*`
 
-			msgbody = `\n\n*Berikut merupakan rincian pesanan anda:*`
+			msgbody := `\n\n*Berikut merupakan rincian pesanan anda:*`
 			msgSubBody += `\n\n*Berikut merupakan rincian pesanan:*`
 			orderline, errline := orderlinerepo.SelectAll(c, models.CustomerOrderLineParameter{
 				HeaderID: *order.ID,
@@ -180,7 +180,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 				msgbody += `\n`
 				for i := range orderline {
 					msgbody += `\n ` + *orderline[i].QTY + ` ` + *orderline[i].UomName + ` ` + *orderline[i].ItemName + `\n`
-
+					msgSubBody += `\n ` + *orderline[i].QTY + ` ` + *orderline[i].UomName + ` ` + *orderline[i].ItemName + `\n`
 				}
 				ordercount := len(orderline)
 				msgbody += `\n`
