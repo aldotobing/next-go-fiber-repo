@@ -199,7 +199,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 				msgSubBody += `\n`
 				msgSubBody += `\nSalam Sehat`
 				msgSubBody += `\n`
-				msgSubBody += `\nNB : Bila ini bukan transaksi dari Toko Bapak/Ibu, silahkan periksa periksa data transaksi di SFA WEB(NEXT)/WEB CMS MYSM.`
+				msgSubBody += `\nNB : Bila ini bukan transaksi dari Toko Bapak/Ibu, silahkan periksa data transaksi di SFA WEB(NEXT)/WEB CMS MYSM.`
 			}
 
 			if useraccount.CustomerFCMToken != nil && *useraccount.CustomerFCMToken != "" {
