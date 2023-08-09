@@ -126,3 +126,18 @@ func (h *PromoLineHandler) Edit(ctx *fiber.Ctx) error {
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
+
+// Delete ...
+func (h *PromoLineHandler) Delete(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	id := ctx.Params("id")
+	if id == "" {
+		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
+	}
+
+	uc := usecase.PromoLineUC{ContractUC: h.ContractUC}
+	res, err := uc.Delete(c, id)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
