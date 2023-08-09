@@ -148,6 +148,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 	useraccount, erruser := userrepo.FindByID(c, models.CustomerParameter{ID: *res.CustomerID})
 
 	var msgSubBody string
+	var customerSales models.Salesman
 	if erruser == nil {
 
 		FcmUc := FCMUC{ContractUC: uc.ContractUC}
@@ -165,7 +166,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 			msgsalesmanheader := `*Kepada Yang Terhormat* \n\n *` + *useraccount.CustomerSalesmanName + `*`
 			msgsalesmanheader += `\n\n*NO ORDERAN ` + *order.DocumentNo + ` pada tanggal ` + dateString + ` oleh Toko : (` + *useraccount.CustomerName + `(` + *useraccount.Code + `)) telah berhasil dan akan diproses*`
 
-			msgSubBody += `\n\n*NO ORDERAN ` + *order.DocumentNo + ` pada tanggal ` + dateString + ` oleh Toko : (` + *useraccount.CustomerName + `(` + *useraccount.Code + `)) telah berhasil dan akan diproses*`
+			msgSubBody += `\n\n*NO ORDERAN ` + *order.DocumentNo + ` pada tanggal ` + dateString + ` oleh Toko : (` + *useraccount.CustomerName + `(` + *useraccount.Code + `)) telah berhasil dan akan diproses*\n\n*dari Salesman : {{salesman_detail}}*`
 
 			msgcustomerheader := `*Kepada Yang Terhormat* \n\n *` + *useraccount.Code + ` - ` + *useraccount.CustomerName + `*`
 			msgcustomerheader += `\n\n*NO ORDERAN ` + *order.DocumentNo + ` anda pada tanggal ` + dateString + ` oleh Toko : (` + *useraccount.CustomerName + `(` + *useraccount.Code + `)) telah berhasil dan akan diproses*`
@@ -231,8 +232,8 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 				// }
 				if useraccount.CustomerSalesmanID != nil {
 					salesmannRepo := repository.NewSalesmanRepository(uc.DB)
-					customerSales, errcustsales := salesmannRepo.FindByID(c, models.SalesmanParameter{ID: *useraccount.CustomerSalesmanID})
-					if errcustsales == nil {
+					customerSales, err = salesmannRepo.FindByID(c, models.SalesmanParameter{ID: *useraccount.CustomerSalesmanID})
+					if err == nil {
 						if customerSales.PhoneNo != nil {
 							msgSalesman := msgsalesmanheader + msgbody
 							senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*customerSales.PhoneNo, msgSalesman)
@@ -254,6 +255,11 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 	}
 	if branchData.PICName != nil && *branchData.PICName != "" && branchData.PICPhoneNo != nil && *branchData.PICPhoneNo != "" {
 		msgToPIC := `*Kepada Yang Terhormat PIC*\n\n *` + *branchData.PICName + `*`
+		if customerSales.ID != nil {
+			msgSubBody = strings.ReplaceAll(msgSubBody, "{{salesman_detail}}", *customerSales.Name+" ("+*customerSales.Code+")")
+		} else {
+			msgSubBody = strings.ReplaceAll(msgSubBody, "{{salesman_detail}}", "-")
+		}
 		msgToPIC += msgSubBody
 
 		_ = uc.ContractUC.WhatsApp.SendTransactionWA(*branchData.PICPhoneNo, msgToPIC)
