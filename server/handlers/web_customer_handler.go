@@ -224,7 +224,7 @@ func (h *WebCustomerHandler) ReportSelect(ctx *fiber.Ctx) error {
 	uc := usecase.WebCustomerUC{ContractUC: h.ContractUC}
 	res, err := uc.ReportSelect(c, parameter)
 	if err != nil {
-		return h.SendResponse(ctx, nil, nil, errors.New(helper.InvalidGender), http.StatusBadRequest)
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
 	}
 
 	if res == nil {
