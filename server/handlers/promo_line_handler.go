@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strconv"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -132,12 +133,13 @@ func (h *PromoLineHandler) Delete(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	id := ctx.Params("id")
-	if id == "" {
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
 		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
 	}
 
 	uc := usecase.PromoLineUC{ContractUC: h.ContractUC}
-	res, err := uc.Delete(c, id)
+	res, err := uc.Delete(c, idInt)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }

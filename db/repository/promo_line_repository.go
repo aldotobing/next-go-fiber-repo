@@ -15,7 +15,7 @@ type IPromoLine interface {
 	FindAll(ctx context.Context, parameter models.PromoLineParameter) ([]models.PromoLine, int, error)
 	Add(c context.Context, model *models.PromoLine) (*string, error)
 	Edit(c context.Context, model *models.PromoLine) (*string, error)
-	Delete(c context.Context, id string) (*string, error)
+	Delete(c context.Context, id int) (*string, error)
 	// 	EditAddress(c context.Context, model *models.PromoLine) (*string, error)
 }
 
@@ -251,7 +251,7 @@ func (repository PromoLine) Add(c context.Context, model *models.PromoLine) (res
 	return res, err
 }
 
-func (repo PromoLine) Delete(c context.Context, id string) (res *string, err error) {
+func (repo PromoLine) Delete(c context.Context, id int) (res *string, err error) {
 	statement := `DELETE FROM PROMO_LINE WHERE ID = $1 RETURNING id`
 
 	err = repo.DB.QueryRowContext(c, statement, id).Scan(&res)

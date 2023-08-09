@@ -120,7 +120,7 @@ func (uc PromoLineUC) Edit(c context.Context, id string, data *requests.PromoLin
 	return res, err
 }
 
-func (uc PromoLineUC) Delete(c context.Context, id string) (res models.PromoLine, err error) {
+func (uc PromoLineUC) Delete(c context.Context, id int) (res models.PromoLine, err error) {
 	repo := repository.NewPromoLineRepository(uc.DB)
 	// now := time.Now().UTC()
 	// strnow := now.Format(time.RFC3339)
