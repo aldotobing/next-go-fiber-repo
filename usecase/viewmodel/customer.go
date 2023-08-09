@@ -56,4 +56,6 @@ type CustomerVM struct {
 	CustomerProfileStatus    *string `json:"customer_profile_status"`
 	ModifiedBy               *string `json:"modified_by"`
 	ModifiedDate             *string `json:"modified_date"`
+	CustomerPriceListID      *string `json:"customer_price_list_id"`
+	CustomerPriceListName    *string `json:"customer_price_list_name"`
 }

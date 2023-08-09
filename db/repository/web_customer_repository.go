@@ -84,6 +84,8 @@ func (repository WebCustomerRepository) scanRows(rows *sql.Rows) (res models.Web
 		&res.CustomerUserName,
 		&res.ModifiedBy,
 		&res.ModifiedDate,
+		&res.CustomerPriceListID,
+		&res.CustomerPriceListName,
 	)
 	if err != nil {
 
@@ -204,6 +206,8 @@ func (repository WebCustomerRepository) scanRow(row *sql.Row) (res models.WebCus
 		&res.CustomerUserName,
 		&res.ModifiedBy,
 		&res.ModifiedDate,
+		&res.CustomerPriceListID,
+		&res.CustomerPriceListName,
 	)
 	if err != nil {
 		return res, err

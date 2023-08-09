@@ -61,6 +61,8 @@ type WebCustomer struct {
 	RegionID                 *string `json:"region_id"`
 	RegionGroupID            *string `json:"region_group_id"`
 	CreatedDate              *string `json:"created_date"`
+	CustomerPriceListID      *string `json:"customer_price_list_id"`
+	CustomerPriceListName    *string `json:"customer_price_list_name"`
 }
 
 // CustomerParameter ...
@@ -167,7 +169,9 @@ var (
 		usr.id as user_id,
 		usr.login as user_name,
 		usr_edited.login,
-		c.modified_date
+		c.modified_date,
+		C.price_list_id,
+		PL._name
 	FROM CUSTOMER C
 	LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
 	LEFT JOIN REGION REG ON REG.ID = B.REGION_ID
@@ -184,6 +188,7 @@ var (
 	left join customer_level cl on cl.id = c.customer_level_id
 	left join _user usr on usr.id = C.user_id
 	left join _user usr_edited on usr_edited.id = c.modified_by
+	LEFT JOIN PRICE_LIST PL ON PL.ID = C.PRICE_LIST_ID
 	`
 
 	// CustomerWhereStatement ...
