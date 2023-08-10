@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 
@@ -118,7 +118,7 @@ func (h *WebCustomerHandler) FindByID(ctx *fiber.Ctx) error {
 func (h *WebCustomerHandler) FetchVisitDay(params models.WebCustomerParameter) string {
 	jsonReq, err := json.Marshal(params)
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrv/rest/customer/visitday/1", bytes.NewBuffer(jsonReq))
+	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrvxxx/rest/customer/visitday/1", bytes.NewBuffer(jsonReq))
 	if err != nil {
 		fmt.Println("client err")
 		fmt.Print(err.Error())
@@ -134,7 +134,7 @@ func (h *WebCustomerHandler) FetchVisitDay(params models.WebCustomerParameter) s
 		fmt.Print(err.Error())
 	}
 	defer resp.Body.Close()
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Print(err.Error())
 	}
