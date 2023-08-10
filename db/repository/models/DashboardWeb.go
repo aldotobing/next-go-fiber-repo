@@ -228,12 +228,12 @@ var (
 		group by r.id
 	),
 	dataVisitedUser as (
-		select uca.user_id as user_id, count(uca.id) as visit_user
+		select cus.id as cus_id, count(*) as visit_user
 		from user_checkin_activity uca
 			left join _user us on us.id = uca.user_id
 			left join customer cus on cus.customer_code = us.login
 		where  cus.show_in_apps = 1 and uca.checkin_time::date between '{START_DATE}' and '{END_DATE}'
-		group by uca.user_id
+		group by cus.id
 	),
 	dataOutlet as (
 		select r.id as region_id, count(distinct c.id) as total_outlet
@@ -267,14 +267,14 @@ var (
 		left join customer c on c.branch_id = b.id
 		left join _user us on us.id = c.user_id 
 		where c.modified_date::date between '{START_DATE}' and '{END_DATE}'
-			and(c.customer_nik is not null or c.customer_nik != '')
-			and (c.customer_name is not null or c.customer_name != '')
+			and(c.customer_nik is not null and c.customer_nik != '')
+			and (c.customer_name is not null and c.customer_name != '')
 			and (c.customer_birthdate is not null)
-			and (c.customer_religion is not null or c.customer_religion != '')
-			and (c.customer_photo_ktp is not null or c.customer_photo_ktp != '')
-			and (c.customer_profile_picture is not null or c.customer_profile_picture != '')
-			and (c.customer_phone is not null or c.customer_phone != '')
-			and (c.customer_code is not null or c.customer_code != '')
+			and (c.customer_religion is not null and c.customer_religion != '')
+			and (c.customer_photo_ktp is not null and c.customer_photo_ktp != '')
+			and (c.customer_profile_picture is not null and c.customer_profile_picture != '')
+			and (c.customer_phone is not null and c.customer_phone != '')
+			and (c.customer_code is not null and c.customer_code != '')
 			and c.created_date IS not null and c.show_in_apps = 1
 			and us.fcm_token is not null and length(trim(us.fcm_token))>0
 		group by r.id
@@ -298,7 +298,7 @@ var (
 		left join region r on r.id = b.region_id
 		left join "_user" u on u.id = c.user_id
 		left join dataRepeatOrder dro on dro.customer_id = c.id
-		left join dataVisitedUser dvs on dvs.user_id = u.id
+		left join dataVisitedUser dvs on dvs.cus_id = c.id
 		left join dataOutlet ddo on ddo.region_id = r.id
 		left join dataActiveOutlet dao on dao.region_id= r.id
 		left join dataInvoice di on di.region_id = r.id
