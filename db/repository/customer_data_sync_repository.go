@@ -157,16 +157,15 @@ func (repository CustomerDataSyncRepository) Edit(c context.Context, model *mode
 	payment_terms_id = (select id from term_of_payment where code =$3) ,
 	price_list_id= (select id from price_list where code=$4),
 	salesman_id =(select id from salesman where partner_id =(select id from partner where code =$5)),
-	customer_level_id =(select id from customer_level where code = $6),
-	branch_id = $7,
-	customer_type_id =(select id from customer_type where code = $8)
-	where partner_id = (select id from partner where code = $9)
+	branch_id = $6,
+	customer_type_id =(select id from customer_type where code = $7)
+	where partner_id = (select id from partner where code = $8)
 	returning id `
 
 	err = transaction.QueryRowContext(c, customerstatement,
 		model.Name, model.Address,
 		model.TermOfPaymentCode, model.PriceListCode, model.SalesmanCode,
-		model.CustomerLevelCode, model.BranchID, str.EmptyString(*model.CustomerType),
+		model.BranchID, str.EmptyString(*model.CustomerType),
 		model.Code,
 	).Scan(&rescus)
 
