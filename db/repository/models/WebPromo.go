@@ -17,6 +17,8 @@ type WebPromo struct {
 	RegionAreaList      *[]WebRegionAreaEligiblePromo    `json:"region_area_list"`
 	CustomerLevelIdList *string                          `json:"customer_Level_id_list"`
 	CustomerLevelList   *[]WebCustomerLevelEligiblePromo `json:"customer_Level_list"`
+	BranchIdList        *string                          `json:"branch_id_list"`
+	BranchList          *[]WebBranchEligiblePromo        `json:"branch_list"`
 }
 
 // WebPromoParameter ...

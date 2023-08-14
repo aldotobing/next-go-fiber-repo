@@ -12,6 +12,7 @@ type WebPromoRequest struct {
 	ShowInApp           int    `json:"show_in_app"`
 	CustomerTypeIdList  string `json:"customer_type_id_list"`
 	CustomerLevelIDList string `json:"customer_level_id_list"`
+	BranchIdList        string `json:"branch_id_list"`
 	RegionIDList        string `json:"region_area_id_list"`
 	Active              int    `json:"active"`
 }

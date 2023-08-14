@@ -89,6 +89,7 @@ func (uc WebPromoUC) Add(c context.Context, data *requests.WebPromoRequest, imgB
 		ShowInApp:           &data.ShowInApp,
 		CustomerTypeIdList:  &data.CustomerTypeIdList,
 		RegionAreaIdList:    &data.RegionIDList,
+		BranchIdList:        &data.BranchIdList,
 		CustomerLevelIdList: &data.CustomerLevelIDList,
 	}
 	res.ID, err = repo.Add(c, &res)
@@ -139,6 +140,7 @@ func (uc WebPromoUC) Edit(c context.Context, data *requests.WebPromoRequest, img
 		CustomerTypeIdList:  &data.CustomerTypeIdList,
 		RegionAreaIdList:    &data.RegionIDList,
 		CustomerLevelIdList: &data.CustomerLevelIDList,
+		BranchIdList:        &data.BranchIdList,
 	}
 
 	res.ID, err = repo.Edit(c, &res)
