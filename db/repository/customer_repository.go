@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -158,14 +159,20 @@ func (repository CustomerRepository) scanRow(row *sql.Row) (res models.Customer,
 
 // SelectAll ...
 func (repository CustomerRepository) SelectAll(c context.Context, parameter models.CustomerParameter) (data []models.Customer, err error) {
-	conditionString := ``
+	var conditionString string
+	var args []interface{}
+	var index int = 1
 
 	if parameter.ID != "" {
-		conditionString += ` AND c.id = '` + parameter.ID + `'`
+		conditionString += ` AND c.id = $` + strconv.Itoa(index)
+		args = append(args, parameter.ID)
+		index++
 	}
 
 	if parameter.UserId != "" {
-		conditionString += ` AND C.BRANCH_ID IN (SELECT BRANCH_ID FROM USER_BRANCH UB WHERE UB.USER_ID = ` + parameter.UserId + `) `
+		conditionString += ` AND C.BRANCH_ID IN (SELECT BRANCH_ID FROM USER_BRANCH UB WHERE UB.USER_ID = $` + strconv.Itoa(index) + `) `
+		args = append(args, parameter.UserId)
+		index++
 	}
 
 	if parameter.FlagToken {
@@ -173,11 +180,10 @@ func (repository CustomerRepository) SelectAll(c context.Context, parameter mode
 	}
 
 	statement := models.CustomerSelectStatement + ` ` + models.CustomerWhereStatement +
-		` AND (LOWER(c."customer_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
-	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
+		` AND (LOWER(c."customer_name") LIKE $` + strconv.Itoa(index) + `) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+	args = append(args, "%"+strings.ToLower(parameter.Search)+"%")
 
-	//print
-	// fmt.Println(statement)
+	rows, err := repository.DB.QueryContext(c, statement, args...)
 
 	if err != nil {
 		return data, err
@@ -185,7 +191,6 @@ func (repository CustomerRepository) SelectAll(c context.Context, parameter mode
 
 	defer rows.Close()
 	for rows.Next() {
-
 		temp, err := repository.scanRows(rows)
 		if err != nil {
 			return data, err
@@ -196,22 +201,69 @@ func (repository CustomerRepository) SelectAll(c context.Context, parameter mode
 	return data, err
 }
 
+// func (repository CustomerRepository) SelectAll(c context.Context, parameter models.CustomerParameter) (data []models.Customer, err error) {
+// 	conditionString := ``
+
+// 	if parameter.ID != "" {
+// 		conditionString += ` AND c.id = '` + parameter.ID + `'`
+// 	}
+
+// 	if parameter.UserId != "" {
+// 		conditionString += ` AND C.BRANCH_ID IN (SELECT BRANCH_ID FROM USER_BRANCH UB WHERE UB.USER_ID = ` + parameter.UserId + `) `
+// 	}
+
+// 	if parameter.FlagToken {
+// 		conditionString += ` AND us.FCM_TOKEN IS NOT NULL `
+// 	}
+
+// 	statement := models.CustomerSelectStatement + ` ` + models.CustomerWhereStatement +
+// 		` AND (LOWER(c."customer_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+// 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
+
+// 	//print
+// 	// fmt.Println(statement)
+
+// 	if err != nil {
+// 		return data, err
+// 	}
+
+// 	defer rows.Close()
+// 	for rows.Next() {
+
+// 		temp, err := repository.scanRows(rows)
+// 		if err != nil {
+// 			return data, err
+// 		}
+// 		data = append(data, temp)
+// 	}
+
+// 	return data, err
+// }
+
 // FindAll ...
 func (repository CustomerRepository) FindAll(ctx context.Context, parameter models.CustomerParameter) (data []models.Customer, count int, err error) {
-	conditionString := ``
+	var conditionString string
+	var args []interface{}
+	var index int = 1
 
 	if parameter.ID != "" {
-		conditionString += ` AND c.id = '` + parameter.ID + `'`
+		conditionString += ` AND c.id = $` + strconv.Itoa(index)
+		args = append(args, parameter.ID)
+		index++
 	}
 
 	if parameter.UserId != "" {
-		conditionString += ` AND C.BRANCH_ID IN (SELECT BRANCH_ID FROM USER_BRANCH UB WHERE UB.USER_ID = ` + parameter.UserId + `) `
+		conditionString += ` AND C.BRANCH_ID IN (SELECT BRANCH_ID FROM USER_BRANCH UB WHERE UB.USER_ID = $` + strconv.Itoa(index) + `) `
+		args = append(args, parameter.UserId)
+		index++
 	}
 
-	query := models.CustomerSelectStatement + ` ` + models.CustomerWhereStatement + ` ` + conditionString + `
-		AND (LOWER(c."customer_name") LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
-	// fmt.Println(query)
-	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
+	query := models.CustomerSelectStatement + ` ` + models.CustomerWhereStatement + ` ` + conditionString +
+		` AND (LOWER(c."customer_name") LIKE $` + strconv.Itoa(index) + `) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $` + strconv.Itoa(index+1) + ` LIMIT $` + strconv.Itoa(index+2)
+
+	args = append(args, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
+	rows, err := repository.DB.QueryContext(ctx, query, args...)
+
 	if err != nil {
 		return data, count, err
 	}
@@ -229,11 +281,49 @@ func (repository CustomerRepository) FindAll(ctx context.Context, parameter mode
 		return data, count, err
 	}
 
-	query = `SELECT COUNT(*) FROM "customer" c ` + models.CustomerWhereStatement + ` ` +
-		conditionString + ` AND (LOWER(c."customer_name") LIKE $1)`
-	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
+	countQuery := `SELECT COUNT(*) FROM "customer" c ` + models.CustomerWhereStatement + ` ` + conditionString + ` AND (LOWER(c."customer_name") LIKE $1)`
+	err = repository.DB.QueryRow(countQuery, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
+
 	return data, count, err
 }
+
+// func (repository CustomerRepository) FindAll(ctx context.Context, parameter models.CustomerParameter) (data []models.Customer, count int, err error) {
+// 	conditionString := ``
+
+// 	if parameter.ID != "" {
+// 		conditionString += ` AND c.id = '` + parameter.ID + `'`
+// 	}
+
+// 	if parameter.UserId != "" {
+// 		conditionString += ` AND C.BRANCH_ID IN (SELECT BRANCH_ID FROM USER_BRANCH UB WHERE UB.USER_ID = ` + parameter.UserId + `) `
+// 	}
+
+// 	query := models.CustomerSelectStatement + ` ` + models.CustomerWhereStatement + ` ` + conditionString + `
+// 		AND (LOWER(c."customer_name") LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
+// 	// fmt.Println(query)
+// 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
+// 	if err != nil {
+// 		return data, count, err
+// 	}
+
+// 	defer rows.Close()
+// 	for rows.Next() {
+// 		temp, err := repository.scanRows(rows)
+// 		if err != nil {
+// 			return data, count, err
+// 		}
+// 		data = append(data, temp)
+// 	}
+// 	err = rows.Err()
+// 	if err != nil {
+// 		return data, count, err
+// 	}
+
+// 	query = `SELECT COUNT(*) FROM "customer" c ` + models.CustomerWhereStatement + ` ` +
+// 		conditionString + ` AND (LOWER(c."customer_name") LIKE $1)`
+// 	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
+// 	return data, count, err
+// }
 
 // FindByID ...
 func (repository CustomerRepository) FindByID(c context.Context, parameter models.CustomerParameter) (data models.Customer, err error) {
