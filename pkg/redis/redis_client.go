@@ -4,15 +4,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/go-redis/redis/v7"
 	"time"
+
+	"github.com/go-redis/redis/v7"
 )
 
 type RedisClient struct {
 	Client *redis.Client
 }
 
-func (redisClient RedisClient) StoreToRedistWithExpired(key string, val interface{}, duration string) error {
+func (redisClient *RedisClient) StoreToRedistWithExpired(key string, val interface{}, duration string) error {
 	dur, err := time.ParseDuration(duration)
 	if err != nil {
 		return err
@@ -29,7 +30,7 @@ func (redisClient RedisClient) StoreToRedistWithExpired(key string, val interfac
 }
 
 
-func (redisClient RedisClient) StoreToRedis(key string, val interface{}) error {
+func (redisClient *RedisClient) StoreToRedis(key string, val interface{}) error {
 	b, err := json.Marshal(val)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -41,7 +42,7 @@ func (redisClient RedisClient) StoreToRedis(key string, val interface{}) error {
 	return err
 }
 
-func (redisClient RedisClient) GetFromRedis(key string, cb interface{}) error {
+func (redisClient *RedisClient) GetFromRedis(key string, cb interface{}) error {
 	res, err := redisClient.Client.Get(key).Result()
 	if err != nil {
 		return err
@@ -59,6 +60,31 @@ func (redisClient RedisClient) GetFromRedis(key string, cb interface{}) error {
 	return err
 }
 
-func (redisClient RedisClient) RemoveFromRedis(key string) error {
+func (redisClient *RedisClient) RemoveFromRedis(key string) error {
 	return redisClient.Client.Del(key).Err()
+}
+
+func (redisClient *RedisClient) Get(key string) ([]byte, error) {
+    res, err := redisClient.Client.Get(key).Result()
+    if err != nil {
+        return nil, err
+    }
+    return []byte(res), nil
+}
+
+func (redisClient *RedisClient) Set(key string, value []byte, expiration time.Duration) error {
+    return redisClient.Client.Set(key, string(value), expiration).Err()
+}
+
+
+func (redisClient *RedisClient) Reset() error {
+    return redisClient.Client.FlushDB().Err()
+}
+
+func (redisClient *RedisClient) Close() error {
+    return redisClient.Client.Close()
+}
+
+func (redisClient *RedisClient) Delete(key string) error {
+    return redisClient.Client.Del(key).Err()
 }
