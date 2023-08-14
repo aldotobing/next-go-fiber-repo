@@ -319,6 +319,9 @@ func (repository WebCustomerRepository) SelectAll(c context.Context, parameter m
 func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter models.WebCustomerParameter) (data []models.WebCustomer, count int, err error) {
 	conditionString := ``
 
+	var args []interface{}
+	var index int = 1
+
 	if parameter.Search == "" {
 		parameter.Search = ""
 	}
@@ -336,15 +339,15 @@ func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter m
 	}
 
 	if parameter.BranchId != "" {
-		conditionString += ` AND C.BRANCH_ID= ` + parameter.BranchId
-	} else {
-		parameter.BranchId = ""
+		conditionString += ` AND C.BRANCH_ID= $` + strconv.Itoa(index)
+		args = append(args, parameter.BranchId)
+		index++
 	}
 
 	if parameter.PhoneNumber != "" {
-		conditionString += ` AND c.customer_phone LIKE '%` + parameter.PhoneNumber + `%'`
-	} else {
-		parameter.PhoneNumber = ""
+		conditionString += ` AND c.customer_phone LIKE $` + strconv.Itoa(index)
+		args = append(args, "%"+parameter.PhoneNumber+"%")
+		index++
 	}
 
 	var whereStatement string
@@ -355,7 +358,7 @@ func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter m
 	}
 
 	query := models.WebCustomerSelectStatement + ` ` + whereStatement + ` ` + conditionString + `
-	AND (LOWER(c.customer_name) LIKE $` + strconv.Itoa(index) + ` or LOWER(c.customer_code) LIKE $` + strconv.Itoa(index) + `) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $` + strconv.Itoa(index+1) + ` LIMIT $` + strconv.Itoa(index+2)
+		AND (LOWER(c.customer_name) LIKE $` + strconv.Itoa(index) + ` or LOWER(c.customer_code) LIKE $` + strconv.Itoa(index) + `) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $` + strconv.Itoa(index+1) + ` LIMIT $` + strconv.Itoa(index+2)
 
 	rows, err := repository.DB.QueryContext(ctx, query, args...)
 	if err != nil {

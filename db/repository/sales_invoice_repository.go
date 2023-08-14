@@ -136,33 +136,32 @@ func (repository SalesInvoiceRepository) SelectAll(c context.Context, parameter 
 // FindAll ...
 func (repository SalesInvoiceRepository) FindAll(ctx context.Context, parameter models.SalesInvoiceParameter) (data []models.SalesInvoice, count int, err error) {
 	var conditionString string
-	var args, argsCount []interface{}
+	var args []interface{}
 	var index int = 1
 
 	if parameter.CustomerID != "" {
 		conditionString += ` AND def.cust_bill_to_id = $` + strconv.Itoa(index)
 		args = append(args, parameter.CustomerID)
-		argsCount = append(argsCount, parameter.CustomerID)
 		index++
 	}
 
 	if parameter.StartDate != "" && parameter.EndDate != "" {
 		conditionString += ` AND def.transaction_date BETWEEN $` + strconv.Itoa(index) + ` AND $` + strconv.Itoa(index+1)
 		args = append(args, parameter.StartDate, parameter.EndDate)
-		argsCount = append(argsCount, parameter.StartDate, parameter.EndDate)
 		index += 2
 	}
 
 	if parameter.UserId != "" {
 		conditionString += ` AND def.branch_id IN (SELECT ub.branch_id FROM user_branch ub WHERE ub.user_id = $` + strconv.Itoa(index) + `)`
 		args = append(args, parameter.UserId)
-		argsCount = append(argsCount, parameter.UserId)
 		index++
 	}
 
 	query := models.SalesInvoiceSelectStatement + ` ` + models.SalesInvoiceWhereStatement + ` ` + conditionString +
 		` AND (LOWER(def."document_no") LIKE $` + strconv.Itoa(index) + `) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $` + strconv.Itoa(index+1) + ` LIMIT $` + strconv.Itoa(index+2)
 	args = append(args, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
+
+	fmt.Println(query)
 
 	rows, err := repository.DB.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -184,13 +183,8 @@ func (repository SalesInvoiceRepository) FindAll(ctx context.Context, parameter 
 
 	argsCount = append(argsCount, "%"+strings.ToLower(parameter.Search)+"%")
 	query = `SELECT COUNT(*) FROM "sales_invoice_header" def ` + models.SalesInvoiceWhereStatement + ` ` +
-		conditionString + ` AND (LOWER(def."document_no") LIKE $` + strconv.Itoa(index) + `)`
-
-	err = repository.DB.QueryRowContext(ctx, query, argsCount...).Scan(&count)
-
-	fmt.Println("Query:", query)
-	fmt.Println("Args:", argsCount)
-
+		conditionString + ` AND (LOWER(def."document_no") LIKE $1)`
+	err = repository.DB.QueryRowContext(ctx, query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
 	return data, count, err
 }
 
