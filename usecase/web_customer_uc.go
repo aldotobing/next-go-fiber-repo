@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"mime/multipart"
 	"strconv"
 	"strings"
@@ -172,22 +173,6 @@ func (uc WebCustomerUC) FindAll(c context.Context, parameter models.WebCustomerP
 		if err == nil {
 			return response.Data.ListCustomer, response.Meta, nil
 		}
-	}
-
-	parameter.Offset, parameter.Limit, parameter.Page, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.WebCustomerOrderBy, models.WebCustomerOrderByrByString)
-
-	repo := repository.NewWebCustomerRepository(uc.DB)
-	data, count, err := repo.FindAll(c, parameter)
-	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
-		return nil, viewmodel.PaginationVM{}, err
-	}
-
-	p := uc.setPaginationResponse(parameter.Page, parameter.Limit, count)
-	for _, d := range data {
-		var temp viewmodel.CustomerVM
-		uc.BuildBody(&d, &temp, true)
-		response.Data.ListCustomer = append(response.Data.ListCustomer, temp)
 	}
 
 	parameter.Offset, parameter.Limit, parameter.Page, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.WebCustomerOrderBy, models.WebCustomerOrderByrByString)
