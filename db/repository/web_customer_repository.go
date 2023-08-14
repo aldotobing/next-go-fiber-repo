@@ -280,7 +280,14 @@ func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter m
 		conditionString += ` AND c.customer_phone LIKE '%` + parameter.PhoneNumber + `%'`
 	}
 
-	query := models.WebCustomerSelectStatement + ` ` + models.WebCustomerWhereStatement + ` ` + conditionString + `
+	var whereStatement string
+	if parameter.ShowInApp == "" || parameter.ShowInApp == "1" {
+		whereStatement = models.WebCustomerWhereStatement
+	} else {
+		whereStatement = models.WebCustomerWhereStatementAll
+	}
+
+	query := models.WebCustomerSelectStatement + ` ` + whereStatement + ` ` + conditionString + `
 		AND (LOWER(c.customer_name) LIKE $1 or LOWER(c.customer_code) LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
 
 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
