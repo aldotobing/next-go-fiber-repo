@@ -65,6 +65,6 @@ type CustomerData struct {
 }
 
 type PaginatedResponse struct {
-	Data CustomerData `json:"data"`
+	Data CustomerData       `json:"data"`
 	Meta PaginationVM `json:"meta"`
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"mime/multipart"
 	"strconv"
 	"strings"
@@ -139,22 +140,39 @@ func (uc WebCustomerUC) SelectAll(c context.Context, parameter models.WebCustome
 }
 
 // FindAll ...
-func (uc WebCustomerUC) FindAll(c context.Context, parameter models.WebCustomerParameter) (res []viewmodel.CustomerVM, p viewmodel.PaginationVM, err error) {
-	parameter.Offset, parameter.Limit, parameter.Page, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.WebCustomerOrderBy, models.WebCustomerOrderByrByString)
+// func (uc WebCustomerUC) FindAll(c context.Context, parameter models.WebCustomerParameter) (res []viewmodel.CustomerVM, p viewmodel.PaginationVM, err error) {
+// 	parameter.Offset, parameter.Limit, parameter.Page, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.WebCustomerOrderBy, models.WebCustomerOrderByrByString)
 
-	var count int
-	repo := repository.NewWebCustomerRepository(uc.DB)
-	data, count, err := repo.FindAll(c, parameter)
-	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
-		return res, p, err
-	}
+// 	var count int
+// 	repo := repository.NewWebCustomerRepository(uc.DB)
+// 	data, count, err := repo.FindAll(c, parameter)
+// 	if err != nil {
+// 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+// 		return res, p, err
+// 	}
 
-	p = uc.setPaginationResponse(parameter.Page, parameter.Limit, count)
-	for i := range data {
-		var temp viewmodel.CustomerVM
-		uc.BuildBody(&data[i], &temp, false)
-		res = append(res, temp)
+// 	p = uc.setPaginationResponse(parameter.Page, parameter.Limit, count)
+// 	for i := range data {
+// 		var temp viewmodel.CustomerVM
+// 		uc.BuildBody(&data[i], &temp, false)
+// 		res = append(res, temp)
+// 	}
+
+// 	return res, p, err
+// }
+
+func (uc WebCustomerUC) FindAll(c context.Context, parameter models.WebCustomerParameter) ([]viewmodel.CustomerVM, viewmodel.PaginationVM, error) {
+	var response viewmodel.PaginatedResponse
+
+	cacheKey := fmt.Sprintf("customer:admin_user_id:%s:page:%d:search:%s:branch_id:%s:phone_number:%s", parameter.UserId, parameter.Page, parameter.Search, parameter.BranchId, parameter.PhoneNumber)
+
+	// Try getting data from cache
+	cachedData, err := uc.RedisClient.Get(cacheKey)
+	if err == nil && string(cachedData) != "" {
+		err := json.Unmarshal(cachedData, &response)
+		if err == nil {
+			return response.Data.ListCustomer, response.Meta, nil
+		}
 	}
 
 	parameter.Offset, parameter.Limit, parameter.Page, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.WebCustomerOrderBy, models.WebCustomerOrderByrByString)
