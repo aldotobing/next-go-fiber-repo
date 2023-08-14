@@ -264,6 +264,10 @@ func (repository WebCustomerRepository) SelectAll(c context.Context, parameter m
 func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter models.WebCustomerParameter) (data []models.WebCustomer, count int, err error) {
 	conditionString := ``
 
+	if parameter.Search == "" {
+		parameter.Search = ""
+	}
+
 	if parameter.ID != "" {
 		conditionString += ` AND c.id = '` + parameter.ID + `'`
 	}
@@ -274,10 +278,14 @@ func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter m
 
 	if parameter.BranchId != "" {
 		conditionString += ` AND C.BRANCH_ID= ` + parameter.BranchId
+	} else {
+		parameter.BranchId = ""
 	}
 
 	if parameter.PhoneNumber != "" {
 		conditionString += ` AND c.customer_phone LIKE '%` + parameter.PhoneNumber + `%'`
+	} else {
+		parameter.PhoneNumber = ""
 	}
 
 	var whereStatement string

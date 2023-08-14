@@ -59,3 +59,12 @@ type CustomerVM struct {
 	CustomerPriceListID      *string `json:"customer_price_list_id"`
 	CustomerPriceListName    *string `json:"customer_price_list_name"`
 }
+
+type CustomerData struct {
+	ListCustomer []CustomerVM `json:"list_customer"`
+}
+
+type PaginatedResponse struct {
+	Data CustomerData       `json:"data"`
+	Meta PaginationVM `json:"meta"`
+}
