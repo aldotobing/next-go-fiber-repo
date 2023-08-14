@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -181,56 +180,56 @@ func (repository DashboardWebRepository) scanBranchCustomerDetailReportRows(rows
 }
 
 // FindByID ...
-func (repository DashboardWebRepository) GetData(c context.Context, parameter models.DashboardWebParameter) ([]models.DashboardWeb, error) {
+// func (repository DashboardWebRepository) GetData(c context.Context, parameter models.DashboardWebParameter) ([]models.DashboardWeb, error) {
 
-	if parameter.StartDate == "" || parameter.EndDate == "" {
-		return nil, errors.New("invalid dates provided")
-	}
-
-	statement := models.DashboardWebSelectStatement
-
-	rows, err := repository.DB.QueryContext(c, statement, str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var data []models.DashboardWeb
-	for rows.Next() {
-		temp, err := repository.scanRows(rows)
-		if err != nil {
-			return nil, err
-		}
-		data = append(data, temp)
-	}
-
-	if err = rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return data, nil
-}
-
-// func (repository DashboardWebRepository) GetData(c context.Context, parameter models.DashboardWebParameter) (data []models.DashboardWeb, err error) {
-// 	statement := models.DashboardWebSelectStatement
-// 	rows, err := repository.DB.QueryContext(c, statement, str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
-
-// 	if err != nil {
-// 		return data, err
+// 	if parameter.StartDate == "" || parameter.EndDate == "" {
+// 		return nil, errors.New("invalid dates provided")
 // 	}
 
-// 	defer rows.Close()
-// 	for rows.Next() {
+// 	statement := models.DashboardWebSelectStatement
 
+// 	rows, err := repository.DB.QueryContext(c, statement, str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	defer rows.Close()
+
+// 	var data []models.DashboardWeb
+// 	for rows.Next() {
 // 		temp, err := repository.scanRows(rows)
 // 		if err != nil {
-// 			return data, err
+// 			return nil, err
 // 		}
 // 		data = append(data, temp)
 // 	}
 
-// 	return data, err
+// 	if err = rows.Err(); err != nil {
+// 		return nil, err
+// 	}
+
+// 	return data, nil
 // }
+
+func (repository DashboardWebRepository) GetData(c context.Context, parameter models.DashboardWebParameter) (data []models.DashboardWeb, err error) {
+	statement := models.DashboardWebSelectStatement
+	rows, err := repository.DB.QueryContext(c, statement, str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
+
+	if err != nil {
+		return data, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+
+		temp, err := repository.scanRows(rows)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
+	}
+
+	return data, err
+}
 
 // GetDataByGroupID ...
 func (repository DashboardWebRepository) GetDataByGroupID(c context.Context, parameter models.DashboardWebParameter) (data []models.DashboardWebRegionDetail, err error) {
@@ -265,57 +264,30 @@ func (repository DashboardWebRepository) GetDataByGroupID(c context.Context, par
 	return data, err
 }
 
-func (repository DashboardWebRepository) GetRegionDetailData(c context.Context, parameter models.DashboardWebRegionParameter) (data []models.DashboardWebRegionDetail, err error) {
-	var statement string
-	var args []interface{}
-
-	regionID := str.NullOrEmtyString(&parameter.RegionID)
-	startDate := str.NullOrEmtyString(&parameter.StartDate)
-	endDate := str.NullOrEmtyString(&parameter.EndDate)
-
-	if parameter.RegionID != "" {
-		statement = models.DashboardWebRegionDetailByRegionIDSelectStatement
-		args = append(args, regionID, startDate, endDate)
-	} else {
-		groupID := str.NullOrEmtyString(&parameter.GroupID)
-		statement = models.DashboardWebRegionDetailSelectStatement
-		args = append(args, groupID, startDate, endDate)
-	}
-
-	rows, err := repository.DB.QueryContext(c, statement, args...)
-	if err != nil {
-		return data, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		temp, err := repository.scanRegionDetailRows(rows)
-		if err != nil {
-			return data, err
-		}
-		data = append(data, temp)
-	}
-
-	return data, err
-}
-
 // func (repository DashboardWebRepository) GetRegionDetailData(c context.Context, parameter models.DashboardWebRegionParameter) (data []models.DashboardWebRegionDetail, err error) {
-// 	var rows *sql.Rows
+// 	var statement string
+// 	var args []interface{}
+
+// 	regionID := str.NullOrEmtyString(&parameter.RegionID)
+// 	startDate := str.NullOrEmtyString(&parameter.StartDate)
+// 	endDate := str.NullOrEmtyString(&parameter.EndDate)
+
 // 	if parameter.RegionID != "" {
-// 		statement := models.DashboardWebRegionDetailByRegionIDSelectStatement
-// 		rows, err = repository.DB.QueryContext(c, statement, str.NullOrEmtyString(&parameter.RegionID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
+// 		statement = models.DashboardWebRegionDetailByRegionIDSelectStatement
+// 		args = append(args, regionID, startDate, endDate)
 // 	} else {
-// 		statement := models.DashboardWebRegionDetailSelectStatement
-// 		rows, err = repository.DB.QueryContext(c, statement, str.NullOrEmtyString(&parameter.GroupID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
+// 		groupID := str.NullOrEmtyString(&parameter.GroupID)
+// 		statement = models.DashboardWebRegionDetailSelectStatement
+// 		args = append(args, groupID, startDate, endDate)
 // 	}
 
+// 	rows, err := repository.DB.QueryContext(c, statement, args...)
 // 	if err != nil {
 // 		return data, err
 // 	}
-
 // 	defer rows.Close()
-// 	for rows.Next() {
 
+// 	for rows.Next() {
 // 		temp, err := repository.scanRegionDetailRows(rows)
 // 		if err != nil {
 // 			return data, err
@@ -325,6 +297,33 @@ func (repository DashboardWebRepository) GetRegionDetailData(c context.Context, 
 
 // 	return data, err
 // }
+
+func (repository DashboardWebRepository) GetRegionDetailData(c context.Context, parameter models.DashboardWebRegionParameter) (data []models.DashboardWebRegionDetail, err error) {
+	var rows *sql.Rows
+	if parameter.RegionID != "" {
+		statement := models.DashboardWebRegionDetailByRegionIDSelectStatement
+		rows, err = repository.DB.QueryContext(c, statement, str.NullOrEmtyString(&parameter.RegionID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
+	} else {
+		statement := models.DashboardWebRegionDetailSelectStatement
+		rows, err = repository.DB.QueryContext(c, statement, str.NullOrEmtyString(&parameter.GroupID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
+	}
+
+	if err != nil {
+		return data, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+
+		temp, err := repository.scanRegionDetailRows(rows)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
+	}
+
+	return data, err
+}
 
 func (repository DashboardWebRepository) GetUserByRegionDetailData(c context.Context, parameter models.DashboardWebRegionParameter) (data []models.DashboardWebBranchDetail, err error) {
 	statement := models.DashboardWebCustomerDetailByRegionDetailByRegionIDSelectStatement
