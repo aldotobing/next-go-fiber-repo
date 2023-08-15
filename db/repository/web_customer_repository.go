@@ -351,6 +351,7 @@ func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter m
 	}
 
 	args = append(args, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
+
 	var whereStatement string
 	if parameter.ShowInApp == "" || parameter.ShowInApp == "1" {
 		whereStatement = models.WebCustomerWhereStatement
