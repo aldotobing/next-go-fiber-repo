@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"nextbasis-service-v-0.1/helper"
 	redisPkg "nextbasis-service-v-0.1/pkg/redis"
 
 	conf "nextbasis-service-v-0.1/config"
@@ -149,6 +150,9 @@ func main() {
 	}))
 	//DISABLE SCHEDULER
 	//helper.SetCronJobs()
+
+	go helper.StartDBEventListener(configs)
+
 	boot.RegisterRouters()
 	log.Fatal(boot.App.Listen(configs.EnvConfig["APP_HOST"]))
 
