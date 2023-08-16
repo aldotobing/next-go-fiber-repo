@@ -238,11 +238,11 @@ func (h *WebPromoHandler) FindByID(ctx *fiber.Ctx) error {
 	}
 	var branchIDList string
 	for i := range branchresEligible {
-		if customerLevelresEligible[i].CustomerLevelId != nil {
+		if branchresEligible[i].BranchId != nil {
 			if branchIDList == "" {
-				branchIDList += *customerLevelresEligible[i].CustomerLevelId
+				branchIDList += *branchresEligible[i].BranchId
 			} else {
-				branchIDList += "," + *customerLevelresEligible[i].CustomerLevelId
+				branchIDList += "," + *branchresEligible[i].BranchId
 			}
 		}
 	}
