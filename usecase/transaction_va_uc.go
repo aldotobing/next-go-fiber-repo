@@ -211,19 +211,19 @@ func (uc TransactionVAUC) PaidTransaction(c context.Context, id string, data *re
 			if senDwaMessage != nil {
 				fmt.Println("sukses")
 			}
-			if fcustomer.CustomerSalesmanID != nil {
-				salesmannRepo := repository.NewSalesmanRepository(uc.DB)
-				customerSales, errcustsales := salesmannRepo.FindByID(c, models.SalesmanParameter{ID: *fcustomer.CustomerSalesmanID})
-				if errcustsales == nil {
-					if customerSales.PhoneNo != nil {
-						msgSalesman := msgcustomerheader
-						senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*customerSales.PhoneNo, msgSalesman)
-						if senDwaMessage != nil {
-							fmt.Println("sukses")
-						}
-					}
-				}
-			}
+			// if fcustomer.CustomerSalesmanID != nil {
+			// 	salesmannRepo := repository.NewSalesmanRepository(uc.DB)
+			// 	customerSales, errcustsales := salesmannRepo.FindByID(c, models.SalesmanParameter{ID: *useraccount.CustomerSalesmanID})
+			// 	if errcustsales == nil {
+			// 		if customerSales.PhoneNo != nil {
+			// 			msgSalesman := msgsalesmanheader + msgbody
+			// 			senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*customerSales.PhoneNo, msgSalesman)
+			// 			if senDwaMessage != nil {
+			// 				fmt.Println("sukses")
+			// 			}
+			// 		}
+			// 	}
+			// }
 		}
 
 	}

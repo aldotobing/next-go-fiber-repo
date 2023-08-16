@@ -20,6 +20,7 @@ type PromoContentParameter struct {
 	PromoName        string `json:"promo_name"`
 	CustomerTypeId   string `json:"customer_type_id"`
 	CustomerLevelID  string `json:"customer_level_id"`
+	BranchID         string `json:"branch_id"`
 	PromoDescription string `json:"promo_description"`
 	PromoUrlBanner   string `json:"promo_url_banner"`
 	StartDate        string `json:"start_date"`

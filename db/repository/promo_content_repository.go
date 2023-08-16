@@ -91,6 +91,13 @@ func (repository PromoContent) SelectAll(c context.Context, parameter models.Pro
 			WHERE ctep.customer_level_id = ` + parameter.CustomerLevelID + ` or ctep.id is null)`
 	}
 
+	if parameter.BranchID != "" {
+		conditionString += ` AND PC.ID IN (SELECT pc2.id 
+			FROM promo pc2
+			left join branch_eligible_promo BEP on BEP.promo_id = pc2.id
+			WHERE BEP.branch_id = ` + parameter.BranchID + ` )`
+	}
+
 	statement := models.PromoContentSelectStatement + ` ` + models.PromoContentWhereStatement +
 		` AND (LOWER(pc._name) LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 

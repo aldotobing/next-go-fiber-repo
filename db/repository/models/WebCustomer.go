@@ -82,6 +82,7 @@ type WebCustomerParameter struct {
 	PhoneNumber    string `json:"phone_number"`
 	StartDate      string `json:"start_date"`
 	EndDate        string `json:"end_date"`
+	ShowInApp      string `json:"show_in_app"`
 }
 
 // WebCustomerReportParameter ...
@@ -193,6 +194,9 @@ var (
 
 	// CustomerWhereStatement ...
 	WebCustomerWhereStatement = ` WHERE c.created_date IS not NULL and c.show_in_apps = 1 `
+
+	// CustomerWhereStatement ...
+	WebCustomerWhereStatementAll = ` WHERE c.created_date IS not NULL `
 
 	WebCustomerWithInvoiceSelectStatement = `with invoice_count as(
 		select c.id, count(coh.id) as invoices
