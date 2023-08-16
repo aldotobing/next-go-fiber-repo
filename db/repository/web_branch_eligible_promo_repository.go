@@ -31,8 +31,8 @@ func (repository WebBranchEligiblePromo) scanRows(rows *sql.Rows) (res models.We
 		&res.PromoID,
 		&res.Code,
 		&res.PromoName,
-		&res.CustomerLevelId,
-		&res.CustomerLevelName,
+		&res.BranchId,
+		&res.BranchName,
 	)
 
 	return
@@ -45,8 +45,8 @@ func (repository WebBranchEligiblePromo) scanRow(row *sql.Row) (res models.WebBr
 		&res.PromoID,
 		&res.Code,
 		&res.PromoName,
-		&res.CustomerLevelId,
-		&res.CustomerLevelName,
+		&res.BranchId,
+		&res.BranchName,
 	)
 
 	return

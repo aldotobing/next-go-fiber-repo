@@ -2,12 +2,12 @@ package models
 
 // WebBranchEligiblePromo ...
 type WebBranchEligiblePromo struct {
-	ID                *string `json:"id"`
-	PromoID           *string `json:"promo_id"`
-	Code              *string `json:"promo_code"`
-	PromoName         *string `json:"promo_name"`
-	CustomerLevelId   *string `json:"customer_level_id"`
-	CustomerLevelName *string `json:"customer_level_name"`
+	ID         *string `json:"id"`
+	PromoID    *string `json:"promo_id"`
+	Code       *string `json:"promo_code"`
+	PromoName  *string `json:"promo_name"`
+	BranchId   *string `json:"branch_id"`
+	BranchName *string `json:"branch_name"`
 }
 
 // WebBranchEligiblePromoParameter ...
