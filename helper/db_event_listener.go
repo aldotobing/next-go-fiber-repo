@@ -36,14 +36,15 @@ func StartDBEventListener(configs config.Configs) {
 	for {
 		select {
 		case n := <-listener.Notify:
-			fmt.Println("Received notification:", n.Extra)
+			currentTime := time.Now().Format("2006-01-02 15:04:05")
+			fmt.Println(currentTime, "- Received notification:", n.Extra)
 			// Extract the ID from the notification
 			splitMsg := strings.Split(n.Extra, " ")
 			if len(splitMsg) >= 4 {
 				customerID := splitMsg[3]
 				cacheKey := "customer:" + customerID
 				configs.RedisClient.Client.Del(cacheKey)
-				fmt.Printf("Deleted Redis cache for key: %s\n", cacheKey)
+				fmt.Printf("%s - Deleted Redis cache for key: %s\n", currentTime, cacheKey)
 			}
 		case <-time.After(90 * time.Second):
 			fmt.Println("Received no events for 90 seconds, checking connection")
