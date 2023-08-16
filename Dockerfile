@@ -24,20 +24,27 @@ WORKDIR /app/server
 RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 
 # Start a new stage from scratch
-FROM alpine:latest
-RUN apk --no-cache add ca-certificates
+FROM debian:10-slim
+# Install the ca-certificates and tzdata packages.
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    tzdata \
+    && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /root/
+# Set the working directory
+WORKDIR /app/
 
-# Copy the pre-built binary file from the previous stage
-COPY --from=builder /app/server/main .
+# Copy the pre-built binary file from the previous stage to /app/server/
+COPY --from=builder /app/server/main /app/server/
 
-# Copy the .env file and firebaseconfig.json from the build stage
-COPY --from=builder /app/.env .
-COPY --from=builder /app/firebaseconfig.json .
+# Copy the .env file and firebaseconfig.json from the build stage to /app/
+COPY --from=builder /app/.env /app/
+COPY --from=builder /app/firebaseconfig.json /app/
 
 # Expose port 5050 for the API service
-EXPOSE 5050
+EXPOSE 5000
 
-# Set the entry point of the container
+# Set the working directory to /app/server/ and the entry point of the container
+WORKDIR /app/server/
+
 CMD ["./main"]

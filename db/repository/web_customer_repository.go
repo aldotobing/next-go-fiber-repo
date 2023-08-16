@@ -350,14 +350,9 @@ func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter m
 		index++
 	}
 
-	var whereStatement string
-	if parameter.ShowInApp == "" || parameter.ShowInApp == "1" {
-		whereStatement = models.WebCustomerWhereStatement
-	} else {
-		whereStatement = models.WebCustomerWhereStatementAll
-	}
+	args = append(args, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
 
-	query := models.WebCustomerSelectStatement + ` ` + whereStatement + ` ` + conditionString + `
+	query := models.WebCustomerSelectStatement + ` ` + models.WebCustomerWhereStatement + ` ` + conditionString + `
 		AND (LOWER(c.customer_name) LIKE $` + strconv.Itoa(index) + ` or LOWER(c.customer_code) LIKE $` + strconv.Itoa(index) + `) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $` + strconv.Itoa(index+1) + ` LIMIT $` + strconv.Itoa(index+2)
 
 	rows, err := repository.DB.QueryContext(ctx, query, args...)
