@@ -381,7 +381,7 @@ func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter m
 		return data, count, err
 	}
 
-	queryCount := `SELECT COUNT(*) FROM "customer" c ` + models.WebCustomerWhereStatement + ` ` + conditionString + ` AND (LOWER(c.customer_name) LIKE $` + strconv.Itoa(index) + ` or LOWER(c.customer_code) LIKE $` + strconv.Itoa(index) + `)`
+	queryCount := `SELECT COUNT(*) FROM "customer" c ` + whereStatement + ` ` + conditionString + ` AND (LOWER(c.customer_name) LIKE $` + strconv.Itoa(index) + ` or LOWER(c.customer_code) LIKE $` + strconv.Itoa(index) + `)`
 	err = repository.DB.QueryRowContext(ctx, queryCount, args[:index]...).Scan(&count) // Reusing the args but slicing to the appropriate length for this query.
 	return data, count, err
 }
