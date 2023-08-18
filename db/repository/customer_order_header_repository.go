@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -214,28 +215,76 @@ func (repository CustomerOrderHeaderRepository) SelectAll(c context.Context, par
 // 	return data, count, err
 // }
 
+func (repository CustomerOrderHeaderRepository) FindAll(ctx context.Context, parameter models.CustomerOrderHeaderParameter) (data []models.CustomerOrderHeader, count int, err error) {
+	var conditionString string
+	var args, argsCount []interface{}
+	var index int = 1
+
+	if parameter.CustomerID != "" {
+		conditionString += ` AND def.cust_ship_to_id = $` + strconv.Itoa(index)
+		args = append(args, parameter.CustomerID)
+		argsCount = append(argsCount, parameter.CustomerID)
+		index++
+	}
+
+	if parameter.UserID != "" {
+		conditionString += ` AND def.branch_id in (select branch_id from user_branch where user_id = $` + strconv.Itoa(index) + `)`
+		args = append(args, parameter.UserID)
+		argsCount = append(argsCount, parameter.UserID)
+		index++
+	}
+
+	query := models.CustomerOrderHeaderSelectStatement + ` ` + models.CustomerOrderHeaderWhereStatement + ` ` + conditionString + `
+		AND (LOWER(cus."customer_name") LIKE $` + strconv.Itoa(index) + ` OR LOWER(def."document_no") LIKE $` + strconv.Itoa(index) + `) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $` + strconv.Itoa(index+1) + ` LIMIT $` + strconv.Itoa(index+2)
+
+	args = append(args, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
+	argsCount = append(argsCount, "%"+strings.ToLower(parameter.Search)+"%")
+	rows, err := repository.DB.QueryContext(ctx, query, args...)
+	if err != nil {
+		return data, count, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		temp, err := repository.scanRows(rows)
+		if err != nil {
+			return data, count, err
+		}
+		data = append(data, temp)
+	}
+	err = rows.Err()
+	if err != nil {
+		return data, count, err
+	}
+
+	query = `select
+			count(*)
+			from customer_order_header def
+			join customer cus on cus.id = def.cust_ship_to_id
+			left join salesman s on s.id = def.salesman_id
+			left join term_of_payment top on top.id = def.payment_terms_id
+			left join branch b on b.id = def.branch_id
+			left join price_list pl on pl.id = def.price_list_id
+			left join price_list_version plv on plv.id = def.price_list_version_id ` + models.CustomerOrderHeaderWhereStatement + ` ` +
+		conditionString + ` AND (LOWER(cus."customer_name") LIKE $` + strconv.Itoa(index) + ` OR LOWER(def."document_no") LIKE $` + strconv.Itoa(index) + `)`
+	err = repository.DB.QueryRowContext(ctx, query, argsCount...).Scan(&count)
+	return data, count, err
+}
+
 // func (repository CustomerOrderHeaderRepository) FindAll(ctx context.Context, parameter models.CustomerOrderHeaderParameter) (data []models.CustomerOrderHeader, count int, err error) {
-// 	var conditionString string
-// 	var args []interface{}
-// 	var index int = 1
+// 	conditionString := ``
 
 // 	if parameter.CustomerID != "" {
-// 		conditionString += ` AND def.cust_ship_to_id = $` + strconv.Itoa(index)
-// 		args = append(args, parameter.CustomerID)
-// 		index++
+// 		conditionString += ` AND def.cust_ship_to_id = '` + parameter.CustomerID + `'`
 // 	}
 
 // 	if parameter.UserID != "" {
-// 		conditionString += ` AND def.branch_id in (select branch_id from user_branch where user_id = $` + strconv.Itoa(index) + `)`
-// 		args = append(args, parameter.UserID)
-// 		index++
+// 		conditionString += ` AND def.branch_id in ( select branch_id from user_branch where user_id = ` + parameter.UserID + `)`
 // 	}
 
 // 	query := models.CustomerOrderHeaderSelectStatement + ` ` + models.CustomerOrderHeaderWhereStatement + ` ` + conditionString + `
-// 		AND (LOWER(cus."customer_name") LIKE $` + strconv.Itoa(index) + ` OR LOWER(def."document_no") LIKE $` + strconv.Itoa(index) + `) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $` + strconv.Itoa(index+1) + ` LIMIT $` + strconv.Itoa(index+2)
-
-// 	args = append(args, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
-// 	rows, err := repository.DB.QueryContext(ctx, query, args...)
+// 		AND (LOWER(cus."customer_name") LIKE $1 or LOWER(def."document_no") LIKE $1) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
+// 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
 // 	if err != nil {
 // 		return data, count, err
 // 	}
@@ -263,54 +312,9 @@ func (repository CustomerOrderHeaderRepository) SelectAll(c context.Context, par
 // 			left join price_list pl on pl.id = def.price_list_id
 // 			left join price_list_version plv on plv.id = def.price_list_version_id ` + models.CustomerOrderHeaderWhereStatement + ` ` +
 // 		conditionString + ` AND (LOWER(cus."customer_name") LIKE $1)`
-// 	err = repository.DB.QueryRowContext(ctx, query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
+// 	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
 // 	return data, count, err
 // }
-
-func (repository CustomerOrderHeaderRepository) FindAll(ctx context.Context, parameter models.CustomerOrderHeaderParameter) (data []models.CustomerOrderHeader, count int, err error) {
-	conditionString := ``
-
-	if parameter.CustomerID != "" {
-		conditionString += ` AND def.cust_ship_to_id = '` + parameter.CustomerID + `'`
-	}
-
-	if parameter.UserID != "" {
-		conditionString += ` AND def.branch_id in ( select branch_id from user_branch where user_id = ` + parameter.UserID + `)`
-	}
-
-	query := models.CustomerOrderHeaderSelectStatement + ` ` + models.CustomerOrderHeaderWhereStatement + ` ` + conditionString + `
-		AND (LOWER(cus."customer_name") LIKE $1 or LOWER(def."document_no") LIKE $1) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
-	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
-	if err != nil {
-		return data, count, err
-	}
-
-	defer rows.Close()
-	for rows.Next() {
-		temp, err := repository.scanRows(rows)
-		if err != nil {
-			return data, count, err
-		}
-		data = append(data, temp)
-	}
-	err = rows.Err()
-	if err != nil {
-		return data, count, err
-	}
-
-	query = `select
-			count(*)
-			from customer_order_header def
-			join customer cus on cus.id = def.cust_ship_to_id
-			left join salesman s on s.id = def.salesman_id
-			left join term_of_payment top on top.id = def.payment_terms_id
-			left join branch b on b.id = def.branch_id
-			left join price_list pl on pl.id = def.price_list_id
-			left join price_list_version plv on plv.id = def.price_list_version_id ` + models.CustomerOrderHeaderWhereStatement + ` ` +
-		conditionString + ` AND (LOWER(cus."customer_name") LIKE $1)`
-	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
-	return data, count, err
-}
 
 // FindByID ...
 func (repository CustomerOrderHeaderRepository) FindByID(c context.Context, parameter models.CustomerOrderHeaderParameter) (data models.CustomerOrderHeader, err error) {
