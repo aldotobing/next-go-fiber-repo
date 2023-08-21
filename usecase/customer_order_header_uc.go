@@ -148,7 +148,6 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 	useraccount, erruser := userrepo.FindByID(c, models.CustomerParameter{ID: *res.CustomerID})
 
 	var msgSubBody string
-	var customerSales models.Salesman
 	if erruser == nil {
 
 		FcmUc := FCMUC{ContractUC: uc.ContractUC}
@@ -232,7 +231,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 				// }
 				if useraccount.CustomerSalesmanID != nil {
 					salesmannRepo := repository.NewSalesmanRepository(uc.DB)
-					customerSales, err = salesmannRepo.FindByID(c, models.SalesmanParameter{ID: *useraccount.CustomerSalesmanID})
+					customerSales, err := salesmannRepo.FindByID(c, models.SalesmanParameter{ID: *useraccount.CustomerSalesmanID})
 					if err == nil {
 						if customerSales.PhoneNo != nil {
 							msgSalesman := msgsalesmanheader + msgbody
@@ -255,8 +254,8 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 	}
 	if branchData.PICName != nil && *branchData.PICName != "" && branchData.PICPhoneNo != nil && *branchData.PICPhoneNo != "" {
 		msgToPIC := `*Kepada Yang Terhormat PIC*\n\n *` + *branchData.PICName + `*`
-		if customerSales.ID != nil {
-			msgSubBody = strings.ReplaceAll(msgSubBody, "{{salesman_detail}}", *customerSales.Name+" ("+*customerSales.Code+")")
+		if useraccount.CustomerSalesmanID != nil {
+			msgSubBody = strings.ReplaceAll(msgSubBody, "{{salesman_detail}}", *useraccount.CustomerSalesmanName+" ("+*useraccount.CustomerSalesmanCode+")")
 		} else {
 			msgSubBody = strings.ReplaceAll(msgSubBody, "{{salesman_detail}}", "-")
 		}
