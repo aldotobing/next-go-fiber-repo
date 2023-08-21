@@ -95,7 +95,7 @@ func (repository PromoContent) SelectAll(c context.Context, parameter models.Pro
 		conditionString += ` AND PC.ID IN (SELECT pc2.id 
 			FROM promo pc2
 			left join branch_eligible_promo BEP on BEP.promo_id = pc2.id
-			WHERE BEP.branch_id = ` + parameter.BranchID + ` )`
+			WHERE BEP.branch_id = ` + parameter.BranchID + ` or BEP.id is null)`
 	}
 
 	statement := models.PromoContentSelectStatement + ` ` + models.PromoContentWhereStatement +
