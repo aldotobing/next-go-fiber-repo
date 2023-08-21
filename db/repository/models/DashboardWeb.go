@@ -219,11 +219,9 @@ var (
 	dataInvoice as (
 		select r.id region_id, count(sih.id) total_invoice
 		from sales_invoice_header sih 
-			join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
 			left join branch b on b.id = sih.branch_id 
 			left join region r on r.id = b.region_id 
-		where lower(sih.transaction_source_document_no) like '%co%'
-			and coh.status in ('submitted','finish')
+		where sih.transaction_source_document_no like 'CO%'
 			and sih.transaction_date between '{START_DATE}' and '{END_DATE}' 
 		group by r.id
 	),
