@@ -251,12 +251,10 @@ var (
 		from branch b 
 		left join customer c on c.branch_id = b.id
 		left join sales_invoice_header sih on sih.cust_bill_to_id = c.id
-		join customer_order_header coh on coh.document_no = sih.transaction_source_document_no 
 		left join region r on r.id = b.region_id
 		where c.created_date IS not NULL 
 			and sih.transaction_date between '{START_DATE}' and '{END_DATE}'
-			and lower(sih.transaction_source_document_no) like 'co%' 
-			and coh.status in ('submitted','finish')
+			and sih.transaction_source_document_no like 'CO%' 
 		group by r.id 
 	),
 	dataCompleteCustomer as (
