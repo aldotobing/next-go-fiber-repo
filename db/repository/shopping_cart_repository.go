@@ -297,7 +297,11 @@ func (repository ShoppingCartRepository) GetTotal(c context.Context, parameter m
 		
 		) then 0 else 1 end),
 		
-		(select def.min_order from customer_type_branch_min_omzet def where def.branch_id = (select branch_id from customer where id = $2) and def.customer_type_id = (select c1.customer_type_id from customer c1 where id = $2) limit 1)
+		coalesce(
+			(	select def.min_order from customer_type_branch_min_omzet def where def.branch_id = (select branch_id from customer where id = $2) and def.min_order>0 and def.customer_type_id = (select c1.customer_type_id from customer c1 where id = $2) 
+				limit 1
+			),( coalesce( (select min_omzet_amount from branch where id= (select branch_id from customer where id = $2)  ),100000)))
+			
 	`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ListLine, parameter.CustomerID)
 	data, err = repository.scanIsAbleRow(row)
