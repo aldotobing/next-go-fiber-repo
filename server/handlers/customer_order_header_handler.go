@@ -145,7 +145,7 @@ func (h *CustomerOrderHeaderHandler) RestSelectAll(ctx *fiber.Ctx) error {
 			By:       ctx.Query("by"),
 			Sort:     ctx.Query("sort"),
 		}
-		listLine, _ := lineuc.SelectAll(c, lineparameter)
+		listLine, _ := lineuc.RestSelectAll(c, lineparameter)
 
 		if listLine != nil {
 			res[i].ListLine = listLine
