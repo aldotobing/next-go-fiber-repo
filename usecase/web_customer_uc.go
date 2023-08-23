@@ -196,7 +196,7 @@ func (uc WebCustomerUC) FindAll(c context.Context, parameter models.WebCustomerP
 	// Cache the entire response
 	jsonData, err := json.Marshal(response)
 	if err == nil {
-		uc.RedisClient.Set(cacheKey, jsonData, time.Minute*30) // Cache for 30 minutes
+		uc.RedisClient.Set(cacheKey, jsonData, time.Minute*60) // Cache for 30 minutes
 	}
 
 	return response.Data.ListCustomer, response.Meta, nil
