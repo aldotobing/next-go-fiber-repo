@@ -289,8 +289,19 @@ func (repository ShoppingCartRepository) GetTotal(c context.Context, parameter m
 	select 
 		((case when ( (select sum(price*qty) from cart where id in(select  unnest(ARRAY(select string_to_array($1,',')))::integer))<( select coalesce(min_omzet_amount,0) from branch where id = (select branch_id from customer where id = $2) )) then 0 else 1 end)) as total_amount,
 		(select coalesce(min_omzet_amount,0) from branch where id = (select branch_id from customer where id = $2) )::integer as min_amount,
-		(case when((select sum(price*qty) from cart where id in(select  unnest(ARRAY(select string_to_array($1,',')))::integer)) < (select def.min_order from customer_type_branch_min_omzet def where def.branch_id = (select branch_id from customer where id = $2) and def.customer_type_id = (select c1.customer_type_id from customer c1 where id = $2) limit 1)) then 0 else 1 end),
-		(select def.min_order from customer_type_branch_min_omzet def where def.branch_id = (select branch_id from customer where id = $2) and def.customer_type_id = (select c1.customer_type_id from customer c1 where id = $2) limit 1)
+		(case when((select coalesce(sum(price*qty),0) from cart where id in(select  unnest(ARRAY(select string_to_array($1,',')))::integer)) < 
+		coalesce(
+		(	select def.min_order from customer_type_branch_min_omzet def where def.branch_id = (select branch_id from customer where id = $2) and def.min_order>0 and def.customer_type_id = (select c1.customer_type_id from customer c1 where id = $2) 
+			limit 1
+		),( coalesce( (select min_omzet_amount from branch where id= (select branch_id from customer where id = $2)  ),100000)))
+		
+		) then 0 else 1 end),
+		
+		coalesce(
+			(	select def.min_order from customer_type_branch_min_omzet def where def.branch_id = (select branch_id from customer where id = $2) and def.min_order>0 and def.customer_type_id = (select c1.customer_type_id from customer c1 where id = $2) 
+				limit 1
+			),( coalesce( (select min_omzet_amount from branch where id= (select branch_id from customer where id = $2)  ),100000)))
+			
 	`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ListLine, parameter.CustomerID)
 	data, err = repository.scanIsAbleRow(row)

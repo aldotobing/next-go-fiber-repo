@@ -193,7 +193,7 @@ var (
 	`
 
 	// CustomerWhereStatement ...
-	WebCustomerWhereStatement = ` WHERE c.created_date IS not NULL and c.show_in_apps = 1 `
+	WebCustomerWhereStatement = ` WHERE c.show_in_apps = 1 and c.created_date IS not NULL `
 
 	// CustomerWhereStatement ...
 	WebCustomerWhereStatementAll = ` WHERE c.created_date IS not NULL `
