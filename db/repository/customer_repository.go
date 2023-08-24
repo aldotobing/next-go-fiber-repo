@@ -179,6 +179,30 @@ func (repository CustomerRepository) SelectAll(c context.Context, parameter mode
 		conditionString += ` AND us.FCM_TOKEN IS NOT NULL `
 	}
 
+	if parameter.CustomerTypeId != "" {
+		conditionString += ` AND C.CUSTOMER_TYPE_ID = $` + strconv.Itoa(index)
+		args = append(args, parameter.CustomerTypeId)
+		index++
+	}
+
+	if parameter.BranchID != "" {
+		conditionString += ` AND C.BRANCH_ID = $` + strconv.Itoa(index)
+		args = append(args, parameter.BranchID)
+		index++
+	}
+
+	if parameter.RegionID != "" {
+		conditionString += ` AND REG.ID = $` + strconv.Itoa(index)
+		args = append(args, parameter.RegionID)
+		index++
+	}
+
+	if parameter.RegionGroupID != "" {
+		conditionString += ` AND C.GROUP_ID = $` + strconv.Itoa(index)
+		args = append(args, parameter.RegionGroupID)
+		index++
+	}
+
 	statement := models.CustomerSelectStatement + ` ` + models.CustomerWhereStatement +
 		` AND (LOWER(c."customer_name") LIKE $` + strconv.Itoa(index) + `) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	args = append(args, "%"+strings.ToLower(parameter.Search)+"%")
