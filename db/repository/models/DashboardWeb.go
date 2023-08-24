@@ -263,15 +263,8 @@ var (
 		left join customer c on c.branch_id = b.id
 		left join _user us on us.id = c.user_id 
 		where c.modified_date::date between '{START_DATE}' and '{END_DATE}'
-			and(c.customer_nik is not null and c.customer_nik != '')
-			and (c.customer_name is not null and c.customer_name != '')
-			and (c.customer_birthdate is not null)
-			and (c.customer_religion is not null and c.customer_religion != '')
-			and (c.customer_photo_ktp is not null and c.customer_photo_ktp != '')
-			and (c.customer_profile_picture is not null and c.customer_profile_picture != '')
-			and (c.customer_phone is not null and c.customer_phone != '')
-			and (c.customer_code is not null and c.customer_code != '')
 			and c.created_date IS not null and c.show_in_apps = 1
+			and coalesce(c.is_data_completed, false) = true
 			and us.fcm_token is not null and length(trim(us.fcm_token))>0
 		group by r.id
 	)
