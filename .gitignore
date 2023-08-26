@@ -1,4 +1,5 @@
 /.idea/
+/cert
 .env
 dbconfig.yml
 vendor
