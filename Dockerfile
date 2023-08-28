@@ -41,8 +41,8 @@ COPY --from=builder /app/server/main /app/server/
 COPY --from=builder /app/.env /app/
 COPY --from=builder /app/firebaseconfig.json /app/
 
-# Expose port 5050 for the API service
-EXPOSE 5050
+# Expose port 5000 for the API service
+EXPOSE 5000
 
 # Set the working directory to /app/server/ and the entry point of the container
 WORKDIR /app/server/
