@@ -14,4 +14,5 @@ type BroadcastRequest struct {
 	RegionGroupName  string `json:"region_group_name"`
 	CustomerTypeID   string `json:"customer_type_id"`
 	CustomerTypeName string `json:"customer_type_name"`
+	RepeatEveryDay   bool   `json:"repeat_every_day"`
 }
