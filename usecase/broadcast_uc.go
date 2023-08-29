@@ -26,6 +26,7 @@ func (uc BroadcastUC) BuildBody(data *models.Broadcast, res *viewmodel.Broadcast
 	res.Body = data.Body
 	res.BroadcastDate = data.BroadcastDate
 	res.BroadcastTime = data.BroadcastTime
+	res.RepeatEveryDay = data.RepeatEveryDay
 	res.CreatedAt = data.CreatedAt
 	res.UpdatedAt = data.UpdatedAt.String
 	res.DeletedAt = data.DeletedAt.String
@@ -204,15 +205,20 @@ func (uc BroadcastUC) BroadcastWithID(c context.Context, id string) (err error) 
 // Add ...
 func (uc BroadcastUC) Add(c context.Context, in requests.BroadcastRequest) (out viewmodel.BroadcastVM, err error) {
 	out = viewmodel.BroadcastVM{
-		Title:         in.Title,
-		Body:          in.Body,
-		BroadcastDate: in.BroadcastDate,
-		BroadcastTime: in.BroadcastTime,
+		Title:          in.Title,
+		Body:           in.Body,
+		BroadcastDate:  in.BroadcastDate,
+		BroadcastTime:  in.BroadcastTime,
+		RepeatEveryDay: in.RepeatEveryDay,
 		Parameter: viewmodel.BroadcastParameterVM{
-			BranchID:       in.BranchID,
-			RegionID:       in.RegionID,
-			RegionGroupID:  in.RegionGroupID,
-			CustomerTypeID: in.CustomerTypeID,
+			BranchID:         in.BranchID,
+			BranchName:       in.BranchName,
+			RegionID:         in.RegionID,
+			RegionName:       in.RegionName,
+			RegionGroupID:    in.RegionGroupID,
+			RegionGroupName:  in.RegionGroupName,
+			CustomerTypeID:   in.CustomerTypeID,
+			CustomerTypeName: in.CustomerTypeName,
 		},
 	}
 
@@ -229,16 +235,21 @@ func (uc BroadcastUC) Add(c context.Context, in requests.BroadcastRequest) (out 
 // Update ...
 func (uc BroadcastUC) Update(c context.Context, id string, in requests.BroadcastRequest) (out viewmodel.BroadcastVM, err error) {
 	out = viewmodel.BroadcastVM{
-		ID:            id,
-		Title:         in.Title,
-		Body:          in.Body,
-		BroadcastDate: in.BroadcastDate,
-		BroadcastTime: in.BroadcastTime,
+		ID:             id,
+		Title:          in.Title,
+		Body:           in.Body,
+		BroadcastDate:  in.BroadcastDate,
+		BroadcastTime:  in.BroadcastTime,
+		RepeatEveryDay: in.RepeatEveryDay,
 		Parameter: viewmodel.BroadcastParameterVM{
-			BranchID:       in.BranchID,
-			RegionID:       in.RegionID,
-			RegionGroupID:  in.RegionGroupID,
-			CustomerTypeID: in.CustomerTypeID,
+			BranchID:         in.BranchID,
+			BranchName:       in.BranchName,
+			RegionID:         in.RegionID,
+			RegionName:       in.RegionName,
+			RegionGroupID:    in.RegionGroupID,
+			RegionGroupName:  in.RegionGroupName,
+			CustomerTypeID:   in.CustomerTypeID,
+			CustomerTypeName: in.CustomerTypeName,
 		},
 	}
 
