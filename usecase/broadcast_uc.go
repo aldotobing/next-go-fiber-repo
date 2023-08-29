@@ -209,10 +209,14 @@ func (uc BroadcastUC) Add(c context.Context, in requests.BroadcastRequest) (out 
 		BroadcastDate: in.BroadcastDate,
 		BroadcastTime: in.BroadcastTime,
 		Parameter: viewmodel.BroadcastParameterVM{
-			BranchID:       in.BranchID,
-			RegionID:       in.RegionID,
-			RegionGroupID:  in.RegionGroupID,
-			CustomerTypeID: in.CustomerTypeID,
+			BranchID:         in.BranchID,
+			BranchName:       in.BranchName,
+			RegionID:         in.RegionID,
+			RegionName:       in.RegionName,
+			RegionGroupID:    in.RegionGroupID,
+			RegionGroupName:  in.RegionGroupName,
+			CustomerTypeID:   in.CustomerTypeID,
+			CustomerTypeName: in.CustomerTypeName,
 		},
 	}
 
@@ -235,10 +239,14 @@ func (uc BroadcastUC) Update(c context.Context, id string, in requests.Broadcast
 		BroadcastDate: in.BroadcastDate,
 		BroadcastTime: in.BroadcastTime,
 		Parameter: viewmodel.BroadcastParameterVM{
-			BranchID:       in.BranchID,
-			RegionID:       in.RegionID,
-			RegionGroupID:  in.RegionGroupID,
-			CustomerTypeID: in.CustomerTypeID,
+			BranchID:         in.BranchID,
+			BranchName:       in.BranchName,
+			RegionID:         in.RegionID,
+			RegionName:       in.RegionName,
+			RegionGroupID:    in.RegionGroupID,
+			RegionGroupName:  in.RegionGroupName,
+			CustomerTypeID:   in.CustomerTypeID,
+			CustomerTypeName: in.CustomerTypeName,
 		},
 	}
 
