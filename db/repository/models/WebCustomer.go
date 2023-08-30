@@ -63,6 +63,7 @@ type WebCustomer struct {
 	CreatedDate              *string `json:"created_date"`
 	CustomerPriceListID      *string `json:"customer_price_list_id"`
 	CustomerPriceListName    *string `json:"customer_price_list_name"`
+	ShowInApp                *string `json:"show_in_app"`
 }
 
 // CustomerParameter ...
@@ -172,7 +173,8 @@ var (
 		usr_edited.login,
 		c.modified_date,
 		C.price_list_id,
-		PL._name
+		PL._name,
+		coalesce(c.show_in_apps,0)
 	FROM CUSTOMER C
 	LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
 	LEFT JOIN REGION REG ON REG.ID = B.REGION_ID
