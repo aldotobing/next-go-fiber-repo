@@ -144,8 +144,6 @@ func (uc DashboardWebUC) GetAllBranchDetailCustomerData(c context.Context, param
 }
 
 func (uc DashboardWebUC) GetAllReportBranchDetailCustomerData(c context.Context, parameter models.DashboardWebBranchParameter) (res []models.DashboardWebBranchDetail, err error) {
-	_, _, parameter.Page, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.DashboardWebBranchDetailOrderBy, models.DashboardWebBranchDetailOrderByrByString)
-
 	repo := repository.NewDashboardWebRepository(uc.DB)
 	res, err = repo.GetAllReportBranchDetailCustomerData(c, parameter)
 	if err != nil {

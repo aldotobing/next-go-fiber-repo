@@ -149,6 +149,7 @@ func (h *DashboardWebHandler) GetAllReportBranchCustomerData(ctx *fiber.Ctx) err
 
 	parameter := models.DashboardWebBranchParameter{
 		BranchID:  ctx.Query("branch_id"),
+		UserID:    ctx.Query("user_id"),
 		StartDate: ctx.Query("start_date"),
 		EndDate:   ctx.Query("end_date"),
 	}
