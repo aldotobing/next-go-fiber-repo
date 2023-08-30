@@ -116,6 +116,7 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 
 	res.CustomerPriceListID = data.CustomerPriceListID
 	res.CustomerPriceListName = data.CustomerPriceListName
+	res.CustomerShowInApp = data.ShowInApp
 }
 
 // SelectAll ...

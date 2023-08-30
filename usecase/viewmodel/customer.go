@@ -58,6 +58,7 @@ type CustomerVM struct {
 	ModifiedDate             *string `json:"modified_date"`
 	CustomerPriceListID      *string `json:"customer_price_list_id"`
 	CustomerPriceListName    *string `json:"customer_price_list_name"`
+	CustomerShowInApp        *string `json:"customer_show_in_app"`
 }
 
 type CustomerData struct {
