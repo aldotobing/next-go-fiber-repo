@@ -56,6 +56,8 @@ type DashboardWebBranchDetail struct {
 	CustomerCityName         *string `json:"customer_city_name_detail"`
 	StatusInstall            *string `json:"status_install"`
 	StatusComplete           *string `json:"status_complete"`
+	SalesmanCode             *string `json:"salesman_code"`
+	SalesmanName             *string `json:"salesman_name"`
 }
 
 type DashboardWebGetWithUserID struct {
