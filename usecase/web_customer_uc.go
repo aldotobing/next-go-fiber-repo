@@ -494,6 +494,7 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 		CustomerBirthDate:      &data.CustomerBirthDate,
 		CustomerPhotoKtp:       &stringImageKTP,
 		UserID:                 &data.UserID,
+		ShowInApp:              &data.CustomerShowInApp,
 	}
 
 	res.ID, err = repo.Edit(c, &res)
