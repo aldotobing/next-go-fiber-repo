@@ -101,7 +101,9 @@ func (h *WebCustomerHandler) FindByID(ctx *fiber.Ctx) error {
 	res, err := uc.FindByID(c, parameter)
 
 	type StructObject struct {
-		ListObject viewmodel.CustomerVM `json:"customer"`
+		ListObject          viewmodel.CustomerVM   `json:"customer"`
+		CustomerTarget      interface{}            `json:"customer_target"`
+		CustomerAchievement map[string]interface{} `json:"customer_achievement"`
 	}
 
 	objectData := new(StructObject)
@@ -112,6 +114,42 @@ func (h *WebCustomerHandler) FindByID(ctx *fiber.Ctx) error {
 	if target != "" {
 		objectData.ListObject.VisitDay = &target
 	}
+
+	objectData.CustomerTarget = helper.FetchClientDataTarget(models.CustomerTargetSemesterParameter{
+		ID:   *res.ID,
+		Code: *res.Code,
+	})
+
+	achievement := make(map[string]interface{})
+	quarterAchievement, _ := usecase.CustomerAchievementQuarterUC{ContractUC: h.ContractUC}.SelectAll(c, models.CustomerAchievementQuarterParameter{
+		ID: *res.ID,
+		By: "cus.created_date",
+	})
+	if len(quarterAchievement) == 1 {
+		achievement["quater_achievement"] = quarterAchievement[0].Achievement
+	}
+	semesterAchievement, _ := usecase.CustomerAchievementSemesterUC{ContractUC: h.ContractUC}.SelectAll(c, models.CustomerAchievementSemesterParameter{
+		ID: *res.ID,
+		By: "cus.created_date",
+	})
+	if len(semesterAchievement) == 1 {
+		achievement["semester_achievement"] = semesterAchievement[0].Achievement
+	}
+	yearAchievement, _ := usecase.CustomerAchievementYearUC{ContractUC: h.ContractUC}.SelectAll(c, models.CustomerAchievementYearParameter{
+		ID: *res.ID,
+		By: "cus.created_date",
+	})
+	if len(yearAchievement) == 1 {
+		achievement["year_achievement"] = yearAchievement[0].Achievement
+	}
+	annualAchievement, _ := usecase.CustomerAchievementUC{ContractUC: h.ContractUC}.SelectAll(c, models.CustomerAchievementParameter{
+		ID: *res.ID,
+		By: "cus.created_date",
+	})
+	if len(annualAchievement) == 1 {
+		achievement["month_achievement"] = annualAchievement[0].Achievement
+	}
+	objectData.CustomerAchievement = achievement
 
 	return h.SendResponse(ctx, objectData, nil, err, 0)
 }
