@@ -421,7 +421,7 @@ func (repository WebCustomerRepository) Edit(c context.Context, model *models.We
 		customer_photo_ktp = $13,
 		customer_cp_name = $14,
 		modified_date = now(),
-		modified_by = $15
+		modified_by = $15,
 		show_in_apps = $16
 	WHERE id = $17
 	RETURNING id`
