@@ -58,6 +58,7 @@ func main() {
 		Password: configs.EnvConfig["REDIS_PASSWORD"], // no password set
 		DB:       0,                                   // use default DB
 	})
+	// fmt.Println("Redis pass: " + configs.EnvConfig["REDIS_PASSWORD"])
 
 	redisStorage := &redisPkg.RedisClient{
 		Client: baseClient,
