@@ -24,6 +24,7 @@ import (
 	idTranslations "github.com/go-playground/validator/v10/translations/id"
 	redis "github.com/go-redis/redis/v7"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -54,8 +55,8 @@ func main() {
 	// Set up Redis client
 	baseClient := redis.NewClient(&redis.Options{
 		Addr:     configs.EnvConfig["REDIS_URL"],
-		Password: "", // no password set
-		DB:       0,  // use default DB
+		Password: configs.EnvConfig["REDIS_PASSWORD"], // no password set
+		DB:       0,                                   // use default DB
 	})
 
 	redisStorage := &redisPkg.RedisClient{
@@ -148,6 +149,8 @@ func main() {
 		TimeFormat: time.RFC3339,
 		TimeZone:   "Asia/Jakarta",
 	}))
+	boot.App.Use(compress.New())
+
 	//DISABLE SCHEDULER
 	//helper.SetCronJobs()
 
@@ -155,6 +158,12 @@ func main() {
 
 	boot.RegisterRouters()
 	log.Fatal(boot.App.Listen(configs.EnvConfig["APP_HOST"]))
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("Error getting current working directory: %v", err)
+	}
+	log.Printf("Current working directory: %s", cwd)
+	// log.Fatal(boot.App.ListenTLS(configs.EnvConfig["APP_HOST"], "cert/api.crt", "cert/api.key"))
 
 }
 
