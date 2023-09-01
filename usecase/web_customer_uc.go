@@ -473,6 +473,9 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 	birthDate, _ := time.Parse("2006-01-02", data.CustomerBirthDate)
 	data.CustomerBirthDate = birthDate.Format("2006-01-02")
 
+	if data.CustomerShowInApp == "" {
+		data.CustomerShowInApp = *currentObjectUc.CustomerShowInApp
+	}
 	res = models.WebCustomer{
 		ID:                     &id,
 		Code:                   &data.Code,
