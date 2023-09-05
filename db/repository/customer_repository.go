@@ -205,6 +205,12 @@ func (repository CustomerRepository) SelectAll(c context.Context, parameter mode
 		index++
 	}
 
+	if parameter.CustomerLevelId != "" {
+		conditionString += ` AND C.CUSTOMER_LEVEL_ID = $` + strconv.Itoa(index)
+		args = append(args, parameter.CustomerTypeId)
+		index++
+	}
+
 	statement := models.CustomerSelectStatement + ` ` + models.CustomerWhereStatement +
 		` AND (LOWER(c."customer_name") LIKE $` + strconv.Itoa(index) + `) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	args = append(args, "%"+strings.ToLower(parameter.Search)+"%")

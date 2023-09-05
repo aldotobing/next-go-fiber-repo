@@ -61,22 +61,23 @@ type Customer struct {
 
 // CustomerParameter ...
 type CustomerParameter struct {
-	ID             string `json:"customer_id"`
-	Code           string `json:"customer_code"`
-	Phone          string `json:"customer_phone"`
-	Name           string `json:"customer_name"`
-	CustomerTypeId string `json:"custome_type_id"`
-	UserId         string `json:"admin_user_id"`
-	BranchID       string `json:"branch_id"`
-	RegionID       string `json:"region_id"`
-	RegionGroupID  string `json:"region_group_id"`
-	FlagToken      bool   `json:"flag_token"`
-	Search         string `json:"search"`
-	Page           int    `json:"page"`
-	Offset         int    `json:"offset"`
-	Limit          int    `json:"limit"`
-	By             string `json:"by"`
-	Sort           string `json:"sort"`
+	ID              string `json:"customer_id"`
+	Code            string `json:"customer_code"`
+	Phone           string `json:"customer_phone"`
+	Name            string `json:"customer_name"`
+	CustomerTypeId  string `json:"custome_type_id"`
+	CustomerLevelId string `json:"custome_level_id"`
+	UserId          string `json:"admin_user_id"`
+	BranchID        string `json:"branch_id"`
+	RegionID        string `json:"region_id"`
+	RegionGroupID   string `json:"region_group_id"`
+	FlagToken       bool   `json:"flag_token"`
+	Search          string `json:"search"`
+	Page            int    `json:"page"`
+	Offset          int    `json:"offset"`
+	Limit           int    `json:"limit"`
+	By              string `json:"by"`
+	Sort            string `json:"sort"`
 }
 
 var (
@@ -125,8 +126,8 @@ var (
 		DIST._NAME AS CUST_DISTRICT_NAME,
 		SDIST.ID AS CUST_SUBDISTRICT_ID,
 		SDIST._NAME AS CUST_SUBDISTRICT_NAME,
-		PS.CODE as CUST_SALESMAN_CODE,
-		PS._NAME AS CUST_SALESMAN_NAME,
+		S.SALESMAN_CODE as CUST_SALESMAN_CODE,
+		S.SALESMAN_NAME AS CUST_SALESMAN_NAME,
 		S.SALESMAN_PHONE_NO AS CUST_SALESMAN_PHONE,
 		C.SALES_CYCLE CUST_SALES_CYCLE,
 		C.CUSTOMER_TYPE_ID AS CUST_TYPE_ID,
