@@ -16,12 +16,14 @@ type BroadcastVM struct {
 
 // BroadcastParameterVM ....
 type BroadcastParameterVM struct {
-	BranchID         string `json:"branch_id"`
-	BranchName       string `json:"branch_name"`
-	RegionID         string `json:"region_id"`
-	RegionName       string `json:"region_name"`
-	RegionGroupID    string `json:"region_group_id"`
-	RegionGroupName  string `json:"region_group_name"`
-	CustomerTypeID   string `json:"customer_type_id"`
-	CustomerTypeName string `json:"customer_type_name"`
+	BranchID          string `json:"branch_id"`
+	BranchName        string `json:"branch_name"`
+	RegionID          string `json:"region_id"`
+	RegionName        string `json:"region_name"`
+	RegionGroupID     string `json:"region_group_id"`
+	RegionGroupName   string `json:"region_group_name"`
+	CustomerTypeID    string `json:"customer_type_id"`
+	CustomerTypeName  string `json:"customer_type_name"`
+	CustomerLevelID   string `json:"customer_level_id"`
+	CustomerLevelName string `json:"customer_level_name"`
 }

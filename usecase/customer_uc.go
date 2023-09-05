@@ -50,7 +50,7 @@ func (uc CustomerUC) SelectAll(c context.Context, parameter models.CustomerParam
 
 	// Define the cache key
 	cacheKey := CustomerCacheKey + parameter.By + ":" + parameter.Sort + ":" + parameter.BranchID + ":" +
-		parameter.CustomerTypeId + ":" + parameter.RegionID + ":" + parameter.RegionGroupID
+		parameter.CustomerTypeId + ":" + parameter.RegionID + ":" + parameter.RegionGroupID + ":" + parameter.CustomerLevelId
 
 	// Try to get data from Redis cache first
 	err = uc.RedisClient.GetFromRedis(cacheKey, &res)
