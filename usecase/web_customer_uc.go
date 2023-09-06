@@ -26,14 +26,7 @@ type WebCustomerUC struct {
 
 // BuildBody ...
 func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.CustomerVM, birthdateFull bool) {
-	if data.CustomerNik == nil || *data.CustomerNik == "" ||
-		data.CustomerName == nil || *data.CustomerName == "" ||
-		data.CustomerBirthDate == nil || *data.CustomerBirthDate == "" ||
-		data.CustomerReligion == nil || *data.CustomerReligion == "" ||
-		data.CustomerPhotoKtp == nil || *data.CustomerPhotoKtp == "" ||
-		data.CustomerProfilePicture == nil || *data.CustomerProfilePicture == "" ||
-		data.CustomerPhone == nil || *data.CustomerPhone == "" ||
-		data.Code == nil || *data.Code == "" {
+	if !*data.IsDataComplete {
 		res.CustomerProfileStatus = &models.CustomerProfileStatusIncomplete
 	} else {
 		res.CustomerProfileStatus = &models.CustomerProfileStatusComplete
@@ -117,6 +110,11 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 	res.CustomerPriceListID = data.CustomerPriceListID
 	res.CustomerPriceListName = data.CustomerPriceListName
 	res.CustomerShowInApp = data.ShowInApp
+
+	res.CustomerStatusInstall = true
+	if data.CustomerUserToken == nil || *data.CustomerUserToken == "" {
+		res.CustomerStatusInstall = false
+	}
 }
 
 // SelectAll ...
