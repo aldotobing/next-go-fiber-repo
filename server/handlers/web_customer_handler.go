@@ -104,6 +104,7 @@ func (h *WebCustomerHandler) FindByID(ctx *fiber.Ctx) error {
 		ListObject          viewmodel.CustomerVM   `json:"customer"`
 		CustomerTarget      interface{}            `json:"customer_target"`
 		CustomerAchievement map[string]interface{} `json:"customer_achievement"`
+		SalesmanVisit       interface{}            `json:"salesman_visit"`
 	}
 
 	objectData := new(StructObject)
@@ -150,6 +151,11 @@ func (h *WebCustomerHandler) FindByID(ctx *fiber.Ctx) error {
 		achievement["month_achievement"] = annualAchievement[0].Achievement
 	}
 	objectData.CustomerAchievement = achievement
+
+	objectData.SalesmanVisit = helper.FetchVisitDay(models.CustomerParameter{
+		ID:   *res.ID,
+		Code: *res.Code,
+	})
 
 	return h.SendResponse(ctx, objectData, nil, err, 0)
 }

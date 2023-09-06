@@ -53,6 +53,7 @@ type WebCustomer struct {
 	CustomerLevel            *string `json:"customer_level_name"`
 	CustomerUserID           *string `json:"customer_user_id"`
 	CustomerUserName         *string `json:"customer_user_name"`
+	CustomerUserToken        *string `json:"customer_user_token"`
 	CustomerGender           *string `json:"customer_gender"`
 	CustomerProfileStatus    *string `json:"customer_profile_status"`
 	ModifiedDate             *string `json:"modified_date"`
@@ -64,6 +65,7 @@ type WebCustomer struct {
 	CustomerPriceListID      *string `json:"customer_price_list_id"`
 	CustomerPriceListName    *string `json:"customer_price_list_name"`
 	ShowInApp                *string `json:"show_in_app"`
+	IsDataComplete           *bool   `json:"is_data_complete"`
 }
 
 // CustomerParameter ...
@@ -170,11 +172,13 @@ var (
 		c.customer_level_id,
 		usr.id as user_id,
 		usr.login as user_name,
+		usr.fcm_token as user_token,
 		usr_edited.login,
 		c.modified_date,
 		C.price_list_id,
 		PL._name,
-		coalesce(c.show_in_apps,0)
+		coalesce(c.show_in_apps,0),
+		coalesce(C.is_data_completed,false)
 	FROM CUSTOMER C
 	LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
 	LEFT JOIN REGION REG ON REG.ID = B.REGION_ID
