@@ -43,6 +43,7 @@ func (repository WebPromo) scanRows(rows *sql.Rows) (res models.WebPromo, err er
 		&res.EndDate,
 		&res.Active,
 		&res.ShowInApp,
+		&res.Priority,
 	)
 	if err != nil {
 
@@ -63,6 +64,7 @@ func (repository WebPromo) scanRow(row *sql.Row) (res models.WebPromo, err error
 		&res.EndDate,
 		&res.Active,
 		&res.ShowInApp,
+		&res.Priority,
 	)
 	if err != nil {
 		return res, err
@@ -165,8 +167,9 @@ func (repository WebPromo) Edit(c context.Context, model *models.WebPromo) (res 
 		start_date = $5,
 		end_date = $6,
 		active = $7,
-		code = $8
-	WHERE id = $9
+		code = $8,
+		priority = &9
+	WHERE id = $10
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		model.PromoName,
@@ -177,6 +180,7 @@ func (repository WebPromo) Edit(c context.Context, model *models.WebPromo) (res 
 		model.EndDate,
 		model.Active,
 		model.Code,
+		model.Priority,
 		model.ID).Scan(&res)
 	if err != nil {
 		return res, err
@@ -301,10 +305,10 @@ func (repository WebPromo) Add(c context.Context, model *models.WebPromo) (res *
 	defer transaction.Rollback()
 
 	statement := `INSERT INTO promo (code, _name, description, url_banner,
-		start_date, end_date, active, show_in_app)
-	VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`
+		start_date, end_date, active, show_in_app, priority)
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`
 	err = transaction.QueryRowContext(c, statement, model.Code, model.PromoName, model.PromoDescription, model.PromoUrlBanner,
-		model.StartDate, model.EndDate, 1, model.ShowInApp).Scan(&res)
+		model.StartDate, model.EndDate, 1, model.ShowInApp, model.Priority).Scan(&res)
 
 	fmt.Println("PROMO INSERT : " + statement)
 

@@ -15,4 +15,5 @@ type WebPromoRequest struct {
 	BranchIdList        string `json:"branch_id_list"`
 	RegionIDList        string `json:"region_area_id_list"`
 	Active              int    `json:"active"`
+	Priority            int    `json:"priority"`
 }
