@@ -40,6 +40,7 @@ func (repository PromoContent) scanRows(rows *sql.Rows) (res models.PromoContent
 		&res.StartDate,
 		&res.EndDate,
 		&res.Active,
+		&res.Priority,
 	)
 	if err != nil {
 
@@ -59,6 +60,7 @@ func (repository PromoContent) scanRow(row *sql.Row) (res models.PromoContent, e
 		&res.StartDate,
 		&res.EndDate,
 		&res.Active,
+		&res.Priority,
 	)
 	if err != nil {
 		return res, err

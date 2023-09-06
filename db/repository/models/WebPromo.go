@@ -19,6 +19,7 @@ type WebPromo struct {
 	CustomerLevelList   *[]WebCustomerLevelEligiblePromo `json:"customer_Level_list"`
 	BranchIdList        *string                          `json:"branch_id_list"`
 	BranchList          *[]WebBranchEligiblePromo        `json:"branch_list"`
+	Priority            *int                             `json:"priority"`
 }
 
 // WebPromoParameter ...
@@ -41,7 +42,7 @@ type WebPromoParameter struct {
 
 var (
 	// WebPromoOrderBy ...
-	WebPromoOrderBy = []string{"pc.id", "pc._name", "pc.created_date"}
+	WebPromoOrderBy = []string{"pc.id", "pc._name", "pc.created_date", "pc.priority"}
 	// WebPromoOrderByrByString ...
 	WebPromoOrderByrByString = []string{
 		"pc._name",
@@ -59,7 +60,8 @@ var (
 		PC.START_DATE AS PROMO_START_DATE,
 		PC.END_DATE AS PROMO_END_DATE,
 		PC.ACTIVE AS ACTIVE,
-		PC.show_in_app 
+		PC.show_in_app,
+		PC.Priority
 	FROM PROMO PC
 	`
 	// WebPromoWhereStatement ...
