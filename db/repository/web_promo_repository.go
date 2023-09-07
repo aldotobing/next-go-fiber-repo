@@ -168,7 +168,7 @@ func (repository WebPromo) Edit(c context.Context, model *models.WebPromo) (res 
 		end_date = $6,
 		active = $7,
 		code = $8,
-		priority = &9
+		priority = $9
 	WHERE id = $10
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
