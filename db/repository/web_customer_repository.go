@@ -146,6 +146,7 @@ func (repository WebCustomerRepository) scanRowsReport(rows *sql.Rows) (res mode
 		&res.CustomerSalesmanID,
 		&res.ModifiedBy,
 		&res.CustomerUserName,
+		&res.IsDataComplete,
 	)
 	if err != nil {
 
