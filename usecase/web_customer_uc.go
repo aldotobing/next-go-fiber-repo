@@ -841,26 +841,12 @@ func (uc WebCustomerUC) ReportSelect(c context.Context, parameter models.WebCust
 		}
 
 		if parameter.CustomerProfileStatus == "0" {
-			if data[i].CustomerNik == nil || *data[i].CustomerNik == "" ||
-				data[i].CustomerName == nil || *data[i].CustomerName == "" ||
-				data[i].CustomerBirthDate == nil || *data[i].CustomerBirthDate == "" ||
-				data[i].CustomerReligion == nil || *data[i].CustomerReligion == "" ||
-				data[i].CustomerPhotoKtp == nil || *data[i].CustomerPhotoKtp == "" ||
-				data[i].CustomerProfilePicture == nil || *data[i].CustomerProfilePicture == "" ||
-				data[i].CustomerPhone == nil || *data[i].CustomerPhone == "" ||
-				data[i].Code == nil || *data[i].Code == "" {
+			if !*data[i].IsDataComplete {
 				uc.BuildBody(&data[i], &temp, true)
 				res = append(res, temp)
 			}
 		} else if parameter.CustomerProfileStatus == "1" {
-			if data[i].CustomerNik != nil && *data[i].CustomerNik != "" &&
-				data[i].CustomerName != nil && *data[i].CustomerName != "" &&
-				data[i].CustomerBirthDate != nil && *data[i].CustomerBirthDate != "" &&
-				data[i].CustomerReligion != nil && *data[i].CustomerReligion != "" &&
-				data[i].CustomerPhotoKtp != nil && *data[i].CustomerPhotoKtp != "" &&
-				data[i].CustomerProfilePicture != nil && *data[i].CustomerProfilePicture != "" &&
-				data[i].CustomerPhone != nil && *data[i].CustomerPhone != "" &&
-				data[i].Code != nil && *data[i].Code != "" {
+			if *data[i].IsDataComplete {
 				uc.BuildBody(&data[i], &temp, true)
 				res = append(res, temp)
 			}
