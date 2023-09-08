@@ -92,3 +92,18 @@ func (h *CilentInvoiceHandler) DataSync(ctx *fiber.Ctx) error {
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
+
+func (h *CilentInvoiceHandler) UndoneDataSync(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.CilentInvoiceParameter{
+		CustomerID: ctx.Params("customer_id"),
+		Search:     ctx.Query("search"),
+		By:         ctx.Query("by"),
+		Sort:       ctx.Query("sort"),
+	}
+	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
+	res, err := uc.UndoneDataSync(c, parameter)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}

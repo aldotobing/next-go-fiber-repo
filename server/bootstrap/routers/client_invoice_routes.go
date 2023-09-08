@@ -28,5 +28,6 @@ func (route CilentInvoiceRoutes) RegisterRoute() {
 	r.Get("/select/:customer_id", handler.SelectAll)
 	r.Get("/id/:id", handler.FindByID)
 	r.Get("/", handler.DataSync)
+	r.Get("/undone", handler.UndoneDataSync)
 
 }
