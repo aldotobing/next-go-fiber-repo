@@ -199,8 +199,8 @@ func (uc CilentInvoiceUC) DataSync(c context.Context, parameter models.CilentInv
 func (uc CilentInvoiceUC) UndoneDataSync(c context.Context, parameter models.CilentInvoiceParameter) ([]models.CilentInvoice, error) {
 	repo := repository.NewCilentInvoiceRepository(uc.DB)
 
-	parameter.StartDate = `2023-08-01`
-	parameter.EndDate = `2023-08-31`
+	// parameter.StartDate = `2023-08-01`
+	// parameter.EndDate = `2023-08-31`
 
 	jsonReq, err := json.Marshal(parameter)
 	if err != nil {

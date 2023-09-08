@@ -52,6 +52,8 @@ func (h *TransactionDataSyncHandler) UndoneDataSync(ctx *fiber.Ctx) error {
 		Search:     ctx.Query("search"),
 		By:         ctx.Query("by"),
 		Sort:       ctx.Query("sort"),
+		StartDate:  ctx.Query("start_date"),
+		EndDate:    ctx.Query("end_date"),
 	}
 	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
 	res, err := uc.UndoneDataSync(c, parameter)
