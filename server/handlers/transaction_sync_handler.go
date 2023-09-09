@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"nextbasis-service-v-0.1/db/repository/models"
+	"nextbasis-service-v-0.1/pkg/str"
 	"nextbasis-service-v-0.1/usecase"
 
 	"github.com/gofiber/fiber/v2"
@@ -54,6 +55,8 @@ func (h *TransactionDataSyncHandler) UndoneDataSync(ctx *fiber.Ctx) error {
 		Sort:       ctx.Query("sort"),
 		StartDate:  ctx.Query("start_date"),
 		EndDate:    ctx.Query("end_date"),
+		Page:       str.StringToInt(ctx.Query("page")),
+		Limit:      str.StringToInt(ctx.Query("limit")),
 	}
 	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
 	res, err := uc.UndoneDataSync(c, parameter)
