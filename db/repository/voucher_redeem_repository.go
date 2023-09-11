@@ -10,9 +10,9 @@ import (
 
 // IVoucherRedeemRepository ...
 type IVoucherRedeemRepository interface {
-	SelectAll(c context.Context, parameter models.VoucherRedeemParameter) ([]models.VoucherRedeem, error)
-	FindAll(ctx context.Context, parameter models.VoucherRedeemParameter) ([]models.VoucherRedeem, int, error)
-	FindByID(c context.Context, parameter models.VoucherRedeemParameter) (models.VoucherRedeem, error)
+	SelectAll(c context.Context, in models.VoucherRedeemParameter) ([]models.VoucherRedeem, error)
+	FindAll(ctx context.Context, in models.VoucherRedeemParameter) ([]models.VoucherRedeem, int, error)
+	FindByID(c context.Context, in models.VoucherRedeemParameter) (models.VoucherRedeem, error)
 	Add(c context.Context, model viewmodel.VoucherRedeemVM) (string, error)
 	AddBulk(c context.Context, model []viewmodel.VoucherRedeemVM) error
 	Update(c context.Context, model viewmodel.VoucherRedeemVM) (string, error)
@@ -69,12 +69,16 @@ func (repository VoucherRedeemRepository) scanRow(row *sql.Row) (res models.Vouc
 }
 
 // SelectAll ...
-func (repository VoucherRedeemRepository) SelectAll(c context.Context, parameter models.VoucherRedeemParameter) (data []models.VoucherRedeem, err error) {
+func (repository VoucherRedeemRepository) SelectAll(c context.Context, in models.VoucherRedeemParameter) (data []models.VoucherRedeem, err error) {
 	var conditionString string
+
+	if in.CustomerID != "" {
+		conditionString += ` AND DEF.CUSTOMER_ID = ` + in.CustomerID
+	}
 
 	statement := models.VoucherRedeemSelectStatement + models.VoucherRedeemWhereStatement +
 		` AND DEF.REDEEMED_AT IS NULL ` + conditionString +
-		` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+		` ORDER BY ` + in.By + ` ` + in.Sort
 
 	rows, err := repository.DB.QueryContext(c, statement)
 
@@ -95,15 +99,15 @@ func (repository VoucherRedeemRepository) SelectAll(c context.Context, parameter
 }
 
 // FindAll ...
-func (repository VoucherRedeemRepository) FindAll(ctx context.Context, parameter models.VoucherRedeemParameter) (data []models.VoucherRedeem, count int, err error) {
+func (repository VoucherRedeemRepository) FindAll(ctx context.Context, in models.VoucherRedeemParameter) (data []models.VoucherRedeem, count int, err error) {
 	var conditionString string
 
 	conditionString += ` AND DEF.REDEEMED_AT IS NULL `
 
 	statement := models.VoucherRedeemSelectStatement + models.VoucherRedeemWhereStatement +
 		conditionString +
-		` ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $1 LIMIT $2`
-	rows, err := repository.DB.QueryContext(ctx, statement, parameter.Offset, parameter.Limit)
+		` ORDER BY ` + in.By + ` ` + in.Sort + ` OFFSET $1 LIMIT $2`
+	rows, err := repository.DB.QueryContext(ctx, statement, in.Offset, in.Limit)
 	if err != nil {
 		return data, count, err
 	}
@@ -128,8 +132,8 @@ func (repository VoucherRedeemRepository) FindAll(ctx context.Context, parameter
 }
 
 // FindByID ...
-func (repository VoucherRedeemRepository) FindByID(c context.Context, parameter models.VoucherRedeemParameter) (data models.VoucherRedeem, err error) {
-	statement := models.VoucherRedeemSelectStatement + ` WHERE DEF.ID = ` + parameter.ID
+func (repository VoucherRedeemRepository) FindByID(c context.Context, in models.VoucherRedeemParameter) (data models.VoucherRedeem, err error) {
+	statement := models.VoucherRedeemSelectStatement + ` WHERE DEF.ID = ` + in.ID
 	row := repository.DB.QueryRowContext(c, statement)
 
 	data, err = repository.scanRow(row)

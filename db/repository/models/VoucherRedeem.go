@@ -19,13 +19,14 @@ type VoucherRedeem struct {
 
 // VoucherRedeemParameter ...
 type VoucherRedeemParameter struct {
-	ID     string `json:"id"`
-	Search string `json:"search"`
-	Page   int    `json:"page"`
-	Offset int    `json:"offset"`
-	Limit  int    `json:"limit"`
-	By     string `json:"by"`
-	Sort   string `json:"sort"`
+	ID         string `json:"id"`
+	CustomerID string `json:"customer_id"`
+	Search     string `json:"search"`
+	Page       int    `json:"page"`
+	Offset     int    `json:"offset"`
+	Limit      int    `json:"limit"`
+	By         string `json:"by"`
+	Sort       string `json:"sort"`
 }
 
 var (

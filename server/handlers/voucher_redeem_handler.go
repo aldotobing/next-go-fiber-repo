@@ -42,9 +42,10 @@ func (h *VoucherRedeemHandler) FindAll(ctx *fiber.Ctx) error {
 func (h *VoucherRedeemHandler) SelectAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 	parameter := models.VoucherRedeemParameter{
-		Search: ctx.Query("search"),
-		By:     ctx.Query("by"),
-		Sort:   ctx.Query("sort"),
+		Search:     ctx.Query("search"),
+		CustomerID: ctx.Query("customer_id"),
+		By:         ctx.Query("by"),
+		Sort:       ctx.Query("sort"),
 	}
 	uc := usecase.VoucherRedeemUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectAll(c, parameter)
