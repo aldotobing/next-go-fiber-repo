@@ -279,4 +279,10 @@ func (boot Bootstrap) RegisterRouters() {
 
 	BroadcastRoute := routers.BroadcastRoutes{RouterGroup: apiV1, Handler: handler}
 	BroadcastRoute.RegisterRoute()
+
+	voucherRoute := routers.VoucherRoutes{RouterGroup: apiV1, Handler: handler}
+	voucherRoute.RegisterRoute()
+
+	voucherReedeemRoute := routers.VoucherRedeemRoutes{RouterGroup: apiV1, Handler: handler}
+	voucherReedeemRoute.RegisterRoute()
 }
