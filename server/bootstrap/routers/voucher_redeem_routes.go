@@ -26,6 +26,7 @@ func (route VoucherRedeemRoutes) RegisterRoute() {
 	r.Get("/", handler.FindAll)
 	r.Get("/select", handler.SelectAll)
 	r.Get("/id/:id", handler.FindByID)
+	r.Get("/document_no/:document_no", handler.FindByDocumentNo)
 	r.Post("/add", handler.Add)
 	r.Post("/add_bulk", handler.AddBulk)
 	r.Put("/edit/:id", handler.Update)

@@ -13,6 +13,7 @@ type IVoucherRedeemRepository interface {
 	SelectAll(c context.Context, in models.VoucherRedeemParameter) ([]models.VoucherRedeem, error)
 	FindAll(ctx context.Context, in models.VoucherRedeemParameter) ([]models.VoucherRedeem, int, error)
 	FindByID(c context.Context, in models.VoucherRedeemParameter) (models.VoucherRedeem, error)
+	FindByDocumentNo(c context.Context, in models.VoucherRedeemParameter) (models.VoucherRedeem, error)
 	Add(c context.Context, model viewmodel.VoucherRedeemVM) (string, error)
 	AddBulk(c context.Context, model []viewmodel.VoucherRedeemVM) error
 	Update(c context.Context, model viewmodel.VoucherRedeemVM) (string, error)
@@ -134,6 +135,16 @@ func (repository VoucherRedeemRepository) FindAll(ctx context.Context, in models
 // FindByID ...
 func (repository VoucherRedeemRepository) FindByID(c context.Context, in models.VoucherRedeemParameter) (data models.VoucherRedeem, err error) {
 	statement := models.VoucherRedeemSelectStatement + ` WHERE DEF.ID = ` + in.ID
+	row := repository.DB.QueryRowContext(c, statement)
+
+	data, err = repository.scanRow(row)
+
+	return
+}
+
+// FindByDocumentNo ...
+func (repository VoucherRedeemRepository) FindByDocumentNo(c context.Context, in models.VoucherRedeemParameter) (data models.VoucherRedeem, err error) {
+	statement := models.VoucherRedeemSelectStatement + ` WHERE DEF.REDEEMED_TO_DOC_NO = '` + in.DocumentNo + `'`
 	row := repository.DB.QueryRowContext(c, statement)
 
 	data, err = repository.scanRow(row)

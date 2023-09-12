@@ -94,6 +94,20 @@ func (uc VoucherRedeemUC) FindByID(c context.Context, parameter models.VoucherRe
 	return
 }
 
+// FindByDocumentNo ...
+func (uc VoucherRedeemUC) FindByDocumentNo(c context.Context, parameter models.VoucherRedeemParameter) (out viewmodel.VoucherRedeemVM, err error) {
+	repo := repository.NewVoucherRedeemRepository(uc.DB)
+	data, err := repo.FindByDocumentNo(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	uc.BuildBody(&data, &out)
+
+	return
+}
+
 // Add ...
 func (uc VoucherRedeemUC) Add(c context.Context, in requests.VoucherRedeemRequest) (out viewmodel.VoucherRedeemVM, err error) {
 	out = viewmodel.VoucherRedeemVM{
