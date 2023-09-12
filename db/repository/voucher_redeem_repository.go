@@ -45,6 +45,8 @@ func (repository VoucherRedeemRepository) scanRows(rows *sql.Rows) (res models.V
 		&res.VoucherID,
 		&res.VoucherName,
 		&res.VoucherCashValue,
+		&res.VoucherDescription,
+		&res.VoucherImageURL,
 	)
 
 	return
@@ -64,6 +66,8 @@ func (repository VoucherRedeemRepository) scanRow(row *sql.Row) (res models.Vouc
 		&res.VoucherID,
 		&res.VoucherName,
 		&res.VoucherCashValue,
+		&res.VoucherDescription,
+		&res.VoucherImageURL,
 	)
 
 	return

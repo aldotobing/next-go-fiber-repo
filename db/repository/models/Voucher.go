@@ -15,6 +15,7 @@ type Voucher struct {
 	CreatedAt         string         `json:"created_at"`
 	UpdatedAt         sql.NullString `json:"updated_at"`
 	DeletedAt         sql.NullString `json:"deleted_at"`
+	Description       sql.NullString `json:"description"`
 }
 
 // VoucherParameter ...
@@ -45,7 +46,8 @@ var (
 			DEF.CASH_VALUE,
 			DEF.CREATED_AT,
 			DEF.UPDATED_AT,
-			DEF.DELETED_AT
+			DEF.DELETED_AT,
+			DEF.DESCRIPTION
 		FROM VOUCHER DEF
 	`
 	VoucherWhereStatement = `WHERE DEF.DELETED_AT IS NULL `
