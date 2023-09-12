@@ -71,6 +71,21 @@ func (h *VoucherRedeemHandler) FindByID(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
+// FindByDocumentNo ...
+func (h *VoucherRedeemHandler) FindByDocumentNo(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+	parameter := models.VoucherRedeemParameter{
+		DocumentNo: ctx.Params("document_no"),
+	}
+	uc := usecase.VoucherRedeemUC{ContractUC: h.ContractUC}
+	res, err := uc.FindByDocumentNo(c, parameter)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
 // Add ...
 func (h *VoucherRedeemHandler) Add(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)

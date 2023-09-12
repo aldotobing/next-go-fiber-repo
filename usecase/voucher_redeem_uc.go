@@ -26,9 +26,12 @@ func (uc VoucherRedeemUC) BuildBody(data *models.VoucherRedeem, res *viewmodel.V
 	res.CreatedAt = data.CreatedAt
 	res.UpdatedAt = data.UpdatedAt.String
 	res.DeletedAt = data.DeletedAt.String
+
 	res.VoucherID = data.VoucherID
 	res.VoucherName = data.VoucherName
 	res.VoucherCashValue = data.VoucherCashValue
+	res.VoucherDescription = data.VoucherDescription.String
+	res.VoucherImageURL = data.VoucherImageURL
 }
 
 // FindAll ...
@@ -84,6 +87,20 @@ func (uc VoucherRedeemUC) SelectAll(c context.Context, parameter models.VoucherR
 func (uc VoucherRedeemUC) FindByID(c context.Context, parameter models.VoucherRedeemParameter) (out viewmodel.VoucherRedeemVM, err error) {
 	repo := repository.NewVoucherRedeemRepository(uc.DB)
 	data, err := repo.FindByID(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	uc.BuildBody(&data, &out)
+
+	return
+}
+
+// FindByDocumentNo ...
+func (uc VoucherRedeemUC) FindByDocumentNo(c context.Context, parameter models.VoucherRedeemParameter) (out viewmodel.VoucherRedeemVM, err error) {
+	repo := repository.NewVoucherRedeemRepository(uc.DB)
+	data, err := repo.FindByDocumentNo(c, parameter)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return

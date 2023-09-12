@@ -9,4 +9,5 @@ type VoucherRequest struct {
 	ImageURL          string `json:"image_url"`
 	VoucherCategoryID string `json:"voucher_category_id"`
 	CashValue         string `json:"cash_value"`
+	Description       string `json:"description"`
 }
