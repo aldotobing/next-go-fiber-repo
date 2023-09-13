@@ -151,7 +151,7 @@ func (repository VoucherRepository) Add(c context.Context, in viewmodel.VoucherV
 			UPDATED_AT,
 			DESCRIPTION
 		)
-	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW()) RETURNING id`
+	VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW(), $8) RETURNING id`
 
 	voucherCategoryID, _ := strconv.Atoi(in.VoucherCategoryID)
 	err = repository.DB.QueryRowContext(c, statement,
