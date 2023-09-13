@@ -82,7 +82,7 @@ func (repository VoucherRedeemRepository) SelectAll(c context.Context, in models
 	}
 
 	statement := models.VoucherRedeemSelectStatement + models.VoucherRedeemWhereStatement +
-		` AND DEF.REDEEMED_AT IS NULL ` + conditionString +
+		` AND DEF.REDEEMED_AT IS NULL AND DEF.REDEEMED_TO_DOC_NO IS NULL ` + conditionString +
 		` ORDER BY ` + in.By + ` ` + in.Sort
 
 	rows, err := repository.DB.QueryContext(c, statement)
@@ -214,7 +214,6 @@ func (repository VoucherRedeemRepository) Update(c context.Context, in viewmodel
 // Redeem ...
 func (repository VoucherRedeemRepository) Redeem(c context.Context, in viewmodel.VoucherRedeemVM) (res string, err error) {
 	statement := `UPDATE VOUCHER_REDEEM SET 
-		REDEEMED = '1', 
 		REDEEMED_TO_DOC_NO = $1,
 		REDEEMED_AT = now(),
 		UPDATED_AT = NOW()
