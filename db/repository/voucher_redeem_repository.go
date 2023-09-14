@@ -35,7 +35,7 @@ func NewVoucherRedeemRepository(DB *sql.DB) IVoucherRedeemRepository {
 func (repository VoucherRedeemRepository) scanRows(rows *sql.Rows) (res models.VoucherRedeem, err error) {
 	err = rows.Scan(
 		&res.ID,
-		&res.CustomerID,
+		&res.CustomerCode,
 		&res.Redeemed,
 		&res.RedeemedAt,
 		&res.RedeemedToDocNo,
@@ -56,7 +56,7 @@ func (repository VoucherRedeemRepository) scanRows(rows *sql.Rows) (res models.V
 func (repository VoucherRedeemRepository) scanRow(row *sql.Row) (res models.VoucherRedeem, err error) {
 	err = row.Scan(
 		&res.ID,
-		&res.CustomerID,
+		&res.CustomerCode,
 		&res.Redeemed,
 		&res.RedeemedAt,
 		&res.RedeemedToDocNo,
@@ -77,8 +77,8 @@ func (repository VoucherRedeemRepository) scanRow(row *sql.Row) (res models.Vouc
 func (repository VoucherRedeemRepository) SelectAll(c context.Context, in models.VoucherRedeemParameter) (data []models.VoucherRedeem, err error) {
 	var conditionString string
 
-	if in.CustomerID != "" {
-		conditionString += ` AND DEF.CUSTOMER_ID = ` + in.CustomerID
+	if in.CustomerCode != "" {
+		conditionString += ` AND DEF.CUSTOMER_CODE = ` + in.CustomerCode
 	}
 
 	statement := models.VoucherRedeemSelectStatement + models.VoucherRedeemWhereStatement +
@@ -107,7 +107,7 @@ func (repository VoucherRedeemRepository) SelectAll(c context.Context, in models
 func (repository VoucherRedeemRepository) FindAll(ctx context.Context, in models.VoucherRedeemParameter) (data []models.VoucherRedeem, count int, err error) {
 	var conditionString string
 
-	conditionString += ` AND DEF.REDEEMED_AT IS NULL `
+	conditionString += ` AND DEF.REDEEMED_AT IS NULL AND DEF.REDEEMED_TO_DOC_NO IS NULL `
 
 	statement := models.VoucherRedeemSelectStatement + models.VoucherRedeemWhereStatement +
 		conditionString +
@@ -159,14 +159,14 @@ func (repository VoucherRedeemRepository) FindByDocumentNo(c context.Context, in
 // Add ...
 func (repository VoucherRedeemRepository) Add(c context.Context, in viewmodel.VoucherRedeemVM) (res string, err error) {
 	statement := `INSERT INTO VOUCHER_REDEEM (
-			CUSTOMER_ID, 
+			CUSTOMER_CODE, 
 			VOUCHER_ID,
 			CREATED_AT,
 			UPDATED_AT
 		)
 	VALUES ($1, $2, NOW(), NOW()) RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
-		in.CustomerID,
+		in.CustomerCode,
 		in.VoucherID,
 	).Scan(&res)
 
@@ -178,13 +178,13 @@ func (repository VoucherRedeemRepository) AddBulk(c context.Context, in []viewmo
 	var valueStatement string
 	for _, datum := range in {
 		if valueStatement == "" {
-			valueStatement += `(` + datum.CustomerID + `, ` + datum.VoucherID + `, NOW(), NOW())`
+			valueStatement += `('` + datum.CustomerCode + `', ` + datum.VoucherID + `, NOW(), NOW())`
 		} else {
-			valueStatement += `, (` + datum.CustomerID + `, ` + datum.VoucherID + `, NOW(), NOW())`
+			valueStatement += `, ('` + datum.CustomerCode + `', ` + datum.VoucherID + `, NOW(), NOW())`
 		}
 	}
 	statement := `INSERT INTO VOUCHER_REDEEM (
-			CUSTOMER_ID, 
+			CUSTOMER_CODE, 
 			VOUCHER_ID,
 			CREATED_AT,
 			UPDATED_AT
@@ -204,7 +204,7 @@ func (repository VoucherRedeemRepository) Update(c context.Context, in viewmodel
 	WHERE id = $3
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
-		in.CustomerID,
+		in.CustomerCode,
 		in.VoucherID,
 		in.ID).Scan(&res)
 

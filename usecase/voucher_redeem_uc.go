@@ -19,7 +19,7 @@ type VoucherRedeemUC struct {
 // BuildBody ...
 func (uc VoucherRedeemUC) BuildBody(data *models.VoucherRedeem, res *viewmodel.VoucherRedeemVM) {
 	res.ID = data.ID
-	res.CustomerID = data.CustomerID
+	res.CustomerCode = data.CustomerCode
 	res.Redeemed = data.Redeemed
 	res.RedeemedAt = data.RedeemedAt.String
 	res.RedeemedToDocumentNo = data.RedeemedToDocNo.String
@@ -114,8 +114,8 @@ func (uc VoucherRedeemUC) FindByDocumentNo(c context.Context, parameter models.V
 // Add ...
 func (uc VoucherRedeemUC) Add(c context.Context, in requests.VoucherRedeemRequest) (out viewmodel.VoucherRedeemVM, err error) {
 	out = viewmodel.VoucherRedeemVM{
-		CustomerID: in.CustomerID,
-		VoucherID:  in.VoucherID,
+		CustomerCode: in.CustomerCode,
+		VoucherID:    in.VoucherID,
 	}
 
 	broadcastRepo := repository.NewVoucherRedeemRepository(uc.DB)
@@ -132,8 +132,8 @@ func (uc VoucherRedeemUC) Add(c context.Context, in requests.VoucherRedeemReques
 func (uc VoucherRedeemUC) AddBulk(c context.Context, in requests.VoucherRedeemBulkRequest) (out []viewmodel.VoucherRedeemVM, err error) {
 	for _, datum := range in.VouchersRedeem {
 		out = append(out, viewmodel.VoucherRedeemVM{
-			CustomerID: datum.CustomerID,
-			VoucherID:  datum.VoucherID,
+			CustomerCode: datum.CustomerCode,
+			VoucherID:    in.VoucherID,
 		})
 	}
 
@@ -150,9 +150,9 @@ func (uc VoucherRedeemUC) AddBulk(c context.Context, in requests.VoucherRedeemBu
 // Update ...
 func (uc VoucherRedeemUC) Update(c context.Context, id string, in requests.VoucherRedeemRequest) (out viewmodel.VoucherRedeemVM, err error) {
 	out = viewmodel.VoucherRedeemVM{
-		ID:         id,
-		CustomerID: in.CustomerID,
-		VoucherID:  in.VoucherID,
+		ID:           id,
+		CustomerCode: in.CustomerCode,
+		VoucherID:    in.VoucherID,
 	}
 
 	broadcastRepo := repository.NewVoucherRedeemRepository(uc.DB)

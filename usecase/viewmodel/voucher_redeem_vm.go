@@ -3,7 +3,7 @@ package viewmodel
 // VoucherVM ....
 type VoucherRedeemVM struct {
 	ID                   string `json:"id"`
-	CustomerID           string `json:"customer_id"`
+	CustomerCode         string `json:"customer_code"`
 	Redeemed             string `json:"redeemed"`
 	RedeemedAt           string `json:"redeemed_at"`
 	RedeemedToDocumentNo string `json:"redeemed_to_doc_no"`
