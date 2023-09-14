@@ -77,13 +77,13 @@ func (repository WebCustomerRepository) scanRows(rows *sql.Rows) (res models.Web
 		&res.CustomerTaxCalcMethod,
 		&res.CustomerBranchID,
 		&res.CustomerSalesmanID,
-		&res.CustomerUserToken,
 		&res.CustomerPhotoKtp,
 		&res.CustomerNik,
 		&res.CustomerLevel,
 		&res.CustomerLevelID,
 		&res.CustomerUserID,
 		&res.CustomerUserName,
+		&res.CustomerUserToken,
 		&res.ModifiedBy,
 		&res.ModifiedDate,
 		&res.CustomerPriceListID,
@@ -146,6 +146,7 @@ func (repository WebCustomerRepository) scanRowsReport(rows *sql.Rows) (res mode
 		&res.CustomerSalesmanID,
 		&res.ModifiedBy,
 		&res.CustomerUserName,
+		&res.IsDataComplete,
 	)
 	if err != nil {
 

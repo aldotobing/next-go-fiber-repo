@@ -207,7 +207,7 @@ func (repository CustomerRepository) SelectAll(c context.Context, parameter mode
 
 	if parameter.CustomerLevelId != "" {
 		conditionString += ` AND C.CUSTOMER_LEVEL_ID = $` + strconv.Itoa(index)
-		args = append(args, parameter.CustomerTypeId)
+		args = append(args, parameter.CustomerLevelId)
 		index++
 	}
 

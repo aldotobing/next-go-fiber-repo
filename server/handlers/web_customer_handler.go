@@ -116,9 +116,13 @@ func (h *WebCustomerHandler) FindByID(ctx *fiber.Ctx) error {
 		objectData.ListObject.VisitDay = &target
 	}
 
+	var customerCode string
+	if res.Code != nil {
+		customerCode = *res.Code
+	}
 	objectData.CustomerTarget = helper.FetchClientDataTarget(models.CustomerTargetSemesterParameter{
 		ID:   *res.ID,
-		Code: *res.Code,
+		Code: customerCode,
 	})
 
 	achievement := make(map[string]interface{})
@@ -154,7 +158,7 @@ func (h *WebCustomerHandler) FindByID(ctx *fiber.Ctx) error {
 
 	objectData.SalesmanVisit = helper.FetchVisitDay(models.CustomerParameter{
 		ID:   *res.ID,
-		Code: *res.Code,
+		Code: customerCode,
 	})
 
 	return h.SendResponse(ctx, objectData, nil, err, 0)

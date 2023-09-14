@@ -204,3 +204,52 @@ func (uc CilentInvoiceUC) DataSync(c context.Context, parameter models.CilentInv
 
 	return resBuilder, nil
 }
+
+func (uc CilentInvoiceUC) UndoneDataSync(c context.Context, parameter models.CilentInvoiceParameter) ([]models.CilentInvoice, error) {
+	repo := repository.NewCilentInvoiceRepository(uc.DB)
+
+	// parameter.StartDate = `2023-08-01`
+	// parameter.EndDate = `2023-08-31`
+
+	jsonReq, err := json.Marshal(parameter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal json: %w", err)
+	}
+
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrv/rest/salesInvoice/transaction", bytes.NewBuffer(jsonReq))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new undone request: %w", err)
+	}
+
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer C2A5CE6A2292E7745CE5A3F7E68A9")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute undone request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read undone response body: %w", err)
+	}
+
+	var res []models.CilentInvoice
+	if err := json.Unmarshal(bodyBytes, &res); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal undone response: %w", err)
+	}
+
+	var resBuilder []models.CilentInvoice
+	for _, invoiceObject := range res {
+		_, err := repo.InsertDataWithLine(c, &invoiceObject)
+		if err != nil {
+			// return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
+		}
+		resBuilder = append(resBuilder, invoiceObject)
+	}
+
+	return resBuilder, nil
+}

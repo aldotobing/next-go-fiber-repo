@@ -163,7 +163,8 @@ func (uc WebCustomerUC) SelectAll(c context.Context, parameter models.WebCustome
 func (uc WebCustomerUC) FindAll(c context.Context, parameter models.WebCustomerParameter) ([]viewmodel.CustomerVM, viewmodel.PaginationVM, error) {
 	var response viewmodel.PaginatedResponse
 
-	cacheKey := fmt.Sprintf("customer:admin_user_id:%s:page:%d:search:%s:branch_id:%s:phone_number:%s:show_in_app:%s", parameter.UserId, parameter.Page, parameter.Search, parameter.BranchId, parameter.PhoneNumber, parameter.ShowInApp)
+	cacheKey := fmt.Sprintf("customer:admin_user_id:%s:page:%d:search:%s:branch_id:%s:phone_number:%s:show_in_app:%s:by:%s:sort:&%s",
+		parameter.UserId, parameter.Page, parameter.Search, parameter.BranchId, parameter.PhoneNumber, parameter.ShowInApp, parameter.By, parameter.Sort)
 
 	// Try getting data from cache
 	cachedData, err := uc.RedisClient.Get(cacheKey)
@@ -841,26 +842,12 @@ func (uc WebCustomerUC) ReportSelect(c context.Context, parameter models.WebCust
 		}
 
 		if parameter.CustomerProfileStatus == "0" {
-			if data[i].CustomerNik == nil || *data[i].CustomerNik == "" ||
-				data[i].CustomerName == nil || *data[i].CustomerName == "" ||
-				data[i].CustomerBirthDate == nil || *data[i].CustomerBirthDate == "" ||
-				data[i].CustomerReligion == nil || *data[i].CustomerReligion == "" ||
-				data[i].CustomerPhotoKtp == nil || *data[i].CustomerPhotoKtp == "" ||
-				data[i].CustomerProfilePicture == nil || *data[i].CustomerProfilePicture == "" ||
-				data[i].CustomerPhone == nil || *data[i].CustomerPhone == "" ||
-				data[i].Code == nil || *data[i].Code == "" {
+			if !*data[i].IsDataComplete {
 				uc.BuildBody(&data[i], &temp, true)
 				res = append(res, temp)
 			}
 		} else if parameter.CustomerProfileStatus == "1" {
-			if data[i].CustomerNik != nil && *data[i].CustomerNik != "" &&
-				data[i].CustomerName != nil && *data[i].CustomerName != "" &&
-				data[i].CustomerBirthDate != nil && *data[i].CustomerBirthDate != "" &&
-				data[i].CustomerReligion != nil && *data[i].CustomerReligion != "" &&
-				data[i].CustomerPhotoKtp != nil && *data[i].CustomerPhotoKtp != "" &&
-				data[i].CustomerProfilePicture != nil && *data[i].CustomerProfilePicture != "" &&
-				data[i].CustomerPhone != nil && *data[i].CustomerPhone != "" &&
-				data[i].Code != nil && *data[i].Code != "" {
+			if *data[i].IsDataComplete {
 				uc.BuildBody(&data[i], &temp, true)
 				res = append(res, temp)
 			}
