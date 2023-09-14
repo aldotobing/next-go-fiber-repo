@@ -5,7 +5,7 @@ import "database/sql"
 // VoucherRedeem ...
 type VoucherRedeem struct {
 	ID                 string         `json:"id"`
-	CustomerID         string         `json:"customer_id"`
+	CustomerCode       string         `json:"customer_code"`
 	Redeemed           string         `json:"redeemed"`
 	RedeemedAt         sql.NullString `json:"redeemed_at"`
 	RedeemedToDocNo    sql.NullString `json:"redeemed_to_doc_no"`
@@ -21,15 +21,15 @@ type VoucherRedeem struct {
 
 // VoucherRedeemParameter ...
 type VoucherRedeemParameter struct {
-	ID         string `json:"id"`
-	CustomerID string `json:"customer_id"`
-	DocumentNo string `json:"document_no"`
-	Search     string `json:"search"`
-	Page       int    `json:"page"`
-	Offset     int    `json:"offset"`
-	Limit      int    `json:"limit"`
-	By         string `json:"by"`
-	Sort       string `json:"sort"`
+	ID           string `json:"id"`
+	CustomerCode string `json:"customer_code"`
+	DocumentNo   string `json:"document_no"`
+	Search       string `json:"search"`
+	Page         int    `json:"page"`
+	Offset       int    `json:"offset"`
+	Limit        int    `json:"limit"`
+	By           string `json:"by"`
+	Sort         string `json:"sort"`
 }
 
 var (
@@ -38,7 +38,7 @@ var (
 
 	VoucherRedeemSelectStatement = `SELECT 
 		DEF.ID, 
-		DEF.CUSTOMER_ID, 
+		DEF.CUSTOMER_CODE, 
 		DEF.REDEEMED, 
 		DEF.REDEEMED_AT, 
 		DEF.REDEEMED_TO_DOC_NO,
