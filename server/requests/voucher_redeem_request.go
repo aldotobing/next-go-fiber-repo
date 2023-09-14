@@ -10,5 +10,6 @@ type VoucherRedeemRequest struct {
 
 // VoucherRedeemBulkRequest ...
 type VoucherRedeemBulkRequest struct {
+	VoucherID      string                 `json:"voucher_id"`
 	VouchersRedeem []VoucherRedeemRequest `json:"vouchers_redeem"`
 }

@@ -133,7 +133,7 @@ func (uc VoucherRedeemUC) AddBulk(c context.Context, in requests.VoucherRedeemBu
 	for _, datum := range in.VouchersRedeem {
 		out = append(out, viewmodel.VoucherRedeemVM{
 			CustomerCode: datum.CustomerCode,
-			VoucherID:    datum.VoucherID,
+			VoucherID:    in.VoucherID,
 		})
 	}
 
