@@ -305,7 +305,7 @@ var (
 		
 	 `
 	DashboardWebRegionDetailByRegionIDSelectStatement = `
-	select * from os_fetch_dashborad_regiongroupdetaildata_by_region_id($1::integer,$2::integer,$3,$4s,null,null,null) `
+	select * from os_fetch_dashborad_regiongroupdetaildata_by_region_id($1::integer,$2::integer,$3,$4,null,null,null) `
 
 	DashboardWebCustomerDetailByRegionDetailByRegionIDSelectStatement = `
 	select * from os_fetch_dashborad_get_total_user_by_branch_id($1::integer,$2,$3) `
