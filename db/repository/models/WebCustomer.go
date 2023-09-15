@@ -102,7 +102,7 @@ type WebCustomerReportParameter struct {
 
 var (
 	// CustomerOrderBy ...
-	WebCustomerOrderBy = []string{"c.id", "c.customer_name", "c.created_date"}
+	WebCustomerOrderBy = []string{"c.id", "c.customer_name", "c.show_in_apps", "c.active", "c.customer_phone", "c.created_date"}
 	// CustomerOrderByrByString ...
 	WebCustomerOrderByrByString = []string{
 		"c.customer_name",
