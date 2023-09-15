@@ -399,7 +399,7 @@ func (repository DashboardWebRepository) GetAllBranchDetailCustomerData(ctx cont
 func (repository DashboardWebRepository) GetAllReportBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) (data []models.DashboardWebBranchDetail, err error) {
 
 	query := models.DashboardWebReportBranchDetailSelectStatement
-	rows, err := repository.DB.Query(query, str.NullOrEmtyString(&parameter.BranchID), str.NullOrEmtyString(&parameter.UserID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
+	rows, err := repository.DB.Query(query, str.NullOrEmtyString(&parameter.BranchID), str.NullOrEmtyString(&parameter.UserID), str.NullOrEmtyString(&parameter.CustomerLevelID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
 	if err != nil {
 		return data, err
 	}

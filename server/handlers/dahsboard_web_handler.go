@@ -148,10 +148,11 @@ func (h *DashboardWebHandler) GetAllReportBranchCustomerData(ctx *fiber.Ctx) err
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.DashboardWebBranchParameter{
-		BranchID:  ctx.Query("branch_id"),
-		UserID:    ctx.Query("user_id"),
-		StartDate: ctx.Query("start_date"),
-		EndDate:   ctx.Query("end_date"),
+		BranchID:        ctx.Query("branch_id"),
+		CustomerLevelID: ctx.Query("customer_level_id"),
+		UserID:          ctx.Query("user_id"),
+		StartDate:       ctx.Query("start_date"),
+		EndDate:         ctx.Query("end_date"),
 	}
 
 	uc := usecase.DashboardWebUC{ContractUC: h.ContractUC}
