@@ -40,7 +40,7 @@ func (cl Client) SendWA(phoneNo, txtMessages string) (err error) {
 	Waconf.Phone = phoneNo
 	Waconf.Pesan = strings.ReplaceAll(baseOTPRequstMessage, "#OTP#", txtMessages)
 	jsonReq, err := json.Marshal(Waconf)
-
+	fmt.Println("api key ", cl.apikey)
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", cl.apiurl, bytes.NewBuffer(jsonReq))
 	if err != nil {
