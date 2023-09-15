@@ -301,13 +301,9 @@ func (repository DashboardWebRepository) GetDataByGroupID(c context.Context, par
 
 func (repository DashboardWebRepository) GetRegionDetailData(c context.Context, parameter models.DashboardWebRegionParameter) (data []models.DashboardWebRegionDetail, err error) {
 	var rows *sql.Rows
-	if parameter.RegionID != "" {
-		statement := models.DashboardWebRegionDetailByRegionIDSelectStatement
-		rows, err = repository.DB.QueryContext(c, statement, str.NullOrEmtyString(&parameter.RegionID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
-	} else {
-		statement := models.DashboardWebRegionDetailSelectStatement
-		rows, err = repository.DB.QueryContext(c, statement, str.NullOrEmtyString(&parameter.GroupID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
-	}
+
+	statement := models.DashboardWebRegionDetailByRegionIDSelectStatement
+	rows, err = repository.DB.QueryContext(c, statement, str.NullOrEmtyString(&parameter.RegionID), str.NullOrEmtyString(&parameter.GroupID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
 
 	if err != nil {
 		return data, err
