@@ -37,24 +37,25 @@ import (
 
 // Configs ...
 type Configs struct {
-	EnvConfig    map[string]string
-	DB           *sql.DB
-	DBMS         *sql.DB
-	RedisClient  redisPkg.RedisClient
-	JweCred      jwe.Credential
-	JwtCred      jwt.Credential
-	Aes          aes.Credential
-	AesFront     aesfront.Credential
-	Minio        *minio.Client
-	Aws          aws.AWSS3
-	Firestore    *firestore.Client
-	Mandrill     mandrill.Credential
-	Recaptcha    recaptcha.Credential
-	Mail         mail.Connection
-	Mailing      mailing.GoMailConfig
-	TwilioClient *twilioPkg.Client
-	WooWAClient  *whatsapp.Client
-	FCM          fcm.Connection
+	EnvConfig      map[string]string
+	DB             *sql.DB
+	DBMS           *sql.DB
+	RedisClient    redisPkg.RedisClient
+	JweCred        jwe.Credential
+	JwtCred        jwt.Credential
+	Aes            aes.Credential
+	AesFront       aesfront.Credential
+	Minio          *minio.Client
+	Aws            aws.AWSS3
+	Firestore      *firestore.Client
+	Mandrill       mandrill.Credential
+	Recaptcha      recaptcha.Credential
+	Mail           mail.Connection
+	Mailing        mailing.GoMailConfig
+	TwilioClient   *twilioPkg.Client
+	WooWAClient    *whatsapp.Client
+	WooWAOtpClient *whatsapp.Client
+	FCM            fcm.Connection
 }
 
 var (
@@ -220,6 +221,7 @@ func LoadConfigs() (res Configs, err error) {
 	// setup twilio
 	res.TwilioClient = twilioPkg.NewTwilioClient(res.EnvConfig["TWILIO_SID"], res.EnvConfig["TWILIO_TOKEN"], res.EnvConfig["TWILIO_SEND_FROM"])
 	res.WooWAClient = whatsapp.NewWooWAClient(res.EnvConfig["WA_URL"], res.EnvConfig["WA_KEY"])
+	res.WooWAOtpClient = whatsapp.NewWooWAClient(res.EnvConfig["WA_URL"], res.EnvConfig["OTP_WA_KEY"])
 
 	// fmt.Printf("+%v", res.Aws)
 	res.FCM.APIKey = res.EnvConfig["FCM_API_KEY"]
