@@ -89,6 +89,7 @@ type ContractUC struct {
 	Recaptcha    recaptcha.Credential
 	Mail         mail.Connection
 	WhatsApp     *whatsapp.Client
+	OtpWhatsApp  *whatsapp.Client
 }
 
 func (uc ContractUC) setPaginationParameter(page, limit int, orderBy, sort string, orderByWhiteLists, orderByStringWhiteLists []string) (int, int, int, string, string) {
