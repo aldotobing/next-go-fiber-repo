@@ -301,13 +301,9 @@ func (repository DashboardWebRepository) GetDataByGroupID(c context.Context, par
 
 func (repository DashboardWebRepository) GetRegionDetailData(c context.Context, parameter models.DashboardWebRegionParameter) (data []models.DashboardWebRegionDetail, err error) {
 	var rows *sql.Rows
-	if parameter.RegionID != "" {
-		statement := models.DashboardWebRegionDetailByRegionIDSelectStatement
-		rows, err = repository.DB.QueryContext(c, statement, str.NullOrEmtyString(&parameter.RegionID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
-	} else {
-		statement := models.DashboardWebRegionDetailSelectStatement
-		rows, err = repository.DB.QueryContext(c, statement, str.NullOrEmtyString(&parameter.GroupID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
-	}
+
+	statement := models.DashboardWebRegionDetailByRegionIDSelectStatement
+	rows, err = repository.DB.QueryContext(c, statement, str.NullOrEmtyString(&parameter.RegionID), str.NullOrEmtyString(&parameter.GroupID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
 
 	if err != nil {
 		return data, err
@@ -399,7 +395,7 @@ func (repository DashboardWebRepository) GetAllBranchDetailCustomerData(ctx cont
 func (repository DashboardWebRepository) GetAllReportBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) (data []models.DashboardWebBranchDetail, err error) {
 
 	query := models.DashboardWebReportBranchDetailSelectStatement
-	rows, err := repository.DB.Query(query, str.NullOrEmtyString(&parameter.BranchID), str.NullOrEmtyString(&parameter.UserID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
+	rows, err := repository.DB.Query(query, str.NullOrEmtyString(&parameter.BranchID), str.NullOrEmtyString(&parameter.UserID), str.NullOrEmtyString(&parameter.CustomerLevelID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
 	if err != nil {
 		return data, err
 	}
