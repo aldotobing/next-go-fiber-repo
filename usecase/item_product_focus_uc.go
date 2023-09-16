@@ -131,7 +131,7 @@ func (uc ItemProductFocusUC) SelectAllV2(c context.Context, parameter models.Ite
 
 				dbUpdatedData, _ := time.Parse("2006-01-02 15:04:05.999999", perAddDatum[6])
 				updatedDataTime, errParse := time.Parse("2006-01-02 15:04:05.999999", updatedData)
-				if lowestConversion == conversion && (updatedDataTime.Before(dbUpdatedData) && errParse != nil) {
+				if (updatedDataTime.Before(dbUpdatedData) || errParse != nil) || lowestPrice == 0 {
 					lowestPrice = price
 					lowestConversion = conversion
 
