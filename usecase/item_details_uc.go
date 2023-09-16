@@ -85,26 +85,19 @@ func (uc ItemDetailsUC) FindByIDV2(c context.Context, parameter models.ItemDetai
 
 	// Find Lowest Price and lowest conversion
 	var lowestPrice, lowestConversion float64
-	var lowestUOMName, updatedData string
+	var lowestUOMName string
+	var updatedData time.Time
 	for _, datum := range data {
 		price, _ := strconv.ParseFloat(*datum.ItemDetailsPrice, 64)
 		conversion, _ := strconv.ParseFloat(*datum.UomLineConversion, 64)
-		if price < lowestPrice || lowestPrice == 0 {
-			lowestPrice = price
-			lowestConversion = conversion
-			lowestUOMName = *datum.UomName
-
-			updatedData = datum.ItemPriceCreatedAT.String
-		}
 
 		dbUpdatedData, _ := time.Parse("2006-01-02T15:04:05.999999Z", datum.ItemPriceCreatedAT.String)
-		updatedDataTime, errParse := time.Parse("2006-01-02T15:04:05.999999Z", updatedData)
-		if (updatedDataTime.Before(dbUpdatedData) || errParse != nil) || lowestPrice == 0 {
+		if (updatedData.Before(dbUpdatedData)) || lowestPrice == 0 {
 			lowestPrice = price
 			lowestConversion = conversion
 			lowestUOMName = *datum.UomName
 
-			updatedData = datum.ItemPriceCreatedAT.String
+			updatedData = dbUpdatedData
 		}
 		parameter.PriceListVersionId = *datum.PriceListVersionId
 	}
