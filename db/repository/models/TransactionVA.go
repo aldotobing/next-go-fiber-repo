@@ -8,6 +8,7 @@ type TransactionVA struct {
 	VACode           *string `json:"va_code"`
 	VAPartnerCode    *string `json:"va_partner_code"`
 	Amount           *string `json:"amount"`
+	PaidAmount       *string `json:"paid_amount"`
 	VaPairID         *string `json:"va_pair_id"`
 	VaRef1           *string `json:"va_ref1"`
 	VaRef2           *string `json:"va_ref2"`
@@ -47,7 +48,10 @@ var (
 	select def.id,def.invoice_code, def.va_code, ROUND(def.amount) as _amount,def.va_pair_id,
 	def.va_ref1,def.va_ref2, def.start_date, def.end_date, def.va_partner_code, def.paid_status,
 	c.customer_name as cus_name, c.id as customer_id,
-	REPLACE(def.invoice_code,(select branch_code from branch where id = sih.branch_id),'') as basic_invoice_code
+	REPLACE(def.invoice_code,(select branch_code from branch where id = sih.branch_id),'') as basic_invoice_code,
+	ROUND(def.amount-( coalesce( (select cash_value from voucher where id =(
+		select voucher_id from voucher_redeem where redeemed_to_doc_no =def.invoice_code)),0)  )
+		)as net_amount
 		from virtual_account_transaction def
 		join sales_invoice_header sih on sih.document_no = def.invoice_code
 		left join customer c on sih.cust_bill_to_id = c.id

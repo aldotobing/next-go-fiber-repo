@@ -19,6 +19,7 @@ type IVoucherRedeemRepository interface {
 	Update(c context.Context, model viewmodel.VoucherRedeemVM) (string, error)
 	Redeem(c context.Context, model viewmodel.VoucherRedeemVM) (string, error)
 	Delete(c context.Context, id string) (string, error)
+	PaidRedeem(c context.Context, model viewmodel.VoucherRedeemVM) (string, error)
 }
 
 // VoucherRedeemRepository ...
@@ -82,7 +83,7 @@ func (repository VoucherRedeemRepository) SelectAll(c context.Context, in models
 	}
 
 	statement := models.VoucherRedeemSelectStatement + models.VoucherRedeemWhereStatement +
-		` AND DEF.REDEEMED_AT IS NULL AND DEF.REDEEMED_TO_DOC_NO IS NULL ` + conditionString +
+		` AND (DEF.REDEEMED is null  or DEF.REDEEMED = 0) ` + conditionString +
 		` ORDER BY ` + in.By + ` ` + in.Sort
 
 	rows, err := repository.DB.QueryContext(c, statement)
@@ -107,7 +108,7 @@ func (repository VoucherRedeemRepository) SelectAll(c context.Context, in models
 func (repository VoucherRedeemRepository) FindAll(ctx context.Context, in models.VoucherRedeemParameter) (data []models.VoucherRedeem, count int, err error) {
 	var conditionString string
 
-	conditionString += ` AND DEF.REDEEMED_AT IS NULL AND DEF.REDEEMED_TO_DOC_NO IS NULL `
+	conditionString += ` AND (DEF.REDEEMED is null  or DEF.REDEEMED = 0) `
 
 	statement := models.VoucherRedeemSelectStatement + models.VoucherRedeemWhereStatement +
 		conditionString +
@@ -233,6 +234,20 @@ func (repository VoucherRedeemRepository) Delete(c context.Context, id string) (
 	WHERE id = ` + id + `
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement).Scan(&res)
+
+	return
+}
+
+// Redeem ...
+func (repository VoucherRedeemRepository) PaidRedeem(c context.Context, in viewmodel.VoucherRedeemVM) (res string, err error) {
+	statement := `UPDATE VOUCHER_REDEEM SET 
+		redeemed = 1,
+		REDEEMED_AT = now(),
+		UPDATED_AT = NOW()
+	WHERE redeemed_to_doc_no = $1
+	RETURNING id`
+	err = repository.DB.QueryRowContext(c, statement,
+		in.RedeemedToDocumentNo).Scan(&res)
 
 	return
 }
