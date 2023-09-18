@@ -66,6 +66,8 @@ type WebCustomer struct {
 	CustomerPriceListName    *string `json:"customer_price_list_name"`
 	ShowInApp                *string `json:"show_in_app"`
 	IsDataComplete           *bool   `json:"is_data_complete"`
+	SalesmanTypeCode         *string `json:"salesman_type_code"`
+	SalesmanTypeName         *string `json:"salesman_type_name"`
 }
 
 // CustomerParameter ...
@@ -74,6 +76,7 @@ type WebCustomerParameter struct {
 	Code           string `json:"customer_code"`
 	Name           string `json:"customer_name"`
 	CustomerTypeId string `json:"custome_type_id"`
+	SalesmanTypeID string `json:"salesman_type_id"`
 	UserId         string `json:"admin_user_id"`
 	BranchId       string `json:"branch_id"`
 	Search         string `json:"search"`
@@ -178,7 +181,9 @@ var (
 		C.price_list_id,
 		PL._name,
 		coalesce(c.show_in_apps,0),
-		coalesce(C.is_data_completed,false)
+		coalesce(C.is_data_completed,false),
+		ST.CODE,
+		ST._NAME
 	FROM CUSTOMER C
 	LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
 	LEFT JOIN REGION REG ON REG.ID = B.REGION_ID
@@ -188,6 +193,7 @@ var (
 	left JOIN DISTRICT DIST ON DIST.ID = C.CUSTOMER_DISTRICT_ID
 	left JOIN SUBDISTRICT SDIST ON SDIST.ID = C.CUSTOMER_SUBDISTRICT_ID
 	LEFT JOIN SALESMAN S ON S.ID = C.SALESMAN_ID
+	LEFT JOIN SALESMAN_TYPE ST ON ST.ID = S.SALESMAN_TYPE_ID
 	LEFT JOIN PARTNER PS ON PS.ID = S.PARTNER_ID
 	LEFT JOIN CUSTOMER_GIFT CG ON CG.CUSTOMER_ID = C.ID
 	LEFT JOIN CUSTOMER_POINT CP ON CP.CUSTOMER_ID = C.ID

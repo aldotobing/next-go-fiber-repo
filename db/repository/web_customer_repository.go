@@ -90,6 +90,8 @@ func (repository WebCustomerRepository) scanRows(rows *sql.Rows) (res models.Web
 		&res.CustomerPriceListName,
 		&res.ShowInApp,
 		&res.IsDataComplete,
+		&res.SalesmanTypeCode,
+		&res.SalesmanTypeName,
 	)
 	if err != nil {
 
@@ -216,6 +218,8 @@ func (repository WebCustomerRepository) scanRow(row *sql.Row) (res models.WebCus
 		&res.CustomerPriceListName,
 		&res.ShowInApp,
 		&res.IsDataComplete,
+		&res.SalesmanTypeCode,
+		&res.SalesmanTypeName,
 	)
 	if err != nil {
 		return res, err
@@ -242,6 +246,14 @@ func (repository WebCustomerRepository) SelectAll(c context.Context, parameter m
 
 	if parameter.PhoneNumber != "" {
 		conditionString += ` AND c.customer_phone LIKE '` + parameter.PhoneNumber + `'`
+	}
+
+	if parameter.CustomerTypeId != "" {
+		conditionString += ` AND c.customer_type_id = ` + parameter.CustomerTypeId
+	}
+
+	if parameter.SalesmanTypeID != "" {
+		conditionString += ` AND st.id = ` + parameter.SalesmanTypeID
 	}
 
 	statement := models.WebCustomerSelectStatement + ` ` + models.WebCustomerWhereStatement +
