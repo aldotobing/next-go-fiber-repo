@@ -193,3 +193,16 @@ func (uc VoucherRedeemUC) Delete(c context.Context, in string) (err error) {
 
 	return
 }
+
+// Paid ...
+func (uc VoucherRedeemUC) PaidRedeem(c context.Context, in viewmodel.VoucherRedeemVM) (out viewmodel.VoucherRedeemVM, err error) {
+
+	broadcastRepo := repository.NewVoucherRedeemRepository(uc.DB)
+	out.ID, err = broadcastRepo.PaidRedeem(c, in)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	return
+}

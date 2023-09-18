@@ -192,7 +192,7 @@ func (h *TransactionVAHandler) GetTransactionByVaCode(ctx *fiber.Ctx) error {
 		ObjectDataDetail.BillCode = "01"
 		ObjectDataDetail.BillName = *res.InvoiceCode
 		ObjectDataDetail.BillShortName = "Pembayaran"
-		ObjectDataDetail.BillAmount = *res.Amount
+		ObjectDataDetail.BillAmount = *res.PaidAmount
 		ObjectData.InquiryResult.VabillDetails.BillDetail = append(ObjectData.InquiryResult.VabillDetails.BillDetail, *ObjectDataDetail)
 		ObjectData.InquiryResult.Currency = "360"
 		ObjectData.InquiryResult.Status.IsError = "false"
@@ -305,7 +305,7 @@ func (h *TransactionVAHandler) PaidTransactionByVaCode(ctx *fiber.Ctx) error {
 		inputUpdate.VaPairID = input.PaymentRequestBody.TransactionID
 		inputUpdate.Amount = input.PaymentRequestBody.PaymentAmount
 
-		if inputUpdate.Amount != *res.Amount {
+		if inputUpdate.Amount != *res.PaidAmount {
 			ObjectData.InquiryResult.Status.ErrorCode = "B5"
 			ObjectData.InquiryResult.Status.IsError = "true"
 			ObjectData.InquiryResult.Status.StatusDescription = "Bill Not Found"
@@ -328,7 +328,11 @@ func (h *TransactionVAHandler) PaidTransactionByVaCode(ctx *fiber.Ctx) error {
 
 				ObjectData.InquiryResult.BillInfo1 = *resafterupdate.VACode
 				ObjectData.InquiryResult.BillInfo2 = *resafterupdate.Customername
-
+				ucvoucher := usecase.VoucherRedeemUC{ContractUC: h.ContractUC}
+				_, errvoucherpaid := ucvoucher.PaidRedeem(c, viewmodel.VoucherRedeemVM{RedeemedToDocumentNo: *resafterupdate.InvoiceCode})
+				if errvoucherpaid != nil {
+					fmt.Println(errvoucherpaid)
+				}
 				ObjectData.InquiryResult.Status.IsError = "false"
 				ObjectData.InquiryResult.Status.ErrorCode = "00"
 				ObjectData.InquiryResult.Status.StatusDescription = "Transaction Success"
