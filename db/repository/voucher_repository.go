@@ -44,6 +44,7 @@ func (repository VoucherRepository) scanRows(rows *sql.Rows) (res models.Voucher
 		&res.UpdatedAt,
 		&res.DeletedAt,
 		&res.Description,
+		&res.TermAndCondition,
 	)
 
 	return
@@ -64,6 +65,7 @@ func (repository VoucherRepository) scanRow(row *sql.Row) (res models.Voucher, e
 		&res.UpdatedAt,
 		&res.DeletedAt,
 		&res.Description,
+		&res.TermAndCondition,
 	)
 
 	return
@@ -149,9 +151,10 @@ func (repository VoucherRepository) Add(c context.Context, in viewmodel.VoucherV
 			CASH_VALUE,
 			CREATED_AT,
 			UPDATED_AT,
-			DESCRIPTION
+			DESCRIPTION,
+			TERM_AND_CONDITION
 		)
-	VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW(), $8) RETURNING id`
+	VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW(), $8, $9) RETURNING id`
 
 	voucherCategoryID, _ := strconv.Atoi(in.VoucherCategoryID)
 	err = repository.DB.QueryRowContext(c, statement,
@@ -163,6 +166,7 @@ func (repository VoucherRepository) Add(c context.Context, in viewmodel.VoucherV
 		voucherCategoryID,
 		in.CashValue,
 		in.Description,
+		in.TermAndCondition,
 	).Scan(&res)
 
 	return
@@ -179,8 +183,9 @@ func (repository VoucherRepository) Update(c context.Context, in viewmodel.Vouch
 		VOUCHER_CATEGORY_ID = $6,
 		CASH_VALUE = $7,
 		UPDATED_AT = now(),
-		DESCRIPTION = $8
-	WHERE id = $9
+		DESCRIPTION = $8,
+		TERM_AND_CONDITION = $9
+	WHERE id = $10
 	RETURNING id`
 
 	voucherCategoryID, _ := strconv.Atoi(in.VoucherCategoryID)
@@ -193,6 +198,7 @@ func (repository VoucherRepository) Update(c context.Context, in viewmodel.Vouch
 		voucherCategoryID,
 		in.CashValue,
 		in.Description,
+		in.TermAndCondition,
 		in.ID).Scan(&res)
 
 	return

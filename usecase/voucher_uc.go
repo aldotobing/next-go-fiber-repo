@@ -29,6 +29,7 @@ func (uc VoucherUC) BuildBody(data *models.Voucher, res *viewmodel.VoucherVM) {
 	res.VoucherCategoryID = data.VoucherCategoryID
 	res.CashValue = data.CashValue
 	res.Description = data.Description.String
+	res.TermAndCondition = data.TermAndCondition.String
 	res.CreatedAt = data.CreatedAt
 	res.UpdatedAt = data.UpdatedAt.String
 	res.DeletedAt = data.DeletedAt.String
@@ -108,6 +109,7 @@ func (uc VoucherUC) Add(c context.Context, in requests.VoucherRequest) (out view
 		VoucherCategoryID: in.VoucherCategoryID,
 		CashValue:         in.CashValue,
 		Description:       in.Description,
+		TermAndCondition:  in.TermAndCondition,
 	}
 
 	repo := repository.NewVoucherRepository(uc.DB)
@@ -146,6 +148,7 @@ func (uc VoucherUC) Update(c context.Context, id string, in requests.VoucherRequ
 		VoucherCategoryID: in.VoucherCategoryID,
 		CashValue:         in.CashValue,
 		Description:       in.Description,
+		TermAndCondition:  in.TermAndCondition,
 	}
 
 	repo := repository.NewVoucherRepository(uc.DB)

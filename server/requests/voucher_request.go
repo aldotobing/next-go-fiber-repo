@@ -10,4 +10,5 @@ type VoucherRequest struct {
 	VoucherCategoryID string `json:"voucher_category_id"`
 	CashValue         string `json:"cash_value"`
 	Description       string `json:"description"`
+	TermAndCondition  string `json:"term_and_condition"`
 }
