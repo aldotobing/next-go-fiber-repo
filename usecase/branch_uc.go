@@ -168,3 +168,18 @@ func (uc BranchUC) Update(c context.Context, id string, in *requests.BranchReque
 
 	return
 }
+
+func (uc BranchUC) GenerateAllUser(c context.Context, id string) (res models.Branch, err error) {
+	res = models.Branch{
+		ID: &id,
+	}
+
+	repo := repository.NewBranchRepository(uc.DB)
+	_, err = repo.GenerateAllUser(c, res)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	return
+}
