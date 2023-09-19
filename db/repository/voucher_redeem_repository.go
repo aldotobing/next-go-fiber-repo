@@ -216,15 +216,36 @@ func (repository VoucherRedeemRepository) Update(c context.Context, in viewmodel
 
 // Redeem ...
 func (repository VoucherRedeemRepository) Redeem(c context.Context, in viewmodel.VoucherRedeemVM) (res string, err error) {
+
+	transaction, err := repository.DB.BeginTx(c, nil)
+	if err != nil {
+		return res, err
+	}
+	defer transaction.Rollback()
+
+	updatestatement := `UPDATE VOUCHER_REDEEM SET 
+			REDEEMED_TO_DOC_NO = null,
+			REDEEMED_AT = null,
+			UPDATED_AT = null
+		WHERE deleted_at is null and ( redeemed is null or redeemed ='0' ) and customer_code = ( select customer_code from VOUCHER_REDEEM where id = $1)
+		
+		`
+	updateCOStatusRow, _ := transaction.QueryContext(c, updatestatement, in.ID)
+	updateCOStatusRow.Close()
+
 	statement := `UPDATE VOUCHER_REDEEM SET 
 		REDEEMED_TO_DOC_NO = $1,
 		REDEEMED_AT = now(),
 		UPDATED_AT = NOW()
 	WHERE id = $2
 	RETURNING id`
-	err = repository.DB.QueryRowContext(c, statement,
+	err = transaction.QueryRowContext(c, statement,
 		in.RedeemedToDocumentNo,
 		in.ID).Scan(&res)
+
+	if err = transaction.Commit(); err != nil {
+		return res, err
+	}
 
 	return
 }
