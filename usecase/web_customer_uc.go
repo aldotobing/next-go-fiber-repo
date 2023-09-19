@@ -258,8 +258,8 @@ func (uc WebCustomerUC) SelectAll(c context.Context, parameter models.WebCustome
 func (uc WebCustomerUC) FindAll(c context.Context, parameter models.WebCustomerParameter) ([]viewmodel.CustomerVM, viewmodel.PaginationVM, error) {
 	var response viewmodel.PaginatedResponse
 
-	cacheKey := fmt.Sprintf("customer:admin_user_id:%s:page:%d:search:%s:branch_id:%s:phone_number:%s:show_in_app:%s:by:%s:sort:&%s",
-		parameter.UserId, parameter.Page, parameter.Search, parameter.BranchId, parameter.PhoneNumber, parameter.ShowInApp, parameter.By, parameter.Sort)
+	cacheKey := fmt.Sprintf("customer:admin_user_id:%s:page:%d:search:%s:branch_id:%s:phone_number:%s:show_in_app:%s:by:%s:sort:&%s:customer_type:%s",
+		parameter.UserId, parameter.Page, parameter.Search, parameter.BranchId, parameter.PhoneNumber, parameter.ShowInApp, parameter.By, parameter.Sort, parameter.CustomerTypeId)
 
 	// Try getting data from cache
 	cachedData, err := uc.RedisClient.Get(cacheKey)
