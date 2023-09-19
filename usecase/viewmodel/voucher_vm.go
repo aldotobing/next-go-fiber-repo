@@ -11,6 +11,7 @@ type VoucherVM struct {
 	VoucherCategoryID string `json:"voucher_category_id"`
 	CashValue         string `json:"cash_value"`
 	Description       string `json:"description"`
+	TermAndCondition  string `json:"term_and_condition"`
 	CreatedAt         string `json:"created_at"`
 	UpdatedAt         string `json:"updated_at"`
 	DeletedAt         string `json:"deleted_at"`
