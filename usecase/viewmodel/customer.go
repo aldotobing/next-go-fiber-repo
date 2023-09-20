@@ -60,8 +60,8 @@ type CustomerVM struct {
 	CustomerPriceListName    *string `json:"customer_price_list_name"`
 	CustomerShowInApp        *string `json:"customer_show_in_app"`
 	CustomerStatusInstall    bool    `json:"customer_status_install"`
-	SalesmanTypeCode         string  `json:"salesman_type_code"`
-	SalesmanTypeName         string  `json:"salesman_type_name"`
+	SalesmanTypeCode         *string `json:"salesman_type_code"`
+	SalesmanTypeName         *string `json:"salesman_type_name"`
 }
 
 type CustomerData struct {

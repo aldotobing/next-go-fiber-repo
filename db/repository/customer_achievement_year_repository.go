@@ -74,10 +74,6 @@ func (repository CustomerAchievementYear) SelectAll(c context.Context, parameter
 		` WHERE CUS.ID = '` + parameter.ID + `'`
 
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
-
-	//print
-	fmt.Println(statement)
-
 	if err != nil {
 		return data, err
 	}
