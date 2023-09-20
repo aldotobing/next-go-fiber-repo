@@ -115,8 +115,9 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 	if data.CustomerUserToken == nil || *data.CustomerUserToken == "" {
 		res.CustomerStatusInstall = false
 	}
-	res.SalesmanTypeCode = *data.SalesmanTypeCode
-	res.SalesmanTypeName = *data.SalesmanTypeName
+
+	res.SalesmanTypeCode = data.SalesmanTypeCode
+	res.SalesmanTypeName = data.SalesmanTypeName
 }
 
 // BuildBodyReport ...
