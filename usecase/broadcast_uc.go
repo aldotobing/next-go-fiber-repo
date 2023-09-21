@@ -140,6 +140,8 @@ func (uc BroadcastUC) Broadcast(c context.Context, input *requests.BroadcastRequ
 		return
 	}
 
+	var requestNotification []requests.UserNotificationRequest
+
 	fcmUC := FCMUC{ContractUC: uc.ContractUC}
 	for i := range data {
 		if data[i].CustomerFCMToken != nil && *data[i].CustomerFCMToken != "" {
@@ -152,8 +154,17 @@ func (uc BroadcastUC) Broadcast(c context.Context, input *requests.BroadcastRequ
 				logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "send_message", c.Value("requestid"))
 				continue
 			}
+			requestNotification = append(requestNotification, requests.UserNotificationRequest{
+				UserID: *data[i].ID,
+				RowID:  "0",
+				Type:   "4",
+				Title:  input.Title,
+				Text:   body,
+			})
 		}
 	}
+
+	_ = UserNotificationUC{ContractUC: uc.ContractUC}.AddBulk(c, requestNotification)
 
 	return err
 }
@@ -185,6 +196,7 @@ func (uc BroadcastUC) BroadcastWithID(c context.Context, id string) (err error) 
 		return
 	}
 
+	var requestNotification []requests.UserNotificationRequest
 	fcmUC := FCMUC{ContractUC: uc.ContractUC}
 	for i := range data {
 		if data[i].CustomerFCMToken != nil && *data[i].CustomerFCMToken != "" {
@@ -197,8 +209,17 @@ func (uc BroadcastUC) BroadcastWithID(c context.Context, id string) (err error) 
 				logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "send_message", c.Value("requestid"))
 				continue
 			}
+			requestNotification = append(requestNotification, requests.UserNotificationRequest{
+				UserID: *data[i].ID,
+				RowID:  "0",
+				Type:   "4",
+				Title:  broadcastData.Title,
+				Text:   body,
+			})
 		}
 	}
+
+	_ = UserNotificationUC{ContractUC: uc.ContractUC}.AddBulk(c, requestNotification)
 
 	return err
 }
@@ -219,6 +240,7 @@ func (uc BroadcastUC) BroadcastWithScheduler(c context.Context) (err error) {
 		return
 	}
 
+	var requestNotification []requests.UserNotificationRequest
 	for _, broadcastDatum := range broadcastData {
 		var param viewmodel.BroadcastParameterVM
 		json.Unmarshal([]byte(broadcastDatum.Parameter.String), &param)
@@ -250,9 +272,18 @@ func (uc BroadcastUC) BroadcastWithScheduler(c context.Context) (err error) {
 					logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "send_message", c.Value("requestid"))
 					continue
 				}
+				requestNotification = append(requestNotification, requests.UserNotificationRequest{
+					UserID: *data[i].ID,
+					RowID:  "0",
+					Type:   "4",
+					Title:  broadcastDatum.Title,
+					Text:   body,
+				})
 			}
 		}
 	}
+
+	_ = UserNotificationUC{ContractUC: uc.ContractUC}.AddBulk(c, requestNotification)
 
 	return err
 }
