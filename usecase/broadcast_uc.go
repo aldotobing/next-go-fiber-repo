@@ -203,6 +203,60 @@ func (uc BroadcastUC) BroadcastWithID(c context.Context, id string) (err error) 
 	return err
 }
 
+// BroadcastWithScheduler ...
+func (uc BroadcastUC) BroadcastWithScheduler(c context.Context) (err error) {
+	broadcastRepo := repository.BroadcastRepository{uc.DB}
+	now := time.Now()
+	before := now.Add(-time.Hour * 1)
+	broadcastData, err := broadcastRepo.SelectAll(c, models.BroadcastParameter{
+		StartAt: before.Format("15:04:05"),
+		EndAt:   now.Format("15:04:05"),
+		Sort:    "asc",
+		By:      "b.id",
+	})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	for _, broadcastDatum := range broadcastData {
+		var param viewmodel.BroadcastParameterVM
+		json.Unmarshal([]byte(broadcastDatum.Parameter.String), &param)
+
+		data, err := CustomerUC{ContractUC: uc.ContractUC}.SelectAll(c, models.CustomerParameter{
+			By:              "c.created_date",
+			Sort:            "desc",
+			FlagToken:       true,
+			CustomerTypeId:  param.CustomerTypeID,
+			BranchID:        param.BranchID,
+			RegionID:        param.RegionID,
+			RegionGroupID:   param.RegionGroupID,
+			CustomerLevelId: param.CustomerLevelID,
+		})
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+			return err
+		}
+
+		fcmUC := FCMUC{ContractUC: uc.ContractUC}
+		for i := range data {
+			if data[i].CustomerFCMToken != nil && *data[i].CustomerFCMToken != "" {
+				var body string
+				body = broadcastDatum.Body
+				body = uc.greetingTime(body)
+				body = strings.ReplaceAll(body, "{NAMA_TOKO}", *data[i].CustomerName)
+				_, err = fcmUC.SendFCMMessage(c, broadcastDatum.Title, body, *data[i].CustomerFCMToken)
+				if err != nil {
+					logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "send_message", c.Value("requestid"))
+					continue
+				}
+			}
+		}
+	}
+
+	return err
+}
+
 // Add ...
 func (uc BroadcastUC) Add(c context.Context, in requests.BroadcastRequest) (out viewmodel.BroadcastVM, err error) {
 	out = viewmodel.BroadcastVM{
