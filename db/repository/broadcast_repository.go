@@ -69,10 +69,16 @@ func (repository BroadcastRepository) scanRow(row *sql.Row) (res models.Broadcas
 func (repository BroadcastRepository) SelectAll(c context.Context, parameter models.BroadcastParameter) (data []models.Broadcast, err error) {
 	var conditionString string
 
+	if parameter.StartAt != "" && parameter.EndAt != "" {
+		conditionString += `AND (
+			(B.BROADCAST_DATE = NOW()::DATE AND B.BROADCAST_TIME BETWEEN '` + parameter.StartAt + `' AND '` + parameter.EndAt + `') 
+				OR 
+			(B.REPEAT_EVERY_DAY = true and B.BROADCAST_TIME BETWEEN '` + parameter.StartAt + `' AND '` + parameter.EndAt + `')
+		)`
+	}
 	statement := models.BroadcastSelectStatement + models.BroadcastWhereStatement +
 		` AND (LOWER(b."title") LIKE '%` + parameter.Search + `%') ` + conditionString +
 		` ORDER BY ` + parameter.By + ` ` + parameter.Sort
-
 	rows, err := repository.DB.QueryContext(c, statement)
 
 	if err != nil {

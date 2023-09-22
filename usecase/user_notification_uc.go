@@ -93,6 +93,29 @@ func (uc UserNotificationUC) Add(c context.Context, data *requests.UserNotificat
 	return res, err
 }
 
+// AddBulk  ...
+func (uc UserNotificationUC) AddBulk(c context.Context, data []requests.UserNotificationRequest) (err error) {
+
+	repo := repository.NewUserNotificationRepository(uc.DB)
+	var in []models.UserNotification
+	for _, datum := range data {
+		in = append(in, models.UserNotification{
+			UserID: &datum.UserID,
+			RowID:  &datum.RowID,
+			Type:   &datum.Type,
+			Text:   &datum.Text,
+		})
+	}
+
+	err = repo.AddBulk(c, in)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	return
+}
+
 func (uc UserNotificationUC) UpdateStatus(c context.Context, id string, data *requests.UserNotificationRequest) (res models.UserNotification, err error) {
 	repo := repository.NewUserNotificationRepository(uc.DB)
 	now := time.Now().Local()
