@@ -104,6 +104,7 @@ func (uc UserNotificationUC) AddBulk(c context.Context, data []requests.UserNoti
 			RowID:  &datum.RowID,
 			Type:   &datum.Type,
 			Text:   &datum.Text,
+			Title:  &datum.Title,
 		})
 	}
 
