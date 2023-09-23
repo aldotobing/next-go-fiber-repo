@@ -153,7 +153,7 @@ func (repository UserNotificationRepository) AddBulk(c context.Context, model []
 		if valueStatement == "" {
 			valueStatement += `(
 				'` + *model[i].UserID + `', '` + *model[i].RowID + `', '` + *model[i].Type + `',
-				'` + *model[i].Text + `', now(), '` + *model[i].CreatedAt + `','` + *model[i].Title + `','unread')`
+				'` + *model[i].Text + `', now(),'` + *model[i].Title + `','unread')`
 		} else {
 			valueStatement += `, (
 				'` + *model[i].UserID + `', '` + *model[i].RowID + `', '` + *model[i].Type + `',
