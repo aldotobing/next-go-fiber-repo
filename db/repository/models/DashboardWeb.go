@@ -58,6 +58,8 @@ type DashboardWebBranchDetail struct {
 	StatusComplete           *string `json:"status_complete"`
 	SalesmanCode             *string `json:"salesman_code"`
 	SalesmanName             *string `json:"salesman_name"`
+	SalesmanTypeCode         *string `json:"salesman_type_code"`
+	SalesmanTypeName         *string `json:"salesman_type_name"`
 }
 
 type DashboardWebGetWithUserID struct {
