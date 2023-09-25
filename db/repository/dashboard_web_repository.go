@@ -672,14 +672,14 @@ func (repo DashboardWebRepository) GetOmzetValue(ctx context.Context, parameter 
 		whereStatement += ` AND sil.item_id = ` + parameter.ItemID
 	}
 	if parameter.ItemCategoryID != "" {
-		whereStatement += ` AND sil.category_id = ` + parameter.ItemCategoryID
+		whereStatement += ` AND i.item_category_id = ` + parameter.ItemCategoryID
 	}
 
 	if parameter.ItemIDs != "" {
 		whereStatement += ` AND sil.item_id IN (` + parameter.ItemIDs + `)`
 	}
 	if parameter.ItemCategoryIDs != "" {
-		whereStatement += ` AND sil.category_id IN (` + parameter.ItemCategoryIDs + `)`
+		whereStatement += ` AND i.item_category_id IN (` + parameter.ItemCategoryIDs + `)`
 	}
 
 	query := `select r.group_id,
@@ -688,6 +688,7 @@ func (repo DashboardWebRepository) GetOmzetValue(ctx context.Context, parameter 
 			coalesce(sum(sil.qty),0) as total_volume
 		from sales_invoice_header sih 
 			left join sales_invoice_line sil on sil.header_id = sih.id 
+			left join item i on i.id = sil.item_id
 			left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
 			left join branch b on b.id = sih.branch_id  
 			left join region r on r.id = b.region_id
@@ -727,14 +728,14 @@ func (repo DashboardWebRepository) GetOmzetValueByGroupID(ctx context.Context, p
 		whereStatement += ` AND sil.item_id = ` + parameter.ItemID
 	}
 	if parameter.ItemCategoryID != "" {
-		whereStatement += ` AND sil.category_id = ` + parameter.ItemCategoryID
+		whereStatement += ` AND i.item_category_id = ` + parameter.ItemCategoryID
 	}
 
 	if parameter.ItemIDs != "" {
 		whereStatement += ` AND sil.item_id IN (` + parameter.ItemIDs + `)`
 	}
 	if parameter.ItemCategoryIDs != "" {
-		whereStatement += ` AND sil.category_id IN (` + parameter.ItemCategoryIDs + `)`
+		whereStatement += ` AND i.item_category_id IN (` + parameter.ItemCategoryIDs + `)`
 	}
 
 	if groupID != "" && groupID != "0" {
@@ -747,6 +748,7 @@ func (repo DashboardWebRepository) GetOmzetValueByGroupID(ctx context.Context, p
 			coalesce(sum(sil.qty),0) as total_volume
 		from sales_invoice_header sih 
 			left join sales_invoice_line sil on sil.header_id = sih.id 
+			left join item i on i.id = sil.item_id
 			left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
 			left join branch b on b.id = sih.branch_id  
 			left join region r on r.id = b.region_id
@@ -786,14 +788,14 @@ func (repo DashboardWebRepository) GetOmzetValueByRegionID(ctx context.Context, 
 		whereStatement += ` AND sil.item_id = ` + parameter.ItemID
 	}
 	if parameter.ItemCategoryID != "" {
-		whereStatement += ` AND sil.category_id = ` + parameter.ItemCategoryID
+		whereStatement += ` AND i.item_category_id = ` + parameter.ItemCategoryID
 	}
 
 	if parameter.ItemIDs != "" {
 		whereStatement += ` AND sil.item_id IN (` + parameter.ItemIDs + `)`
 	}
 	if parameter.ItemCategoryIDs != "" {
-		whereStatement += ` AND sil.category_id IN (` + parameter.ItemCategoryIDs + `)`
+		whereStatement += ` AND i.item_category_id IN (` + parameter.ItemCategoryIDs + `)`
 	}
 
 	if regionID != "" && regionID != "0" {
@@ -807,6 +809,7 @@ func (repo DashboardWebRepository) GetOmzetValueByRegionID(ctx context.Context, 
 			coalesce(count(distinct(sih.cust_bill_to_id)),0) as total_active_customer
 		from sales_invoice_header sih 
 			left join sales_invoice_line sil on sil.header_id = sih.id 
+			left join item i on i.id = sil.item_id
 			left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
 			left join branch b on b.id = sih.branch_id  
 			left join region r on r.id = b.region_id
@@ -852,14 +855,14 @@ func (repo DashboardWebRepository) GetOmzetValueByBranchID(ctx context.Context, 
 		whereStatement += ` AND sil.item_id = ` + parameter.ItemID
 	}
 	if parameter.ItemCategoryID != "" {
-		whereStatement += ` AND sil.category_id = ` + parameter.ItemCategoryID
+		whereStatement += ` AND i.item_category_id = ` + parameter.ItemCategoryID
 	}
 
 	if parameter.ItemIDs != "" {
 		whereStatement += ` AND sil.item_id IN (` + parameter.ItemIDs + `)`
 	}
 	if parameter.ItemCategoryIDs != "" {
-		whereStatement += ` AND sil.category_id IN (` + parameter.ItemCategoryIDs + `)`
+		whereStatement += ` AND i.item_category_id IN (` + parameter.ItemCategoryIDs + `)`
 	}
 
 	if branchID != "" && branchID != "0" {
@@ -899,6 +902,7 @@ func (repo DashboardWebRepository) GetOmzetValueByBranchID(ctx context.Context, 
         coalesce(sum(sil.qty),0) as total_volume
     from sales_invoice_header sih 
 		left join sales_invoice_line sil on sil.header_id = sih.id 
+		left join item i on i.id = sil.item_id
 		left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
 		left join customer c on c.id = coh.cust_bill_to_id
 		left join branch b on b.id = sih.branch_id  
@@ -954,14 +958,14 @@ func (repo DashboardWebRepository) GetOmzetValueByCustomerID(ctx context.Context
 		whereStatement += ` AND sil.item_id = ` + parameter.ItemID
 	}
 	if parameter.ItemCategoryID != "" {
-		whereStatement += ` AND sil.category_id = ` + parameter.ItemCategoryID
+		whereStatement += ` AND i.item_category_id = ` + parameter.ItemCategoryID
 	}
 
 	if parameter.ItemIDs != "" {
 		whereStatement += ` AND sil.item_id IN (` + parameter.ItemIDs + `)`
 	}
 	if parameter.ItemCategoryIDs != "" {
-		whereStatement += ` AND sil.category_id IN (` + parameter.ItemCategoryIDs + `)`
+		whereStatement += ` AND i.item_category_id IN (` + parameter.ItemCategoryIDs + `)`
 	}
 
 	if customerID != "" && customerID != "0" {
