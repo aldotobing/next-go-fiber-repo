@@ -62,6 +62,7 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 	res.CustomerBranchLat = data.CustomerBranchLat
 	res.CustomerBranchLng = data.CustomerBranchLng
 	res.CustomerBranchPicPhoneNo = data.CustomerBranchPicPhoneNo
+	res.CustomerBranchPicName = data.CustomerBranchPicName.String
 	res.CustomerRegionCode = data.CustomerRegionCode
 	res.CustomerRegionName = data.CustomerRegionName
 	res.CustomerRegionGroup = data.CustomerRegionGroup
@@ -114,6 +115,8 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 	res.CustomerStatusInstall = true
 	if data.CustomerUserToken == nil || *data.CustomerUserToken == "" {
 		res.CustomerStatusInstall = false
+	} else {
+		res.CustomerFCMToken = *data.CustomerUserToken
 	}
 
 	res.SalesmanTypeCode = data.SalesmanTypeCode

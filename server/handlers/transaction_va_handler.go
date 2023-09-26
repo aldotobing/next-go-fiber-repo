@@ -3,8 +3,10 @@ package handlers
 import (
 	"context"
 	"crypto/sha512"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -337,6 +339,83 @@ func (h *TransactionVAHandler) PaidTransactionByVaCode(ctx *fiber.Ctx) error {
 				ObjectData.InquiryResult.Status.ErrorCode = "00"
 				ObjectData.InquiryResult.Status.StatusDescription = "Transaction Success"
 
+				customerData, _ := usecase.WebCustomerUC{ContractUC: h.ContractUC}.FindByID(c, models.WebCustomerParameter{ID: *resafterupdate.CustomerID})
+				salesInvoiceData, _ := usecase.SalesInvoiceUC{ContractUC: h.ContractUC}.FindByDocumentNo(c, models.SalesInvoiceParameter{ID: *resafterupdate.InvoiceCode})
+				var detailLine, deadLineFooter string
+				emptyString := ""
+				var emptyJson json.RawMessage
+
+				if salesInvoiceData.SourceDocumentNo == nil {
+					salesInvoiceData.SourceDocumentNo = &emptyString
+				}
+				if customerData.CustomerSalesmanName == nil {
+					customerData.CustomerSalesmanName = &emptyString
+				}
+				if customerData.CustomerSalesmanCode == nil {
+					customerData.CustomerSalesmanCode = &emptyString
+				}
+
+				if salesInvoiceData.InvoiceLine != nil {
+					detailLine += `Berikut merupakan rincian pesanan:\n`
+					var invoiceLine []viewmodel.InvoiceLineVM
+					if salesInvoiceData.InvoiceLine == nil {
+						salesInvoiceData.InvoiceLine = &emptyJson
+					}
+					invoiceDataJson, _ := json.Marshal(salesInvoiceData.InvoiceLine)
+					errMarshal := json.Unmarshal(invoiceDataJson, &invoiceLine)
+					if errMarshal == nil {
+						for i := range invoiceLine {
+							detailLine += invoiceLine[i].Quantity + " " + invoiceLine[i].UomName + " " + invoiceLine[i].ItemName + "/n"
+						}
+						deadLineFooter += `Total ` + strconv.Itoa(len(invoiceLine)) + ` item, senilai ` + *salesInvoiceData.NetAmount
+					}
+				}
+				if customerData.CustomerFCMToken != "" {
+
+					message := `Kepada Yang Terhormat
+
+					` + *customerData.Code + ` - ` + *resafterupdate.Customername + ` 
+					
+					NO ORDERAN ` + *salesInvoiceData.SourceDocumentNo + ` 
+					NO INVOICE ` + *resafterupdate.InvoiceCode + ` 
+					pada tanggal ` + time.Now().Format(time.DateOnly) + ` oleh Toko : ` + *customerData.CustomerName + `  dengan No. Virtual Account ` + *resafterupdate.VACode + ` TELAH LUNAS
+					
+					Berikut merupakan rincian pesanan anda:
+					` + detailLine + `
+					
+					Terima kasih atas pembayaran anda
+					
+					Salam Sehat
+					
+					NB : Bila ini bukan transaksi dari Toko Bapak/Ibu, silahkan menghubungi Distributor Produk Sido Muncul.`
+
+					_, _ = usecase.FCMUC{ContractUC: h.ContractUC}.SendFCMMessage(c, "Lunas "+*salesInvoiceData.SourceDocumentNo, message, customerData.CustomerFCMToken)
+				}
+				if customerData.CustomerBranchPicPhoneNo != nil {
+
+					message := `*Kepada Yang Terhormat PIC*
+
+					*` + customerData.CustomerBranchPicName + `*
+				
+					*NO ORDERAN ` + *salesInvoiceData.SourceDocumentNo + `*
+				
+					*NO INVOICE ` + *resafterupdate.InvoiceCode + `*
+				
+					*pada tanggal ` + time.Now().Format(time.DateOnly) + ` oleh Toko : ` + *customerData.CustomerName + `(` + *customerData.Code + `) dengan No. Virtual Account ` + *resafterupdate.VACode + ` TELAH LUNAS*
+					
+					*Pelanggan dari salesman : ` + *customerData.CustomerSalesmanName + `(` + *customerData.CustomerSalesmanCode + `)*
+
+					`
+
+					message += detailLine + deadLineFooter
+					message += `Terima kasih atas pemesanan anda
+				
+					Salam Sehat
+				
+					NB : Bila ini bukan transaksi dari Toko Bapak/Ibu, silahkan periksa data transaksi di SFA WEB(NEXT)/WEB CMS MYSM.`
+
+					_ = uc.ContractUC.WhatsApp.SendTransactionWA(*customerData.CustomerBranchPicPhoneNo, message)
+				}
 			}
 		}
 	}
