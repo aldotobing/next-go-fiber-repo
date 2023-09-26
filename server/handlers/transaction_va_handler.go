@@ -378,7 +378,7 @@ func (h *TransactionVAHandler) PaidTransactionByVaCode(ctx *fiber.Ctx) error {
 					
 					NO ORDERAN ` + *salesInvoiceData.SourceDocumentNo + ` 
 					NO INVOICE ` + *resafterupdate.InvoiceCode + ` 
-					pada tanggal ` + time.Now().Format(time.DateOnly) + ` oleh Toko : ` + *customerData.CustomerName + `  dengan No. Virtual Account ` + *resafterupdate.VACode + ` TELAH LUNAS
+					pada tanggal ` + time.Now().Format("2006-01-02") + ` oleh Toko : ` + *customerData.CustomerName + `  dengan No. Virtual Account ` + *resafterupdate.VACode + ` TELAH LUNAS
 					
 					Berikut merupakan rincian pesanan anda:
 					` + detailLine + `
@@ -401,7 +401,7 @@ func (h *TransactionVAHandler) PaidTransactionByVaCode(ctx *fiber.Ctx) error {
 				
 					*NO INVOICE ` + *resafterupdate.InvoiceCode + `*
 				
-					*pada tanggal ` + time.Now().Format(time.DateOnly) + ` oleh Toko : ` + *customerData.CustomerName + `(` + *customerData.Code + `) dengan No. Virtual Account ` + *resafterupdate.VACode + ` TELAH LUNAS*
+					*pada tanggal ` + time.Now().Format("2006-01-02") + ` oleh Toko : ` + *customerData.CustomerName + `(` + *customerData.Code + `) dengan No. Virtual Account ` + *resafterupdate.VACode + ` TELAH LUNAS*
 					
 					*Pelanggan dari salesman : ` + *customerData.CustomerSalesmanName + `(` + *customerData.CustomerSalesmanCode + `)*
 
