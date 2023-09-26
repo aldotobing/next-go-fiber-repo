@@ -47,6 +47,7 @@ func (repository SalesInvoiceRepository) scanRow(row *sql.Row) (res models.Sales
 	err = row.Scan(
 		&res.ID, &res.CustomerName, &res.NoInvoice, &res.NoOrder, &res.TrasactionDate, &res.ModifiedDate, &res.JatuhTempo, &res.Status, &res.NetAmount, &res.OutStandingAmount, &res.InvoiceLine,
 		&res.TotalPaid, &res.PaymentMethod,
+		&res.SourceDocumentNo,
 	)
 
 	return

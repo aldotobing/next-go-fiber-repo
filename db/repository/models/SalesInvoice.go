@@ -18,6 +18,7 @@ type SalesInvoice struct {
 	InvoiceLine       *json.RawMessage `json:"invoice_line"`
 	TotalPaid         *string          `json:"total_paid"`
 	PaymentMethod     *string          `json:"payment_method"`
+	SourceDocumentNo  *string          `json:"source_document_no"`
 }
 
 // SalesInvoiceParameter ...
@@ -71,7 +72,8 @@ var (
 										JOIN CUSTOMER C ON C.ID = subDEF.CUST_BILL_TO_ID
 										WHERE SUBDEF.id = DEF.ID) T),
 	DEF.TOTAL_PAID,
-	DEF.PAYMENT_METHOD
+	DEF.PAYMENT_METHOD,
+	def.transaction_source_document_no 
 	FROM SALES_INVOICE_HEADER DEF
 	left JOIN SALES_ORDER_HEADER SOH ON SOH.ID = DEF.SALES_ORDER_ID
 	JOIN CUSTOMER C ON C.ID = DEF.CUST_BILL_TO_ID
