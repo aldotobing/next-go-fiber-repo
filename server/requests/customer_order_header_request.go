@@ -27,4 +27,5 @@ type CustomerOrderHeaderRequest struct {
 	NetAmount            string `json:"net_amount"`
 	DiscAmount           string `json:"disc_amount"`
 	LineList             string `json:"line_list"`
+	VoucherRedeemID      string `json:"voucher_redeem_id"`
 }

@@ -21,6 +21,7 @@ type IVoucherRedeemRepository interface {
 	Redeem(c context.Context, model viewmodel.VoucherRedeemVM) (string, error)
 	Delete(c context.Context, id string) (string, error)
 	PaidRedeem(c context.Context, model viewmodel.VoucherRedeemVM) (string, error)
+	CheckOutPaidRedeem(c context.Context, model viewmodel.VoucherRedeemVM) (string, error)
 }
 
 // VoucherRedeemRepository ...
@@ -271,6 +272,21 @@ func (repository VoucherRedeemRepository) PaidRedeem(c context.Context, in viewm
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		in.RedeemedToDocumentNo).Scan(&res)
+
+	return
+}
+
+// Redeem ...
+func (repository VoucherRedeemRepository) CheckOutPaidRedeem(c context.Context, in viewmodel.VoucherRedeemVM) (res string, err error) {
+	statement := `UPDATE VOUCHER_REDEEM SET 
+		redeemed_to_doc_no = $1,
+		redeemed = 1,
+		REDEEMED_AT = now(),
+		UPDATED_AT = NOW()
+	WHERE id = $2
+	RETURNING id`
+	err = repository.DB.QueryRowContext(c, statement,
+		in.RedeemedToDocumentNo, in.ID).Scan(&res)
 
 	return
 }
