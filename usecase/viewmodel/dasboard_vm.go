@@ -147,3 +147,19 @@ type DashboardTrackingInvoiceVM struct {
 	PaidOffDate                 string `json:"paid_off_date"`
 	SourceTransaction           string `json:"source_transaction"`
 }
+
+type DashboardVirtualAccountVM struct {
+	RegionGroupName         string `json:"region_group_name"`
+	RegionName              string `json:"region_name"`
+	BranchName              string `json:"branch_name"`
+	BranchArea              string `json:"branch_area"`
+	BranchCode              string `json:"branch_code"`
+	CustomerName            string `json:"customer_name"`
+	CustomerCode            string `json:"customer_code"`
+	CustomerPhoneNo         string `json:"customer_phone_number"`
+	InvoiceNumber           string `json:"invoice_number"`
+	SourceDocumentNo        string `json:"source_document_no"`
+	VirtualAccountNumber    string `json:"virtual_account_number"`
+	VirtualAccountStartDate string `json:"virtual_start_date"`
+	VirtualAccountEndDate   string `json:"virtual_end_date"`
+}

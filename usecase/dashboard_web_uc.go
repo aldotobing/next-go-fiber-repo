@@ -595,3 +595,36 @@ func (uc DashboardWebUC) GetTrackingInvoiceData(c context.Context, parameter mod
 
 	return res, err
 }
+
+func (uc DashboardWebUC) GetVirtualAccountData(c context.Context, parameter models.DashboardWebBranchParameter) (res []viewmodel.DashboardVirtualAccountVM, err error) {
+	repo := repository.NewDashboardWebRepository(uc.DB)
+	data, err := repo.VirtualAccount(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	for _, datum := range data {
+		res = append(res, viewmodel.DashboardVirtualAccountVM{
+			RegionGroupName:         datum.RegionGroupName.String,
+			RegionName:              datum.RegionName.String,
+			BranchName:              datum.BranchName.String,
+			BranchArea:              datum.BranchArea.String,
+			BranchCode:              datum.BranchCode.String,
+			CustomerName:            datum.CustomerName.String,
+			CustomerCode:            datum.CustomerCode.String,
+			CustomerPhoneNo:         datum.CustomerPhoneNo.String,
+			InvoiceNumber:           datum.InvoiceNumber,
+			SourceDocumentNo:        datum.SourceDocumentNo.String,
+			VirtualAccountNumber:    datum.VirtualAccountNumber.String,
+			VirtualAccountStartDate: datum.VirtualAccountStartDate.String,
+			VirtualAccountEndDate:   datum.VirtualAccountEndDate.String,
+		})
+	}
+
+	if res == nil {
+		res = make([]viewmodel.DashboardVirtualAccountVM, 0)
+	}
+
+	return res, err
+}
