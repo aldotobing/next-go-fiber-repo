@@ -30,6 +30,7 @@ type IDashboardWebRepository interface {
 	GetOmzetValueByCustomerID(ctx context.Context, parameter models.DashboardWebBranchParameter, customerID string) (res []models.OmzetValueModel, err error)
 
 	TrackingInvoice(ctx context.Context, input models.DashboardWebBranchParameter) (res []models.DashboardTrackingInvoice, err error)
+	VirtualAccount(ctx context.Context, input models.DashboardWebBranchParameter) (res []models.DashboardVirtualAccount, err error)
 }
 
 // DashboardWebRepository ...
@@ -1102,5 +1103,41 @@ func (repo DashboardWebRepository) TrackingInvoice(ctx context.Context, input mo
 		res = append(res, temp)
 	}
 
+	return
+}
+
+func (repo DashboardWebRepository) VirtualAccount(ctx context.Context, input models.DashboardWebBranchParameter) (res []models.DashboardVirtualAccount, err error) {
+	queryStatement := `	select def.va_code, def.invoice_code, sih.transaction_source_document_no, def.start_date, def.end_date,
+	c.customer_name, c.customer_code, c.customer_phone,
+	b._name, b.branch_code, b.area,
+	r._name, r.group_name
+	from virtual_account_transaction def
+		left join sales_invoice_header sih on sih.document_no = def.invoice_code
+		left join customer c on c.id = sih.cust_bill_to_id
+		left join branch b on b.id = c.branch_id
+		left join region r on r.id = b.region_id
+	where def.created_date is not null and def.va_code is not null
+	order by def.created_date desc`
+
+	rows, err := repo.DB.Query(queryStatement)
+	if err != nil {
+		return
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var temp models.DashboardVirtualAccount
+		err = rows.Scan(&temp.VirtualAccountNumber, &temp.InvoiceNumber, &temp.SourceDocumentNo, &temp.VirtualAccountStartDate, &temp.VirtualAccountEndDate,
+			&temp.CustomerName, &temp.CustomerCode, &temp.CustomerPhoneNo,
+			&temp.BranchName, &temp.BranchCode, &temp.BranchArea,
+			&temp.RegionName, &temp.RegionGroupName,
+		)
+		if err != nil {
+			return
+		}
+
+		res = append(res, temp)
+	}
 	return
 }
