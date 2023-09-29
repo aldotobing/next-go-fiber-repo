@@ -18,13 +18,15 @@ type Broadcast struct {
 
 // BroadcastParameter ...
 type BroadcastParameter struct {
-	ID     string `json:"id"`
-	Search string `json:"search"`
-	Page   int    `json:"page"`
-	Offset int    `json:"offset"`
-	Limit  int    `json:"limit"`
-	By     string `json:"by"`
-	Sort   string `json:"sort"`
+	ID      string `json:"id"`
+	StartAt string `json:"start_at"`
+	EndAt   string `json:"end_at"`
+	Search  string `json:"search"`
+	Page    int    `json:"page"`
+	Offset  int    `json:"offset"`
+	Limit   int    `json:"limit"`
+	By      string `json:"by"`
+	Sort    string `json:"sort"`
 }
 
 var (

@@ -14,6 +14,7 @@ type IBranchRepository interface {
 	FindAll(ctx context.Context, parameter models.BranchParameter) ([]models.Branch, int, error)
 	FindByID(c context.Context, parameter models.BranchParameter) (models.Branch, error)
 	Update(c context.Context, in models.Branch) (res *string, err error)
+	GenerateAllUser(c context.Context, in models.Branch) (res *string, err error)
 }
 
 // BranchRepository ...
@@ -158,6 +159,18 @@ func (repository BranchRepository) Update(c context.Context, in models.Branch) (
 	err = repository.DB.QueryRowContext(c, statement,
 		in.PICPhoneNo,
 		in.PICName,
+		in.ID).Scan(&res)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func (repository BranchRepository) GenerateAllUser(c context.Context, in models.Branch) (res *string, err error) {
+	statement := `select generate_cus_user_data_by_branch_candstype as jumlah from generate_cus_user_data_by_branch_candstype($1,$1)
+	`
+	err = repository.DB.QueryRowContext(c, statement,
 		in.ID).Scan(&res)
 	if err != nil {
 		return

@@ -32,6 +32,7 @@ func (h *WebCustomerHandler) SelectAll(ctx *fiber.Ctx) error {
 	parameter := models.WebCustomerParameter{
 		ID:             ctx.Query("customer_id"),
 		CustomerTypeId: ctx.Query("customer_type_id"),
+		SalesmanTypeID: ctx.Query("salesman_type_id"),
 		UserId:         ctx.Query("admin_user_id"),
 		BranchId:       ctx.Query("branch_id"),
 		Search:         ctx.Query("search"),

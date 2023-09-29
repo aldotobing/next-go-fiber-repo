@@ -12,6 +12,7 @@ type IUserNotificationRepository interface {
 	FindAll(ctx context.Context, parameter models.UserNotificationParameter) ([]models.UserNotification, int, error)
 	FindByID(c context.Context, parameter models.UserNotificationParameter) (models.UserNotification, error)
 	Add(c context.Context, model *models.UserNotification) (*string, error)
+	AddBulk(c context.Context, model []models.UserNotification) (err error)
 	UpdateStatus(c context.Context, model *models.UserNotification) (*string, error)
 	UpdateAllStatus(c context.Context, model *models.UserNotification) (*string, error)
 	DeleteStatus(c context.Context, model *models.UserNotification) (*string, error)
@@ -144,6 +145,28 @@ func (repository UserNotificationRepository) Add(c context.Context, model *model
 		return res, err
 	}
 	return res, err
+}
+
+func (repository UserNotificationRepository) AddBulk(c context.Context, model []models.UserNotification) (err error) {
+	var valueStatement string
+	for i := range model {
+		if valueStatement == "" {
+			valueStatement += `(
+				'` + *model[i].UserID + `', '` + *model[i].RowID + `', '` + *model[i].Type + `',
+				'` + *model[i].Text + `', now(),'` + *model[i].Title + `','unread')`
+		} else {
+			valueStatement += `, (
+				'` + *model[i].UserID + `', '` + *model[i].RowID + `', '` + *model[i].Type + `',
+				'` + *model[i].Text + `', now(),'` + *model[i].Title + `','unread')`
+		}
+	}
+	statement := `INSERT INTO user_notification (user_id, row_id, type_notification, notification_text,
+		created_date, notification_title, notification_status)
+	VALUES ` + valueStatement
+
+	err = repository.DB.QueryRowContext(c, statement).Err()
+
+	return
 }
 
 func (repository UserNotificationRepository) UpdateStatus(c context.Context, model *models.UserNotification) (res *string, err error) {

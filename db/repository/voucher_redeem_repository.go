@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/usecase/viewmodel"
@@ -19,6 +20,8 @@ type IVoucherRedeemRepository interface {
 	Update(c context.Context, model viewmodel.VoucherRedeemVM) (string, error)
 	Redeem(c context.Context, model viewmodel.VoucherRedeemVM) (string, error)
 	Delete(c context.Context, id string) (string, error)
+	PaidRedeem(c context.Context, model viewmodel.VoucherRedeemVM) (string, error)
+	CheckOutPaidRedeem(c context.Context, model viewmodel.VoucherRedeemVM) (string, error)
 }
 
 // VoucherRedeemRepository ...
@@ -82,9 +85,10 @@ func (repository VoucherRedeemRepository) SelectAll(c context.Context, in models
 	}
 
 	statement := models.VoucherRedeemSelectStatement + models.VoucherRedeemWhereStatement +
-		` AND DEF.REDEEMED_AT IS NULL AND DEF.REDEEMED_TO_DOC_NO IS NULL ` + conditionString +
+		` AND (DEF.REDEEMED is null  or DEF.REDEEMED = '0') ` + conditionString +
 		` ORDER BY ` + in.By + ` ` + in.Sort
 
+	fmt.Println(statement)
 	rows, err := repository.DB.QueryContext(c, statement)
 
 	if err != nil {
@@ -107,7 +111,7 @@ func (repository VoucherRedeemRepository) SelectAll(c context.Context, in models
 func (repository VoucherRedeemRepository) FindAll(ctx context.Context, in models.VoucherRedeemParameter) (data []models.VoucherRedeem, count int, err error) {
 	var conditionString string
 
-	conditionString += ` AND DEF.REDEEMED_AT IS NULL AND DEF.REDEEMED_TO_DOC_NO IS NULL `
+	conditionString += ` AND (DEF.REDEEMED is null  or DEF.REDEEMED = '0') `
 
 	statement := models.VoucherRedeemSelectStatement + models.VoucherRedeemWhereStatement +
 		conditionString +
@@ -213,15 +217,36 @@ func (repository VoucherRedeemRepository) Update(c context.Context, in viewmodel
 
 // Redeem ...
 func (repository VoucherRedeemRepository) Redeem(c context.Context, in viewmodel.VoucherRedeemVM) (res string, err error) {
+
+	transaction, err := repository.DB.BeginTx(c, nil)
+	if err != nil {
+		return res, err
+	}
+	defer transaction.Rollback()
+
+	updatestatement := `UPDATE VOUCHER_REDEEM SET 
+			REDEEMED_TO_DOC_NO = null,
+			REDEEMED_AT = null,
+			UPDATED_AT = null
+		WHERE deleted_at is null and ( redeemed is null or redeemed ='0' ) and customer_code = ( select customer_code from VOUCHER_REDEEM where id = $1)
+		
+		`
+	updateCOStatusRow, _ := transaction.QueryContext(c, updatestatement, in.ID)
+	updateCOStatusRow.Close()
+
 	statement := `UPDATE VOUCHER_REDEEM SET 
 		REDEEMED_TO_DOC_NO = $1,
 		REDEEMED_AT = now(),
 		UPDATED_AT = NOW()
 	WHERE id = $2
 	RETURNING id`
-	err = repository.DB.QueryRowContext(c, statement,
+	err = transaction.QueryRowContext(c, statement,
 		in.RedeemedToDocumentNo,
 		in.ID).Scan(&res)
+
+	if err = transaction.Commit(); err != nil {
+		return res, err
+	}
 
 	return
 }
@@ -233,6 +258,35 @@ func (repository VoucherRedeemRepository) Delete(c context.Context, id string) (
 	WHERE id = ` + id + `
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement).Scan(&res)
+
+	return
+}
+
+// Redeem ...
+func (repository VoucherRedeemRepository) PaidRedeem(c context.Context, in viewmodel.VoucherRedeemVM) (res string, err error) {
+	statement := `UPDATE VOUCHER_REDEEM SET 
+		redeemed = 1,
+		REDEEMED_AT = now(),
+		UPDATED_AT = NOW()
+	WHERE redeemed_to_doc_no = $1
+	RETURNING id`
+	err = repository.DB.QueryRowContext(c, statement,
+		in.RedeemedToDocumentNo).Scan(&res)
+
+	return
+}
+
+// Redeem ...
+func (repository VoucherRedeemRepository) CheckOutPaidRedeem(c context.Context, in viewmodel.VoucherRedeemVM) (res string, err error) {
+	statement := `UPDATE VOUCHER_REDEEM SET 
+		redeemed_to_doc_no = $1,
+		redeemed = 1,
+		REDEEMED_AT = now(),
+		UPDATED_AT = NOW()
+	WHERE id = $2
+	RETURNING id`
+	err = repository.DB.QueryRowContext(c, statement,
+		in.RedeemedToDocumentNo, in.ID).Scan(&res)
 
 	return
 }

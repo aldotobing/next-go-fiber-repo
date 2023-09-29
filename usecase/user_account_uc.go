@@ -182,7 +182,7 @@ func (uc UserAccountUC) Login(c context.Context, data *requests.UserAccountLogin
 	// res.SalesmanCode = chkuser.SalesmanCode
 
 	if len(parts) == 1 {
-		senDwaMessage := uc.ContractUC.WhatsApp.SendWA(res.Phone, res.Otp)
+		senDwaMessage := uc.ContractUC.OtpWhatsApp.SendWA(res.Phone, res.Otp)
 		if senDwaMessage != nil {
 			fmt.Println("sukses")
 		}
@@ -233,7 +233,7 @@ func (uc UserAccountUC) ResendOtp(c context.Context, id string, data *requests.U
 	res.SalesmanID = chkuser.SalesmanID
 	res.SalesmanName = chkuser.SalesmanName
 	res.SalesmanCode = chkuser.SalesmanCode
-	senDwaMessage := uc.ContractUC.WhatsApp.SendWA(res.Phone, res.Otp)
+	senDwaMessage := uc.ContractUC.OtpWhatsApp.SendWA(res.Phone, res.Otp)
 	if senDwaMessage != nil {
 		fmt.Println("sukses")
 	}

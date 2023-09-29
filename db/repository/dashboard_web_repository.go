@@ -30,6 +30,7 @@ type IDashboardWebRepository interface {
 	GetOmzetValueByCustomerID(ctx context.Context, parameter models.DashboardWebBranchParameter, customerID string) (res []models.OmzetValueModel, err error)
 
 	TrackingInvoice(ctx context.Context, input models.DashboardWebBranchParameter) (res []models.DashboardTrackingInvoice, err error)
+	VirtualAccount(ctx context.Context, input models.DashboardWebBranchParameter) (res []models.DashboardVirtualAccount, err error)
 }
 
 // DashboardWebRepository ...
@@ -171,6 +172,7 @@ func (repository DashboardWebRepository) scanBranchCustomerDetailReportRows(rows
 		&res.TotalInvoice, &res.TotalCheckin, &res.TotalAktifOutlet, &res.CustomerClassName, &res.CustomerCityName,
 		&res.StatusComplete, &res.StatusInstall,
 		&res.SalesmanCode, &res.SalesmanName,
+		&res.SalesmanTypeCode, &res.SalesmanTypeName,
 	)
 	if err != nil {
 
@@ -301,13 +303,9 @@ func (repository DashboardWebRepository) GetDataByGroupID(c context.Context, par
 
 func (repository DashboardWebRepository) GetRegionDetailData(c context.Context, parameter models.DashboardWebRegionParameter) (data []models.DashboardWebRegionDetail, err error) {
 	var rows *sql.Rows
-	if parameter.RegionID != "" {
-		statement := models.DashboardWebRegionDetailByRegionIDSelectStatement
-		rows, err = repository.DB.QueryContext(c, statement, str.NullOrEmtyString(&parameter.RegionID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
-	} else {
-		statement := models.DashboardWebRegionDetailSelectStatement
-		rows, err = repository.DB.QueryContext(c, statement, str.NullOrEmtyString(&parameter.GroupID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
-	}
+
+	statement := models.DashboardWebRegionDetailByRegionIDSelectStatement
+	rows, err = repository.DB.QueryContext(c, statement, str.NullOrEmtyString(&parameter.RegionID), str.NullOrEmtyString(&parameter.GroupID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
 
 	if err != nil {
 		return data, err
@@ -399,7 +397,7 @@ func (repository DashboardWebRepository) GetAllBranchDetailCustomerData(ctx cont
 func (repository DashboardWebRepository) GetAllReportBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) (data []models.DashboardWebBranchDetail, err error) {
 
 	query := models.DashboardWebReportBranchDetailSelectStatement
-	rows, err := repository.DB.Query(query, str.NullOrEmtyString(&parameter.BranchID), str.NullOrEmtyString(&parameter.UserID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
+	rows, err := repository.DB.Query(query, str.NullOrEmtyString(&parameter.BranchID), str.NullOrEmtyString(&parameter.UserID), str.NullOrEmtyString(&parameter.CustomerLevelID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
 	if err != nil {
 		return data, err
 	}
@@ -676,14 +674,14 @@ func (repo DashboardWebRepository) GetOmzetValue(ctx context.Context, parameter 
 		whereStatement += ` AND sil.item_id = ` + parameter.ItemID
 	}
 	if parameter.ItemCategoryID != "" {
-		whereStatement += ` AND sil.category_id = ` + parameter.ItemCategoryID
+		whereStatement += ` AND i.item_category_id = ` + parameter.ItemCategoryID
 	}
 
 	if parameter.ItemIDs != "" {
 		whereStatement += ` AND sil.item_id IN (` + parameter.ItemIDs + `)`
 	}
 	if parameter.ItemCategoryIDs != "" {
-		whereStatement += ` AND sil.category_id IN (` + parameter.ItemCategoryIDs + `)`
+		whereStatement += ` AND i.item_category_id IN (` + parameter.ItemCategoryIDs + `)`
 	}
 
 	query := `select r.group_id,
@@ -692,6 +690,7 @@ func (repo DashboardWebRepository) GetOmzetValue(ctx context.Context, parameter 
 			coalesce(sum(sil.qty),0) as total_volume
 		from sales_invoice_header sih 
 			left join sales_invoice_line sil on sil.header_id = sih.id 
+			left join item i on i.id = sil.item_id
 			left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
 			left join branch b on b.id = sih.branch_id  
 			left join region r on r.id = b.region_id
@@ -731,14 +730,14 @@ func (repo DashboardWebRepository) GetOmzetValueByGroupID(ctx context.Context, p
 		whereStatement += ` AND sil.item_id = ` + parameter.ItemID
 	}
 	if parameter.ItemCategoryID != "" {
-		whereStatement += ` AND sil.category_id = ` + parameter.ItemCategoryID
+		whereStatement += ` AND i.item_category_id = ` + parameter.ItemCategoryID
 	}
 
 	if parameter.ItemIDs != "" {
 		whereStatement += ` AND sil.item_id IN (` + parameter.ItemIDs + `)`
 	}
 	if parameter.ItemCategoryIDs != "" {
-		whereStatement += ` AND sil.category_id IN (` + parameter.ItemCategoryIDs + `)`
+		whereStatement += ` AND i.item_category_id IN (` + parameter.ItemCategoryIDs + `)`
 	}
 
 	if groupID != "" && groupID != "0" {
@@ -751,6 +750,7 @@ func (repo DashboardWebRepository) GetOmzetValueByGroupID(ctx context.Context, p
 			coalesce(sum(sil.qty),0) as total_volume
 		from sales_invoice_header sih 
 			left join sales_invoice_line sil on sil.header_id = sih.id 
+			left join item i on i.id = sil.item_id
 			left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
 			left join branch b on b.id = sih.branch_id  
 			left join region r on r.id = b.region_id
@@ -790,14 +790,14 @@ func (repo DashboardWebRepository) GetOmzetValueByRegionID(ctx context.Context, 
 		whereStatement += ` AND sil.item_id = ` + parameter.ItemID
 	}
 	if parameter.ItemCategoryID != "" {
-		whereStatement += ` AND sil.category_id = ` + parameter.ItemCategoryID
+		whereStatement += ` AND i.item_category_id = ` + parameter.ItemCategoryID
 	}
 
 	if parameter.ItemIDs != "" {
 		whereStatement += ` AND sil.item_id IN (` + parameter.ItemIDs + `)`
 	}
 	if parameter.ItemCategoryIDs != "" {
-		whereStatement += ` AND sil.category_id IN (` + parameter.ItemCategoryIDs + `)`
+		whereStatement += ` AND i.item_category_id IN (` + parameter.ItemCategoryIDs + `)`
 	}
 
 	if regionID != "" && regionID != "0" {
@@ -811,6 +811,7 @@ func (repo DashboardWebRepository) GetOmzetValueByRegionID(ctx context.Context, 
 			coalesce(count(distinct(sih.cust_bill_to_id)),0) as total_active_customer
 		from sales_invoice_header sih 
 			left join sales_invoice_line sil on sil.header_id = sih.id 
+			left join item i on i.id = sil.item_id
 			left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
 			left join branch b on b.id = sih.branch_id  
 			left join region r on r.id = b.region_id
@@ -856,14 +857,14 @@ func (repo DashboardWebRepository) GetOmzetValueByBranchID(ctx context.Context, 
 		whereStatement += ` AND sil.item_id = ` + parameter.ItemID
 	}
 	if parameter.ItemCategoryID != "" {
-		whereStatement += ` AND sil.category_id = ` + parameter.ItemCategoryID
+		whereStatement += ` AND i.item_category_id = ` + parameter.ItemCategoryID
 	}
 
 	if parameter.ItemIDs != "" {
 		whereStatement += ` AND sil.item_id IN (` + parameter.ItemIDs + `)`
 	}
 	if parameter.ItemCategoryIDs != "" {
-		whereStatement += ` AND sil.category_id IN (` + parameter.ItemCategoryIDs + `)`
+		whereStatement += ` AND i.item_category_id IN (` + parameter.ItemCategoryIDs + `)`
 	}
 
 	if branchID != "" && branchID != "0" {
@@ -903,6 +904,7 @@ func (repo DashboardWebRepository) GetOmzetValueByBranchID(ctx context.Context, 
         coalesce(sum(sil.qty),0) as total_volume
     from sales_invoice_header sih 
 		left join sales_invoice_line sil on sil.header_id = sih.id 
+		left join item i on i.id = sil.item_id
 		left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
 		left join customer c on c.id = coh.cust_bill_to_id
 		left join branch b on b.id = sih.branch_id  
@@ -958,14 +960,14 @@ func (repo DashboardWebRepository) GetOmzetValueByCustomerID(ctx context.Context
 		whereStatement += ` AND sil.item_id = ` + parameter.ItemID
 	}
 	if parameter.ItemCategoryID != "" {
-		whereStatement += ` AND sil.category_id = ` + parameter.ItemCategoryID
+		whereStatement += ` AND i.item_category_id = ` + parameter.ItemCategoryID
 	}
 
 	if parameter.ItemIDs != "" {
 		whereStatement += ` AND sil.item_id IN (` + parameter.ItemIDs + `)`
 	}
 	if parameter.ItemCategoryIDs != "" {
-		whereStatement += ` AND sil.category_id IN (` + parameter.ItemCategoryIDs + `)`
+		whereStatement += ` AND i.item_category_id IN (` + parameter.ItemCategoryIDs + `)`
 	}
 
 	if customerID != "" && customerID != "0" {
@@ -1101,5 +1103,58 @@ func (repo DashboardWebRepository) TrackingInvoice(ctx context.Context, input mo
 		res = append(res, temp)
 	}
 
+	return
+}
+
+func (repo DashboardWebRepository) VirtualAccount(ctx context.Context, input models.DashboardWebBranchParameter) (res []models.DashboardVirtualAccount, err error) {
+	var whereStatement string
+	if input.StartDate != "" && input.EndDate != "" {
+		whereStatement += `AND SIH.transaction_date BETWEEN '` + input.StartDate + `' AND '` + input.EndDate + `'`
+	} else {
+		whereStatement += `AND SIH.transaction_date BETWEEN date_trunc('MONTH',now())::DATE AND now()`
+	}
+
+	if input.BranchID != "" {
+		whereStatement += `AND b.id in (` + input.BranchID + `)`
+	}
+
+	if input.RegionID != "" {
+		whereStatement += `AND r.id in (` + input.RegionID + `)`
+	}
+	if input.RegionGroupID != "" {
+		whereStatement += `AND r.group_id in (` + input.RegionGroupID + `)`
+	}
+	queryStatement := `	select def.va_code, def.invoice_code, sih.transaction_source_document_no, def.start_date, def.end_date,
+	c.customer_name, c.customer_code, c.customer_phone,
+	b._name, b.branch_code, b.area,
+	r._name, r.group_name
+	from virtual_account_transaction def
+		left join sales_invoice_header sih on sih.document_no = def.invoice_code
+		left join customer c on c.id = sih.cust_bill_to_id
+		left join branch b on b.id = c.branch_id
+		left join region r on r.id = b.region_id
+	where def.created_date is not null and def.va_code is not null ` + whereStatement + `
+	order by def.created_date desc`
+
+	rows, err := repo.DB.Query(queryStatement)
+	if err != nil {
+		return
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var temp models.DashboardVirtualAccount
+		err = rows.Scan(&temp.VirtualAccountNumber, &temp.InvoiceNumber, &temp.SourceDocumentNo, &temp.VirtualAccountStartDate, &temp.VirtualAccountEndDate,
+			&temp.CustomerName, &temp.CustomerCode, &temp.CustomerPhoneNo,
+			&temp.BranchName, &temp.BranchCode, &temp.BranchArea,
+			&temp.RegionName, &temp.RegionGroupName,
+		)
+		if err != nil {
+			return
+		}
+
+		res = append(res, temp)
+	}
 	return
 }

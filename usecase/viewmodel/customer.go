@@ -17,6 +17,7 @@ type CustomerVM struct {
 	CustomerBranchLat        *string `json:"customer_branch_lat"`
 	CustomerBranchLng        *string `json:"customer_branch_lng"`
 	CustomerBranchPicPhoneNo *string `json:"customer_branch_pic_phone_no"`
+	CustomerBranchPicName    string  `json:"customer_branch_pic_name"`
 	CustomerRegionCode       *string `json:"customer_region_code"`
 	CustomerRegionName       *string `json:"customer_region_name"`
 	CustomerRegionGroup      *string `json:"customer_region_group"`
@@ -60,6 +61,9 @@ type CustomerVM struct {
 	CustomerPriceListName    *string `json:"customer_price_list_name"`
 	CustomerShowInApp        *string `json:"customer_show_in_app"`
 	CustomerStatusInstall    bool    `json:"customer_status_install"`
+	CustomerFCMToken         string  `json:"customer_fcm_token"`
+	SalesmanTypeCode         *string `json:"salesman_type_code"`
+	SalesmanTypeName         *string `json:"salesman_type_name"`
 }
 
 type CustomerData struct {

@@ -117,25 +117,18 @@ func (uc ItemProductFocusUC) SelectAllV2(c context.Context, parameter models.Ite
 		if len(additional) > 0 && additional[0] != "" {
 			// Find Lowest Price and lowest conversion
 			var lowestPrice, lowestConversion float64
-			var updatedData string
+			var updatedData time.Time
 			for _, addDatum := range additional {
 				perAddDatum := strings.Split(addDatum, "#sep#")
 				price, _ := strconv.ParseFloat(perAddDatum[3], 64)
 				conversion, _ := strconv.ParseFloat(perAddDatum[2], 64)
 
-				if lowestPrice == 0 {
-					lowestPrice = price
-					lowestConversion = conversion
-					updatedData = perAddDatum[6]
-				}
-
-				dbUpdatedData, _ := time.Parse("2006-01-02 15:04:05.999999", perAddDatum[6])
-				updatedDataTime, errParse := time.Parse("2006-01-02 15:04:05.999999", updatedData)
-				if lowestConversion == conversion && (updatedDataTime.Before(dbUpdatedData) && errParse != nil) {
+				dbUpdatedData, errParse := time.Parse("2006-01-02 15:04:05.999999", perAddDatum[6])
+				if (updatedData.Before(dbUpdatedData) || errParse != nil) || lowestPrice == 0 {
 					lowestPrice = price
 					lowestConversion = conversion
 
-					updatedData = perAddDatum[6]
+					updatedData = dbUpdatedData
 				}
 
 			}

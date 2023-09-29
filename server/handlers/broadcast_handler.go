@@ -104,6 +104,16 @@ func (h *BroadcastHandler) BroadcastWithID(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, nil, nil, err, 0)
 }
 
+// BroadcastWithScheduler...
+func (h *BroadcastHandler) BroadcastWithScheduler(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	uc := usecase.BroadcastUC{ContractUC: h.ContractUC}
+	err := uc.BroadcastWithScheduler(c)
+
+	return h.SendResponse(ctx, nil, nil, err, 0)
+}
+
 // Add ...
 func (h *BroadcastHandler) Add(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)

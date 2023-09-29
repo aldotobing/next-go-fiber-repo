@@ -66,7 +66,7 @@ func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter) 
 				conversion, _ := strconv.ParseFloat(perAddDatum[2], 64)
 
 				dbUpdatedDate, errParse := time.Parse("2006-01-02 15:04:05.999999", perAddDatum[3])
-				if (newestModifiedDate.Before(dbUpdatedDate) && errParse != nil) || lowestPrice == 0 {
+				if (newestModifiedDate.Before(dbUpdatedDate) || errParse != nil) || lowestPrice == 0 {
 					lowestPrice = price
 					lowestConversion = conversion
 					newestModifiedDate = dbUpdatedDate

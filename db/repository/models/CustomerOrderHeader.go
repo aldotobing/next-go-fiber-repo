@@ -37,6 +37,7 @@ type CustomerOrderHeader struct {
 	VoidReasonID         *string             `json:"reason_id"`
 	VoidReasonText       *string             `json:"reason_text"`
 	OrderSource          *string             `json:"order_source"`
+	GlobalDiscAmount     *string             `json:"global_disc_amount"`
 }
 
 // CustomerOrderHeaderParameter ...

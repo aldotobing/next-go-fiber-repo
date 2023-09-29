@@ -58,6 +58,8 @@ type DashboardWebBranchDetail struct {
 	StatusComplete           *string `json:"status_complete"`
 	SalesmanCode             *string `json:"salesman_code"`
 	SalesmanName             *string `json:"salesman_name"`
+	SalesmanTypeCode         *string `json:"salesman_type_code"`
+	SalesmanTypeName         *string `json:"salesman_type_name"`
 }
 
 type DashboardWebGetWithUserID struct {
@@ -138,6 +140,22 @@ type DashboardTrackingInvoice struct {
 	InvoiceUpdatedDate       sql.NullString `json:"invoice_updated_date"`
 	PaidOffDate              sql.NullString `json:"paid_off_date"`
 	DueDate                  sql.NullString `json:"due_date"`
+}
+
+type DashboardVirtualAccount struct {
+	RegionGroupName         sql.NullString `json:"region_group_name"`
+	RegionName              sql.NullString `json:"region_name"`
+	BranchName              sql.NullString `json:"branch_name"`
+	BranchArea              sql.NullString `json:"branch_area"`
+	BranchCode              sql.NullString `json:"branch_code"`
+	CustomerName            sql.NullString `json:"customer_name"`
+	CustomerCode            sql.NullString `json:"customer_code"`
+	CustomerPhoneNo         sql.NullString `json:"customer_phone_number"`
+	InvoiceNumber           string         `json:"invoice_number"`
+	SourceDocumentNo        sql.NullString `json:"source_document_no"`
+	VirtualAccountNumber    sql.NullString `json:"virtual_account_number"`
+	VirtualAccountStartDate sql.NullString `json:"virtual_start_date"`
+	VirtualAccountEndDate   sql.NullString `json:"virtual_end_date"`
 }
 
 // DashboardWebParameter ...
@@ -305,7 +323,7 @@ var (
 		
 	 `
 	DashboardWebRegionDetailByRegionIDSelectStatement = `
-	select * from os_fetch_dashborad_regiongroupdetaildata_by_region_id($1::integer,$2,$3,null,null,null) `
+	select * from os_fetch_dashborad_regiongroupdetaildata_by_region_id($1::integer,$2::integer,$3,$4,null,null,null) `
 
 	DashboardWebCustomerDetailByRegionDetailByRegionIDSelectStatement = `
 	select * from os_fetch_dashborad_get_total_user_by_branch_id($1::integer,$2,$3) `
@@ -319,7 +337,7 @@ var (
 	DashboardWebBranchDetailSelectStatement = ` select * from os_fetch_dashborad_branchcustomerdata($1::integer,$2,$3,null,null,null)
 	   `
 
-	DashboardWebReportBranchDetailSelectStatement = ` select * from os_fetch_dashborad_branchcustomerdata2($1::varchar,$2,$3,$4,null,null,null)
+	DashboardWebReportBranchDetailSelectStatement = ` select * from os_fetch_dashborad_branchcustomerdata2($1::varchar,$2,$3::varchar,$4,$5,null,null,null)
 	   `
 
 	DashboardWebBranchDetailSelectWithUserIDStatement = ` select * from os_fetch_dashborad_customerdata_using_user_id($1::integer,$2,$3,null,null,null)

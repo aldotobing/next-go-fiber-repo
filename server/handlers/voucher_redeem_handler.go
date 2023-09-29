@@ -43,7 +43,7 @@ func (h *VoucherRedeemHandler) SelectAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 	parameter := models.VoucherRedeemParameter{
 		Search:       ctx.Query("search"),
-		CustomerCode: ctx.Query("customer_codes"),
+		CustomerCode: ctx.Query("customer_code"),
 		By:           ctx.Query("by"),
 		Sort:         ctx.Query("sort"),
 	}
