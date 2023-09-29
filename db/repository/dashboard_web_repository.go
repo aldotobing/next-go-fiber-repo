@@ -1107,6 +1107,23 @@ func (repo DashboardWebRepository) TrackingInvoice(ctx context.Context, input mo
 }
 
 func (repo DashboardWebRepository) VirtualAccount(ctx context.Context, input models.DashboardWebBranchParameter) (res []models.DashboardVirtualAccount, err error) {
+	var whereStatement string
+	if input.StartDate != "" && input.EndDate != "" {
+		whereStatement += `AND SIH.transaction_date BETWEEN '` + input.StartDate + `' AND '` + input.EndDate + `'`
+	} else {
+		whereStatement += `AND SIH.transaction_date BETWEEN date_trunc('MONTH',now())::DATE AND now()`
+	}
+
+	if input.BranchID != "" {
+		whereStatement += `AND b.id in (` + input.BranchID + `)`
+	}
+
+	if input.RegionID != "" {
+		whereStatement += `AND r.id in (` + input.RegionID + `)`
+	}
+	if input.RegionGroupID != "" {
+		whereStatement += `AND r.group_id in (` + input.RegionGroupID + `)`
+	}
 	queryStatement := `	select def.va_code, def.invoice_code, sih.transaction_source_document_no, def.start_date, def.end_date,
 	c.customer_name, c.customer_code, c.customer_phone,
 	b._name, b.branch_code, b.area,
@@ -1116,7 +1133,7 @@ func (repo DashboardWebRepository) VirtualAccount(ctx context.Context, input mod
 		left join customer c on c.id = sih.cust_bill_to_id
 		left join branch b on b.id = c.branch_id
 		left join region r on r.id = b.region_id
-	where def.created_date is not null and def.va_code is not null
+	where def.created_date is not null and def.va_code is not null ` + whereStatement + `
 	order by def.created_date desc`
 
 	rows, err := repo.DB.Query(queryStatement)
