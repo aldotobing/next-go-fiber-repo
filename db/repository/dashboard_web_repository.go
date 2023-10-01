@@ -43,27 +43,25 @@ func NewDashboardWebRepository(DB *sql.DB) IDashboardWebRepository {
 	return &DashboardWebRepository{DB: DB}
 }
 
-// Scan row
-func (repository DashboardWebRepository) scanRow(row *sql.Row) (res models.DashboardWeb, err error) {
-	err = row.Scan(
-		&res.RegionGroupID, &res.RegionGroupName, &res.TotalRegisteredUser, &res.TotalRepeatUser, &res.TotalOrderUser, &res.TotalInvoice, &res.TotalVisitUser,
-		&res.CustomerCountRepeatOrder, &res.TotalActiveOutlet,
-	)
-
-	if err != nil {
-		return res, err
-	}
-
-	return res, nil
-}
-
 // Scan rows
 func (repository DashboardWebRepository) scanRows(rows *sql.Rows) (res models.DashboardWeb, err error) {
-	err = rows.Scan(
-		&res.RegionGroupID, &res.RegionGroupName, &res.TotalRegisteredUser, &res.TotalRepeatUser, &res.TotalOrderUser, &res.TotalInvoice, &res.TotalVisitUser,
-		&res.CustomerCountRepeatOrder, &res.TotalActiveOutlet,
-		&res.TotalOutlet, &res.TotalCompleteCustomer,
-	)
+	// err = rows.Scan(
+	// 	&res.RegionGroupID, &res.RegionGroupName, &res.TotalRegisteredUser, &res.TotalRepeatUser, &res.TotalOrderUser, &res.TotalInvoice, &res.TotalVisitUser,
+	// 	&res.CustomerCountRepeatOrder, &res.TotalActiveOutlet,
+	// 	&res.TotalOutlet, &res.TotalCompleteCustomer,
+	// )
+
+	err = rows.Scan(&res.RegionGroupID,
+		&res.RegionGroupName,
+		&res.TotalVisitUser,
+		&res.TotalRepeatUser,
+		&res.TotalOrderUser,
+		&res.TotalRegisteredUser,
+		&res.CustomerCountRepeatOrder,
+		&res.TotalOutlet,
+		&res.TotalActiveOutlet,
+		&res.TotalInvoice,
+		&res.TotalCompleteCustomer)
 	if err != nil {
 
 		return res, err
@@ -214,8 +212,19 @@ func (repository DashboardWebRepository) scanBranchCustomerDetailReportRows(rows
 // }
 
 func (repository DashboardWebRepository) GetData(c context.Context, parameter models.DashboardWebParameter) (data []models.DashboardWeb, err error) {
-	statement := models.DashboardWebSelectStatement
-	rows, err := repository.DB.QueryContext(c, statement, str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
+	statement := models.DashboardWebSelectStatementNew
+
+	var startDate, endDate string
+	if parameter.StartDate != "" && parameter.EndDate != "" {
+		startDate = `'` + parameter.StartDate + `'`
+		endDate = `'` + parameter.EndDate + `'`
+	} else {
+		startDate = `date_trunc('MONTH',now())::DATE)`
+		endDate = `now()::date`
+	}
+	statement = strings.ReplaceAll(statement, "{START_DATE}", startDate)
+	statement = strings.ReplaceAll(statement, "{END_DATE}", endDate)
+	rows, err := repository.DB.QueryContext(c, statement)
 
 	if err != nil {
 		return data, err

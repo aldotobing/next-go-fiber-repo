@@ -24,27 +24,67 @@ type DashboardWebUC struct {
 	*ContractUC
 }
 
-// BuildBody ...
-func (uc DashboardWebUC) BuildBody(res *models.DashboardWeb) {
-}
-
-func (uc DashboardWebUC) BuildRegionDetailBody(res *models.DashboardWebRegionDetail) {
-}
-
-func (uc DashboardWebUC) BuildBranchDetailCustomerBody(res *models.DashboardWebBranchDetail) {
-}
-
 // FindByID ...
-func (uc DashboardWebUC) GetData(c context.Context, parameter models.DashboardWebParameter) (res []models.DashboardWeb, err error) {
+func (uc DashboardWebUC) GetData(c context.Context, parameter models.DashboardWebParameter) (res []viewmodel.Dashboard, err error) {
 	repo := repository.NewDashboardWebRepository(uc.DB)
-	res, err = repo.GetData(c, parameter)
+	data, err := repo.GetData(c, parameter)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
 	}
 
-	for i := range res {
-		uc.BuildBody(&res[i])
+	res = append(res, viewmodel.Dashboard{RegionGroupID: "0"})
+
+	var totalVisitUser, totalRepeatUser, totalOrderUser, totalInvoice,
+		totalRegisteredUser, customerCountRepeatOrder, totalActiveOutlet, totalOutlet,
+		totalCompleteCustomer int
+	for _, datum := range data {
+		a, _ := strconv.Atoi(datum.TotalVisitUser)
+		totalVisitUser += a
+		a, _ = strconv.Atoi(datum.TotalRepeatUser)
+		totalRepeatUser += a
+		a, _ = strconv.Atoi(datum.TotalOrderUser)
+		totalOrderUser += a
+		a, _ = strconv.Atoi(datum.TotalInvoice)
+		totalInvoice += a
+		a, _ = strconv.Atoi(datum.TotalRegisteredUser)
+		totalRegisteredUser += a
+		a, _ = strconv.Atoi(datum.CustomerCountRepeatOrder)
+		customerCountRepeatOrder += a
+		a, _ = strconv.Atoi(datum.TotalActiveOutlet)
+		totalActiveOutlet += a
+		a, _ = strconv.Atoi(datum.TotalOutlet)
+		totalOutlet += a
+		a, _ = strconv.Atoi(datum.TotalCompleteCustomer)
+		totalCompleteCustomer += a
+
+		res = append(res, viewmodel.Dashboard{
+			RegionGroupID:            datum.RegionGroupID,
+			RegionGroupName:          datum.RegionGroupName,
+			TotalVisitUser:           datum.TotalVisitUser,
+			TotalRepeatUser:          datum.TotalRepeatUser,
+			TotalOrderUser:           datum.TotalOrderUser,
+			TotalInvoice:             datum.TotalInvoice,
+			TotalRegisteredUser:      datum.TotalRegisteredUser,
+			CustomerCountRepeatOrder: datum.CustomerCountRepeatOrder,
+			TotalActiveOutlet:        datum.TotalActiveOutlet,
+			TotalOutlet:              datum.TotalOutlet,
+			TotalCompleteCustomer:    datum.TotalCompleteCustomer,
+		})
+	}
+
+	res[0] = viewmodel.Dashboard{
+		RegionGroupID:            "0",
+		RegionGroupName:          "Nasional",
+		TotalVisitUser:           strconv.Itoa(totalVisitUser),
+		TotalRepeatUser:          strconv.Itoa(totalRepeatUser),
+		TotalOrderUser:           strconv.Itoa(totalOrderUser),
+		TotalInvoice:             strconv.Itoa(totalInvoice),
+		TotalRegisteredUser:      strconv.Itoa(totalRegisteredUser),
+		CustomerCountRepeatOrder: strconv.Itoa(customerCountRepeatOrder),
+		TotalActiveOutlet:        strconv.Itoa(totalActiveOutlet),
+		TotalOutlet:              strconv.Itoa(totalOutlet),
+		TotalCompleteCustomer:    strconv.Itoa(totalCompleteCustomer),
 	}
 
 	return res, err
@@ -87,10 +127,6 @@ func (uc DashboardWebUC) GetRegionDetailData(c context.Context, parameter models
 		return res, err
 	}
 
-	for i := range res {
-		uc.BuildRegionDetailBody(&res[i])
-	}
-
 	return res, err
 }
 
@@ -117,9 +153,6 @@ func (uc DashboardWebUC) GetBranchDetailCustomerData(c context.Context, paramete
 	}
 
 	p = uc.setPaginationResponse(parameter.Page, parameter.Limit, count)
-	for i := range res {
-		uc.BuildBranchDetailCustomerBody(&res[i])
-	}
 
 	return res, p, err
 }
@@ -136,9 +169,6 @@ func (uc DashboardWebUC) GetAllBranchDetailCustomerData(c context.Context, param
 	}
 
 	p = uc.setPaginationResponse(parameter.Page, parameter.Limit, count)
-	for i := range res {
-		uc.BuildBranchDetailCustomerBody(&res[i])
-	}
 
 	return res, p, err
 }
