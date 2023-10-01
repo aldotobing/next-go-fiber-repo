@@ -219,7 +219,7 @@ func (repository DashboardWebRepository) GetData(c context.Context, parameter mo
 		startDate = `'` + parameter.StartDate + `'`
 		endDate = `'` + parameter.EndDate + `'`
 	} else {
-		startDate = `date_trunc('MONTH',now())::DATE)`
+		startDate = `date_trunc('MONTH',now())::DATE`
 		endDate = `now()::date`
 	}
 	statement = strings.ReplaceAll(statement, "{START_DATE}", startDate)
