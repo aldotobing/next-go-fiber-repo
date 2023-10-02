@@ -4,18 +4,17 @@ import "database/sql"
 
 // DashboardWeb ...
 type DashboardWeb struct {
-	RegionGroupID            *string                    `json:"region_id"`
-	RegionGroupName          *string                    `json:"region_name"`
-	TotalVisitUser           *string                    `json:"total_visit_user"`
-	TotalRepeatUser          *string                    `json:"total_repeat_order_user"`
-	TotalOrderUser           *string                    `json:"total_order_user"`
-	TotalInvoice             *string                    `json:"total_invoice_user"`
-	TotalRegisteredUser      *string                    `json:"total_registered_user"`
-	DetailData               []DashboardWebRegionDetail `json:"detailed_data"`
-	CustomerCountRepeatOrder *string                    `json:"customer_count_repeat_order"`
-	TotalActiveOutlet        *string                    `json:"total_active_outlet"`
-	TotalOutlet              *string                    `json:"total_outlet"`
-	TotalCompleteCustomer    *string                    `json:"total_complete_customer"`
+	RegionGroupID            string `json:"region_id"`
+	RegionGroupName          string `json:"region_name"`
+	TotalVisitUser           string `json:"total_visit_user"`
+	TotalRepeatUser          string `json:"total_repeat_order_user"`
+	TotalOrderUser           string `json:"total_order_user"`
+	TotalInvoice             string `json:"total_invoice_user"`
+	TotalRegisteredUser      string `json:"total_registered_user"`
+	CustomerCountRepeatOrder string `json:"customer_count_repeat_order"`
+	TotalActiveOutlet        string `json:"total_active_outlet"`
+	TotalOutlet              string `json:"total_outlet"`
+	TotalCompleteCustomer    string `json:"total_complete_customer"`
 }
 
 type DashboardWebRegionDetail struct {
@@ -217,6 +216,110 @@ var (
 	select * from os_fetch_dashborad_regiongroupdata($1,$2,null,null,null)
 	`
 
+	DashboardWebSelectStatementNew = `with dataRepeatOrder as (
+		select c.id as customer_id, count(soh.id) as total_transaction
+		from customer c 
+		left join sales_invoice_header soh ON soh.cust_bill_to_id = c.id 
+		where soh.status='submitted'
+			and soh.transaction_source_document_no like 'CO%'
+			and soh.transaction_date between {START_DATE} and {END_DATE} 
+		group by c.id 
+	),
+	dataTransaction as (
+		select c.id as customer_id, count(soh.id) as total_transaction
+		from customer c 
+		left join sales_order_header soh ON soh.cust_bill_to_id = c.id 
+		where document_no like 'OSO%' 
+			and soh.status='submitted'
+			and soh.transaction_date between {START_DATE} and {END_DATE} 
+			and c.show_in_apps = 1
+		group by c.id 
+	),
+	dataInvoice as (
+		select r.group_id as region_group_id, count(sih.id) total_invoice
+		from sales_invoice_header sih
+			left join customer c on c.id = sih.cust_bill_to_id 
+			left join branch b on b.id = sih.branch_id 
+			left join region r on r.id = b.region_id 
+		where sih.transaction_source_document_no like 'CO%'
+			and sih.transaction_date between {START_DATE} and {END_DATE}
+			and c.show_in_apps = 1
+		group by r.group_id
+	),
+	dataVisitedUser as (
+		select cus.id as cus_id, count(*) as visit_user
+		from user_checkin_activity uca 
+			left join customer cus on cus.user_id = uca.user_id 
+		where uca.checkin_time::date between {START_DATE} and {END_DATE}
+			and cus.show_in_apps = 1
+		group by cus.id
+	),
+	dataOutlet as (
+		select r.group_id as region_group_id, count(distinct c.id) as total_outlet
+		from branch b 
+		left join customer c on c.branch_id = b.id
+		left join sales_invoice_header sih on sih.cust_bill_to_id = c.id
+		left join region r on r.id = b.region_id
+		where c.created_date IS not NULL 
+			and c.show_in_apps = 1 
+		group by r.group_id 
+	), 
+	dataActiveOutlet as (
+		select r.group_id as region_group_id,
+		count(distinct sih.cust_bill_to_id) as active_outlet
+		from branch b 
+		left join customer c on c.branch_id = b.id
+		left join sales_invoice_header sih on sih.cust_bill_to_id = c.id
+		left join region r on r.id = b.region_id
+		where c.created_date IS not NULL 
+			and c.show_in_apps = 1
+			and sih.transaction_date between {START_DATE} and {END_DATE}
+			and sih.transaction_source_document_no like 'CO%' 
+		group by r.group_id 
+	),
+	dataCompleteCustomer as (
+		select r.group_id as region_group_id,
+		count(c.id) as total_complete_customer
+		from region r 
+		left join branch b on b.region_id = r.id
+		left join customer c on c.branch_id = b.id
+		left join _user us on us.id = c.user_id 
+		where c.modified_date::date between {START_DATE} and {END_DATE}
+			and c.created_date IS not null and c.show_in_apps = 1
+			and coalesce(c.is_data_completed, false) = true
+			and us.fcm_token is not null and length(trim(us.fcm_token))>0
+		group by r.group_id 
+	)
+	select r.group_id, r.group_name,
+	coalesce(sum(dvs.visit_user),0) as total_visit_user,
+	sum(case when dro.total_transaction>1 then(dro.total_transaction-1) else 0 end) as total_repeat_order_user,
+	coalesce (sum(dt.total_transaction), 0) as total_order_user,
+	count(u.id) filter (
+		where u.fcm_token is not null 
+			and c.show_in_apps = 1
+			and u.first_login_time::date between {START_DATE} and {END_DATE} 
+			and length(trim(u.fcm_token))>0
+	) as total_register_user,
+	coalesce(count(dro.customer_id) filter (where dro.total_transaction > 1), 0) as customer_count_repeat_order,
+	coalesce (ddo.total_outlet,0) as total_outlet,
+	coalesce(dao.active_outlet,0) as total_active_outlet,
+	coalesce (di.total_invoice,0) as total_invoice,
+	coalesce (dcc.total_complete_customer,0) as total_complete_customer
+	from customer c 
+		left join branch b on b.id = c.branch_id
+		left join region r on r.id = b.region_id
+		left join "_user" u on u.id = c.user_id
+		left join dataRepeatOrder dro on dro.customer_id = c.id
+		left join dataVisitedUser dvs on dvs.cus_id = c.id
+		left join dataOutlet ddo on ddo.region_group_id = r.group_id 
+		left join dataActiveOutlet dao on dao.region_group_id= r.group_id
+		left join dataInvoice di on di.region_group_id = r.group_id
+		left join dataCompleteCustomer dcc on dcc.region_group_id = r.group_id
+		left join dataTransaction dt on dt.customer_id = c.id
+	where r.group_id is not null
+	group by r.group_id,r.group_name, ddo.total_outlet, dao.active_outlet, di.total_invoice, dcc.total_complete_customer
+	order by group_id desc`
+
 	DashboardWebSelectByGroupIDStatement = ` 
 	with dataRepeatOrder as (
 		select c.id as customer_id, count(soh.id) as total_transaction
@@ -234,23 +337,26 @@ var (
 		where lower(document_no) like '%oso%' 
 			and soh.status='submitted'
 			and soh.transaction_date between '{START_DATE}' and '{END_DATE}' 
+			and c.show_in_apps = 1
 		group by c.id 
 	),
 	dataInvoice as (
 		select r.id region_id, count(sih.id) total_invoice
 		from sales_invoice_header sih 
+			left join customer c on c.id = sih.cust_bill_to_id 
 			left join branch b on b.id = sih.branch_id 
 			left join region r on r.id = b.region_id 
 		where sih.transaction_source_document_no like 'CO%'
 			and sih.transaction_date between '{START_DATE}' and '{END_DATE}' 
+			and c.show_in_apps = 1
 		group by r.id
 	),
 	dataVisitedUser as (
 		select cus.id as cus_id, count(*) as visit_user
-		from user_checkin_activity uca
-			left join _user us on us.id = uca.user_id
-			left join customer cus on cus.customer_code = us.login
-		where  cus.show_in_apps = 1 and uca.checkin_time::date between '{START_DATE}' and '{END_DATE}'
+		from user_checkin_activity uca 
+			left join customer cus on cus.user_id = uca.user_id 
+		where uca.checkin_time::date between '{START_DATE}' and '{END_DATE}'
+			and cus.show_in_apps = 1
 		group by cus.id
 	),
 	dataOutlet as (
@@ -271,6 +377,7 @@ var (
 		left join sales_invoice_header sih on sih.cust_bill_to_id = c.id
 		left join region r on r.id = b.region_id
 		where c.created_date IS not NULL 
+			and c.show_in_apps = 1
 			and sih.transaction_date between '{START_DATE}' and '{END_DATE}'
 			and sih.transaction_source_document_no like 'CO%' 
 		group by r.id 
@@ -294,6 +401,7 @@ var (
 	coalesce (sum(dt.total_transaction), 0) as total_order_user,
 	count(u.id) filter (
 		where u.fcm_token is not null 
+			and c.show_in_apps = 1
 			and u.first_login_time::date between '{START_DATE}' and '{END_DATE}' 
 			and length(trim(u.fcm_token))>0
 	) as total_register_user,

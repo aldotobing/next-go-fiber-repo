@@ -1,5 +1,19 @@
 package viewmodel
 
+type Dashboard struct {
+	RegionGroupID            string `json:"region_id"`
+	RegionGroupName          string `json:"region_name"`
+	TotalVisitUser           string `json:"total_visit_user"`
+	TotalRepeatUser          string `json:"total_repeat_order_user"`
+	TotalOrderUser           string `json:"total_order_user"`
+	TotalInvoice             string `json:"total_invoice_user"`
+	TotalRegisteredUser      string `json:"total_registered_user"`
+	CustomerCountRepeatOrder string `json:"customer_count_repeat_order"`
+	TotalActiveOutlet        string `json:"total_active_outlet"`
+	TotalOutlet              string `json:"total_outlet"`
+	TotalCompleteCustomer    string `json:"total_complete_customer"`
+}
+
 type DashboardByGroupID struct {
 	RegionID                 *string `json:"region_id_detail"`
 	RegionName               *string `json:"region_name_detail"`
