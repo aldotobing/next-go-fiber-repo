@@ -149,6 +149,8 @@ type DashboardTrackingInvoiceVM struct {
 	CustomerName                string `json:"customer_name"`
 	CustomerCode                string `json:"customer_code"`
 	CustomerLevelName           string `json:"customer_level_name"`
+	CustomerDistrictName        string `json:"customer_district_name"`
+	CustomerSubDistrictName     string `json:"customer_subdistrict_name"`
 	SalesOrderDocumentNumber    string `json:"sales_order_document_number"`
 	CustomerOrderDocumentNumber string `json:"customer_order_document_number"`
 	InvoiceID                   string `json:"invoice_id"`
