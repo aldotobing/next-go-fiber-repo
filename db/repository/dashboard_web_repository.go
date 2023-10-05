@@ -1063,15 +1063,19 @@ func (repo DashboardWebRepository) TrackingInvoice(ctx context.Context, input mo
 			b.id as branch_id, b.area as branch_area, b.branch_code as branch_code, b."_name" as branch_name,
 			c.id as customer_id, c.customer_name, c.customer_code, 
 			c.customer_level_id as customer_level_id, cl."_name" as customer_level_name,
-			c.user_id as customer_user_id
+			c.user_id as customer_user_id,
+			DIST._NAME AS CUST_DISTRICT_NAME,
+			SDIST._NAME AS CUST_SUBDISTRICT_NAME
 		from customer c 
 		left join customer_level cl on cl.id = c.customer_level_id 
 		left join branch b on b.id= c.branch_id 
 		left join region r on r.id = b.region_id 
+		left JOIN DISTRICT DIST ON DIST.ID = C.CUSTOMER_DISTRICT_ID
+		left JOIN SUBDISTRICT SDIST ON SDIST.ID = C.CUSTOMER_SUBDISTRICT_ID
 	)
 	select ct.group_name, ct.region_name,
 		ct.branch_name, ct.branch_area, ct.branch_code,
-		ct.customer_name, ct.customer_code, ct.customer_level_name,
+		ct.customer_name, ct.customer_code, ct.customer_level_name, ct.CUST_DISTRICT_NAME, ct.CUST_SUBDISTRICT_NAME,
 		sih.id, sih.document_no as invoice_no,
 		coh.document_no as customer_order_document_no, coh.created_date as customer_order_created_date,
 		soh.document_no as sales_order_document_no, soh.created_date as sales_order_created_date,
@@ -1098,7 +1102,7 @@ func (repo DashboardWebRepository) TrackingInvoice(ctx context.Context, input mo
 		var temp models.DashboardTrackingInvoice
 		err = rows.Scan(&temp.RegionGroupName, &temp.RegionName,
 			&temp.BranchName, &temp.BranchArea, &temp.BranchCode,
-			&temp.CustomerName, &temp.CustomerCode, &temp.CustomerLevel,
+			&temp.CustomerName, &temp.CustomerCode, &temp.CustomerLevel, &temp.CustomerDistrictName, &temp.CustomerSubDistrictName,
 			&temp.InvoiceID, &temp.InvoiceNumber,
 			&temp.CustomerOrderDocumentNo, &temp.CustomerOrderCreatedDate,
 			&temp.SalesOrderDocumentNo, &temp.SalesOrderCreatedDate,
