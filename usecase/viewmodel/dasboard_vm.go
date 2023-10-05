@@ -176,4 +176,7 @@ type DashboardVirtualAccountVM struct {
 	VirtualAccountNumber    string `json:"virtual_account_number"`
 	VirtualAccountStartDate string `json:"virtual_start_date"`
 	VirtualAccountEndDate   string `json:"virtual_end_date"`
+	Amount                  string `json:"amount"`
+	VirtualAccountRef1      string `json:"virtual_account_ref1"`
+	VirtualAccountRef2      string `json:"virtual_account_ref2"`
 }

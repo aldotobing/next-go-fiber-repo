@@ -155,6 +155,9 @@ type DashboardVirtualAccount struct {
 	VirtualAccountNumber    sql.NullString `json:"virtual_account_number"`
 	VirtualAccountStartDate sql.NullString `json:"virtual_start_date"`
 	VirtualAccountEndDate   sql.NullString `json:"virtual_end_date"`
+	Amount                  sql.NullString `json:"amount"`
+	VirtualAccountRef1      sql.NullString `json:"virtual_account_ref1"`
+	VirtualAccountRef2      sql.NullString `json:"virtual_account_ref2"`
 }
 
 // DashboardWebParameter ...
