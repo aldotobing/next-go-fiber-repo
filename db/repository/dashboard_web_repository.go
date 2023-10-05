@@ -1136,7 +1136,8 @@ func (repo DashboardWebRepository) VirtualAccount(ctx context.Context, input mod
 	queryStatement := `	select def.va_code, def.invoice_code, sih.transaction_source_document_no, def.start_date, def.end_date,
 	c.customer_name, c.customer_code, c.customer_phone,
 	b._name, b.branch_code, b.area,
-	r._name, r.group_name
+	r._name, r.group_name,
+	def.amount, def.va_ref1, def.va_ref2
 	from virtual_account_transaction def
 		left join sales_invoice_header sih on sih.document_no = def.invoice_code
 		left join customer c on c.id = sih.cust_bill_to_id
@@ -1158,6 +1159,7 @@ func (repo DashboardWebRepository) VirtualAccount(ctx context.Context, input mod
 			&temp.CustomerName, &temp.CustomerCode, &temp.CustomerPhoneNo,
 			&temp.BranchName, &temp.BranchCode, &temp.BranchArea,
 			&temp.RegionName, &temp.RegionGroupName,
+			&temp.Amount, &temp.VirtualAccountRef1, &temp.VirtualAccountRef2,
 		)
 		if err != nil {
 			return

@@ -649,6 +649,9 @@ func (uc DashboardWebUC) GetVirtualAccountData(c context.Context, parameter mode
 			VirtualAccountNumber:    datum.VirtualAccountNumber.String,
 			VirtualAccountStartDate: datum.VirtualAccountStartDate.String,
 			VirtualAccountEndDate:   datum.VirtualAccountEndDate.String,
+			Amount:                  datum.Amount.String,
+			VirtualAccountRef1:      datum.VirtualAccountRef1.String,
+			VirtualAccountRef2:      datum.VirtualAccountRef2.String,
 		})
 	}
 
