@@ -172,7 +172,7 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 		$11 ,$12, $13, $14, $15,
 		$16, $17, $18, $19, $20,
 		$21, $22, $23, $24, $25,
-		$26, $27, $28, $29
+		$26, $27, $28, $29 
 		)
 	RETURNING id`
 	transaction, err := repository.DB.BeginTx(c, nil)
@@ -194,13 +194,13 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 		deletedHeaderRow.Close()
 
 	}
-
+	//oustanding amount = net amount
 	err = transaction.QueryRowContext(c, statement,
 		model.DocumentNo, model.DocumentTypeID, model.TransactionDate, model.TransactionTime, model.CustomerCode,
 		model.TaxCalcMethod, model.SalesmanCode, model.PaymentTermsID, model.SalesOrderID, model.CompanyID,
 		model.BranchID, model.PriceLIstID, model.PriceLIstVersionID, str.EmptyString(*model.Status), str.EmptyString(*model.GrossAmount),
 		model.DiscAmount, model.TaxableAmount, model.TaxAmount, model.RoundingAmount, model.NetAmount,
-		str.EmptyString(*model.OutstandingAmount), str.EmptyString(*model.PaidAmount), model.DueDate, model.NoPPN, model.GlobalDiscAmount,
+		str.EmptyString(*model.NetAmount), str.EmptyString(*model.PaidAmount), model.DueDate, model.NoPPN, model.GlobalDiscAmount,
 		str.EmptyString(*model.TransactionPoint), str.NullString(model.SalesRequestCode), str.NullString(model.InvoiceDate), str.NullString(model.PaidDate),
 	).Scan(&res)
 

@@ -50,6 +50,8 @@ type CilentInvoiceParameter struct {
 	CustomerID string `json:"id_customer"`
 	Search     string `json:"search"`
 	DateParam  string `json:"date_param"`
+	StartDate  string `json:"start_date"`
+	EndDate    string `json:"end_date"`
 	Page       int    `json:"page"`
 	Offset     int    `json:"offset"`
 	Limit      int    `json:"limit"`

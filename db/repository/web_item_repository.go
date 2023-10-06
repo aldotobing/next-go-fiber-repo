@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -77,30 +78,41 @@ func (repository WebItemRepository) scanRow(row *sql.Row) (res models.WebItem, e
 func (repository WebItemRepository) SelectAll(c context.Context, parameter models.WebItemParameter) (data []models.WebItem, err error) {
 	conditionString := ``
 
+	var args []interface{}
+	var index int = 1
+
 	if parameter.ID != "" {
-		conditionString += ` AND DEF.ID = '` + parameter.ID + `'`
+		conditionString += ` AND DEF.ID = $` + strconv.Itoa(index)
+		args = append(args, parameter.ID)
+		index++
 	}
 
 	if parameter.ItemCategoryId != "" {
 		if parameter.ItemCategoryId == "2" {
-			//KHUSUS TAC sendiri, tampilkan semua item dengan category TAC (TAC ANAK, BEBAS GULA, DLL)
-			conditionString += ` AND def.item_category_id IN (SELECT id FROM item_category WHERE lower (_name) LIKE '%tac%') `
+			// KHUSUS TAC sendiri, tampilkan semua item dengan category TAC (TAC ANAK, BEBAS GULA, DLL)
+			conditionString += ` AND def.item_category_id IN (SELECT id FROM item_category WHERE lower(_name) LIKE $` + strconv.Itoa(index) + `) `
+			args = append(args, "%tac%")
+			index++
 		} else {
-			conditionString += ` AND def.item_category_id = ` + parameter.ItemCategoryId + ``
+			conditionString += ` AND def.item_category_id = $` + strconv.Itoa(index)
+			args = append(args, parameter.ItemCategoryId)
+			index++
 		}
 	}
 
+	args = append(args, "%"+strings.ToLower(parameter.Search)+"%")
+
 	statement := models.WebItemSelectStatement + ` ` + models.WebItemWhereStatement +
 		` AND def.hide IN (0, 1) and def.active IN (0, 1)
-		AND (LOWER(def."_name") LIKE $1 OR LOWER(def."code") LIKE $1) ` +
+		AND (LOWER(def."_name") LIKE $` + strconv.Itoa(index) + ` OR LOWER(def."code") LIKE $` + strconv.Itoa(index) + `) ` +
 		conditionString +
 		` ORDER BY ` +
 		parameter.By + ` ` +
 		parameter.Sort
 
-	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
+	rows, err := repository.DB.QueryContext(c, statement, args...)
 
-	fmt.Println(statement)
+	fmt.Println(statement) // consider logging this instead of printing, or removing it entirely after testing
 
 	if err != nil {
 		return data, err
@@ -119,31 +131,88 @@ func (repository WebItemRepository) SelectAll(c context.Context, parameter model
 	return data, err
 }
 
+// func (repository WebItemRepository) SelectAll(c context.Context, parameter models.WebItemParameter) (data []models.WebItem, err error) {
+// 	conditionString := ``
+
+// 	if parameter.ID != "" {
+// 		conditionString += ` AND DEF.ID = '` + parameter.ID + `'`
+// 	}
+
+// 	if parameter.ItemCategoryId != "" {
+// 		if parameter.ItemCategoryId == "2" {
+// 			//KHUSUS TAC sendiri, tampilkan semua item dengan category TAC (TAC ANAK, BEBAS GULA, DLL)
+// 			conditionString += ` AND def.item_category_id IN (SELECT id FROM item_category WHERE lower (_name) LIKE '%tac%') `
+// 		} else {
+// 			conditionString += ` AND def.item_category_id = ` + parameter.ItemCategoryId + ``
+// 		}
+// 	}
+
+// 	statement := models.WebItemSelectStatement + ` ` + models.WebItemWhereStatement +
+// 		` AND def.hide IN (0, 1) and def.active IN (0, 1)
+// 		AND (LOWER(def."_name") LIKE $1 OR LOWER(def."code") LIKE $1) ` +
+// 		conditionString +
+// 		` ORDER BY ` +
+// 		parameter.By + ` ` +
+// 		parameter.Sort
+
+// 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
+
+// 	fmt.Println(statement)
+
+// 	if err != nil {
+// 		return data, err
+// 	}
+
+// 	defer rows.Close()
+// 	for rows.Next() {
+
+// 		temp, err := repository.scanRows(rows)
+// 		if err != nil {
+// 			return data, err
+// 		}
+// 		data = append(data, temp)
+// 	}
+
+// 	return data, err
+// }
+
 // FindAll ...
 func (repository WebItemRepository) FindAll(ctx context.Context, parameter models.WebItemParameter) (data []models.WebItem, count int, err error) {
 	conditionString := ``
 
+	var args []interface{}
+	var index int = 1
+
 	if parameter.ID != "" {
-		conditionString += ` AND DEF.ID = '` + parameter.ID + `'`
+		conditionString += ` AND DEF.ID = $` + strconv.Itoa(index)
+		args = append(args, parameter.ID)
+		index++
 	}
 
 	if parameter.ItemCategoryId != "" {
 		if parameter.ItemCategoryId == "2" {
-			//KHUSUS TAC sendiri, tampilkan semua item dengan category TAC (TAC ANAK, BEBAS GULA, DLL)
-			conditionString += ` AND def.item_category_id IN (SELECT id FROM item_category WHERE lower (_name) LIKE '%tac%') `
+			// KHUSUS TAC sendiri, tampilkan semua item dengan category TAC (TAC ANAK, BEBAS GULA, DLL)
+			conditionString += ` AND def.item_category_id IN (SELECT id FROM item_category WHERE lower(_name) LIKE $` + strconv.Itoa(index) + `) `
+			args = append(args, "%tac%")
+			index++
 		} else {
-			conditionString += ` AND def.item_category_id = ` + parameter.ItemCategoryId + ``
+			conditionString += ` AND def.item_category_id = $` + strconv.Itoa(index)
+			args = append(args, parameter.ItemCategoryId)
+			index++
 		}
 	}
 
+	args = append(args, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
+
 	query := models.WebItemSelectStatement + ` ` + models.WebItemWhereStatement + ` ` + conditionString + `
-			AND (LOWER(def."_name") LIKE $1 OR LOWER(def."code") LIKE $1) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
-	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
+			AND (LOWER(def."_name") LIKE $` + strconv.Itoa(index) + ` OR LOWER(def."code") LIKE $` + strconv.Itoa(index) + `) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $` + strconv.Itoa(index+1) + ` LIMIT $` + strconv.Itoa(index+2)
+	rows, err := repository.DB.QueryContext(ctx, query, args...)
+
+	fmt.Println(query)
+
 	if err != nil {
 		return data, count, err
 	}
-
-	fmt.Println(query)
 
 	defer rows.Close()
 	for rows.Next() {
@@ -153,18 +222,65 @@ func (repository WebItemRepository) FindAll(ctx context.Context, parameter model
 		}
 		data = append(data, temp)
 	}
+
 	err = rows.Err()
 	if err != nil {
 		return data, count, err
 	}
 
-	query = `SELECT COUNT(*) FROM "item" DEF ` +
+	// Now the count query
+	queryCount := `SELECT COUNT(*) FROM "item" DEF ` +
 		`LEFT JOIN ITEM_CATEGORY IC ON IC.ID = DEF.ITEM_CATEGORY_ID` +
-		models.WebItemWhereStatement + ` ` +
-		conditionString + ` AND (LOWER(def."_name") LIKE $1)`
-	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
+		models.WebItemWhereStatement + ` ` + conditionString + ` AND (LOWER(def."_name") LIKE $` + strconv.Itoa(index) + `)`
+	err = repository.DB.QueryRowContext(ctx, queryCount, args[:index]...).Scan(&count) // Use the args but only up to the index for this query
 	return data, count, err
 }
+
+// func (repository WebItemRepository) FindAll(ctx context.Context, parameter models.WebItemParameter) (data []models.WebItem, count int, err error) {
+// 	conditionString := ``
+
+// 	if parameter.ID != "" {
+// 		conditionString += ` AND DEF.ID = '` + parameter.ID + `'`
+// 	}
+
+// 	if parameter.ItemCategoryId != "" {
+// 		if parameter.ItemCategoryId == "2" {
+// 			//KHUSUS TAC sendiri, tampilkan semua item dengan category TAC (TAC ANAK, BEBAS GULA, DLL)
+// 			conditionString += ` AND def.item_category_id IN (SELECT id FROM item_category WHERE lower (_name) LIKE '%tac%') `
+// 		} else {
+// 			conditionString += ` AND def.item_category_id = ` + parameter.ItemCategoryId + ``
+// 		}
+// 	}
+
+// 	query := models.WebItemSelectStatement + ` ` + models.WebItemWhereStatement + ` ` + conditionString + `
+// 			AND (LOWER(def."_name") LIKE $1 OR LOWER(def."code") LIKE $1) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
+// 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
+// 	if err != nil {
+// 		return data, count, err
+// 	}
+
+// 	fmt.Println(query)
+
+// 	defer rows.Close()
+// 	for rows.Next() {
+// 		temp, err := repository.scanRows(rows)
+// 		if err != nil {
+// 			return data, count, err
+// 		}
+// 		data = append(data, temp)
+// 	}
+// 	err = rows.Err()
+// 	if err != nil {
+// 		return data, count, err
+// 	}
+
+// 	query = `SELECT COUNT(*) FROM "item" DEF ` +
+// 		`LEFT JOIN ITEM_CATEGORY IC ON IC.ID = DEF.ITEM_CATEGORY_ID` +
+// 		models.WebItemWhereStatement + ` ` +
+// 		conditionString + ` AND (LOWER(def."_name") LIKE $1)`
+// 	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
+// 	return data, count, err
+// }
 
 // FindByID ...
 func (repository WebItemRepository) FindByID(c context.Context, parameter models.WebItemParameter) (data models.WebItem, err error) {
@@ -180,22 +296,24 @@ func (repository WebItemRepository) FindByID(c context.Context, parameter models
 }
 
 func (repository WebItemRepository) FindByCategoryID(c context.Context, categoryID string) (data []models.WebItemSelectByCategory, err error) {
-	statement := `SELECT 
+	statement := `
+		SELECT 
 			DEF.ID AS item_id,
 			DEF.CODE AS item_code,
 			DEF._NAME AS item_name,
-			(concat('` + models.ItemImagePath + `',def.item_picture)) AS item_picture,
+			(concat($1, def.item_picture)) AS item_picture,
 			DEF.DESCRIPTION AS description,
-			array_to_string(array_agg(u."id" || '#sep#' || u."_name" || '#sep#' || iul.conversion order by iul."conversion"),'|') AS hashtags
+			array_to_string(array_agg(u."id" || '#sep#' || u."_name" || '#sep#' || iul.conversion order by iul."conversion"), '|') AS hashtags
 		FROM ITEM DEF
-		left join item_uom_line iul on iul.item_id = def.id 
-		left join uom u on u.id = iul.uom_id ` +
-		` WHERE def.created_date IS NOT NULL AND def.ITEM_CATEGORY_ID = $1 and def.hide = 0 and def.active = 1` +
-		`group by def.id
-		order by def.id asc`
-	rows, err := repository.DB.Query(statement, categoryID)
+		LEFT JOIN item_uom_line iul ON iul.item_id = def.id 
+		LEFT JOIN uom u ON u.id = iul.uom_id 
+		WHERE def.created_date IS NOT NULL AND def.ITEM_CATEGORY_ID = $2 AND def.hide = 0 AND def.active = 1
+		GROUP BY def.id
+		ORDER BY def.id ASC`
+
+	rows, err := repository.DB.QueryContext(c, statement, models.ItemImagePath, categoryID)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	defer rows.Close()
@@ -209,14 +327,53 @@ func (repository WebItemRepository) FindByCategoryID(c context.Context, category
 			&temp.UOMDetail,
 		)
 		if err != nil {
-			return data, err
+			return nil, err
 		}
 		data = append(data, temp)
 	}
 	err = rows.Err()
 
-	return
+	return data, err
 }
+
+// func (repository WebItemRepository) FindByCategoryID(c context.Context, categoryID string) (data []models.WebItemSelectByCategory, err error) {
+// 	statement := `SELECT
+// 			DEF.ID AS item_id,
+// 			DEF.CODE AS item_code,
+// 			DEF._NAME AS item_name,
+// 			(concat('` + models.ItemImagePath + `',def.item_picture)) AS item_picture,
+// 			DEF.DESCRIPTION AS description,
+// 			array_to_string(array_agg(u."id" || '#sep#' || u."_name" || '#sep#' || iul.conversion order by iul."conversion"),'|') AS hashtags
+// 		FROM ITEM DEF
+// 		left join item_uom_line iul on iul.item_id = def.id
+// 		left join uom u on u.id = iul.uom_id ` +
+// 		` WHERE def.created_date IS NOT NULL AND def.ITEM_CATEGORY_ID = $1 and def.hide = 0 and def.active = 1` +
+// 		`group by def.id
+// 		order by def.id asc`
+// 	rows, err := repository.DB.Query(statement, categoryID)
+// 	if err != nil {
+// 		return
+// 	}
+
+// 	defer rows.Close()
+// 	for rows.Next() {
+// 		var temp models.WebItemSelectByCategory
+// 		err := rows.Scan(&temp.ID,
+// 			&temp.Code,
+// 			&temp.Name,
+// 			&temp.ItemPicture,
+// 			&temp.ItemDescription,
+// 			&temp.UOMDetail,
+// 		)
+// 		if err != nil {
+// 			return data, err
+// 		}
+// 		data = append(data, temp)
+// 	}
+// 	err = rows.Err()
+
+// 	return
+// }
 
 // Edit ...
 func (repository WebItemRepository) Edit(c context.Context, model *models.WebItem) (res *string, err error) {

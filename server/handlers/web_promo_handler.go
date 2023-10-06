@@ -228,5 +228,28 @@ func (h *WebPromoHandler) FindByID(ctx *fiber.Ctx) error {
 		res.CustomerLevelIdList = &customerLevelIDList
 	}
 
+	branchUCEligible := usecase.WebBranchEligiblePromoUC{ContractUC: h.ContractUC}
+	branchresEligible, errEligible := branchUCEligible.SelectAll(c, models.WebBranchEligiblePromoParameter{
+		PromoID: *res.ID,
+		By:      "pr._name",
+	})
+	if branchresEligible == nil {
+		branchresEligible = make([]models.WebBranchEligiblePromo, 0)
+	}
+	var branchIDList string
+	for i := range branchresEligible {
+		if branchresEligible[i].BranchId != nil {
+			if branchIDList == "" {
+				branchIDList += *branchresEligible[i].BranchId
+			} else {
+				branchIDList += "," + *branchresEligible[i].BranchId
+			}
+		}
+	}
+	if errEligible == nil {
+		res.BranchList = &branchresEligible
+		res.BranchIdList = &branchIDList
+	}
+
 	return h.SendResponse(ctx, res, nil, err, 0)
 }

@@ -40,6 +40,7 @@ func (repository PromoContent) scanRows(rows *sql.Rows) (res models.PromoContent
 		&res.StartDate,
 		&res.EndDate,
 		&res.Active,
+		&res.Priority,
 	)
 	if err != nil {
 
@@ -59,6 +60,7 @@ func (repository PromoContent) scanRow(row *sql.Row) (res models.PromoContent, e
 		&res.StartDate,
 		&res.EndDate,
 		&res.Active,
+		&res.Priority,
 	)
 	if err != nil {
 		return res, err
@@ -82,6 +84,27 @@ func (repository PromoContent) SelectAll(c context.Context, parameter models.Pro
 	if parameter.CustomerTypeId != "" {
 		conditionString += ` AND (PC.ID IN (SELECT promo_id FROM customer_type_eligible_promo ctep WHERE customer_type_id = ` + parameter.CustomerTypeId + `) ` +
 			` OR PC.ID NOT IN (SELECT promo_id FROM customer_type_eligible_promo)) `
+	}
+
+	if parameter.CustomerLevelID != "" {
+		conditionString += ` AND PC.ID IN (SELECT pc2.id 
+			FROM promo pc2
+			left join customer_level_eligible_promo ctep on ctep.promo_id = pc2.id
+			WHERE ctep.customer_level_id = ` + parameter.CustomerLevelID + ` or ctep.id is null)`
+	}
+
+	if parameter.BranchID != "" {
+		conditionString += ` AND PC.ID IN (SELECT pc2.id 
+			FROM promo pc2
+			left join branch_eligible_promo BEP on BEP.promo_id = pc2.id
+			WHERE BEP.branch_id = ` + parameter.BranchID + ` or BEP.id is null)`
+	}
+
+	if parameter.RegionID != "" {
+		conditionString += ` AND PC.ID IN (SELECT pc2.id 
+			FROM promo pc2
+			left join region_area_eligible_promo REP on REP.promo_id = pc2.id
+			WHERE REP.region_id = ` + parameter.RegionID + ` or REP.id is null)`
 	}
 
 	statement := models.PromoContentSelectStatement + ` ` + models.PromoContentWhereStatement +

@@ -33,6 +33,24 @@ func (h *UserAccountHandler) Login(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
+func (h *UserAccountHandler) LoginTemp(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	input := new(requests.UserAccountLoginRequest)
+	if err := ctx.BodyParser(input); err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+	if err := h.Validator.Struct(input); err != nil {
+		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
+		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+	}
+
+	uc := usecase.UserAccountUC{ContractUC: h.ContractUC}
+	res, err := uc.LoginTemp(c, input)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
 func (h *UserAccountHandler) ResendOtp(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 	id := ctx.Query("customer_id")

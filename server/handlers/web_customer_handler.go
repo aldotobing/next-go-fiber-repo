@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 
@@ -32,6 +32,7 @@ func (h *WebCustomerHandler) SelectAll(ctx *fiber.Ctx) error {
 	parameter := models.WebCustomerParameter{
 		ID:             ctx.Query("customer_id"),
 		CustomerTypeId: ctx.Query("customer_type_id"),
+		SalesmanTypeID: ctx.Query("salesman_type_id"),
 		UserId:         ctx.Query("admin_user_id"),
 		BranchId:       ctx.Query("branch_id"),
 		Search:         ctx.Query("search"),
@@ -68,6 +69,7 @@ func (h *WebCustomerHandler) FindAll(ctx *fiber.Ctx) error {
 		By:             ctx.Query("by"),
 		Sort:           ctx.Query("sort"),
 		PhoneNumber:    ctx.Query("phone_number"),
+		ShowInApp:      ctx.Query("show_in_app"),
 	}
 	uc := usecase.WebCustomerUC{ContractUC: h.ContractUC}
 	res, meta, err := uc.FindAll(c, parameter)
@@ -100,7 +102,10 @@ func (h *WebCustomerHandler) FindByID(ctx *fiber.Ctx) error {
 	res, err := uc.FindByID(c, parameter)
 
 	type StructObject struct {
-		ListObject viewmodel.CustomerVM `json:"customer"`
+		ListObject          viewmodel.CustomerVM   `json:"customer"`
+		CustomerTarget      interface{}            `json:"customer_target"`
+		CustomerAchievement map[string]interface{} `json:"customer_achievement"`
+		SalesmanVisit       interface{}            `json:"salesman_visit"`
 	}
 
 	objectData := new(StructObject)
@@ -112,13 +117,58 @@ func (h *WebCustomerHandler) FindByID(ctx *fiber.Ctx) error {
 		objectData.ListObject.VisitDay = &target
 	}
 
+	var customerCode string
+	if res.Code != nil {
+		customerCode = *res.Code
+	}
+	objectData.CustomerTarget = helper.FetchClientDataTarget(models.CustomerTargetSemesterParameter{
+		ID:   *res.ID,
+		Code: customerCode,
+	})
+
+	achievement := make(map[string]interface{})
+	quarterAchievement, _ := usecase.CustomerAchievementQuarterUC{ContractUC: h.ContractUC}.SelectAll(c, models.CustomerAchievementQuarterParameter{
+		ID: *res.ID,
+		By: "cus.created_date",
+	})
+	if len(quarterAchievement) == 1 {
+		achievement["quater_achievement"] = quarterAchievement[0].Achievement
+	}
+	semesterAchievement, _ := usecase.CustomerAchievementSemesterUC{ContractUC: h.ContractUC}.SelectAll(c, models.CustomerAchievementSemesterParameter{
+		ID: *res.ID,
+		By: "cus.created_date",
+	})
+	if len(semesterAchievement) == 1 {
+		achievement["semester_achievement"] = semesterAchievement[0].Achievement
+	}
+	yearAchievement, _ := usecase.CustomerAchievementYearUC{ContractUC: h.ContractUC}.SelectAll(c, models.CustomerAchievementYearParameter{
+		ID: *res.ID,
+		By: "cus.created_date",
+	})
+	if len(yearAchievement) == 1 {
+		achievement["year_achievement"] = yearAchievement[0].Achievement
+	}
+	annualAchievement, _ := usecase.CustomerAchievementUC{ContractUC: h.ContractUC}.SelectAll(c, models.CustomerAchievementParameter{
+		ID: *res.ID,
+		By: "cus.created_date",
+	})
+	if len(annualAchievement) == 1 {
+		achievement["month_achievement"] = annualAchievement[0].Achievement
+	}
+	objectData.CustomerAchievement = achievement
+
+	objectData.SalesmanVisit = helper.FetchVisitDay(models.CustomerParameter{
+		ID:   *res.ID,
+		Code: customerCode,
+	})
+
 	return h.SendResponse(ctx, objectData, nil, err, 0)
 }
 
 func (h *WebCustomerHandler) FetchVisitDay(params models.WebCustomerParameter) string {
 	jsonReq, err := json.Marshal(params)
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrv/rest/customer/visitday/1", bytes.NewBuffer(jsonReq))
+	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrvxxx/rest/customer/visitday/1", bytes.NewBuffer(jsonReq))
 	if err != nil {
 		fmt.Println("client err")
 		fmt.Print(err.Error())
@@ -134,7 +184,7 @@ func (h *WebCustomerHandler) FetchVisitDay(params models.WebCustomerParameter) s
 		fmt.Print(err.Error())
 	}
 	defer resp.Body.Close()
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Print(err.Error())
 	}
@@ -224,7 +274,7 @@ func (h *WebCustomerHandler) ReportSelect(ctx *fiber.Ctx) error {
 	uc := usecase.WebCustomerUC{ContractUC: h.ContractUC}
 	res, err := uc.ReportSelect(c, parameter)
 	if err != nil {
-		return h.SendResponse(ctx, nil, nil, errors.New(helper.InvalidGender), http.StatusBadRequest)
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
 	}
 
 	if res == nil {

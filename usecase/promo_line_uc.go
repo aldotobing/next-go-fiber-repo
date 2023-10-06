@@ -119,3 +119,17 @@ func (uc PromoLineUC) Edit(c context.Context, id string, data *requests.PromoLin
 
 	return res, err
 }
+
+func (uc PromoLineUC) Delete(c context.Context, id int) (res models.PromoLine, err error) {
+	repo := repository.NewPromoLineRepository(uc.DB)
+	// now := time.Now().UTC()
+	// strnow := now.Format(time.RFC3339)
+
+	res.ID, err = repo.Delete(c, id)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	return res, err
+}

@@ -1,5 +1,19 @@
 package viewmodel
 
+type Dashboard struct {
+	RegionGroupID            string `json:"region_id"`
+	RegionGroupName          string `json:"region_name"`
+	TotalVisitUser           string `json:"total_visit_user"`
+	TotalRepeatUser          string `json:"total_repeat_order_user"`
+	TotalOrderUser           string `json:"total_order_user"`
+	TotalInvoice             string `json:"total_invoice_user"`
+	TotalRegisteredUser      string `json:"total_registered_user"`
+	CustomerCountRepeatOrder string `json:"customer_count_repeat_order"`
+	TotalActiveOutlet        string `json:"total_active_outlet"`
+	TotalOutlet              string `json:"total_outlet"`
+	TotalCompleteCustomer    string `json:"total_complete_customer"`
+}
+
 type DashboardByGroupID struct {
 	RegionID                 *string `json:"region_id_detail"`
 	RegionName               *string `json:"region_name_detail"`
@@ -135,6 +149,8 @@ type DashboardTrackingInvoiceVM struct {
 	CustomerName                string `json:"customer_name"`
 	CustomerCode                string `json:"customer_code"`
 	CustomerLevelName           string `json:"customer_level_name"`
+	CustomerDistrictName        string `json:"customer_district_name"`
+	CustomerSubDistrictName     string `json:"customer_subdistrict_name"`
 	SalesOrderDocumentNumber    string `json:"sales_order_document_number"`
 	CustomerOrderDocumentNumber string `json:"customer_order_document_number"`
 	InvoiceID                   string `json:"invoice_id"`
@@ -146,4 +162,23 @@ type DashboardTrackingInvoiceVM struct {
 	DueDate                     string `json:"due_date"`
 	PaidOffDate                 string `json:"paid_off_date"`
 	SourceTransaction           string `json:"source_transaction"`
+}
+
+type DashboardVirtualAccountVM struct {
+	RegionGroupName         string `json:"region_group_name"`
+	RegionName              string `json:"region_name"`
+	BranchName              string `json:"branch_name"`
+	BranchArea              string `json:"branch_area"`
+	BranchCode              string `json:"branch_code"`
+	CustomerName            string `json:"customer_name"`
+	CustomerCode            string `json:"customer_code"`
+	CustomerPhoneNo         string `json:"customer_phone_number"`
+	InvoiceNumber           string `json:"invoice_number"`
+	SourceDocumentNo        string `json:"source_document_no"`
+	VirtualAccountNumber    string `json:"virtual_account_number"`
+	VirtualAccountStartDate string `json:"virtual_start_date"`
+	VirtualAccountEndDate   string `json:"virtual_end_date"`
+	Amount                  string `json:"amount"`
+	VirtualAccountRef1      string `json:"virtual_account_ref1"`
+	VirtualAccountRef2      string `json:"virtual_account_ref2"`
 }

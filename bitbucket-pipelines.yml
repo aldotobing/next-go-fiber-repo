@@ -6,9 +6,18 @@
 image: golang:1.19
 definitions:
   steps:
-    #- parallel:
+    - step: &copy
+        name: Working on ENV
+        script:
+          - echo "$PRIVATE_KEY" > id_rsa_bitbucket
+          - chmod 600 id_rsa_bitbucket
+          - scp -i id_rsa_bitbucket -o StrictHostKeyChecking=no ec2-user@"$SSH_ADDR":/home/ec2-user/nextbasis-service-golang/.env .env
+          - scp -i id_rsa_bitbucket -o StrictHostKeyChecking=no ec2-user@"$SSH_ADDR":/home/ec2-user/nextbasis-service-golang/firebaseconfig.json firebaseconfig.json
+        artifacts:
+          - .env
+          - firebaseconfig.json
     - step: &test
-        name: Test and Build
+        name: Test
         script:
           - mkdir test-reports
           - go install github.com/jstemmer/go-junit-report/v2@latest
@@ -31,26 +40,43 @@ definitions:
           - pipe: atlassian/git-secrets-scan:1.2.1
             variables:
               # FILES: '<string>' # Optional.
-              # FILES_IGNORED: '<string>' # Optional.
+              FILES_IGNORED: ".json" # Optional.
               # CUSTOM_PATTERN_ARGS: '<list>' of strings # Optional.
               # ANNOTATION_SUMMARY: '<string>' # Optional.
               # ANNOTATION_DESCRIPTION: '<string>' # Optional.
               DEBUG: "TRUE" # Optional.
+    # - step: &deploy
+    #     name: Deploy to Production
+    #     deployment: Production
+    #     script:
+    #       - echo "Deploying to Production environment"
+    #       - pipe: atlassian/ssh-run:0.4.1
+    #         variables:
+    #           SSH_USER: "$SSH_USER"
+    #           SERVER: "$SSH_ADDR"
+    #           COMMAND: sh /home/ec2-user/deploy.sh
+    #           DEBUG: "TRUE"
+    #           #test
+    - step: &build
+        name: Build Docker image and push
+        image: docker/compose:1.29.2
+        services:
+          - docker
+        script:
+          - echo "$DOCKERHUB_PASSWORD" | docker login --username $DOCKERHUB_USERNAME --password-stdin
+          - docker build -t $DOCKERHUB_USERNAME/nextapi:latest .
+          - docker push $DOCKERHUB_USERNAME/nextapi:latest
     - step: &deploy
-        name: Deploy to Production
+        name: Deploy to EC2
         deployment: Production
         script:
-          - echo "Deploying to Production environment"
           - pipe: atlassian/ssh-run:0.4.1
             variables:
               SSH_USER: "$SSH_USER"
               SERVER: "$SSH_ADDR"
-              COMMAND: sh /home/ec2-user/deploy.sh
-              DEBUG: "TRUE"
-              #test
+              COMMAND: "docker pull $DOCKERHUB_USERNAME/nextapi:latest && docker stop go-api-service || true && docker rm go-api-service || true && docker run -d --name go-api-service -p 5000:5000 $DOCKERHUB_USERNAME/nextapi:latest && echo 'Docker run command executed.' && sleep 5 && docker ps -f name=go-api-service"
         after-script:
-          - ALERT_TYPE="success"
-          - if [[ $BITBUCKET_EXIT_CODE -ne 0 ]]; then ALERT_TYPE="error" ; fi
+          - if [[ $BITBUCKET_EXIT_CODE -ne 0 ]]; then ALERT_TYPE="error"; else ALERT_TYPE="success"; fi
           # - pipe: atlassian/email-notify:0.3.12
           - pipe: atlassian/email-notify:0.8.0
             variables:
@@ -61,10 +87,7 @@ definitions:
               HOST: "$EMAIL_HOST"
               SUBJECT: "${BITBUCKET_REPO_FULL_NAME} : Deploy ${ALERT_TYPE} : Bitbucket Pipe Notification for branch : ${BITBUCKET_BRANCH}"
               BODY_HTML: "mail_template.html"
-
-          - ALERT_TYPE="success"
-          - if [[ $BITBUCKET_EXIT_CODE -ne 0 ]]; then ALERT_TYPE="error" ; fi
-          - pipe: atlassian/slack-notify:2.0.0
+          - pipe: atlassian/slack-notify:2.1.0
             variables:
               WEBHOOK_URL: $SLACK_WEB_HOOK_URL
               MESSAGE: '"[${BITBUCKET_REPO_FULL_NAME}] build has exited with status ${ALERT_TYPE}! Deployed to Production"'
@@ -72,9 +95,11 @@ definitions:
 pipelines:
   branches:
     rebuild:
-      - step: *test
-      - step: *lint
+      - step: *copy
+      #- step: *test
+      #- step: *lint
       - step: *security
+      - step: *build
       - step: *deploy
 
     billy-dev:

@@ -182,7 +182,7 @@ func (uc UserAccountUC) Login(c context.Context, data *requests.UserAccountLogin
 	// res.SalesmanCode = chkuser.SalesmanCode
 
 	if len(parts) == 1 {
-		senDwaMessage := uc.ContractUC.WhatsApp.SendWA(res.Phone, res.Otp)
+		senDwaMessage := uc.ContractUC.OtpWhatsApp.SendWA(res.Phone, res.Otp)
 		if senDwaMessage != nil {
 			fmt.Println("sukses")
 		}
@@ -233,7 +233,7 @@ func (uc UserAccountUC) ResendOtp(c context.Context, id string, data *requests.U
 	res.SalesmanID = chkuser.SalesmanID
 	res.SalesmanName = chkuser.SalesmanName
 	res.SalesmanCode = chkuser.SalesmanCode
-	senDwaMessage := uc.ContractUC.WhatsApp.SendWA(res.Phone, res.Otp)
+	senDwaMessage := uc.ContractUC.OtpWhatsApp.SendWA(res.Phone, res.Otp)
 	if senDwaMessage != nil {
 		fmt.Println("sukses")
 	}
@@ -310,5 +310,110 @@ func (uc UserAccountUC) LoginBackEnd(c context.Context, data *requests.UserAccou
 	res.SalesmanCode = chkuser.SalesmanCode
 	res.RoleList = *chkuser.RoleIDList
 
+	return res, nil
+}
+
+func (uc UserAccountUC) LoginTemp(c context.Context, data *requests.UserAccountLoginRequest) (res viewmodel.UserAccountVM, err error) {
+	parts := strings.Split(data.Code, "--*")
+	CodeUser := ""
+	if len(parts) >= 1 {
+		CodeUser = parts[0]
+	}
+	chkuser, _ := uc.FindByLoginName(c, models.UserAccountParameter{PhoneNo: data.PhoneNo, Code: CodeUser})
+	if chkuser.ID == "" {
+		logruslogger.Log(logruslogger.WarnLevel, helper.NameAlreadyExist, functioncaller.PrintFuncName(), "email", c.Value("requestid"))
+		return res, errors.New(helper.InvalidPhoneOrCode)
+	}
+	fmt.Println(&chkuser)
+	userOtpRequest := requests.UserOtpRequest{
+		Type:  OtpTypeLogin,
+		Phone: data.PhoneNo,
+	}
+	res.LoginCode = chkuser.LoginCode
+	otpUc := OtpUC{ContractUC: uc.ContractUC}
+	if len(parts) > 1 {
+		res.Otp, err = otpUc.OtpAnonumousRequest(c, *res.LoginCode, &userOtpRequest)
+
+	} else {
+		res.Otp, err = otpUc.OtpRequest(c, *res.LoginCode, &userOtpRequest)
+	}
+
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "otp_request", uc.ContractUC.ReqID)
+		return res, err
+	}
+
+	tokens, err := uc.GenerateToken(c, *res.LoginCode)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "token_request", uc.ContractUC.ReqID)
+		return res, err
+	}
+
+	roleList := strings.Split(*chkuser.RoleIDList, ",")
+
+	if len(roleList) > 0 && roleList[0] != "" {
+		if str.Contains(roleList, "111111004") {
+			customerrepo := repository.NewCustomerRepository(uc.DB)
+			chkcustomer, errckeckcus := customerrepo.FindByCodeAndPhone(c, models.CustomerParameter{Code: *chkuser.LoginCode, Phone: data.PhoneNo})
+			if errckeckcus != nil {
+				return res, errors.New(helper.InvalidPhoneOrCode)
+			}
+
+			res.CustomerID = *chkcustomer.ID
+			res.CustomerName = *chkcustomer.CustomerName
+			res.Phone = *chkcustomer.CustomerPhone
+			res.PriceListID = chkcustomer.CustomerPriceListID
+			res.PriceListVersionID = chkcustomer.CustomerPriceListVersionID
+			res.CustomerTypeID = chkcustomer.CustomerTypeId
+			res.CustomerLevelName = chkcustomer.CustomerLevel
+			res.CustomerAddress = chkcustomer.CustomerAddress
+			res.SalesmanID = chkcustomer.CustomerSalesmanID
+			res.SalesmanName = chkcustomer.CustomerSalesmanName
+			res.SalesmanCode = chkcustomer.CustomerSalesmanCode
+			res.Code = chkcustomer.Code
+
+		} else if str.Contains(roleList, "111111002") {
+			doctorrepo := repository.NewDoctorRepository(uc.DB)
+			chkdoctor, errckeckcdoc := doctorrepo.FindByCodeAndPhone(c, models.DoctorParameter{Code: *chkuser.LoginCode, Phone: data.PhoneNo})
+			if errckeckcdoc != nil {
+				return res, errors.New(helper.InvalidPhoneOrCode)
+			}
+			res.CustomerID = *chkdoctor.ID
+			res.CustomerName = *chkdoctor.DoctorName
+			res.Phone = *chkdoctor.DoctorPhone
+			res.Code = chkdoctor.Code
+		}
+	}
+
+	repo := repository.NewUserAccountRepository(uc.DB)
+	_, errfcm := repo.FCMUpdate(c, &models.UserAccount{ID: chkuser.ID, FCMToken: &data.FCMToken})
+	if errfcm != nil {
+	}
+	res.Token = tokens.Token
+	res.ExpiredDate = tokens.ExpiredDate
+	res.RefreshToken = tokens.RefreshToken
+	res.RefreshExpiredDate = tokens.RefreshExpiredDate
+	res.ID = chkuser.ID
+	res.RoleList = *chkuser.RoleIDList
+	res.LoginCode = chkuser.LoginCode
+	// res.Code = chkuser.Code
+	// res.CustomerID = *chkuser.CustomerID
+	// res.CustomerName = *chkuser.Name
+	// res.Phone = *chkuser.Phone
+	// res.PriceListID = chkuser.PriceListID
+	// res.PriceListVersionID = chkuser.PriceListVersionID
+	// res.CustomerTypeID = chkuser.CustomerTypeID
+	// res.CustomerLevelName = chkuser.CustomerLevelName
+	// res.CustomerAddress = chkuser.CustomerAddress
+	// res.SalesmanID = chkuser.SalesmanID
+	// res.SalesmanName = chkuser.SalesmanName
+	// res.SalesmanCode = chkuser.SalesmanCode
+
+	if len(parts) == 1 {
+		senDwaMessage := uc.ContractUC.OtpWhatsApp.SendWA(res.Phone, res.Otp)
+		if senDwaMessage != nil {
+			fmt.Println("sukses")
+		}
+	}
 	return res, nil
 }

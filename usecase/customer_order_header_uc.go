@@ -90,7 +90,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 	repo := repository.NewCustomerOrderHeaderRepository(uc.DB)
 
 	chekablerepo := repository.NewShoppingCartRepository(uc.DB)
-
+	vredeemrepo := repository.NewVoucherRedeemRepository(uc.DB)
 	checkAble, err := chekablerepo.GetTotal(c, models.ShoppingCartParameter{
 		CustomerID: data.CustomerID,
 		ListLine:   data.LineList,
@@ -99,14 +99,17 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 		return res, errors.New("Try Again Later")
 	}
 
+	fmt.Println("sebelom", data.LineList)
 	switch {
 	// case checkAble.IsAble == nil || *checkAble.IsAble == "0":
 	// 	bayar, _ := strconv.ParseFloat(*checkAble.MinOmzet, 0)
 	// 	minOrder := strings.ReplaceAll(number.FormatCurrency(bayar, "IDR", ".", "", 0), "Rp", "")
 	// 	return res, errors.New(helper.InvalidMinimumAmountOrder + minOrder + ` rupiah.`)
+
 	case checkAble.IsMinOrder == nil || *checkAble.IsMinOrder == "0":
 		bayar, _ := strconv.ParseFloat(*checkAble.MinOrder, 0)
 		minOrder := number.FormatCurrency(bayar, "", ".", "", 0)
+		fmt.Println("invalid min amount")
 		return res, errors.New(helper.InvalidMinimumAmountOrder + minOrder + ` rupiah.`)
 	}
 
@@ -118,6 +121,21 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 	tax_amount := "0"
 	net_amount := "0"
 	disc_amount := "0"
+	global_disc_amount := "0"
+
+	if &data.VoucherRedeemID != nil && data.VoucherRedeemID != "" {
+		vcrr, errvcrr := vredeemrepo.FindByID(c, models.VoucherRedeemParameter{ID: data.VoucherRedeemID})
+		if errvcrr == nil {
+			vcrrepo := repository.NewVoucherRepository(uc.DB)
+			vcr, errvcr := vcrrepo.FindByID(c, models.VoucherParameter{ID: vcrr.VoucherID})
+			if errvcr == nil {
+				if &vcr.CashValue != nil && vcr.CashValue != "" {
+					global_disc_amount = vcr.CashValue
+				}
+			}
+		}
+	}
+
 	res = models.CustomerOrderHeader{
 		TransactionDate:      &data.TransactionDate,
 		TransactionTime:      &data.TransactionTime,
@@ -135,6 +153,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 		BranchID:             &data.BranchID,
 		PriceLIstID:          &data.PriceLIstID,
 		LineList:             &data.LineList,
+		GlobalDiscAmount:     &global_disc_amount,
 	}
 
 	res.ID, err = repo.CheckOut(c, &res)
@@ -147,13 +166,23 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 
 	useraccount, erruser := userrepo.FindByID(c, models.CustomerParameter{ID: *res.CustomerID})
 
+	var msgSubBody string
 	if erruser == nil {
-
 		FcmUc := FCMUC{ContractUC: uc.ContractUC}
 		orderrepo := repository.NewCustomerOrderHeaderRepository(uc.DB)
 		orderlinerepo := repository.NewCustomerOrderLineRepository(uc.DB)
 		order, errorder := orderrepo.FindByID(c, models.CustomerOrderHeaderParameter{ID: *res.ID})
 		if errorder == nil {
+			if &data.VoucherRedeemID != nil && data.VoucherRedeemID != "" {
+				fmt.Println("start voucher redeem")
+				_, errvredem := vredeemrepo.CheckOutPaidRedeem(c, viewmodel.VoucherRedeemVM{ID: data.VoucherRedeemID, RedeemedToDocumentNo: *order.DocumentNo})
+				if errvredem == nil {
+					fmt.Println("redeem voucher sukes")
+				}
+				if errvredem != nil {
+					fmt.Println("redeem voucher error,", errvredem)
+				}
+			}
 			// fmt.Println("tanggal ", *order.TransactionDate)
 			dateString := pkgtime.GetDate(*order.TransactionDate+"T00:00:00Z", "02 - 01 - 2006", "Asia/Jakarta")
 
@@ -164,10 +193,13 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 			msgsalesmanheader := `*Kepada Yang Terhormat* \n\n *` + *useraccount.CustomerSalesmanName + `*`
 			msgsalesmanheader += `\n\n*NO ORDERAN ` + *order.DocumentNo + ` pada tanggal ` + dateString + ` oleh Toko : (` + *useraccount.CustomerName + `(` + *useraccount.Code + `)) telah berhasil dan akan diproses*`
 
+			msgSubBody += `\n\n*NO ORDERAN ` + *order.DocumentNo + ` pada tanggal ` + dateString + ` oleh Toko : (` + *useraccount.CustomerName + `(` + *useraccount.Code + `)) telah berhasil dan akan diproses*\n\n*Pelanggan dari salesman : {{salesman_detail}}*`
+
 			msgcustomerheader := `*Kepada Yang Terhormat* \n\n *` + *useraccount.Code + ` - ` + *useraccount.CustomerName + `*`
 			msgcustomerheader += `\n\n*NO ORDERAN ` + *order.DocumentNo + ` anda pada tanggal ` + dateString + ` oleh Toko : (` + *useraccount.CustomerName + `(` + *useraccount.Code + `)) telah berhasil dan akan diproses*`
 
 			msgbody := `\n\n*Berikut merupakan rincian pesanan anda:*`
+			msgSubBody += `\n\n*Berikut merupakan rincian pesanan:*`
 			orderline, errline := orderlinerepo.SelectAll(c, models.CustomerOrderLineParameter{
 				HeaderID: *order.ID,
 				By:       "def.created_date",
@@ -176,7 +208,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 				msgbody += `\n`
 				for i := range orderline {
 					msgbody += `\n ` + *orderline[i].QTY + ` ` + *orderline[i].UomName + ` ` + *orderline[i].ItemName + `\n`
-
+					msgSubBody += `\n ` + *orderline[i].QTY + ` ` + *orderline[i].UomName + ` ` + *orderline[i].ItemName + `\n`
 				}
 				ordercount := len(orderline)
 				msgbody += `\n`
@@ -187,6 +219,15 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 				msgbody += `\nSalam Sehat`
 				msgbody += `\n`
 				msgbody += `\nNB : Bila ini bukan transaksi dari Toko Bapak/Ibu, silahkan menghubungi Distributor Produk Sido Muncul.`
+
+				msgSubBody += `\n`
+				msgSubBody += `Total ` + strconv.Itoa(ordercount) + ` item, senilai ` + harga
+				msgSubBody += `\n`
+				msgSubBody += `\nTerima kasih atas pemesanan anda`
+				msgSubBody += `\n`
+				msgSubBody += `\nSalam Sehat`
+				msgSubBody += `\n`
+				msgSubBody += `\nNB : Bila ini bukan transaksi dari Toko Bapak/Ibu, silahkan periksa data transaksi di SFA WEB(NEXT)/WEB CMS MYSM.`
 			}
 
 			if useraccount.CustomerFCMToken != nil && *useraccount.CustomerFCMToken != "" {
@@ -218,8 +259,8 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 				// }
 				if useraccount.CustomerSalesmanID != nil {
 					salesmannRepo := repository.NewSalesmanRepository(uc.DB)
-					customerSales, errcustsales := salesmannRepo.FindByID(c, models.SalesmanParameter{ID: *useraccount.CustomerSalesmanID})
-					if errcustsales == nil {
+					customerSales, err := salesmannRepo.FindByID(c, models.SalesmanParameter{ID: *useraccount.CustomerSalesmanID})
+					if err == nil {
 						if customerSales.PhoneNo != nil {
 							msgSalesman := msgsalesmanheader + msgbody
 							senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*customerSales.PhoneNo, msgSalesman)
@@ -232,6 +273,23 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 			}
 		}
 
+	}
+
+	branchData, err := BranchUC{ContractUC: uc.ContractUC}.FindByID(c, models.BranchParameter{ID: data.BranchID})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "select_branch_by_id", c.Value("requestid"))
+		return res, err
+	}
+	if branchData.PICName != nil && *branchData.PICName != "" && branchData.PICPhoneNo != nil && *branchData.PICPhoneNo != "" {
+		msgToPIC := `*Kepada Yang Terhormat PIC*\n\n *` + *branchData.PICName + `*`
+		if useraccount.CustomerSalesmanID != nil {
+			msgSubBody = strings.ReplaceAll(msgSubBody, "{{salesman_detail}}", *useraccount.CustomerSalesmanName+" ("+*useraccount.CustomerSalesmanCode+")")
+		} else {
+			msgSubBody = strings.ReplaceAll(msgSubBody, "{{salesman_detail}}", "-")
+		}
+		msgToPIC += msgSubBody
+
+		_ = uc.ContractUC.WhatsApp.SendTransactionWA(*branchData.PICPhoneNo, msgToPIC)
 	}
 
 	return res, err

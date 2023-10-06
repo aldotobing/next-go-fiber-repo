@@ -5,6 +5,7 @@ type UserNotificationRequest struct {
 	RowID     string `json:"row_id"`
 	Type      string `json:"type_notification"`
 	Text      string `json:"notification_text"`
+	Title     string `json:"title"`
 	CreatedAt string `json:"created_date"`
 	UpdatedAt string `json:"modified_date"`
 	DeletedAt string `json:"deleted_date"`

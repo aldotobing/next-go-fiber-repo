@@ -24,6 +24,7 @@ func (route UserAccountRoutes) RegisterRoute() {
 	r.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
 
 	r.Post("/", handler.Login)
+	r.Post("/trial", handler.LoginTemp)
 
 	r1 := route.RouterGroup.Group("/api/web/auth")
 	r1.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -52,6 +53,7 @@ func (repository WebCustomerRepository) scanRows(rows *sql.Rows) (res models.Web
 		&res.CustomerBranchLat,
 		&res.CustomerBranchLng,
 		&res.CustomerBranchPicPhoneNo,
+		&res.CustomerBranchPicName,
 		&res.CustomerRegionCode,
 		&res.CustomerRegionName,
 		&res.CustomerRegionGroup,
@@ -82,8 +84,15 @@ func (repository WebCustomerRepository) scanRows(rows *sql.Rows) (res models.Web
 		&res.CustomerLevelID,
 		&res.CustomerUserID,
 		&res.CustomerUserName,
+		&res.CustomerUserToken,
 		&res.ModifiedBy,
 		&res.ModifiedDate,
+		&res.CustomerPriceListID,
+		&res.CustomerPriceListName,
+		&res.ShowInApp,
+		&res.IsDataComplete,
+		&res.SalesmanTypeCode,
+		&res.SalesmanTypeName,
 	)
 	if err != nil {
 
@@ -140,6 +149,10 @@ func (repository WebCustomerRepository) scanRowsReport(rows *sql.Rows) (res mode
 		&res.CustomerSalesmanID,
 		&res.ModifiedBy,
 		&res.CustomerUserName,
+		&res.IsDataComplete,
+		&res.SalesmanTypeCode,
+		&res.SalesmanTypeName,
+		&res.CustomerUserToken,
 	)
 	if err != nil {
 
@@ -172,6 +185,7 @@ func (repository WebCustomerRepository) scanRow(row *sql.Row) (res models.WebCus
 		&res.CustomerBranchLat,
 		&res.CustomerBranchLng,
 		&res.CustomerBranchPicPhoneNo,
+		&res.CustomerBranchPicName,
 		&res.CustomerRegionCode,
 		&res.CustomerRegionName,
 		&res.CustomerRegionGroup,
@@ -202,8 +216,15 @@ func (repository WebCustomerRepository) scanRow(row *sql.Row) (res models.WebCus
 		&res.CustomerLevelID,
 		&res.CustomerUserID,
 		&res.CustomerUserName,
+		&res.CustomerUserToken,
 		&res.ModifiedBy,
 		&res.ModifiedDate,
+		&res.CustomerPriceListID,
+		&res.CustomerPriceListName,
+		&res.ShowInApp,
+		&res.IsDataComplete,
+		&res.SalesmanTypeCode,
+		&res.SalesmanTypeName,
 	)
 	if err != nil {
 		return res, err
@@ -232,6 +253,14 @@ func (repository WebCustomerRepository) SelectAll(c context.Context, parameter m
 		conditionString += ` AND c.customer_phone LIKE '` + parameter.PhoneNumber + `'`
 	}
 
+	if parameter.CustomerTypeId != "" {
+		conditionString += ` AND c.customer_type_id = ` + parameter.CustomerTypeId
+	}
+
+	if parameter.SalesmanTypeID != "" {
+		conditionString += ` AND st.id = ` + parameter.SalesmanTypeID
+	}
+
 	statement := models.WebCustomerSelectStatement + ` ` + models.WebCustomerWhereStatement +
 		` AND (LOWER(c.customer_name) LIKE $1 or LOWER(c.customer_code) LIKE $1 ) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
@@ -257,29 +286,107 @@ func (repository WebCustomerRepository) SelectAll(c context.Context, parameter m
 }
 
 // FindAll ...
+// func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter models.WebCustomerParameter) (data []models.WebCustomer, count int, err error) {
+// 	conditionString := ``
+
+// 	if parameter.Search == "" {
+// 		parameter.Search = ""
+// 	}
+
+// 	if parameter.ID != "" {
+// 		conditionString += ` AND c.id = '` + parameter.ID + `'`
+// 	}
+
+// 	if parameter.UserId != "" {
+// 		conditionString += ` AND C.BRANCH_ID IN (SELECT BRANCH_ID FROM USER_BRANCH UB WHERE UB.USER_ID = ` + parameter.UserId + `) `
+// 	}
+
+// 	if parameter.BranchId != "" {
+// 		conditionString += ` AND C.BRANCH_ID= ` + parameter.BranchId
+// 	} else {
+// 		parameter.BranchId = ""
+// 	}
+
+// 	if parameter.PhoneNumber != "" {
+// 		conditionString += ` AND c.customer_phone LIKE '%` + parameter.PhoneNumber + `%'`
+// 	} else {
+// 		parameter.PhoneNumber = ""
+// 	}
+
+// 	query := models.WebCustomerSelectStatement + ` ` + models.WebCustomerWhereStatement + ` ` + conditionString + `
+// 		AND (LOWER(c.customer_name) LIKE $1 or LOWER(c.customer_code) LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
+
+// 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
+// 	if err != nil {
+// 		return data, count, err
+// 	}
+
+// 	defer rows.Close()
+// 	for rows.Next() {
+// 		temp, err := repository.scanRows(rows)
+// 		if err != nil {
+// 			return data, count, err
+// 		}
+// 		data = append(data, temp)
+// 	}
+// 	err = rows.Err()
+// 	if err != nil {
+// 		return data, count, err
+// 	}
+
+// 	query = `SELECT COUNT(*) FROM "customer" c ` + models.WebCustomerWhereStatement + ` ` +
+// 		conditionString + ` AND (LOWER(c.customer_name) LIKE $1 or LOWER(c.customer_code) LIKE $1 )`
+// 	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
+// 	return data, count, err
+// }
+
 func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter models.WebCustomerParameter) (data []models.WebCustomer, count int, err error) {
 	conditionString := ``
 
+	var args []interface{}
+	var index int = 1
+
+	if parameter.Search == "" {
+		parameter.Search = ""
+	}
+
 	if parameter.ID != "" {
-		conditionString += ` AND c.id = '` + parameter.ID + `'`
+		conditionString += ` AND c.id = $` + strconv.Itoa(index)
+		args = append(args, parameter.ID)
+		index++
 	}
 
 	if parameter.UserId != "" {
-		conditionString += ` AND C.BRANCH_ID IN (SELECT BRANCH_ID FROM USER_BRANCH UB WHERE UB.USER_ID = ` + parameter.UserId + `) `
+		conditionString += ` AND C.BRANCH_ID IN (SELECT BRANCH_ID FROM USER_BRANCH UB WHERE UB.USER_ID = $` + strconv.Itoa(index) + `) `
+		args = append(args, parameter.UserId)
+		index++
 	}
 
 	if parameter.BranchId != "" {
-		conditionString += ` AND C.BRANCH_ID= ` + parameter.BranchId
+		conditionString += ` AND C.BRANCH_ID= $` + strconv.Itoa(index)
+		args = append(args, parameter.BranchId)
+		index++
 	}
 
 	if parameter.PhoneNumber != "" {
-		conditionString += ` AND c.customer_phone LIKE '%` + parameter.PhoneNumber + `%'`
+		conditionString += ` AND c.customer_phone LIKE $` + strconv.Itoa(index)
+		args = append(args, "%"+parameter.PhoneNumber+"%")
+		index++
 	}
 
-	query := models.WebCustomerSelectStatement + ` ` + models.WebCustomerWhereStatement + ` ` + conditionString + `
-		AND (LOWER(c.customer_name) LIKE $1 or LOWER(c.customer_code) LIKE $1  ) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
+	args = append(args, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
 
-	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
+	var whereStatement string
+	if parameter.ShowInApp == "" || parameter.ShowInApp == "1" {
+		whereStatement = models.WebCustomerWhereStatement
+	} else {
+		whereStatement = models.WebCustomerWhereStatementAll
+	}
+
+	query := models.WebCustomerSelectStatement + ` ` + whereStatement + ` ` + conditionString + `
+		AND (LOWER(c.customer_name) LIKE $` + strconv.Itoa(index) + ` or LOWER(c.customer_code) LIKE $` + strconv.Itoa(index) + `) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $` + strconv.Itoa(index+1) + ` LIMIT $` + strconv.Itoa(index+2)
+
+	rows, err := repository.DB.QueryContext(ctx, query, args...)
 	if err != nil {
 		return data, count, err
 	}
@@ -292,14 +399,14 @@ func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter m
 		}
 		data = append(data, temp)
 	}
+
 	err = rows.Err()
 	if err != nil {
 		return data, count, err
 	}
 
-	query = `SELECT COUNT(*) FROM "customer" c ` + models.WebCustomerWhereStatement + ` ` +
-		conditionString + ` AND (LOWER(c.customer_name) LIKE $1 or LOWER(c.customer_code) LIKE $1 )`
-	err = repository.DB.QueryRow(query, "%"+strings.ToLower(parameter.Search)+"%").Scan(&count)
+	queryCount := `SELECT COUNT(*) FROM "customer" c ` + whereStatement + ` ` + conditionString + ` AND (LOWER(c.customer_name) LIKE $` + strconv.Itoa(index) + ` or LOWER(c.customer_code) LIKE $` + strconv.Itoa(index) + `)`
+	err = repository.DB.QueryRowContext(ctx, queryCount, args[:index]...).Scan(&count) // Reusing the args but slicing to the appropriate length for this query.
 	return data, count, err
 }
 
@@ -336,8 +443,9 @@ func (repository WebCustomerRepository) Edit(c context.Context, model *models.We
 		customer_photo_ktp = $13,
 		customer_cp_name = $14,
 		modified_date = now(),
-		modified_by = $15
-	WHERE id = $16
+		modified_by = $15,
+		show_in_apps = $16
+	WHERE id = $17
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		model.CustomerName,
@@ -355,6 +463,7 @@ func (repository WebCustomerRepository) Edit(c context.Context, model *models.We
 		model.CustomerPhotoKtp,
 		model.CustomerCpName,
 		model.UserID,
+		model.ShowInApp,
 		model.ID).Scan(&res)
 
 	if err != nil {
@@ -400,36 +509,58 @@ func (repository WebCustomerRepository) Add(c context.Context, model *models.Web
 func (repository WebCustomerRepository) ReportSelect(c context.Context, parameter models.WebCustomerReportParameter) (data []models.WebCustomer, err error) {
 	conditionString := ``
 
+	var args []interface{}
+	var index int = 1
+
 	if parameter.RegionID != "" {
-		conditionString += ` AND region_id = '` + parameter.RegionID + `'`
+		conditionString += ` AND region_id = $` + strconv.Itoa(index)
+		args = append(args, parameter.RegionID)
+		index++
 	}
 
 	if parameter.RegionGroupID != "" {
-		conditionString += ` AND region_group_id = '` + parameter.RegionGroupID + `'`
+		conditionString += ` AND region_group_id = $` + strconv.Itoa(index)
+		args = append(args, parameter.RegionGroupID)
+		index++
 	}
 
 	if parameter.BranchArea != "" {
-		conditionString += ` AND LOWER(branch_area) LIKE LOWER('%` + parameter.BranchArea + `%')`
+		conditionString += ` AND LOWER(branch_area) LIKE LOWER($` + strconv.Itoa(index) + `)`
+		args = append(args, "%"+parameter.BranchArea+"%")
+		index++
 	}
 
 	if parameter.CustomerTypeID != "" {
-		conditionString += ` AND cust_type_id = '` + parameter.CustomerTypeID + `'`
+		conditionString += ` AND cust_type_id = $` + strconv.Itoa(index)
+		args = append(args, parameter.CustomerTypeID)
+		index++
 	}
 
 	if parameter.BranchIDs != "" {
-		conditionString += ` AND c_branch_id IN (` + parameter.BranchIDs + `)`
+		ids := strings.Split(parameter.BranchIDs, ",")
+		placeholders := make([]string, len(ids))
+		for i, id := range ids {
+			placeholders[i] = "$" + strconv.Itoa(index)
+			args = append(args, id)
+			index++
+		}
+		conditionString += ` AND c_branch_id IN (` + strings.Join(placeholders, ",") + `)`
 	}
 
 	if parameter.CustomerLevelID != "" {
-		conditionString += ` AND CUSTOMER_LEVEL_ID = '` + parameter.CustomerLevelID + `'`
+		conditionString += ` AND CUSTOMER_LEVEL_ID = $` + strconv.Itoa(index)
+		args = append(args, parameter.CustomerLevelID)
+		index++
 	}
 
 	if parameter.AdminUserID != "" {
-		conditionString += ` AND C_BRANCH_ID IN (SELECT BRANCH_ID FROM USER_BRANCH UB WHERE UB.USER_ID = ` + parameter.AdminUserID + `)`
+		conditionString += ` AND C_BRANCH_ID IN (SELECT BRANCH_ID FROM USER_BRANCH UB WHERE UB.USER_ID = $` + strconv.Itoa(index) + `)`
+		args = append(args, parameter.AdminUserID)
+		index++
 	}
 
-	statement := `select * from v_customer_report WHERE customer_created_date IS NOT NULL ` + conditionString
-	rows, err := repository.DB.QueryContext(c, statement)
+	statement := `SELECT * FROM v_customer_report WHERE customer_created_date IS NOT NULL ` + conditionString
+	rows, err := repository.DB.QueryContext(c, statement, args...)
 
 	if err != nil {
 		return data, err
@@ -437,7 +568,6 @@ func (repository WebCustomerRepository) ReportSelect(c context.Context, paramete
 
 	defer rows.Close()
 	for rows.Next() {
-
 		temp, err := repository.scanRowsReport(rows)
 		if err != nil {
 			return data, err
@@ -447,3 +577,54 @@ func (repository WebCustomerRepository) ReportSelect(c context.Context, paramete
 
 	return data, err
 }
+
+// func (repository WebCustomerRepository) ReportSelect(c context.Context, parameter models.WebCustomerReportParameter) (data []models.WebCustomer, err error) {
+// 	conditionString := ``
+
+// 	if parameter.RegionID != "" {
+// 		conditionString += ` AND region_id = '` + parameter.RegionID + `'`
+// 	}
+
+// 	if parameter.RegionGroupID != "" {
+// 		conditionString += ` AND region_group_id = '` + parameter.RegionGroupID + `'`
+// 	}
+
+// 	if parameter.BranchArea != "" {
+// 		conditionString += ` AND LOWER(branch_area) LIKE LOWER('%` + parameter.BranchArea + `%')`
+// 	}
+
+// 	if parameter.CustomerTypeID != "" {
+// 		conditionString += ` AND cust_type_id = '` + parameter.CustomerTypeID + `'`
+// 	}
+
+// 	if parameter.BranchIDs != "" {
+// 		conditionString += ` AND c_branch_id IN (` + parameter.BranchIDs + `)`
+// 	}
+
+// 	if parameter.CustomerLevelID != "" {
+// 		conditionString += ` AND CUSTOMER_LEVEL_ID = '` + parameter.CustomerLevelID + `'`
+// 	}
+
+// 	if parameter.AdminUserID != "" {
+// 		conditionString += ` AND C_BRANCH_ID IN (SELECT BRANCH_ID FROM USER_BRANCH UB WHERE UB.USER_ID = ` + parameter.AdminUserID + `)`
+// 	}
+
+// 	statement := `select * from v_customer_report WHERE customer_created_date IS NOT NULL ` + conditionString
+// 	rows, err := repository.DB.QueryContext(c, statement)
+
+// 	if err != nil {
+// 		return data, err
+// 	}
+
+// 	defer rows.Close()
+// 	for rows.Next() {
+
+// 		temp, err := repository.scanRowsReport(rows)
+// 		if err != nil {
+// 			return data, err
+// 		}
+// 		data = append(data, temp)
+// 	}
+
+// 	return data, err
+// }

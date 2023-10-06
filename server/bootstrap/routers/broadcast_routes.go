@@ -21,7 +21,16 @@ func (route BroadcastRoutes) RegisterRoute() {
 	//jwtMiddleware := middlewares.JwtMiddleware{ContractUC: handler.ContractUC}
 
 	r := route.RouterGroup.Group("/api/broadcast")
+
 	//r.Use(jwtMiddleware.VerifyUser)
-	r.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
+	r.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Minute))
+	r.Get("/", handler.FindAll)
+	r.Get("/select", handler.SelectAll)
+	r.Get("/id/:id", handler.FindByID)
 	r.Post("/", handler.Broadcast)
+	r.Post("/execute/:id", handler.BroadcastWithID)
+	r.Post("/run/scheduler", handler.BroadcastWithScheduler)
+	r.Post("/add", handler.Add)
+	r.Put("/edit/:id", handler.Update)
+	r.Delete("/delete/:id", handler.Delete)
 }
