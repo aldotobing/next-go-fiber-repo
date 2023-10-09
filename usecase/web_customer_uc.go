@@ -529,6 +529,18 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 	return refreshedRes, err
 }
 
+func (uc WebCustomerUC) EditBulk(c context.Context, data requests.WebCustomerBulkRequest) (err error) {
+	repo := repository.NewWebCustomerRepository(uc.DB)
+
+	err = repo.EditBulk(c, data)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	return
+}
+
 // func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCustomerRequest, imgProfile, imgKtp *multipart.FileHeader) (res models.WebCustomer, err error) {
 
 // 	// currentObjectUc, err := uc.FindByID(c, models.MpBankParameter{ID: id})

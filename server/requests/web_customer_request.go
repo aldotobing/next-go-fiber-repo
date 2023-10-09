@@ -28,3 +28,11 @@ type WebCustomerRequest struct {
 	UserID                 int    `json:"user_id"`
 	CustomerShowInApp      string `json:"customer_show_in_app"`
 }
+
+// WebCustomerBulkRequest ...
+type WebCustomerBulkRequest struct {
+	Active    string               `json:"active"`
+	UserID    string               `json:"user_id"`
+	ShowInApp string               `json:"show_in_app"`
+	Customers []WebCustomerRequest `json:"customers"`
+}
