@@ -24,7 +24,6 @@ import (
 	idTranslations "github.com/go-playground/validator/v10/translations/id"
 	redis "github.com/go-redis/redis/v7"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -151,7 +150,7 @@ func main() {
 		TimeFormat: time.RFC3339,
 		TimeZone:   "Asia/Jakarta",
 	}))
-	boot.App.Use(compress.New())
+	//boot.App.Use(compress.New())
 
 	//DISABLE SCHEDULER
 	//helper.SetCronJobs()
