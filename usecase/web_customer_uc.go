@@ -199,10 +199,12 @@ func (uc WebCustomerUC) FindAll(c context.Context, parameter models.WebCustomerP
 
 	response.Meta = p
 
-	// Cache the entire response
-	jsonData, err := json.Marshal(response)
-	if err == nil {
-		uc.RedisClient.Set(cacheKey, jsonData, time.Minute*60) // Cache for 30 minutes
+	// Cache the entire response (don't cache empty result)
+	if len(response.Data.ListCustomer) > 0 {
+		jsonData, err := json.Marshal(response)
+		if err == nil {
+			uc.RedisClient.Set(cacheKey, jsonData, time.Minute*30) // Cache for 30 minutes only if there's data
+		}
 	}
 
 	return response.Data.ListCustomer, response.Meta, nil
@@ -382,6 +384,22 @@ func (uc WebCustomerUC) FindByID(c context.Context, parameter models.WebCustomer
 	}
 }
 
+// FindByIDNoCache ...
+func (uc WebCustomerUC) FindByIDNoCache(c context.Context, parameter models.WebCustomerParameter) (res viewmodel.CustomerVM, err error) {
+	// Fetch data from DB
+	repo := repository.NewWebCustomerRepository(uc.DB)
+	datum, err := repo.FindByID(c, parameter) 
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	// Transform data
+	uc.BuildBody(&datum, &res, false)
+
+	return res, nil
+}
+
 func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCustomerRequest, imgProfile, imgKtp *multipart.FileHeader) (res models.WebCustomer, err error) {
 
 	// Invalidate the cache before update
@@ -394,7 +412,7 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 	}
 
 	// currentObjectUc, err := uc.FindByID(c, models.MpBankParameter{ID: id})
-	currentObjectUc, err := uc.FindByID(c, models.WebCustomerParameter{ID: id})
+	currentObjectUc, err := uc.FindByIDNoCache(c, models.WebCustomerParameter{ID: id})
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "invalid id", uc.ReqID)
 		return
