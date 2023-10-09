@@ -15,6 +15,7 @@ type IWebCustomerRepository interface {
 	SelectAll(c context.Context, parameter models.WebCustomerParameter) ([]models.WebCustomer, error)
 	FindAll(ctx context.Context, parameter models.WebCustomerParameter) ([]models.WebCustomer, int, error)
 	FindByID(c context.Context, parameter models.WebCustomerParameter) (models.WebCustomer, error)
+	FindByIDNoCache(c context.Context, parameter models.WebCustomerParameter) (models.WebCustomer, error)
 	Edit(c context.Context, model *models.WebCustomer) (*string, error)
 	Add(c context.Context, model *models.WebCustomer) (*string, error)
 	ReportSelect(c context.Context, parameter models.WebCustomerReportParameter) ([]models.WebCustomer, error)
@@ -412,6 +413,21 @@ func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter m
 
 // FindByID ...
 func (repository WebCustomerRepository) FindByID(c context.Context, parameter models.WebCustomerParameter) (data models.WebCustomer, err error) {
+	statement := models.WebCustomerSelectStatement + ` WHERE c.id = $1`
+	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
+
+	// fmt.Println(statement)
+
+	data, err = repository.scanRow(row)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
+}
+
+// FindByID ...
+func (repository WebCustomerRepository) FindByIDNoCache(c context.Context, parameter models.WebCustomerParameter) (data models.WebCustomer, err error) {
 	statement := models.WebCustomerSelectStatement + ` WHERE c.id = $1`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
 
