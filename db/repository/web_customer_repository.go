@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
+	"nextbasis-service-v-0.1/server/requests"
 )
 
 // ICustomerRepository ...
@@ -17,6 +18,7 @@ type IWebCustomerRepository interface {
 	FindByID(c context.Context, parameter models.WebCustomerParameter) (models.WebCustomer, error)
 	FindByIDNoCache(c context.Context, parameter models.WebCustomerParameter) (models.WebCustomer, error)
 	Edit(c context.Context, model *models.WebCustomer) (*string, error)
+	EditBulk(c context.Context, in requests.WebCustomerBulkRequest) error
 	Add(c context.Context, model *models.WebCustomer) (*string, error)
 	ReportSelect(c context.Context, parameter models.WebCustomerReportParameter) ([]models.WebCustomer, error)
 }
@@ -486,6 +488,29 @@ func (repository WebCustomerRepository) Edit(c context.Context, model *models.We
 		return res, err
 	}
 	return res, err
+}
+
+// EditBulk ...
+func (repo WebCustomerRepository) EditBulk(c context.Context, in requests.WebCustomerBulkRequest) (err error) {
+	var customersCode string
+	for _, datum := range in.Customers {
+		if customersCode == "" {
+			customersCode += `'` + datum.Code + `'`
+		} else {
+			customersCode += `, '` + datum.Code + `'`
+		}
+	}
+	statement := `UPDATE customer SET 
+		show_in_apps = $1,
+		active = $2,
+		modified_by = $3
+	WHERE customer_code in (` + customersCode + `)`
+	err = repo.DB.QueryRowContext(c, statement,
+		in.ShowInApp,
+		in.Active,
+		in.UserID).Err()
+
+	return
 }
 
 // Add ...
