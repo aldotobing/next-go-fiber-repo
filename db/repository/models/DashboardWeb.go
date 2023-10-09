@@ -128,6 +128,8 @@ type DashboardTrackingInvoice struct {
 	CustomerName             string         `json:"customer_name"`
 	CustomerCode             string         `json:"customer_code"`
 	CustomerLevel            sql.NullString `json:"customer_level"`
+	CustomerDistrictName     sql.NullString `json:"customer_district_name"`
+	CustomerSubDistrictName  sql.NullString `json:"customer_subdistrict_name"`
 	InvoiceID                string         `json:"invoice_id"`
 	InvoiceNumber            string         `json:"invoice_number"`
 	CustomerOrderDocumentNo  sql.NullString `json:"customer_order_document_no"`
@@ -155,6 +157,9 @@ type DashboardVirtualAccount struct {
 	VirtualAccountNumber    sql.NullString `json:"virtual_account_number"`
 	VirtualAccountStartDate sql.NullString `json:"virtual_start_date"`
 	VirtualAccountEndDate   sql.NullString `json:"virtual_end_date"`
+	Amount                  sql.NullString `json:"amount"`
+	VirtualAccountRef1      sql.NullString `json:"virtual_account_ref1"`
+	VirtualAccountRef2      sql.NullString `json:"virtual_account_ref2"`
 }
 
 // DashboardWebParameter ...

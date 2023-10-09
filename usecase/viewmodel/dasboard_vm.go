@@ -149,6 +149,8 @@ type DashboardTrackingInvoiceVM struct {
 	CustomerName                string `json:"customer_name"`
 	CustomerCode                string `json:"customer_code"`
 	CustomerLevelName           string `json:"customer_level_name"`
+	CustomerDistrictName        string `json:"customer_district_name"`
+	CustomerSubDistrictName     string `json:"customer_subdistrict_name"`
 	SalesOrderDocumentNumber    string `json:"sales_order_document_number"`
 	CustomerOrderDocumentNumber string `json:"customer_order_document_number"`
 	InvoiceID                   string `json:"invoice_id"`
@@ -176,4 +178,7 @@ type DashboardVirtualAccountVM struct {
 	VirtualAccountNumber    string `json:"virtual_account_number"`
 	VirtualAccountStartDate string `json:"virtual_start_date"`
 	VirtualAccountEndDate   string `json:"virtual_end_date"`
+	Amount                  string `json:"amount"`
+	VirtualAccountRef1      string `json:"virtual_account_ref1"`
+	VirtualAccountRef2      string `json:"virtual_account_ref2"`
 }

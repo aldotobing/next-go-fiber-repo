@@ -605,6 +605,8 @@ func (uc DashboardWebUC) GetTrackingInvoiceData(c context.Context, parameter mod
 			CustomerName:                datum.CustomerName,
 			CustomerCode:                datum.CustomerCode,
 			CustomerLevelName:           datum.CustomerLevel.String,
+			CustomerDistrictName:        datum.CustomerDistrictName.String,
+			CustomerSubDistrictName:     datum.CustomerSubDistrictName.String,
 			SalesOrderDocumentNumber:    datum.SalesOrderDocumentNo.String,
 			CustomerOrderDocumentNumber: datum.CustomerOrderDocumentNo.String,
 			InvoiceID:                   datum.InvoiceID,
@@ -649,6 +651,9 @@ func (uc DashboardWebUC) GetVirtualAccountData(c context.Context, parameter mode
 			VirtualAccountNumber:    datum.VirtualAccountNumber.String,
 			VirtualAccountStartDate: datum.VirtualAccountStartDate.String,
 			VirtualAccountEndDate:   datum.VirtualAccountEndDate.String,
+			Amount:                  datum.Amount.String,
+			VirtualAccountRef1:      datum.VirtualAccountRef1.String,
+			VirtualAccountRef2:      datum.VirtualAccountRef2.String,
 		})
 	}
 
