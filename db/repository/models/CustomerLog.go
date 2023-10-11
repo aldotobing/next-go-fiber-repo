@@ -10,8 +10,8 @@ type CustomerLog struct {
 	CustomerName string         `json:"customer_name"`
 	OldData      string         `json:"old_data"`
 	NewData      string         `json:"new_data"`
-	UserID       string         `json:"user_id"`
-	UserName     string         `json:"user_name"`
+	UserID       sql.NullString `json:"user_id"`
+	UserName     sql.NullString `json:"user_name"`
 	CreatedAt    string         `json:"created_at"`
 	UpdatedAt    sql.NullString `json:"updated_at"`
 	DeletedAt    sql.NullString `json:"deleted_at"`

@@ -23,8 +23,13 @@ func (uc CustomerLogUC) BuildBody(data *models.CustomerLog, res *viewmodel.Custo
 	res.CustomerID = data.CustomerID
 	res.CustomerCode = data.CustomerCode
 	res.CustomerName = data.CustomerName
-	res.UserID = data.UserID
-	res.UserName = data.UserName
+	if data.UserID.String == "" {
+		res.UserName = "Changes by app"
+	} else {
+		res.UserID = data.UserID.String
+		res.UserName = data.UserName.String
+	}
+
 	res.CreatedAt = data.CreatedAt
 
 	var oldData, newData viewmodel.CustomerVM
@@ -115,6 +120,17 @@ func (uc CustomerLogUC) SelectAll(c context.Context, parameter models.CustomerLo
 func (uc CustomerLogUC) Add(c context.Context, oldData, newData interface{}, customerID string, userID int) (err error) {
 	repo := repository.NewCustomerLogRepository(uc.DB)
 	err = repo.Add(c, oldData, newData, customerID, userID)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return err
+	}
+
+	return err
+}
+
+func (uc CustomerLogUC) AddByUser(c context.Context, oldData, newData interface{}, customerID string) (err error) {
+	repo := repository.NewCustomerLogRepository(uc.DB)
+	err = repo.AddByUser(c, oldData, newData, customerID)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return err

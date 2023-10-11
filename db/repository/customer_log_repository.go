@@ -13,6 +13,7 @@ import (
 type ICustomerLogRepository interface {
 	SelectAll(c context.Context, parameter models.CustomerLogParameter) ([]models.CustomerLog, error)
 	Add(c context.Context, oldIn, newIn interface{}, customerID string, userID int) error
+	AddByUser(c context.Context, oldIn, newIn interface{}, customerID string) error
 	AddBulk(c context.Context, model *models.WebCustomer) (*string, error)
 }
 
@@ -84,6 +85,25 @@ func (repository CustomerLogRepository) Add(c context.Context, oldIn, newIn inte
 		)`
 	err = repository.DB.QueryRowContext(c, statement,
 		customerID, oldInJson, newInJson, userID,
+	).Err()
+
+	return
+}
+
+// AddByUser ...
+func (repository CustomerLogRepository) AddByUser(c context.Context, oldIn, newIn interface{}, customerID string) (err error) {
+	oldInJson, _ := json.Marshal(oldIn)
+	newInJson, _ := json.Marshal(newIn)
+	statement := `INSERT INTO customer_logs (
+			customer_id, old_data, new_data,
+			created_at, updated_at
+		)
+	VALUES (
+			$1, $2, $3, $4,
+			now(), now()
+		)`
+	err = repository.DB.QueryRowContext(c, statement,
+		customerID, oldInJson, newInJson,
 	).Err()
 
 	return
