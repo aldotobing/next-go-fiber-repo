@@ -22,6 +22,7 @@ import (
 // WebCustomerUC ...
 type WebCustomerUC struct {
 	*ContractUC
+	CustomerLogUC
 }
 
 // BuildBody ...
@@ -47,6 +48,10 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 	if data.CustomerBirthDate != nil && *data.CustomerBirthDate != "" && birthdateFull {
 		birthDate, _ := time.Parse("2006-01-02T15:04:05Z", *data.CustomerBirthDate)
 		birthDateString := birthDate.Format("02 January 2006")
+		data.CustomerBirthDate = &birthDateString
+	} else if !birthdateFull {
+		birthDate, _ := time.Parse("2006-01-02T15:04:05Z", *data.CustomerBirthDate)
+		birthDateString := birthDate.Format("2006-01-02")
 		data.CustomerBirthDate = &birthDateString
 	}
 
@@ -526,6 +531,12 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 	res.ID, err = repo.Edit(c, &res)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	err = CustomerLogUC{ContractUC: uc.ContractUC}.Add(c, currentObjectUc, res, id, data.UserID)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "add_logs", uc.ReqID)
 		return res, err
 	}
 

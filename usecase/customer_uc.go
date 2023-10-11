@@ -243,6 +243,15 @@ func (uc CustomerUC) Edit(c context.Context, id string, data *requests.CustomerR
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
 	}
+
+	birthDate, _ := time.Parse("2006-01-02T15:04:05Z", *currentObjectUc.CustomerBirthDate)
+	birthDateString := birthDate.Format("2006-01-02")
+	currentObjectUc.CustomerBirthDate = &birthDateString
+	err = CustomerLogUC{ContractUC: uc.ContractUC}.Add(c, currentObjectUc, res, id, 0)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "add_logs", uc.ReqID)
+		return res, err
+	}
 	// Invalidate the cache before update
 	err = uc.RedisClient.Client.Del(cacheKey).Err()
 	if err != nil {
