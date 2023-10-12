@@ -533,12 +533,6 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 		return res, err
 	}
 
-	err = CustomerLogUC{ContractUC: uc.ContractUC}.Add(c, currentObjectUc, res, id, data.UserID)
-	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "add_logs", uc.ReqID)
-		return res, err
-	}
-
 	// Invalidate the cache before refresh
 	err = uc.RedisClient.Client.Del(cacheKey).Err()
 	if err != nil {
@@ -551,6 +545,12 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 	res, err = uc.FindByID(c, models.WebCustomerParameter{ID: in.ID.String})
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	err = CustomerLogUC{ContractUC: uc.ContractUC}.Add(c, currentObjectUc, res, id, data.UserID)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "add_logs", uc.ReqID)
 		return res, err
 	}
 
