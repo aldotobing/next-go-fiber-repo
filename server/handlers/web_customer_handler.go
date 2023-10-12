@@ -270,9 +270,9 @@ func (h *WebCustomerHandler) Add(ctx *fiber.Ctx) error {
 
 	imgProfile, _ := ctx.FormFile("img_profile")
 	uc := usecase.WebCustomerUC{ContractUC: h.ContractUC}
-	res, err := uc.Add(c, input, imgProfile)
+	_, err = uc.Add(c, input, imgProfile)
 
-	return h.SendResponse(ctx, res, nil, err, 0)
+	return h.SendResponse(ctx, nil, nil, err, 0)
 }
 
 // ReportSelect ...
