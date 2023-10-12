@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -530,14 +529,14 @@ func (repository WebCustomerRepository) Add(c context.Context, model models.WebC
 			$14, $15, $16
 		) RETURNING id`
 
-	fmt.Println(statement)
+	customerUserID, _ := strconv.Atoi(model.CustomerUserID.String)
 
 	err = repository.DB.QueryRowContext(c, statement,
 		model.CustomerName.String, model.CustomerAddress.String, model.CustomerPhone.String, model.CustomerEmail.String,
 		model.CustomerCpName.String, model.CustomerProfilePicture.String,
 		model.CustomerTaxCalcMethod.String, model.CustomerBranchID.String, model.Code.String,
-		model.CustomerSalesmanID.String, model.CustomerUserID.String, model.CustomerReligion.String, model.CustomerNik.String,
-		model.CustomerLevelID.Int64, model.CustomerGender.String, model.CustomerBirthDate.String,
+		model.CustomerSalesmanID.String, customerUserID, model.CustomerReligion.String, model.CustomerNik.String,
+		int(model.CustomerLevelID.Int64), model.CustomerGender.String, model.CustomerBirthDate.String,
 	).Scan(&res)
 
 	if err != nil {

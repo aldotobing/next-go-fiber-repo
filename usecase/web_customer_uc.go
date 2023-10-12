@@ -404,7 +404,7 @@ func (uc WebCustomerUC) FindByIDNoCache(c context.Context, parameter models.WebC
 	return res, nil
 }
 
-func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCustomerRequest, imgProfile, imgKtp *multipart.FileHeader) (res models.WebCustomer, err error) {
+func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCustomerRequest, imgProfile, imgKtp *multipart.FileHeader) (res viewmodel.CustomerVM, err error) {
 
 	// Invalidate the cache before update
 	cacheKey := CustomerCacheKey + id
@@ -503,7 +503,7 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 	if data.CustomerShowInApp == "" {
 		data.CustomerShowInApp = currentObjectUc.CustomerShowInApp
 	}
-	res = models.WebCustomer{
+	in := models.WebCustomer{
 		ID:                     sql.NullString{String: id},
 		Code:                   sql.NullString{String: data.Code},
 		CustomerName:           sql.NullString{String: data.CustomerName},
@@ -527,7 +527,7 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 		ShowInApp:              sql.NullString{String: data.CustomerShowInApp},
 	}
 
-	res.ID.String, err = repo.Edit(c, res)
+	in.ID.String, err = repo.Edit(c, in)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
@@ -548,13 +548,13 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 	}
 
 	// Refresh the data from the repository
-	refreshedRes, err := repo.FindByID(c, models.WebCustomerParameter{ID: res.ID.String})
+	res, err = uc.FindByID(c, models.WebCustomerParameter{ID: in.ID.String})
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
 	}
 
-	return refreshedRes, err
+	return res, err
 }
 
 func (uc WebCustomerUC) EditBulk(c context.Context, data requests.WebCustomerBulkRequest) (err error) {
@@ -674,7 +674,7 @@ func (uc WebCustomerUC) EditBulk(c context.Context, data requests.WebCustomerBul
 // 	return res, err
 // }
 
-func (uc WebCustomerUC) Add(c context.Context, data *requests.WebCustomerRequest, imgProfile *multipart.FileHeader) (res models.WebCustomer, err error) {
+func (uc WebCustomerUC) Add(c context.Context, data *requests.WebCustomerRequest, imgProfile *multipart.FileHeader) (res viewmodel.CustomerVM, err error) {
 
 	// currentObjectUc, err := uc.FindByID(c, models.MpBankParameter{ID: id})
 	ctx := "FileUC.Upload"
@@ -708,7 +708,7 @@ func (uc WebCustomerUC) Add(c context.Context, data *requests.WebCustomerRequest
 	repo := repository.NewWebCustomerRepository(uc.DB)
 	// now := time.Now().UTC()
 	// strnow := now.Format(time.RFC3339)
-	res = models.WebCustomer{
+	in := models.WebCustomer{
 		Code:                   sql.NullString{String: data.Code},
 		CustomerName:           sql.NullString{String: data.CustomerName},
 		CustomerAddress:        sql.NullString{String: data.CustomerAddress},
@@ -727,11 +727,13 @@ func (uc WebCustomerUC) Add(c context.Context, data *requests.WebCustomerRequest
 		CustomerBirthDate:      sql.NullString{String: data.CustomerBirthDate},
 	}
 
-	res.ID.String, err = repo.Add(c, res)
+	in.ID.String, err = repo.Add(c, in)
 	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query_insert", c.Value("requestid"))
 		return res, err
 	}
+
+	res, _ = uc.FindByID(c, models.WebCustomerParameter{ID: in.ID.String})
 
 	return res, err
 }
