@@ -36,47 +36,47 @@ func (uc CustomerLogUC) BuildBody(data *models.CustomerLog, res *viewmodel.Custo
 	json.Unmarshal([]byte(data.OldData), &oldData)
 	json.Unmarshal([]byte(data.NewData), &newData)
 	var typeChanges, oldDataChanges, newDataChanges string
-	if *oldData.CustomerPhone != *newData.CustomerPhone {
+	if oldData.CustomerPhone != newData.CustomerPhone {
 		typeChanges += "Phone Number"
-		oldDataChanges += *oldData.CustomerPhone
-		newDataChanges += *newData.CustomerPhone
+		oldDataChanges += oldData.CustomerPhone
+		newDataChanges += newData.CustomerPhone
 	}
 
-	if *oldData.CustomerName != *newData.CustomerName {
+	if oldData.CustomerName != newData.CustomerName {
 		if typeChanges != "" {
 			typeChanges += ", "
 			oldDataChanges += ", "
 			newDataChanges += ", "
 		}
 		typeChanges += "Name"
-		oldDataChanges += *oldData.CustomerName
-		newDataChanges += *newData.CustomerName
+		oldDataChanges += oldData.CustomerName
+		newDataChanges += newData.CustomerName
 	}
 
-	if *oldData.CustomerNik != *newData.CustomerNik {
+	if oldData.CustomerNik != newData.CustomerNik {
 		if typeChanges != "" {
 			typeChanges += ", "
 			oldDataChanges += ", "
 			newDataChanges += ", "
 		}
 		typeChanges += "NIK"
-		oldDataChanges += *oldData.CustomerNik
-		newDataChanges += *newData.CustomerNik
+		oldDataChanges += oldData.CustomerNik
+		newDataChanges += newData.CustomerNik
 	}
 
-	if *oldData.CustomerReligion != *newData.CustomerReligion {
+	if oldData.CustomerReligion != newData.CustomerReligion {
 		if typeChanges != "" {
 			typeChanges += ", "
 			oldDataChanges += ", "
 			newDataChanges += ", "
 		}
 		typeChanges += "Religion"
-		oldDataChanges += *oldData.CustomerReligion
-		newDataChanges += *newData.CustomerReligion
+		oldDataChanges += oldData.CustomerReligion
+		newDataChanges += newData.CustomerReligion
 	}
 
-	oldBirthdate, _ := time.Parse("2006-01-02", *oldData.CustomerBirthDate)
-	newBirthdate, _ := time.Parse("2006-01-02", *newData.CustomerBirthDate)
+	oldBirthdate, _ := time.Parse("2006-01-02", oldData.CustomerBirthDate)
+	newBirthdate, _ := time.Parse("2006-01-02", newData.CustomerBirthDate)
 
 	if oldBirthdate != newBirthdate {
 		if typeChanges != "" {

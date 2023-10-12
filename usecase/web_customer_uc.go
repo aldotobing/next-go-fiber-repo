@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -27,105 +28,103 @@ type WebCustomerUC struct {
 
 // BuildBody ...
 func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.CustomerVM, birthdateFull bool) {
-	if !*data.IsDataComplete {
-		res.CustomerProfileStatus = &models.CustomerProfileStatusIncomplete
+	if !data.IsDataComplete {
+		res.CustomerProfileStatus = models.CustomerProfileStatusIncomplete
 	} else {
-		res.CustomerProfileStatus = &models.CustomerProfileStatusComplete
+		res.CustomerProfileStatus = models.CustomerProfileStatusComplete
 	}
 
-	res.ID = data.ID
-	res.Code = data.Code
-	res.CustomerName = data.CustomerName
+	res.ID = data.ID.String
+	res.Code = data.Code.String
+	res.CustomerName = data.CustomerName.String
 
 	var profilePictureURL string
-	if data.CustomerProfilePicture != nil && *data.CustomerProfilePicture != "" {
-		profilePictureURL = models.CustomerImagePath + *data.CustomerProfilePicture
+	if data.CustomerProfilePicture.Valid {
+		profilePictureURL = models.CustomerImagePath + data.CustomerProfilePicture.String
 	}
-	res.CustomerProfilePicture = &profilePictureURL
+	res.CustomerProfilePicture = profilePictureURL
 
-	res.CustomerActiveStatus = data.CustomerActiveStatus
+	res.CustomerActiveStatus = data.CustomerActiveStatus.String
 
-	if data.CustomerBirthDate != nil && *data.CustomerBirthDate != "" && birthdateFull {
-		birthDate, _ := time.Parse("2006-01-02T15:04:05Z", *data.CustomerBirthDate)
+	if data.CustomerBirthDate.Valid && birthdateFull {
+		birthDate, _ := time.Parse("2006-01-02T15:04:05Z", data.CustomerBirthDate.String)
 		birthDateString := birthDate.Format("02 January 2006")
-		data.CustomerBirthDate = &birthDateString
-	} else if !birthdateFull {
-		birthDate, _ := time.Parse("2006-01-02T15:04:05Z", *data.CustomerBirthDate)
+		res.CustomerBirthDate = birthDateString
+	} else if data.CustomerBirthDate.Valid && !birthdateFull {
+		birthDate, _ := time.Parse("2006-01-02T15:04:05Z", data.CustomerBirthDate.String)
 		birthDateString := birthDate.Format("2006-01-02")
-		data.CustomerBirthDate = &birthDateString
+		res.CustomerBirthDate = birthDateString
 	}
 
-	res.CustomerBirthDate = data.CustomerBirthDate
-
-	res.CustomerReligion = data.CustomerReligion
-	res.CustomerLatitude = data.CustomerLatitude
-	res.CustomerLongitude = data.CustomerLongitude
-	res.CustomerBranchCode = data.CustomerBranchCode
-	res.CustomerBranchName = data.CustomerBranchName
-	res.CustomerBranchArea = data.CustomerBranchArea
-	res.CustomerBranchAddress = data.CustomerAddress
-	res.CustomerBranchLat = data.CustomerBranchLat
-	res.CustomerBranchLng = data.CustomerBranchLng
-	res.CustomerBranchPicPhoneNo = data.CustomerBranchPicPhoneNo
+	res.CustomerReligion = data.CustomerReligion.String
+	res.CustomerLatitude = data.CustomerLatitude.String
+	res.CustomerLongitude = data.CustomerLongitude.String
+	res.CustomerBranchCode = data.CustomerBranchCode.String
+	res.CustomerBranchName = data.CustomerBranchName.String
+	res.CustomerBranchArea = data.CustomerBranchArea.String
+	res.CustomerBranchAddress = data.CustomerAddress.String
+	res.CustomerBranchLat = data.CustomerBranchLat.String
+	res.CustomerBranchLng = data.CustomerBranchLng.String
+	res.CustomerBranchPicPhoneNo = data.CustomerBranchPicPhoneNo.String
 	res.CustomerBranchPicName = data.CustomerBranchPicName.String
-	res.CustomerRegionCode = data.CustomerRegionCode
-	res.CustomerRegionName = data.CustomerRegionName
-	res.CustomerRegionGroup = data.CustomerRegionGroup
-	res.CustomerEmail = data.CustomerEmail
-	res.CustomerCpName = data.CustomerCpName
-	res.CustomerAddress = data.CustomerAddress
-	res.CustomerPostalCode = data.CustomerPostalCode
-	res.CustomerProvinceID = data.CustomerProvinceID
-	res.CustomerProvinceName = data.CustomerProvinceName
-	res.CustomerCityID = data.CustomerCityID
-	res.CustomerCityName = data.CustomerCityName
-	res.CustomerDistrictID = data.CustomerDistrictID
-	res.CustomerDistrictName = data.CustomerDistrictName
-	res.CustomerSubdistrictID = data.CustomerSubdistrictID
-	res.CustomerSubdistrictName = data.CustomerSubdistrictName
-	res.CustomerSalesmanCode = data.CustomerSalesmanCode
-	res.CustomerSalesmanName = data.CustomerSalesmanName
-	res.CustomerSalesmanPhone = data.CustomerSalesmanPhone
-	res.CustomerSalesCycle = data.CustomerSalesCycle
-	res.CustomerTypeId = data.CustomerTypeId
-	res.CustomerTypeName = data.CustomerTypeName
-	res.CustomerPhone = data.CustomerPhone
-	res.CustomerPoint = data.CustomerPoint
-	res.GiftName = data.GiftName
-	res.Loyalty = data.Loyalty
-	res.VisitDay = data.VisitDay
-	res.CustomerTaxCalcMethod = data.CustomerTaxCalcMethod
-	res.CustomerBranchID = data.CustomerBranchID
-	res.CustomerSalesmanID = data.CustomerSalesmanID
-	res.CustomerNik = data.CustomerNik
+	res.CustomerRegionCode = data.CustomerRegionCode.String
+	res.CustomerRegionName = data.CustomerRegionName.String
+	res.CustomerRegionGroup = data.CustomerRegionGroup.String
+	res.CustomerEmail = data.CustomerEmail.String
+	res.CustomerCpName = data.CustomerCpName.String
+	res.CustomerAddress = data.CustomerAddress.String
+	res.CustomerPostalCode = data.CustomerPostalCode.String
+	res.CustomerProvinceID = data.CustomerProvinceID.String
+	res.CustomerProvinceName = data.CustomerProvinceName.String
+	res.CustomerCityID = data.CustomerCityID.String
+	res.CustomerCityName = data.CustomerCityName.String
+	res.CustomerDistrictID = data.CustomerDistrictID.String
+	res.CustomerDistrictName = data.CustomerDistrictName.String
+	res.CustomerSubdistrictID = data.CustomerSubdistrictID.String
+	res.CustomerSubdistrictName = data.CustomerSubdistrictName.String
+	res.CustomerSalesmanCode = data.CustomerSalesmanCode.String
+	res.CustomerSalesmanName = data.CustomerSalesmanName.String
+	res.CustomerSalesmanPhone = data.CustomerSalesmanPhone.String
+	res.CustomerSalesCycle = data.CustomerSalesCycle.String
+	res.CustomerTypeId = data.CustomerTypeId.String
+	res.CustomerTypeName = data.CustomerTypeName.String
+	res.CustomerPhone = data.CustomerPhone.String
+	res.CustomerPoint = data.CustomerPoint.String
+	res.GiftName = data.GiftName.String
+	res.Loyalty = data.Loyalty.String
+	res.VisitDay = data.VisitDay.String
+	res.CustomerTaxCalcMethod = data.CustomerTaxCalcMethod.String
+	res.CustomerBranchID = data.CustomerBranchID.String
+	res.CustomerSalesmanID = data.CustomerSalesmanID.String
+	res.CustomerNik = data.CustomerNik.String
 
 	var photoktpURL string
-	if data.CustomerPhotoKtp != nil && *data.CustomerPhotoKtp != "" {
-		photoktpURL = models.CustomerImagePath + *data.CustomerPhotoKtp
+	if data.CustomerPhotoKtp.Valid {
+		photoktpURL = models.CustomerImagePath + data.CustomerPhotoKtp.String
 	}
-	res.CustomerPhotoKtp = &photoktpURL
+	res.CustomerPhotoKtp = photoktpURL
 
-	res.CustomerLevelID = data.CustomerLevelID
-	res.CustomerLevel = data.CustomerLevel
-	res.CustomerUserID = data.CustomerUserID
-	res.CustomerUserName = data.CustomerUserName
-	res.CustomerGender = data.CustomerGender
-	res.ModifiedBy = data.ModifiedBy
-	res.ModifiedDate = data.ModifiedDate
+	res.CustomerLevelID = int(data.CustomerLevelID.Int64)
+	res.CustomerLevel = data.CustomerLevel.String
+	res.CustomerUserID = data.CustomerUserID.String
+	res.CustomerUserName = data.CustomerUserName.String
+	res.CustomerGender = data.CustomerGender.String
+	res.ModifiedBy = data.ModifiedBy.String
+	res.ModifiedDate = data.ModifiedDate.String
 
-	res.CustomerPriceListID = data.CustomerPriceListID
-	res.CustomerPriceListName = data.CustomerPriceListName
-	res.CustomerShowInApp = data.ShowInApp
+	res.CustomerPriceListID = data.CustomerPriceListID.String
+	res.CustomerPriceListName = data.CustomerPriceListName.String
+	res.CustomerShowInApp = data.ShowInApp.String
 
 	res.CustomerStatusInstall = true
-	if data.CustomerUserToken == nil || *data.CustomerUserToken == "" {
+	if data.CustomerUserToken.Valid {
 		res.CustomerStatusInstall = false
 	} else {
-		res.CustomerFCMToken = *data.CustomerUserToken
+		res.CustomerFCMToken = data.CustomerUserToken.String
 	}
 
-	res.SalesmanTypeCode = data.SalesmanTypeCode
-	res.SalesmanTypeName = data.SalesmanTypeName
+	res.SalesmanTypeCode = data.SalesmanTypeCode.String
+	res.SalesmanTypeName = data.SalesmanTypeName.String
 }
 
 // SelectAll ...
@@ -393,7 +392,7 @@ func (uc WebCustomerUC) FindByID(c context.Context, parameter models.WebCustomer
 func (uc WebCustomerUC) FindByIDNoCache(c context.Context, parameter models.WebCustomerParameter) (res viewmodel.CustomerVM, err error) {
 	// Fetch data from DB
 	repo := repository.NewWebCustomerRepository(uc.DB)
-	datum, err := repo.FindByID(c, parameter) 
+	datum, err := repo.FindByID(c, parameter)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
@@ -436,7 +435,7 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 	// }
 
 	// If the phone number has changed, check if it's unique
-	if currentObjectUc.CustomerPhone != nil && *currentObjectUc.CustomerPhone != data.CustomerPhone {
+	if currentObjectUc.CustomerPhone != data.CustomerPhone {
 		checkerPhoneNumberData, _ := uc.SelectAll(c, models.WebCustomerParameter{
 			PhoneNumber: data.CustomerPhone,
 			By:          "c.created_date",
@@ -453,8 +452,8 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 	awsUc := AwsUC{ContractUC: uc.ContractUC}
 
 	var strImgprofile = ""
-	if currentObjectUc.CustomerProfilePicture != nil && *currentObjectUc.CustomerProfilePicture != "" {
-		strImgprofile = strings.ReplaceAll(*currentObjectUc.CustomerProfilePicture, models.CustomerImagePath, "")
+	if currentObjectUc.CustomerProfilePicture != "" {
+		strImgprofile = strings.ReplaceAll(currentObjectUc.CustomerProfilePicture, models.CustomerImagePath, "")
 	}
 	if imgProfile != nil {
 		awsUc.AWSS3.Directory = "image/customer"
@@ -474,8 +473,8 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 	}
 
 	var stringImageKTP string
-	if currentObjectUc.CustomerPhotoKtp != nil && *currentObjectUc.CustomerPhotoKtp != "" {
-		stringImageKTP = strings.ReplaceAll(*currentObjectUc.CustomerPhotoKtp, models.CustomerImagePath, "")
+	if currentObjectUc.CustomerPhotoKtp != "" {
+		stringImageKTP = strings.ReplaceAll(currentObjectUc.CustomerPhotoKtp, models.CustomerImagePath, "")
 	}
 	if imgKtp != nil {
 		awsUc.AWSS3.Directory = "image/customer"
@@ -502,33 +501,33 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 	data.CustomerBirthDate = birthDate.Format("2006-01-02")
 
 	if data.CustomerShowInApp == "" {
-		data.CustomerShowInApp = *currentObjectUc.CustomerShowInApp
+		data.CustomerShowInApp = currentObjectUc.CustomerShowInApp
 	}
 	res = models.WebCustomer{
-		ID:                     &id,
-		Code:                   &data.Code,
-		CustomerName:           &data.CustomerName,
-		CustomerAddress:        &data.CustomerAddress,
-		CustomerPhone:          &data.CustomerPhone,
-		CustomerEmail:          &data.CustomerEmail,
-		CustomerCpName:         &data.CustomerCpName,
-		CustomerProfilePicture: &strImgprofile,
-		CustomerTaxCalcMethod:  &data.CustomerTaxCalcMethod,
-		CustomerActiveStatus:   &data.CustomerActiveStatus,
-		CustomerSalesmanID:     &data.CustomerSalesmanID,
-		CustomerBranchID:       &data.CustomerBranchID,
-		CustomerNik:            &data.CustomerNik,
-		CustomerUserID:         &data.CustomerUserID,
-		CustomerReligion:       &data.CustomerReligion,
-		CustomerLevelID:        &data.CustomerLevelID,
-		CustomerGender:         &data.CustomerGender,
-		CustomerBirthDate:      &data.CustomerBirthDate,
-		CustomerPhotoKtp:       &stringImageKTP,
-		UserID:                 &data.UserID,
-		ShowInApp:              &data.CustomerShowInApp,
+		ID:                     sql.NullString{String: id},
+		Code:                   sql.NullString{String: data.Code},
+		CustomerName:           sql.NullString{String: data.CustomerName},
+		CustomerAddress:        sql.NullString{String: data.CustomerAddress},
+		CustomerPhone:          sql.NullString{String: data.CustomerPhone},
+		CustomerEmail:          sql.NullString{String: data.CustomerEmail},
+		CustomerCpName:         sql.NullString{String: data.CustomerCpName},
+		CustomerProfilePicture: sql.NullString{String: strImgprofile},
+		CustomerTaxCalcMethod:  sql.NullString{String: data.CustomerTaxCalcMethod},
+		CustomerActiveStatus:   sql.NullString{String: data.CustomerActiveStatus},
+		CustomerSalesmanID:     sql.NullString{String: data.CustomerSalesmanID},
+		CustomerBranchID:       sql.NullString{String: data.CustomerBranchID},
+		CustomerNik:            sql.NullString{String: data.CustomerNik},
+		CustomerUserID:         sql.NullString{String: data.CustomerUserID},
+		CustomerReligion:       sql.NullString{String: data.CustomerReligion},
+		CustomerLevelID:        sql.NullInt64{Int64: int64(data.CustomerLevelID)},
+		CustomerGender:         sql.NullString{String: data.CustomerGender},
+		CustomerBirthDate:      sql.NullString{String: data.CustomerBirthDate},
+		CustomerPhotoKtp:       sql.NullString{String: stringImageKTP},
+		UserID:                 sql.NullInt64{Int64: int64(data.UserID)},
+		ShowInApp:              sql.NullString{String: data.CustomerShowInApp},
 	}
 
-	res.ID, err = repo.Edit(c, &res)
+	res.ID.String, err = repo.Edit(c, res)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
@@ -549,7 +548,7 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 	}
 
 	// Refresh the data from the repository
-	refreshedRes, err := repo.FindByID(c, models.WebCustomerParameter{ID: *res.ID})
+	refreshedRes, err := repo.FindByID(c, models.WebCustomerParameter{ID: res.ID.String})
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
@@ -710,25 +709,25 @@ func (uc WebCustomerUC) Add(c context.Context, data *requests.WebCustomerRequest
 	// now := time.Now().UTC()
 	// strnow := now.Format(time.RFC3339)
 	res = models.WebCustomer{
-		Code:                   &data.Code,
-		CustomerName:           &data.CustomerName,
-		CustomerAddress:        &data.CustomerAddress,
-		CustomerPhone:          &data.CustomerPhone,
-		CustomerEmail:          &data.CustomerEmail,
-		CustomerCpName:         &data.CustomerCpName,
-		CustomerProfilePicture: &strImgprofile,
-		CustomerTaxCalcMethod:  &data.CustomerTaxCalcMethod,
-		CustomerActiveStatus:   &data.CustomerActiveStatus,
-		CustomerSalesmanID:     &data.CustomerSalesmanID,
-		CustomerBranchID:       &data.CustomerBranchID,
-		CustomerUserID:         &data.CustomerUserID,
-		CustomerReligion:       &data.CustomerReligion,
-		CustomerLevelID:        &data.CustomerLevelID,
-		CustomerGender:         &data.CustomerGender,
-		CustomerBirthDate:      &data.CustomerBirthDate,
+		Code:                   sql.NullString{String: data.Code},
+		CustomerName:           sql.NullString{String: data.CustomerName},
+		CustomerAddress:        sql.NullString{String: data.CustomerAddress},
+		CustomerPhone:          sql.NullString{String: data.CustomerPhone},
+		CustomerEmail:          sql.NullString{String: data.CustomerEmail},
+		CustomerCpName:         sql.NullString{String: data.CustomerCpName},
+		CustomerProfilePicture: sql.NullString{String: strImgprofile},
+		CustomerTaxCalcMethod:  sql.NullString{String: data.CustomerTaxCalcMethod},
+		CustomerActiveStatus:   sql.NullString{String: data.CustomerActiveStatus},
+		CustomerSalesmanID:     sql.NullString{String: data.CustomerSalesmanID},
+		CustomerBranchID:       sql.NullString{String: data.CustomerBranchID},
+		CustomerUserID:         sql.NullString{String: data.CustomerUserID},
+		CustomerReligion:       sql.NullString{String: data.CustomerReligion},
+		CustomerLevelID:        sql.NullInt64{Int64: int64(data.CustomerLevelID)},
+		CustomerGender:         sql.NullString{String: data.CustomerGender},
+		CustomerBirthDate:      sql.NullString{String: data.CustomerBirthDate},
 	}
 
-	res.ID, err = repo.Add(c, &res)
+	res.ID.String, err = repo.Add(c, res)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
@@ -755,33 +754,33 @@ func (uc WebCustomerUC) ReportSelect(c context.Context, parameter models.WebCust
 	customerLevelIDChecker := make(map[int]string)
 	customerTypeIDChecker := make(map[string]string)
 	for i := range data {
-		if data[i].CustomerCityID != nil && cityIDChecker[*data[i].CustomerCityID] == "" {
-			cityIDChecker[*data[i].CustomerCityID] = "done"
-			cityIDs = append(cityIDs, *data[i].CustomerCityID)
+		if data[i].CustomerCityID.Valid && cityIDChecker[data[i].CustomerCityID.String] == "" {
+			cityIDChecker[data[i].CustomerCityID.String] = "done"
+			cityIDs = append(cityIDs, data[i].CustomerCityID.String)
 		}
-		if data[i].CustomerProvinceID != nil && proviceIDChecker[*data[i].CustomerProvinceID] == "" {
-			proviceIDChecker[*data[i].CustomerProvinceID] = "done"
-			proviceIDs = append(proviceIDs, *data[i].CustomerProvinceID)
+		if data[i].CustomerProvinceID.Valid && proviceIDChecker[data[i].CustomerProvinceID.String] == "" {
+			proviceIDChecker[data[i].CustomerProvinceID.String] = "done"
+			proviceIDs = append(proviceIDs, data[i].CustomerProvinceID.String)
 		}
-		if data[i].CustomerDistrictID != nil && districtIDChecker[*data[i].CustomerDistrictID] == "" {
-			districtIDChecker[*data[i].CustomerDistrictID] = "done"
-			districtIDs = append(districtIDs, *data[i].CustomerDistrictID)
+		if data[i].CustomerDistrictID.Valid && districtIDChecker[data[i].CustomerDistrictID.String] == "" {
+			districtIDChecker[data[i].CustomerDistrictID.String] = "done"
+			districtIDs = append(districtIDs, data[i].CustomerDistrictID.String)
 		}
-		if data[i].CustomerSubdistrictID != nil && subdistrictIDChecker[*data[i].CustomerSubdistrictID] == "" {
-			subdistrictIDChecker[*data[i].CustomerSubdistrictID] = "done"
-			subDistrictids = append(subDistrictids, *data[i].CustomerSubdistrictID)
+		if data[i].CustomerSubdistrictID.Valid && subdistrictIDChecker[data[i].CustomerSubdistrictID.String] == "" {
+			subdistrictIDChecker[data[i].CustomerSubdistrictID.String] = "done"
+			subDistrictids = append(subDistrictids, data[i].CustomerSubdistrictID.String)
 		}
-		if data[i].CustomerSalesmanID != nil && salesmanIDChecker[*data[i].CustomerSalesmanID] == "" {
-			salesmanIDChecker[*data[i].CustomerSalesmanID] = "done"
-			salesmanIDs = append(salesmanIDs, *data[i].CustomerSalesmanID)
+		if data[i].CustomerSalesmanID.Valid && salesmanIDChecker[data[i].CustomerSalesmanID.String] == "" {
+			salesmanIDChecker[data[i].CustomerSalesmanID.String] = "done"
+			salesmanIDs = append(salesmanIDs, data[i].CustomerSalesmanID.String)
 		}
-		if data[i].CustomerLevelID != nil && customerLevelIDChecker[*data[i].CustomerLevelID] == "" {
-			customerLevelIDChecker[*data[i].CustomerLevelID] = "done"
-			customerLevelIDs = append(customerLevelIDs, strconv.Itoa(*data[i].CustomerLevelID))
+		if data[i].CustomerLevelID.Valid && customerLevelIDChecker[int(data[i].CustomerLevelID.Int64)] == "" {
+			customerLevelIDChecker[int(data[i].CustomerLevelID.Int64)] = "done"
+			customerLevelIDs = append(customerLevelIDs, strconv.Itoa(int(data[i].CustomerLevelID.Int64)))
 		}
-		if data[i].CustomerTypeId != nil && customerTypeIDChecker[*data[i].CustomerTypeId] == "" {
-			customerTypeIDChecker[*data[i].CustomerTypeId] = "done"
-			customerTypeIDs = append(customerTypeIDs, *data[i].CustomerTypeId)
+		if data[i].CustomerTypeId.Valid && customerTypeIDChecker[data[i].CustomerTypeId.String] == "" {
+			customerTypeIDChecker[data[i].CustomerTypeId.String] = "done"
+			customerTypeIDs = append(customerTypeIDs, data[i].CustomerTypeId.String)
 		}
 	}
 
@@ -838,63 +837,63 @@ func (uc WebCustomerUC) ReportSelect(c context.Context, parameter models.WebCust
 		var temp viewmodel.CustomerVM
 
 		for j := range cityData {
-			if data[i].CustomerCityID != nil && *data[i].CustomerCityID == *cityData[j].ID {
-				data[i].CustomerCityName = cityData[j].Name
+			if data[i].CustomerCityID.Valid && data[i].CustomerCityID.String == *cityData[j].ID {
+				data[i].CustomerCityName.String = *cityData[j].Name
 				break
 			}
 		}
 
 		for j := range proviceData {
-			if data[i].CustomerProvinceID != nil && *data[i].CustomerProvinceID == proviceData[j].ID {
-				data[i].CustomerProvinceName = proviceData[j].Name
+			if data[i].CustomerProvinceID.Valid && data[i].CustomerProvinceID.String == proviceData[j].ID {
+				data[i].CustomerProvinceName.String = *proviceData[j].Name
 				break
 			}
 		}
 
 		for j := range districtData {
-			if data[i].CustomerDistrictID != nil && *data[i].CustomerDistrictID == districtData[j].ID {
-				data[i].CustomerDistrictName = &districtData[j].Name
+			if data[i].CustomerDistrictID.Valid && data[i].CustomerDistrictID.String == districtData[j].ID {
+				data[i].CustomerDistrictName.String = districtData[j].Name
 				break
 			}
 		}
 
 		for j := range subDistrictData {
-			if data[i].CustomerSubdistrictID != nil && *data[i].CustomerSubdistrictID == subDistrictData[j].ID {
-				data[i].CustomerSubdistrictName = &subDistrictData[j].Name
+			if data[i].CustomerSubdistrictID.Valid && data[i].CustomerSubdistrictID.String == subDistrictData[j].ID {
+				data[i].CustomerSubdistrictName.String = subDistrictData[j].Name
 				break
 			}
 		}
 
 		for j := range salesmanData {
-			if data[i].CustomerSalesmanID != nil && *data[i].CustomerSalesmanID == *salesmanData[j].ID {
-				data[i].CustomerSalesmanName = salesmanData[j].Name
-				data[i].CustomerSalesmanPhone = salesmanData[j].PhoneNo
-				data[i].CustomerSalesmanCode = salesmanData[j].Code
+			if data[i].CustomerSalesmanID.Valid && data[i].CustomerSalesmanID.String == *salesmanData[j].ID {
+				data[i].CustomerSalesmanName.String = *salesmanData[j].Name
+				data[i].CustomerSalesmanPhone.String = *salesmanData[j].PhoneNo
+				data[i].CustomerSalesmanCode.String = *salesmanData[j].Code
 				break
 			}
 		}
 
 		for j := range customerLevelData {
-			if data[i].CustomerLevelID != nil && strconv.Itoa(*data[i].CustomerLevelID) == customerLevelData[j].ID {
-				data[i].CustomerLevel = &customerLevelData[j].Name
+			if data[i].CustomerLevelID.Valid && strconv.Itoa(int(data[i].CustomerLevelID.Int64)) == customerLevelData[j].ID {
+				data[i].CustomerLevel.String = customerLevelData[j].Name
 				break
 			}
 		}
 
 		for j := range customerTypeData {
-			if data[i].CustomerTypeId != nil && *data[i].CustomerTypeId == *customerTypeData[j].ID {
-				data[i].CustomerTypeName = customerTypeData[j].Name
+			if data[i].CustomerTypeId.Valid && data[i].CustomerTypeId.String == *customerTypeData[j].ID {
+				data[i].CustomerTypeName.String = *customerTypeData[j].Name
 				break
 			}
 		}
 
 		if parameter.CustomerProfileStatus == "0" {
-			if !*data[i].IsDataComplete {
+			if !data[i].IsDataComplete {
 				uc.BuildBody(&data[i], &temp, true)
 				res = append(res, temp)
 			}
 		} else if parameter.CustomerProfileStatus == "1" {
-			if *data[i].IsDataComplete {
+			if data[i].IsDataComplete {
 				uc.BuildBody(&data[i], &temp, true)
 				res = append(res, temp)
 			}

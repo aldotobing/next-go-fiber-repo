@@ -342,18 +342,7 @@ func (h *TransactionVAHandler) PaidTransactionByVaCode(ctx *fiber.Ctx) error {
 				customerData, _ := usecase.WebCustomerUC{ContractUC: h.ContractUC}.FindByID(c, models.WebCustomerParameter{ID: *resafterupdate.CustomerID})
 				salesInvoiceData, _ := usecase.SalesInvoiceUC{ContractUC: h.ContractUC}.FindByDocumentNo(c, models.SalesInvoiceParameter{ID: *resafterupdate.InvoiceCode})
 				var detailLine, deadLineFooter string
-				emptyString := ""
 				var emptyJson json.RawMessage
-
-				if salesInvoiceData.SourceDocumentNo == nil {
-					salesInvoiceData.SourceDocumentNo = &emptyString
-				}
-				if customerData.CustomerSalesmanName == nil {
-					customerData.CustomerSalesmanName = &emptyString
-				}
-				if customerData.CustomerSalesmanCode == nil {
-					customerData.CustomerSalesmanCode = &emptyString
-				}
 
 				if salesInvoiceData.InvoiceLine != nil {
 					detailLine += `Berikut merupakan rincian pesanan:\n`
@@ -374,11 +363,11 @@ func (h *TransactionVAHandler) PaidTransactionByVaCode(ctx *fiber.Ctx) error {
 
 					message := `Kepada Yang Terhormat
 
-					` + *customerData.Code + ` - ` + *resafterupdate.Customername + ` 
+					` + customerData.Code + ` - ` + *resafterupdate.Customername + ` 
 					
 					NO ORDERAN ` + *salesInvoiceData.SourceDocumentNo + ` 
 					NO INVOICE ` + *resafterupdate.InvoiceCode + ` 
-					pada tanggal ` + time.Now().Format("2006-01-02") + ` oleh Toko : ` + *customerData.CustomerName + `  dengan No. Virtual Account ` + *resafterupdate.VACode + ` TELAH LUNAS
+					pada tanggal ` + time.Now().Format("2006-01-02") + ` oleh Toko : ` + customerData.CustomerName + `  dengan No. Virtual Account ` + *resafterupdate.VACode + ` TELAH LUNAS
 					
 					Berikut merupakan rincian pesanan anda:
 					` + detailLine + `
@@ -391,7 +380,7 @@ func (h *TransactionVAHandler) PaidTransactionByVaCode(ctx *fiber.Ctx) error {
 
 					_, _ = usecase.FCMUC{ContractUC: h.ContractUC}.SendFCMMessage(c, "Lunas "+*salesInvoiceData.SourceDocumentNo, message, customerData.CustomerFCMToken)
 				}
-				if customerData.CustomerBranchPicPhoneNo != nil {
+				if customerData.CustomerBranchPicPhoneNo != "" {
 
 					message := `*Kepada Yang Terhormat PIC*
 
@@ -401,9 +390,9 @@ func (h *TransactionVAHandler) PaidTransactionByVaCode(ctx *fiber.Ctx) error {
 				
 					*NO INVOICE ` + *resafterupdate.InvoiceCode + `*
 				
-					*pada tanggal ` + time.Now().Format("2006-01-02") + ` oleh Toko : ` + *customerData.CustomerName + `(` + *customerData.Code + `) dengan No. Virtual Account ` + *resafterupdate.VACode + ` TELAH LUNAS*
+					*pada tanggal ` + time.Now().Format("2006-01-02") + ` oleh Toko : ` + customerData.CustomerName + `(` + customerData.Code + `) dengan No. Virtual Account ` + *resafterupdate.VACode + ` TELAH LUNAS*
 					
-					*Pelanggan dari salesman : ` + *customerData.CustomerSalesmanName + `(` + *customerData.CustomerSalesmanCode + `)*
+					*Pelanggan dari salesman : ` + customerData.CustomerSalesmanName + `(` + customerData.CustomerSalesmanCode + `)*
 
 					`
 
@@ -414,7 +403,7 @@ func (h *TransactionVAHandler) PaidTransactionByVaCode(ctx *fiber.Ctx) error {
 				
 					NB : Bila ini bukan transaksi dari Toko Bapak/Ibu, silahkan periksa data transaksi di SFA WEB(NEXT)/WEB CMS MYSM.`
 
-					_ = uc.ContractUC.WhatsApp.SendTransactionWA(*customerData.CustomerBranchPicPhoneNo, message)
+					_ = uc.ContractUC.WhatsApp.SendTransactionWA(customerData.CustomerBranchPicPhoneNo, message)
 				}
 			}
 		}

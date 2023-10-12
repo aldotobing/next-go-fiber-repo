@@ -17,9 +17,9 @@ type IWebCustomerRepository interface {
 	FindAll(ctx context.Context, parameter models.WebCustomerParameter) ([]models.WebCustomer, int, error)
 	FindByID(c context.Context, parameter models.WebCustomerParameter) (models.WebCustomer, error)
 	FindByIDNoCache(c context.Context, parameter models.WebCustomerParameter) (models.WebCustomer, error)
-	Edit(c context.Context, model *models.WebCustomer) (*string, error)
+	Edit(c context.Context, model models.WebCustomer) (string, error)
 	EditBulk(c context.Context, in requests.WebCustomerBulkRequest) error
-	Add(c context.Context, model *models.WebCustomer) (*string, error)
+	Add(c context.Context, model models.WebCustomer) (string, error)
 	ReportSelect(c context.Context, parameter models.WebCustomerReportParameter) ([]models.WebCustomer, error)
 }
 
@@ -444,7 +444,7 @@ func (repository WebCustomerRepository) FindByIDNoCache(c context.Context, param
 }
 
 // Edit ...
-func (repository WebCustomerRepository) Edit(c context.Context, model *models.WebCustomer) (res *string, err error) {
+func (repository WebCustomerRepository) Edit(c context.Context, model models.WebCustomer) (res string, err error) {
 	statement := `UPDATE customer SET 
 		customer_name = $1, 
 		customer_address = $2, 
@@ -466,23 +466,23 @@ func (repository WebCustomerRepository) Edit(c context.Context, model *models.We
 	WHERE id = $17
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
-		model.CustomerName,
-		model.CustomerAddress,
-		model.CustomerUserID,
-		model.CustomerPhone,
-		model.CustomerReligion,
-		model.CustomerNik,
-		model.CustomerLevelID,
-		model.CustomerGender,
-		model.Code,
-		model.CustomerEmail,
-		model.CustomerBirthDate,
-		model.CustomerProfilePicture,
-		model.CustomerPhotoKtp,
-		model.CustomerCpName,
-		model.UserID,
-		model.ShowInApp,
-		model.ID).Scan(&res)
+		model.CustomerName.String,
+		model.CustomerAddress.String,
+		model.CustomerUserID.String,
+		model.CustomerPhone.String,
+		model.CustomerReligion.String,
+		model.CustomerNik.String,
+		model.CustomerLevelID.Int64,
+		model.CustomerGender.String,
+		model.Code.String,
+		model.CustomerEmail.String,
+		model.CustomerBirthDate.String,
+		model.CustomerProfilePicture.String,
+		model.CustomerPhotoKtp.String,
+		model.CustomerCpName.String,
+		model.UserID.Int64,
+		model.ShowInApp.String,
+		model.ID.String).Scan(&res)
 
 	if err != nil {
 		return res, err
@@ -514,7 +514,7 @@ func (repo WebCustomerRepository) EditBulk(c context.Context, in requests.WebCus
 }
 
 // Add ...
-func (repository WebCustomerRepository) Add(c context.Context, model *models.WebCustomer) (res *string, err error) {
+func (repository WebCustomerRepository) Add(c context.Context, model models.WebCustomer) (res string, err error) {
 	statement := `INSERT INTO customer (
 			customer_name, customer_address, customer_phone, customer_email,
 			customer_cp_name, customer_profile_picture, created_date, modified_date, 
@@ -533,11 +533,11 @@ func (repository WebCustomerRepository) Add(c context.Context, model *models.Web
 	fmt.Println(statement)
 
 	err = repository.DB.QueryRowContext(c, statement,
-		model.CustomerName, model.CustomerAddress, model.CustomerPhone, model.CustomerEmail,
-		model.CustomerCpName, model.CustomerProfilePicture,
-		model.CustomerTaxCalcMethod, model.CustomerBranchID, model.Code,
-		model.CustomerSalesmanID, model.CustomerUserID, model.CustomerReligion, model.CustomerNik,
-		model.CustomerLevelID, model.CustomerGender, model.CustomerBirthDate,
+		model.CustomerName.String, model.CustomerAddress.String, model.CustomerPhone.String, model.CustomerEmail.String,
+		model.CustomerCpName.String, model.CustomerProfilePicture.String,
+		model.CustomerTaxCalcMethod.String, model.CustomerBranchID.String, model.Code.String,
+		model.CustomerSalesmanID.String, model.CustomerUserID.String, model.CustomerReligion.String, model.CustomerNik.String,
+		model.CustomerLevelID.Int64, model.CustomerGender.String, model.CustomerBirthDate.String,
 	).Scan(&res)
 
 	if err != nil {
