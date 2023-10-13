@@ -117,7 +117,7 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 	res.CustomerShowInApp = data.ShowInApp.String
 
 	res.CustomerStatusInstall = true
-	if data.CustomerUserToken.Valid {
+	if !data.CustomerUserToken.Valid {
 		res.CustomerStatusInstall = false
 	} else {
 		res.CustomerFCMToken = data.CustomerUserToken.String

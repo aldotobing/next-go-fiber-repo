@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -417,7 +418,7 @@ func (repository WebCustomerRepository) FindByID(c context.Context, parameter mo
 	statement := models.WebCustomerSelectStatement + ` WHERE c.id = $1`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
 
-	// fmt.Println(statement)
+	fmt.Println(statement)
 
 	data, err = repository.scanRow(row)
 	if err != nil {
