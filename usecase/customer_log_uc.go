@@ -92,6 +92,15 @@ func (uc CustomerLogUC) BuildBody(data *models.CustomerLog, res *viewmodel.Custo
 	res.TypeChanges = typeChanges
 	res.OldData = oldDataChanges
 	res.NewData = newDataChanges
+
+	res.BranchID = data.BranchID.String
+	res.BranchName = data.BranchName.String
+	res.RegionID = data.RegionID.String
+	res.RegionName = data.RegionName.String
+	res.RegionGroupID = data.RegionGroupID.String
+	res.RegionGroupName = data.RegionGroupName.String
+	res.CustomerLevelID = data.CustomerLevelID.String
+	res.CustomerLevelName = data.CustomerLevelName.String
 }
 
 // SelectAll ...
