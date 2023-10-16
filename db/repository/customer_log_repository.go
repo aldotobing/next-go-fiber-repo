@@ -39,6 +39,14 @@ func (repository CustomerLogRepository) scanRows(rows *sql.Rows) (res models.Cus
 		&res.UserID,
 		&res.UserName,
 		&res.CreatedAt,
+		&res.BranchID,
+		&res.BranchName,
+		&res.RegionID,
+		&res.RegionName,
+		&res.RegionGroupID,
+		&res.RegionGroupName,
+		&res.CustomerLevelID,
+		&res.CustomerLevelName,
 	)
 	if err != nil {
 
