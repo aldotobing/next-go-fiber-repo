@@ -49,11 +49,34 @@ func (repository CustomerLogRepository) scanRows(rows *sql.Rows) (res models.Cus
 }
 
 // SelectAll ...
-func (repository CustomerLogRepository) SelectAll(c context.Context, parameter models.CustomerLogParameter) (data []models.CustomerLog, err error) {
+func (repository CustomerLogRepository) SelectAll(c context.Context, in models.CustomerLogParameter) (data []models.CustomerLog, err error) {
 	var conditionString string
-
+	if in.StartDate != "" && in.EndDate != "" {
+		conditionString += `AND def.created_at::date BETWEEN '` + in.StartDate + `'::date AND '` + in.EndDate + `'::date`
+	} else {
+		conditionString += `AND def.created_at::date BETWEEN date_trunc('MONTH',now())::DATE AND now()`
+	}
+	if in.UserId != "" {
+		conditionString += ` AND c.branch_id in(
+				select ub.branch_id  
+				from user_branch ub
+				where ub.user_id = ` + in.UserId + `
+			) `
+	}
+	if in.RegionGroupID != "" {
+		conditionString += ` AND R.GROUP_ID = ` + in.RegionGroupID
+	}
+	if in.RegionID != "" {
+		conditionString += ` AND R.ID = ` + in.RegionID
+	}
+	if in.BranchID != "" {
+		conditionString += ` AND B.ID = ` + in.BranchID
+	}
+	if in.CustomerLevelID != "" {
+		conditionString += ` AND C.customer_level_id = ` + in.CustomerLevelID
+	}
 	statement := models.CustomerLogSelectStatement + ` ` + models.CustomerLogWhereStatement +
-		conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+		conditionString + ` ORDER BY ` + in.By + ` ` + in.Sort
 	rows, err := repository.DB.QueryContext(c, statement)
 	if err != nil {
 		return data, err

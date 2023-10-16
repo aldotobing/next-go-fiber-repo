@@ -17,15 +17,24 @@ type CustomerLogHandler struct {
 func (h *CustomerLogHandler) SelectAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
+	// user_id: localStorage.getItem('user_id'),
+	//   start_date: parameter.start_date,
+	//   end_date: parameter.end_date,
+	//   region_group_id: parameter.region_group_id,
+	//   region_id: parameter.region_id,
+	//   branch_id: parameter.branch_id,
+	//   customer_level_id: parameter.customer_level_id,
 	parameter := models.CustomerLogParameter{
-		ID:             ctx.Query("customer_id"),
-		CustomerTypeId: ctx.Query("customer_type_id"),
-		SalesmanTypeID: ctx.Query("salesman_type_id"),
-		UserId:         ctx.Query("admin_user_id"),
-		BranchId:       ctx.Query("branch_id"),
-		Search:         ctx.Query("search"),
-		By:             ctx.Query("by"),
-		Sort:           ctx.Query("sort"),
+		UserId:          ctx.Query("user_id"),
+		StartDate:       ctx.Query("start_date"),
+		EndDate:         ctx.Query("end_date"),
+		RegionGroupID:   ctx.Query("region_group_id"),
+		RegionID:        ctx.Query("region_id"),
+		BranchID:        ctx.Query("branch_id"),
+		CustomerLevelID: ctx.Query("customer_level_id"),
+		Search:          ctx.Query("search"),
+		By:              ctx.Query("by"),
+		Sort:            ctx.Query("sort"),
 	}
 	uc := usecase.CustomerLogUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectAll(c, parameter)

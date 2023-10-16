@@ -19,23 +19,20 @@ type CustomerLog struct {
 
 // CustomerLogParameter ...
 type CustomerLogParameter struct {
-	ID             string `json:"customer_id"`
-	Code           string `json:"customer_code"`
-	Name           string `json:"customer_name"`
-	CustomerTypeId string `json:"custome_type_id"`
-	SalesmanTypeID string `json:"salesman_type_id"`
-	UserId         string `json:"admin_user_id"`
-	BranchId       string `json:"branch_id"`
-	Search         string `json:"search"`
-	Page           int    `json:"page"`
-	Offset         int    `json:"offset"`
-	Limit          int    `json:"limit"`
-	By             string `json:"by"`
-	Sort           string `json:"sort"`
-	PhoneNumber    string `json:"phone_number"`
-	StartDate      string `json:"start_date"`
-	EndDate        string `json:"end_date"`
-	ShowInApp      string `json:"show_in_app"`
+	ID              string `json:"id"`
+	UserId          string `json:"user_id"`
+	StartDate       string `json:"start_date"`
+	EndDate         string `json:"end_date"`
+	RegionGroupID   string `json:"region_group_id"`
+	RegionID        string `json:"region_id"`
+	CustomerLevelID string `json:"customer_level_id"`
+	BranchID        string `json:"branch_id"`
+	Search          string `json:"search"`
+	Page            int    `json:"page"`
+	Offset          int    `json:"offset"`
+	Limit           int    `json:"limit"`
+	By              string `json:"by"`
+	Sort            string `json:"sort"`
 }
 
 var (

@@ -23,7 +23,7 @@ func (uc CustomerLogUC) BuildBody(data *models.CustomerLog, res *viewmodel.Custo
 	res.CustomerID = data.CustomerID
 	res.CustomerCode = data.CustomerCode
 	res.CustomerName = data.CustomerName
-	if data.UserID.String == "" {
+	if data.UserID.String == "" || data.UserID.String == "0" {
 		res.UserName = "Changes by app"
 	} else {
 		res.UserID = data.UserID.String
