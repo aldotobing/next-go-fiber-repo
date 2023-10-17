@@ -88,18 +88,21 @@ type DashboardWebGetWithUserID struct {
 	CompleteCustomer        *string `json:"complete_customer"`
 }
 type OmzetValueModel struct {
-	RegionID            sql.NullString `json:"region_id"`
-	RegionName          sql.NullString `json:"region_name"`
-	RegionGroupID       sql.NullString `json:"region_group_id"`
-	RegionGroupName     sql.NullString `json:"region_group_name"`
-	BranchID            sql.NullString `json:"branch_id"`
-	CustomerID          sql.NullString `json:"customer_id"`
-	ItemID              sql.NullString `json:"item_id"`
-	ItemName            sql.NullString `json:"item_name"`
-	TotalGrossAmount    string         `json:"total_gross_amount"`
-	TotalNettAmount     string         `json:"total_nett_amount"`
-	TotalQuantity       string         `json:"total_quantity"`
-	TotalActiveCustomer string         `json:"total_active_customer"`
+	TransactionYearMonth string         `json:"transaction_year_month"`
+	TransactionYear      string         `json:"transaction_year"`
+	TransactionMonthName string         `json:"transaction_month_name"`
+	RegionID             sql.NullString `json:"region_id"`
+	RegionName           sql.NullString `json:"region_name"`
+	RegionGroupID        sql.NullString `json:"region_group_id"`
+	RegionGroupName      sql.NullString `json:"region_group_name"`
+	BranchID             sql.NullString `json:"branch_id"`
+	CustomerID           sql.NullString `json:"customer_id"`
+	ItemID               sql.NullString `json:"item_id"`
+	ItemName             sql.NullString `json:"item_name"`
+	TotalGrossAmount     string         `json:"total_gross_amount"`
+	TotalNettAmount      string         `json:"total_nett_amount"`
+	TotalQuantity        string         `json:"total_quantity"`
+	TotalActiveCustomer  string         `json:"total_active_customer"`
 }
 
 type OmzetValueBranchModel struct {
@@ -211,6 +214,7 @@ type DashboardWebBranchParameter struct {
 	CustomerLevelID string `json:"customer_level_id"`
 	CustomerTypeID  string `json:"customer_type_id"`
 	BranchArea      string `json:"branch_area"`
+	Year            string `json:"year"`
 }
 
 var (
