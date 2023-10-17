@@ -29,6 +29,8 @@ type IDashboardWebRepository interface {
 	GetOmzetValueByBranchID(ctx context.Context, parameter models.DashboardWebBranchParameter, branchID string) ([]models.OmzetValueBranchModel, error)
 	GetOmzetValueByCustomerID(ctx context.Context, parameter models.DashboardWebBranchParameter, customerID string) (res []models.OmzetValueModel, err error)
 
+	GetOmzetValueGraph(ctx context.Context, parameter models.DashboardWebBranchParameter) ([]models.OmzetValueModel, error)
+
 	TrackingInvoice(ctx context.Context, input models.DashboardWebBranchParameter) (res []models.DashboardTrackingInvoice, err error)
 	VirtualAccount(ctx context.Context, input models.DashboardWebBranchParameter) (res []models.DashboardVirtualAccount, err error)
 }
@@ -1014,6 +1016,82 @@ func (repo DashboardWebRepository) GetOmzetValueByCustomerID(ctx context.Context
 			&temp.TotalGrossAmount,
 			&temp.TotalNettAmount,
 			&temp.TotalQuantity)
+		if err != nil {
+			return
+		}
+
+		res = append(res, temp)
+	}
+
+	return
+}
+
+func (repo DashboardWebRepository) GetOmzetValueGraph(ctx context.Context, parameter models.DashboardWebBranchParameter) (res []models.OmzetValueModel, err error) {
+	var whereStatement string
+	if parameter.Year != "" {
+		whereStatement += ` AND TO_CHAR(sih.transaction_date, 'YYYY') = '` + parameter.Year + `'`
+	} else {
+		whereStatement += ` AND TO_CHAR(sih.transaction_date, 'YYYY') = TO_CHAR(NOW(), 'YYYY')`
+	}
+
+	if parameter.ItemID != "" {
+		whereStatement += ` AND sil.item_id = ` + parameter.ItemID
+	}
+	if parameter.ItemCategoryID != "" {
+		whereStatement += ` AND i.item_category_id = ` + parameter.ItemCategoryID
+	}
+
+	if parameter.ItemIDs != "" {
+		whereStatement += ` AND sil.item_id IN (` + parameter.ItemIDs + `)`
+	}
+	if parameter.ItemCategoryIDs != "" {
+		whereStatement += ` AND i.item_category_id IN (` + parameter.ItemCategoryIDs + `)`
+	}
+	if parameter.UserID != "" {
+		whereStatement += ` AND b.branch_id in(
+			select ub.branch_id  
+			from user_branch ub
+			where ub.user_id = ` + parameter.UserID + `
+		) `
+	}
+	if parameter.RegionID != "" {
+		whereStatement += `r.ID = ` + parameter.RegionID
+	}
+	if parameter.RegionGroupID != "" {
+		whereStatement += `r.group_id = ` + parameter.RegionGroupID
+	}
+	if parameter.BranchID != "" {
+		whereStatement += `b.id in (` + parameter.BranchID + `)`
+	}
+
+	query := `select TO_CHAR(sih.transaction_date, 'YYYY-MM') as transaction_year_month,
+			TO_CHAR(sih.transaction_date, 'YYYY') as transaction_year,
+			TO_CHAR(sih.transaction_date, 'Month') as transaction_month_name,
+			coalesce(sum(sil.gross_amount),0) as total_gross_amount, 
+			coalesce(sum(sil.net_amount),0) as total_nett_amount, 
+			coalesce(sum(sil.qty),0) as total_volume
+		from sales_invoice_header sih 
+			left join sales_invoice_line sil on sil.header_id = sih.id 
+			left join item i on i.id = sil.item_id
+			left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
+			left join branch b on b.id = sih.branch_id  
+			left join region r on r.id = b.region_id
+		WHERE sih.transaction_date is not null 
+			and coh.id is not null` + whereStatement + `
+			group by transaction_year_month, transaction_year, transaction_month_name
+			order by transaction_year_month asc`
+
+	rows, err := repo.DB.Query(query)
+	if err != nil {
+		return
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var temp models.OmzetValueModel
+		err = rows.Scan(&temp.TransactionYearMonth, &temp.TransactionYear, &temp.TransactionMonthName,
+			&temp.TotalGrossAmount, &temp.TotalNettAmount, &temp.TotalQuantity)
 		if err != nil {
 			return
 		}

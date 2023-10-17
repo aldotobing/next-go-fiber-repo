@@ -568,6 +568,32 @@ func (uc DashboardWebUC) GetOmzetValueByCustomerID(c context.Context, parameter 
 	return res, err
 }
 
+func (uc DashboardWebUC) GetOmzetValueGraph(c context.Context, parameter models.DashboardWebBranchParameter) (res []viewmodel.OmzetValueGraphVM, err error) {
+	repo := repository.NewDashboardWebRepository(uc.DB)
+	omzetData, err := repo.GetOmzetValueGraph(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	acOmzet := accounting.Accounting{Symbol: "Rp. ", Thousand: ".", Decimal: ","}
+	acQuantity := accounting.Accounting{Thousand: "."}
+	for i := range omzetData {
+		totalQualityFloat, _ := strconv.ParseFloat(omzetData[i].TotalQuantity, 64)
+		totalQuantity := acQuantity.FormatMoney(totalQualityFloat)
+		totalOmzetFloat, _ := strconv.ParseFloat(omzetData[i].TotalNettAmount, 64)
+		totalOmzet := acOmzet.FormatMoney(totalOmzetFloat)
+		res = append(res, viewmodel.OmzetValueGraphVM{
+			TransactionYear:      omzetData[i].TransactionYear,
+			TransactionMonthName: strings.ReplaceAll(omzetData[i].TransactionMonthName, " ", ""),
+			TotalQuantity:        totalQuantity,
+			TotalOmzet:           totalOmzet,
+		})
+	}
+
+	return res, err
+}
+
 func (uc DashboardWebUC) GetTrackingInvoiceData(c context.Context, parameter models.DashboardWebBranchParameter) (res []viewmodel.DashboardTrackingInvoiceVM, err error) {
 	repo := repository.NewDashboardWebRepository(uc.DB)
 	data, err := repo.TrackingInvoice(c, parameter)
