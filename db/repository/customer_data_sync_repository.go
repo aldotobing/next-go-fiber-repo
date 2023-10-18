@@ -35,6 +35,7 @@ func (repository CustomerDataSyncRepository) scanRows(rows *sql.Rows) (res model
 		&res.Address, &res.PhoneNo, &res.CustomerType, &res.PriceListCode,
 		&res.CountryCode, &res.CityCode, &res.DistrictCode, &res.SubDistrictCode,
 		&res.ProvinceCode, &res.TermOfPaymentCode, &res.SalesmanCode, &res.BranchID,
+		&res.UserID,
 	)
 	if err != nil {
 
@@ -51,6 +52,7 @@ func (repository CustomerDataSyncRepository) scanRow(row *sql.Row) (res models.C
 		&res.Address, &res.PhoneNo, &res.CustomerType, &res.PriceListCode,
 		&res.CountryCode, &res.CityCode, &res.DistrictCode, &res.SubDistrictCode,
 		&res.ProvinceCode, &res.TermOfPaymentCode, &res.SalesmanCode, &res.BranchID,
+		&res.UserID,
 	)
 	if err != nil {
 		return res, err
@@ -105,7 +107,7 @@ func (repository CustomerDataSyncRepository) Add(c context.Context, model *model
 	customerstatement := ` insert into customer(device_id,partner_id,customer_name,customer_address,customer_phone,
 		created_date, modified_date,
 		payment_terms_id,price_list_id,salesman_id,customer_level_id,
-		branch_id,customer_code,customer_type_id)
+		branch_id,customer_code,customer_type_id, user_id)
 	values
 	(433,$1,$2,$3,$4,now(),now(),
 		(select id from term_of_payment where code =$5),
@@ -113,7 +115,8 @@ func (repository CustomerDataSyncRepository) Add(c context.Context, model *model
 		(select id from salesman where partner_id =(select id from partner where code =$7)),
 		(select id from customer_level where code = $8),
 		$9,$10,
-		(select id from customer_type where code = $11)
+		(select id from customer_type where code = $11),
+		$12
 		) RETURNING id `
 
 	var rescus string
@@ -121,6 +124,7 @@ func (repository CustomerDataSyncRepository) Add(c context.Context, model *model
 		&res, model.Name, model.Address, model.PhoneNo,
 		model.TermOfPaymentCode, model.PriceListCode, model.SalesmanCode,
 		model.CustomerLevelCode, model.BranchID, model.Code, str.EmptyString(*model.CustomerType),
+		model.UserID.String,
 	).Scan(&rescus)
 
 	if err != nil {
@@ -158,14 +162,16 @@ func (repository CustomerDataSyncRepository) Edit(c context.Context, model *mode
 	price_list_id= (select id from price_list where code=$4),
 	salesman_id =(select id from salesman where partner_id =(select id from partner where code =$5)),
 	branch_id = $6,
-	customer_type_id =(select id from customer_type where code = $7)
-	where partner_id = (select id from partner where code = $8)
+	customer_type_id =(select id from customer_type where code = $7),
+	user_id = $8
+	where partner_id = (select id from partner where code = $9)
 	returning id `
 
 	err = transaction.QueryRowContext(c, customerstatement,
 		model.Name, model.Address,
 		model.TermOfPaymentCode, model.PriceListCode, model.SalesmanCode,
 		model.BranchID, str.EmptyString(*model.CustomerType),
+		model.UserID.String,
 		model.Code,
 	).Scan(&rescus)
 
