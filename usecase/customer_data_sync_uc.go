@@ -3,6 +3,7 @@ package usecase
 import (
 	"bytes"
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -123,6 +124,18 @@ func (uc CustomerDataSyncUC) DataSync(c context.Context, parameter models.Custom
 	for _, itemObject := range res {
 		fmt.Println("masuk perulangan")
 		currentItem, _ := uc.FindByCode(c, models.CustomerDataSyncParameter{Code: *itemObject.Code})
+
+		itemObject.UserID.String = currentItem.UserID.String
+		if !currentItem.UserID.Valid {
+			userData, err := WebUserUC{ContractUC: uc.ContractUC}.Add(c, &requests.WebUserRequest{
+				Login:               *itemObject.Code,
+				Password:            *itemObject.Code,
+				UserRoleGroupIDList: "25",
+			})
+			if err == nil {
+				itemObject.UserID = sql.NullString{String: *userData.ID, Valid: true}
+			}
+		}
 
 		if currentItem.ID != nil {
 			fmt.Println("not null")

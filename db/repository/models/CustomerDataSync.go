@@ -1,24 +1,27 @@
 package models
 
+import "database/sql"
+
 // CustomerDataSync ...
 type CustomerDataSync struct {
-	ID                *string `json:"customer_id"`
-	PartnerID         *string `json:"partner_id"`
-	Code              *string `json:"customer_code"`
-	SalesmanCode      *string `json:"salesman_code"`
-	Name              *string `json:"customer_name"`
-	CustomerType      *string `json:"customer_type_code"`
-	Address           *string `json:"customer_address"`
-	PhoneNo           *string `json:"customer_phone_no"`
-	PriceListCode     *string `json:"price_list_code"`
-	CountryCode       *string `json:"country_code"`
-	CityCode          *string `json:"city_code"`
-	DistrictCode      *string `json:"district_code"`
-	SubDistrictCode   *string `json:"subdistrict_code"`
-	ProvinceCode      *string `json:"province_code"`
-	BranchID          *string `json:"branch_id"`
-	TermOfPaymentCode *string `json:"top_code"`
-	CustomerLevelCode *string `json:"customer_level_code"`
+	ID                *string        `json:"customer_id"`
+	PartnerID         *string        `json:"partner_id"`
+	Code              *string        `json:"customer_code"`
+	SalesmanCode      *string        `json:"salesman_code"`
+	Name              *string        `json:"customer_name"`
+	CustomerType      *string        `json:"customer_type_code"`
+	Address           *string        `json:"customer_address"`
+	PhoneNo           *string        `json:"customer_phone_no"`
+	PriceListCode     *string        `json:"price_list_code"`
+	CountryCode       *string        `json:"country_code"`
+	CityCode          *string        `json:"city_code"`
+	DistrictCode      *string        `json:"district_code"`
+	SubDistrictCode   *string        `json:"subdistrict_code"`
+	ProvinceCode      *string        `json:"province_code"`
+	BranchID          *string        `json:"branch_id"`
+	TermOfPaymentCode *string        `json:"top_code"`
+	CustomerLevelCode *string        `json:"customer_level_code"`
+	UserID            sql.NullString `json:"user_id"`
 }
 
 // CustomerDataSyncParameter ...
@@ -49,7 +52,8 @@ var (
 	p.address as customer_addrss,p.phone_no as customer_phone_no,ctp.code as customer_type_code, 
 	p.code as plice_list_code,cntr.code as country_code,cty.code as city_code, dst.code as district_code,
 	sdst.code as subdistrict_code,pv.code as province_code, top.code as top_code, 
-	ps.code as salesman_code ,b.id::character varying as branch_id
+	ps.code as salesman_code ,b.id::character varying as branch_id,
+	c.user_id
 	from customer c  
 	left join partner p on p.id=c.partner_id 
 	left join salesman s on s.id = c.salesman_id 
