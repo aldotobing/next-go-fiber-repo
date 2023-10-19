@@ -33,7 +33,7 @@ var (
 	// SalesmanSelectStatement ...
 
 	SalesmanSelectStatement = `
-	select def.id,p._name, def.salesman_phone_no, def.salesman_code
+	select def.id,p._name, coalesce(def.salesman_phone_no, ''), coalesce(def.salesman_code, '')
 	from salesman def
 	join partner p on p.id = def.partner_id
 		`
