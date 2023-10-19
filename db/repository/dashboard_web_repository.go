@@ -454,7 +454,7 @@ func (repository DashboardWebRepository) GetAllBranchDataWithUserID(ctx context.
 		select count(*), sih.cust_bill_to_id
 		from sales_invoice_header sih
 		where sih.transaction_date between ` + dateStartStatement + ` and ` + dateEndStatement + `  
-				and lower(sih.transaction_source_document_no) like 'co%' 
+				and sih.transaction_source_document_no like 'CO%' 
 				and sih.status = 'submitted'
 		group by sih.cust_bill_to_id
 	), customer_total_transaction as (
@@ -510,7 +510,7 @@ func (repository DashboardWebRepository) GetAllBranchDataWithUserID(ctx context.
 		group by b.id
 	)
 	select b.id, b._name, b.branch_code, r._name, r.group_name,
-		sum(case when cro.count > 1 then 1 else 0 end) as repeat_order,
+		sum(case when crot.count > 1 then crot.count-1 else 0 end) as repeat_order,
 		sum(case when crot.count > 1 then 1 else 0 end) as repeat_order_toko,
 		coalesce(sum(cto.count), 0) as total_transaction ,
 		coalesce(sum(cti.count), 0) as total_invoice,
