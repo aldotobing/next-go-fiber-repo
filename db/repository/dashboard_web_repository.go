@@ -458,14 +458,14 @@ func (repository DashboardWebRepository) GetAllBranchDataWithUserID(ctx context.
 				and sih.status = 'submitted'
 		group by sih.cust_bill_to_id
 	), customer_total_transaction as (
-		select count(soh.*), soh.cust_bill_to_id
+		select count(soh.*), c.branch_id
 		from sales_order_header soh
 		left join customer c on c.id = soh.cust_bill_to_id
 		where soh.transaction_date between ` + dateStartStatement + ` and ` + dateEndStatement + ` 
 			and lower(soh.document_no) like 'oso%'
 			and soh.status='submitted'
 			and c.show_in_apps = 1
-		group by cust_bill_to_id
+		group by c.branch_id
 	), customer_total_invoice as (
 		select count(sih.*), sih.cust_bill_to_id
 		from sales_invoice_header sih
@@ -512,7 +512,7 @@ func (repository DashboardWebRepository) GetAllBranchDataWithUserID(ctx context.
 	select b.id, b._name, b.branch_code, r._name, r.group_name,
 		sum(case when crot.count > 1 then crot.count-1 else 0 end) as repeat_order,
 		sum(case when crot.count > 1 then 1 else 0 end) as repeat_order_toko,
-		coalesce(sum(cto.count), 0) as total_transaction ,
+		coalesce(cto.count, 0) as total_transaction ,
 		coalesce(sum(cti.count), 0) as total_invoice,
 		coalesce(sum(ctci.count), 0) as total_check_id,
 		sum(case when cao.count >= 1 then 1 else 0 end) as aktif_outlet,
@@ -526,7 +526,7 @@ func (repository DashboardWebRepository) GetAllBranchDataWithUserID(ctx context.
 		left join _user us on us.id = def.user_id
 		left join customer_repeat_order cro on cro.cust_bill_to_id = def.id
 		left join customer_repeat_order_toko crot on crot.cust_bill_to_id = def.id
-		left join customer_total_transaction cto on cto.cust_bill_to_id = def.id
+		left join customer_total_transaction cto on cto.branch_id = b.id
 		left join customer_total_invoice cti on cti.cust_bill_to_id = def.id
 		left join customer_total_check_in ctci on ctci.user_id = def.user_id
 		left join customer_aktif_outlet cao on cao.cust_bill_to_id = def.id
@@ -545,7 +545,7 @@ func (repository DashboardWebRepository) GetAllBranchDataWithUserID(ctx context.
 		AND def.created_date IS not NULL 
 		and def.user_id is not null
 		and def.show_in_apps = 1
-	GROUP BY b.ID, r.id, dcc.total_complete_customer`
+	GROUP BY b.ID, r.id, dcc.total_complete_customer, cto.count`
 	rows, err := repository.DB.Query(query)
 	if err != nil {
 		return data, err
