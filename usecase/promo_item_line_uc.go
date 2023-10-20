@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -32,10 +33,37 @@ func (uc PromoItemLineUC) SelectAll(c context.Context, parameter models.PromoIte
 		return res, err
 	}
 
+	var ids, priceListVersionID string
+	for i := range data {
+		if ids == "" {
+			ids += *data[i].ItemID
+		} else {
+			ids += "," + *data[i].ItemID
+		}
+		priceListVersionID = *data[i].PriceListVersionID
+	}
+	fmt.Println(ids)
+	latestPrice, _ := ItemUC{ContractUC: uc.ContractUC}.SelectAllV2(c, models.ItemParameter{IDs: ids, PriceListVersionId: priceListVersionID, By: "def.created_date"}, true)
 	doubleChecker := make(map[string]string)
+	fmt.Println(latestPrice)
 	for i := range data {
 		if doubleChecker[*data[i].ID] == "" {
 			doubleChecker[*data[i].ID] = "done"
+			var finalPrice string
+			for j := range latestPrice {
+				fmt.Println(*latestPrice[j].ID, "==", *data[i].ItemID)
+				if *latestPrice[j].ID == *data[i].ItemID {
+					for k := range latestPrice[j].Uom {
+						if *latestPrice[j].Uom[k].Conversion == *data[i].UomLineConversion {
+							finalPrice = *latestPrice[j].Uom[k].ItemDetailsPrice
+						}
+					}
+					latestPrice = uc.removeIndex(latestPrice, j)
+					break
+				}
+			}
+
+			fmt.Println(finalPrice)
 			res = append(res, viewmodel.PromoItemLineVM{
 				ID:                 data[i].ID,
 				ItemID:             data[i].ItemID,
@@ -52,7 +80,7 @@ func (uc PromoItemLineUC) SelectAll(c context.Context, parameter models.PromoIte
 				Qty:                data[i].Qty,
 				UomID:              data[i].UomID,
 				UomName:            data[i].UomID,
-				ItemPrice:          data[i].ItemPrice,
+				ItemPrice:          &finalPrice,
 				PriceListVersionID: data[i].PriceListVersionID,
 				GlobalMaxQty:       data[i].GlobalMaxQty,
 				CustomerMaxQty:     data[i].CustomerMaxQty,
@@ -125,4 +153,8 @@ func (uc PromoItemLineUC) Add(c context.Context, data *requests.PromoItemLineReq
 	}
 
 	return res, err
+}
+
+func (uc PromoItemLineUC) removeIndex(s []viewmodel.ItemVM, index int) []viewmodel.ItemVM {
+	return append(s[:index], s[index+1:]...)
 }
