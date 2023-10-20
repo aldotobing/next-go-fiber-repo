@@ -406,14 +406,15 @@ func (uc WebCustomerUC) FindByIDNoCache(c context.Context, parameter models.WebC
 
 func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCustomerRequest, imgProfile, imgKtp *multipart.FileHeader) (res viewmodel.CustomerVM, err error) {
 
-	// Invalidate the cache before update
 	cacheKey := CustomerCacheKey + id
-	err = uc.RedisClient.Client.Del(cacheKey).Err()
-	if err != nil {
-		// Log error
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_del", uc.ReqID)
-		return res, err
-	}
+
+	// // Invalidate the cache before update
+	// err = uc.RedisClient.Client.Del(cacheKey).Err()
+	// if err != nil {
+	// 	// Log error
+	// 	logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_del", uc.ReqID)
+	// 	return res, err
+	// }
 
 	// currentObjectUc, err := uc.FindByID(c, models.MpBankParameter{ID: id})
 	currentObjectUc, err := uc.FindByIDNoCache(c, models.WebCustomerParameter{ID: id})
@@ -533,19 +534,25 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 		return res, err
 	}
 
-	// Invalidate the cache before refresh
-	err = uc.RedisClient.Client.Del(cacheKey).Err()
-	if err != nil {
-		// Log error
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_del", uc.ReqID)
-		return res, err
-	}
-
 	// Refresh the data from the repository
-	res, err = uc.FindByID(c, models.WebCustomerParameter{ID: in.ID.String})
+	res, err = uc.FindByIDNoCache(c, models.WebCustomerParameter{ID: in.ID.String})
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
+	}
+
+	jsonData, jsonErr := json.Marshal(res)
+	if jsonErr != nil {
+		logruslogger.Log(logruslogger.WarnLevel, jsonErr.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
+	}
+
+	// 1 hour
+	cacheExpireTime := time.Hour
+	if len(jsonData) > 0 {
+		setErr := uc.RedisClient.Client.Set(cacheKey, jsonData, cacheExpireTime).Err()
+		if setErr != nil {
+			logruslogger.Log(logruslogger.WarnLevel, setErr.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
+		}
 	}
 
 	err = CustomerLogUC{ContractUC: uc.ContractUC}.Add(c, currentObjectUc, res, id, data.UserID)
