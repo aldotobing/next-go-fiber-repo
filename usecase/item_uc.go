@@ -42,11 +42,11 @@ func (uc ItemUC) SelectAll(c context.Context, parameter models.ItemParameter) (r
 }
 
 // SelectAllV2 ...
-func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter) (res []viewmodel.ItemVM, err error) {
+func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter, allParam bool) (res []viewmodel.ItemVM, err error) {
 	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(0, 0, parameter.By, parameter.Sort, models.ItemOrderBy, models.ItemOrderByrByString)
 
 	repo := repository.NewItemRepository(uc.DB)
-	data, err := repo.SelectAllV2(c, parameter)
+	data, err := repo.SelectAllV2(c, parameter, allParam)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return
