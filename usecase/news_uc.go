@@ -73,7 +73,7 @@ func (uc NewsUC) Add(c context.Context, data *requests.NewsRequest) (res models.
 		StartDate:   &data.StartDate,
 		EndDate:     &data.EndDate,
 		Active:      &data.Active,
-		ImageUrl:    data.ImageUrl,
+		ImageUrl:    &data.ImageUrl,
 	}
 	res.ID, err = repo.Add(c, &res)
 	if err != nil {
@@ -122,7 +122,7 @@ func (uc NewsUC) Edit(c context.Context, id string, data *requests.NewsRequest) 
 		StartDate:   &data.StartDate,
 		EndDate:     &data.EndDate,
 		Active:      &data.Active,
-		ImageUrl:    data.ImageUrl,
+		ImageUrl:    &data.ImageUrl,
 	}
 
 	res.ID, err = repo.Edit(c, &res)

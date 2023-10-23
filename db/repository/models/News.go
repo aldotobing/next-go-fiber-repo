@@ -8,7 +8,7 @@ type News struct {
 	StartDate   *string `json:"start_date"`
 	EndDate     *string `json:"end_date"`
 	Active      *string `json:"active"`
-	ImageUrl    string  `json:"image_url"`
+	ImageUrl    *string `json:"image_url"`
 }
 
 // NewsParameter ...
