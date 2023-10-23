@@ -180,17 +180,18 @@ type DashboardWebParameter struct {
 }
 
 type DashboardWebRegionParameter struct {
-	BranchID  string `json:"branch_id"`
-	GroupID   string `json:"group_id"`
-	RegionID  string `json:"region_id"`
-	Search    string `json:"search"`
-	Page      int    `json:"page"`
-	Offset    int    `json:"offset"`
-	Limit     int    `json:"limit"`
-	By        string `json:"by"`
-	Sort      string `json:"sort"`
-	StartDate string `json:"start_date"`
-	EndDate   string `json:"end_date"`
+	BranchID        string `json:"branch_id"`
+	GroupID         string `json:"group_id"`
+	RegionID        string `json:"region_id"`
+	CustomerLevelID string `json:"customer_level_id"`
+	Search          string `json:"search"`
+	Page            int    `json:"page"`
+	Offset          int    `json:"offset"`
+	Limit           int    `json:"limit"`
+	By              string `json:"by"`
+	Sort            string `json:"sort"`
+	StartDate       string `json:"start_date"`
+	EndDate         string `json:"end_date"`
 }
 
 type DashboardWebBranchParameter struct {
@@ -440,7 +441,7 @@ var (
 		
 	 `
 	DashboardWebRegionDetailByRegionIDSelectStatement = `
-	select * from os_fetch_dashborad_regiongroupdetaildata_by_region_id($1::integer,$2::integer,$3,$4,null,null,null) `
+	select * from os_fetch_dashborad_regiongroupdetaildata_by_region_id($1::integer,$2::integer,$3,$4,$5,null,null,null) `
 
 	DashboardWebCustomerDetailByRegionDetailByRegionIDSelectStatement = `
 	select * from os_fetch_dashborad_get_total_user_by_branch_id($1::integer,$2,$3) `

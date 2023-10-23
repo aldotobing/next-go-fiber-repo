@@ -62,10 +62,11 @@ func (h *DashboardWebHandler) GetRegionDetailData(ctx *fiber.Ctx) error {
 
 	uc := usecase.DashboardWebUC{ContractUC: h.ContractUC}
 	res, err := uc.GetRegionDetailData(c, models.DashboardWebRegionParameter{
-		GroupID:   ctx.Query("group_id"),
-		RegionID:  ctx.Query("region_id"),
-		StartDate: ctx.Query("start_date"),
-		EndDate:   ctx.Query("end_date"),
+		GroupID:         ctx.Query("group_id"),
+		RegionID:        ctx.Query("region_id"),
+		StartDate:       ctx.Query("start_date"),
+		EndDate:         ctx.Query("end_date"),
+		CustomerLevelID: ctx.Query("customer_level_id"),
 	})
 
 	return h.SendResponse(ctx, res, nil, err, 0)
@@ -175,14 +176,15 @@ func (h *DashboardWebHandler) GetAllBranchDataByUserID(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.DashboardWebBranchParameter{
-		Search:    ctx.Query("search"),
-		Page:      str.StringToInt(ctx.Query("page")),
-		Limit:     str.StringToInt(ctx.Query("limit")),
-		By:        ctx.Query("by"),
-		Sort:      ctx.Query("sort"),
-		StartDate: ctx.Query("start_date"),
-		EndDate:   ctx.Query("end_date"),
-		UserID:    ctx.Query("user_id"),
+		CustomerLevelID: ctx.Query("customer_level_id"),
+		Search:          ctx.Query("search"),
+		Page:            str.StringToInt(ctx.Query("page")),
+		Limit:           str.StringToInt(ctx.Query("limit")),
+		By:              ctx.Query("by"),
+		Sort:            ctx.Query("sort"),
+		StartDate:       ctx.Query("start_date"),
+		EndDate:         ctx.Query("end_date"),
+		UserID:          ctx.Query("user_id"),
 	}
 
 	uc := usecase.DashboardWebUC{ContractUC: h.ContractUC}
