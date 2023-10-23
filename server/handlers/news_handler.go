@@ -94,6 +94,21 @@ func (h *NewsHandler) Add(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
+// Photo ...
+func (h *NewsHandler) Photo(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	image, _ := ctx.FormFile("image")
+
+	uc := usecase.NewsUC{ContractUC: h.ContractUC}
+	res, err := uc.AddPhoto(c, image)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
 // Delete ...
 func (h *NewsHandler) Delete(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
