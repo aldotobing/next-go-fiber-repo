@@ -35,6 +35,7 @@ func NewNewsRepository(DB *sql.DB) INewsRepository {
 func (repository NewsRepository) scanRows(rows *sql.Rows) (res models.News, err error) {
 	err = rows.Scan(
 		&res.ID, &res.Title, &res.Description, &res.StartDate, &res.EndDate, &res.ImageUrl,
+		&res.Active,
 	)
 	if err != nil {
 
@@ -48,6 +49,7 @@ func (repository NewsRepository) scanRows(rows *sql.Rows) (res models.News, err 
 func (repository NewsRepository) scanRow(row *sql.Row) (res models.News, err error) {
 	err = row.Scan(
 		&res.ID, &res.Title, &res.Description, &res.StartDate, &res.EndDate, &res.ImageUrl,
+		&res.Active,
 	)
 	if err != nil {
 		return res, err
