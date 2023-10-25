@@ -584,6 +584,7 @@ func (uc DashboardWebUC) GetOmzetValueGraph(c context.Context, parameter models.
 		totalOmzetFloat, _ := strconv.ParseFloat(omzetData[i].TotalNettAmount, 64)
 		totalOmzet := acOmzet.FormatMoney(totalOmzetFloat)
 		res = append(res, viewmodel.OmzetValueGraphVM{
+			ID:                   strconv.Itoa(i+1),
 			TransactionYear:      omzetData[i].TransactionYear,
 			TransactionMonthName: strings.ReplaceAll(omzetData[i].TransactionMonthName, " ", ""),
 			TotalQuantity:        totalQuantity,

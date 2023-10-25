@@ -141,6 +141,7 @@ type OmzetValueItemVM struct {
 }
 
 type OmzetValueGraphVM struct {
+	ID                   string `json:"id"`
 	TransactionYear      string `json:"transaction_year"`
 	TransactionMonthName string `json:"transaction_month_name"`
 	TotalQuantity        string `json:"total_quantity"`
