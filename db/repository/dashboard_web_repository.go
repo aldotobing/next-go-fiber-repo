@@ -1077,20 +1077,20 @@ func (repo DashboardWebRepository) GetOmzetValueGraph(ctx context.Context, param
 		whereStatement += ` AND i.item_category_id IN (` + parameter.ItemCategoryIDs + `)`
 	}
 	if parameter.UserID != "" {
-		whereStatement += ` AND b.branch_id in(
+		whereStatement += ` AND b.id in(
 			select ub.branch_id  
 			from user_branch ub
 			where ub.user_id = ` + parameter.UserID + `
 		) `
 	}
 	if parameter.RegionID != "" {
-		whereStatement += `r.ID = ` + parameter.RegionID
+		whereStatement += ` AND r.ID = ` + parameter.RegionID
 	}
 	if parameter.RegionGroupID != "" {
-		whereStatement += `r.group_id = ` + parameter.RegionGroupID
+		whereStatement += ` AND r.group_id = ` + parameter.RegionGroupID
 	}
 	if parameter.BranchID != "" {
-		whereStatement += `b.id in (` + parameter.BranchID + `)`
+		whereStatement += ` AND b.id in (` + parameter.BranchID + `)`
 	}
 
 	query := `select TO_CHAR(sih.transaction_date, 'YYYY-MM') as transaction_year_month,
