@@ -96,7 +96,15 @@ func (uc UserAccountUC) Login(c context.Context, data *requests.UserAccountLogin
 		logruslogger.Log(logruslogger.WarnLevel, helper.NameAlreadyExist, functioncaller.PrintFuncName(), "email", c.Value("requestid"))
 		return res, errors.New(helper.InvalidPhoneOrCode)
 	}
-	fmt.Println(&chkuser)
+	if !chkuser.ShowInApp {
+		logruslogger.Log(logruslogger.WarnLevel, helper.CustomerShowInAppFalse, functioncaller.PrintFuncName(), "email", c.Value("requestid"))
+		return res, errors.New(helper.InvalidPhoneOrCode)
+	}
+	if chkuser.Active == "0" {
+		logruslogger.Log(logruslogger.WarnLevel, helper.CustomerInactive, functioncaller.PrintFuncName(), "email", c.Value("requestid"))
+		return res, errors.New(helper.InvalidPhoneOrCode)
+	}
+
 	userOtpRequest := requests.UserOtpRequest{
 		Type:  OtpTypeLogin,
 		Phone: data.PhoneNo,
