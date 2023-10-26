@@ -71,7 +71,7 @@ var (
 				) and is_mysm=1
 			),''
 		),def.fcm_token,
-		coalesce(c.show_in_apps, false), coalesce(c.active,0)
+		coalesce(c.show_in_apps, '0'), coalesce(c.active,'0')
 	from _user def
 	left join customer c on c.user_id = def.id
 
