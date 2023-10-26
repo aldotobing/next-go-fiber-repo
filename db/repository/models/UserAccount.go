@@ -86,8 +86,10 @@ var (
 					where role_group_id in( select role_group_id from user_role_group where user_id = def.id) 
 					) and is_mysm=1
 				),''
-			),def.fcm_token
+			),def.fcm_token,
+			coalesce(c.show_in_apps, '0'), coalesce(c.active,'0')
 		from _user def
+		left join customer c on c.user_id = def.id
 	`
 
 	// UserAccountWhereStatement ...
