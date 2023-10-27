@@ -22,6 +22,7 @@ type CustomerDataSync struct {
 	TermOfPaymentCode *string        `json:"top_code"`
 	CustomerLevelCode *string        `json:"customer_level_code"`
 	UserID            sql.NullString `json:"user_id"`
+	ActiveStatus      *string        `json:"active_satus"`
 }
 
 // CustomerDataSyncParameter ...

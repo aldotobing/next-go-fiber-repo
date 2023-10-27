@@ -163,15 +163,16 @@ func (repository CustomerDataSyncRepository) Edit(c context.Context, model *mode
 	salesman_id =(select id from salesman where partner_id =(select id from partner where code =$5)),
 	branch_id = $6,
 	customer_type_id =(select id from customer_type where code = $7),
-	user_id = $8
-	where partner_id = (select id from partner where code = $9)
+	active = ( case when ($8 is null or $8='-100') then active else $8 end ),
+	user_id = $9
+	where partner_id = (select id from partner where code = $10)
 	returning id `
 
 	err = transaction.QueryRowContext(c, customerstatement,
 		model.Name, model.Address,
 		model.TermOfPaymentCode, model.PriceListCode, model.SalesmanCode,
 		model.BranchID, str.EmptyString(*model.CustomerType),
-		model.UserID.String,
+		model.ActiveStatus, model.UserID.String,
 		model.Code,
 	).Scan(&rescus)
 
