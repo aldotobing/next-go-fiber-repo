@@ -18,6 +18,7 @@ type WebUser struct {
 // WebUserParameter ...
 type WebUserParameter struct {
 	ID     string `json:"id"`
+	Login  string `json:"login"`
 	Search string `json:"search"`
 	Page   int    `json:"page"`
 	Offset int    `json:"offset"`
