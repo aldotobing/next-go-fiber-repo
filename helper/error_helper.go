@@ -156,6 +156,9 @@ var (
 
 	InvalidPhoneOrCode = "Nomor Hp atau Kode Toko Salah"
 
+	InvalidCustomerNotShown  = `Customer Tidak Dapat Muncul Pada Aplikasi`
+	InvalidCustomerNotActive = `Customer Tidak Tidak Aktif`
+
 	CidNotPresent = "cid_not_present"
 
 	UnexpectedCid = "unexpected_cid"

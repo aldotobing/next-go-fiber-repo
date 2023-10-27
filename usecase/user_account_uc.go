@@ -98,11 +98,11 @@ func (uc UserAccountUC) Login(c context.Context, data *requests.UserAccountLogin
 	}
 	if !chkuser.ShowInApp {
 		logruslogger.Log(logruslogger.WarnLevel, helper.CustomerShowInAppFalse, functioncaller.PrintFuncName(), "email", c.Value("requestid"))
-		return res, errors.New(helper.InvalidPhoneOrCode)
+		return res, errors.New(helper.InvalidCustomerNotShown)
 	}
 	if chkuser.Active == "0" {
 		logruslogger.Log(logruslogger.WarnLevel, helper.CustomerInactive, functioncaller.PrintFuncName(), "email", c.Value("requestid"))
-		return res, errors.New(helper.InvalidPhoneOrCode)
+		return res, errors.New(helper.InvalidCustomerNotActive)
 	}
 
 	userOtpRequest := requests.UserOtpRequest{
