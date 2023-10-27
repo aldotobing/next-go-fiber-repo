@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"strconv"
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -1058,9 +1059,10 @@ func (repo DashboardWebRepository) GetOmzetValueByCustomerID(ctx context.Context
 func (repo DashboardWebRepository) GetOmzetValueGraph(ctx context.Context, parameter models.DashboardWebBranchParameter) (res []models.OmzetValueModel, err error) {
 	var whereStatement string
 	if parameter.Year != "" {
-		whereStatement += ` AND TO_CHAR(sih.transaction_date, 'YYYY') = '` + parameter.Year + `'`
+		yearBefore, _ := strconv.Atoi(parameter.Year)
+		whereStatement += ` AND TO_CHAR(sih.transaction_date, 'YYYY') in ('` + parameter.Year + `', '` + strconv.Itoa(yearBefore-1) + `')`
 	} else {
-		whereStatement += ` AND TO_CHAR(sih.transaction_date, 'YYYY') = TO_CHAR(NOW(), 'YYYY')`
+		whereStatement += ` AND TO_CHAR(sih.transaction_date, 'YYYY')in (TO_CHAR(now(), 'YYYY'),TO_CHAR(now()-interval '1 year', 'YYYY'))`
 	}
 
 	if parameter.ItemID != "" {
