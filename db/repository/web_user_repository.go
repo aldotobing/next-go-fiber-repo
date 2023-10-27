@@ -19,6 +19,7 @@ type IWebUserRepository interface {
 	Add(c context.Context, model *models.WebUser) (*string, error)
 	Edit(c context.Context, model *models.WebUser) (*string, error)
 	Delete(c context.Context, id string, now time.Time) (*string, error)
+	FindByLogin(c context.Context, parameter models.WebUserParameter) (models.WebUser, error)
 }
 
 // WebUserRepository ...
@@ -118,6 +119,19 @@ func (repository WebUserRepository) FindAll(ctx context.Context, parameter model
 func (repository WebUserRepository) FindByID(c context.Context, parameter models.WebUserParameter) (data models.WebUser, err error) {
 	statement := models.WebUserSelectStatement + ` WHERE def.created_date IS NOT NULL AND def.id = $1`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
+
+	data, err = repository.scanRow(row)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
+}
+
+// FindByID ...
+func (repository WebUserRepository) FindByLogin(c context.Context, parameter models.WebUserParameter) (data models.WebUser, err error) {
+	statement := models.WebUserSelectStatement + ` WHERE def.created_date IS NOT NULL AND def.login = $1`
+	row := repository.DB.QueryRowContext(c, statement, parameter.Login)
 
 	data, err = repository.scanRow(row)
 	if err != nil {
