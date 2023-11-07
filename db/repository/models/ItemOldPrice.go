@@ -20,11 +20,12 @@ type ItemOldPrice struct {
 	UpdatedAt    sql.NullString `json:"updated_at"`
 	DeletedAt    sql.NullString `json:"deleted_at"`
 
-	ItemCode string `json:"item_code"`
-	ItemName string `json:"item_name"`
-	UomID    string `json:"uom_id"`
-	UomName  string `json:"uom_name"`
-	Price    string `json:"price"`
+	ItemCode    string         `json:"item_code"`
+	ItemName    string         `json:"item_name"`
+	ItemPicture sql.NullString `json:"item_picture"`
+	UomID       string         `json:"uom_id"`
+	UomName     string         `json:"uom_name"`
+	Price       string         `json:"price"`
 }
 
 // ItemOldPriceParameter ...
@@ -58,7 +59,7 @@ var (
 	ItemOldPriceSelectStatement = `
 	SELECT DEF.ID, 
 		DEF.CUSTOMER_ID, C.CUSTOMER_CODE, C.CUSTOMER_NAME,
-		DEF.ITEM_ID, I.CODE, I._NAME,
+		DEF.ITEM_ID, I.CODE, I._NAME, I.ITEM_PICTURE,
 		DEF.PRICE_LIST_ID, DEF.SELL_PRICE, DEF.QTY, 
 		DEF.UOM_ID, U._NAME,
 		DEF.PRESERVED_QTY, DEF.INVOICED_QTY, DEF.START_DATE, DEF.END_DATE,

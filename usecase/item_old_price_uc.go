@@ -20,7 +20,8 @@ type ItemOldPriceUC struct {
 
 // BuildBody ...
 func (uc ItemOldPriceUC) BuildBody(in *models.ItemOldPrice, out *viewmodel.ItemOldPriceVM) {
-	qty, _ := strconv.Atoi(in.Quantity)
+	fmt.Println(in.Quantity)
+	qty, _ := strconv.ParseFloat(in.Quantity, 64)
 
 	out.ID = in.ID
 	out.CustomerID = in.CustomerID
@@ -29,11 +30,12 @@ func (uc ItemOldPriceUC) BuildBody(in *models.ItemOldPrice, out *viewmodel.ItemO
 	out.ItemID = in.ItemID
 	out.ItemCode = in.ItemCode
 	out.ItemName = in.ItemName
+	out.ItemPicture = in.ItemPicture.String
 	out.UomID = in.UomID
 	out.UomName = in.UomName
 	out.StartDate = in.StartDate
 	out.EndDate = in.EndDate
-	out.Quantity = qty
+	out.Quantity = int(qty)
 	out.PriceListID = in.PriceListID
 	out.SellPrice = in.SellPrice
 	out.PreservedQty = in.PreservedQty

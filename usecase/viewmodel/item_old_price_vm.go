@@ -8,6 +8,7 @@ type ItemOldPriceVM struct {
 	CustomerName string `json:"customer_name"`
 	ItemID       string `json:"item_id"`
 	ItemCode     string `json:"item_code"`
+	ItemPicture  string `json:"item_picture"`
 	ItemName     string `json:"item_name"`
 	UomID        string `json:"uom_id"`
 	UomName      string `json:"uom_name"`
