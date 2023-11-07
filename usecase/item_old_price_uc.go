@@ -20,7 +20,6 @@ type ItemOldPriceUC struct {
 
 // BuildBody ...
 func (uc ItemOldPriceUC) BuildBody(in *models.ItemOldPrice, out *viewmodel.ItemOldPriceVM) {
-	fmt.Println(in.Quantity)
 	qty, _ := strconv.ParseFloat(in.Quantity, 64)
 
 	out.ID = in.ID
@@ -106,6 +105,55 @@ func (uc ItemOldPriceUC) FindByID(c context.Context, parameter models.ItemOldPri
 	}
 	uc.BuildBody(&data, &res)
 
+	return res, err
+}
+
+// ItemDetailFindByID ...
+func (uc ItemOldPriceUC) ItemDetailFindByID(c context.Context, parameter models.ItemOldPriceParameter) (res []viewmodel.ItemVM, err error) {
+	repo := repository.NewItemOldPriceRepository(uc.DB)
+	data, err := repo.FindByID(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	var resData viewmodel.ItemOldPriceVM
+	uc.BuildBody(&data, &resData)
+
+	res, err = ItemUC{ContractUC: uc.ContractUC}.SelectAllV2(c, models.ItemParameter{
+		ID:          resData.ItemID,
+		By:          "def.id",
+		PriceListId: resData.PriceListID,
+	}, false)
+
+	itemUomLineData, err := WebItemUomLineUC{ContractUC: uc.ContractUC}.SelectAll(c, models.WebItemUomLineParameter{
+		ItemID: resData.ItemID,
+		By:     "def.id",
+		Sort:   "asc",
+	})
+
+	var basePrice float64
+	sellPriceFloat, _ := strconv.ParseFloat(resData.SellPrice, 64)
+	for i := range itemUomLineData {
+		if *itemUomLineData[i].ItemUomID == resData.UomID {
+			conversion, _ := strconv.ParseFloat(*itemUomLineData[i].ItemUomConversion, 64)
+			basePrice = sellPriceFloat / float64(conversion)
+
+			break
+		}
+	}
+
+	//convert to old price
+	for i := range res {
+		for j := range res[i].Uom {
+			conversion, _ := strconv.ParseFloat(*res[i].Uom[j].Conversion, 64)
+
+			price := strconv.FormatFloat(basePrice*conversion, 'f', 2, 64)
+			limitQuantity := strconv.FormatFloat(float64(resData.Quantity)/conversion, 'f', 2, 64)
+			res[i].Uom[j].ItemDetailsPrice = &price
+			res[i].Uom[j].LimitQuantity = &limitQuantity
+		}
+	}
 	return res, err
 }
 

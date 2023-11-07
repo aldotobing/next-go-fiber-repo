@@ -68,6 +68,7 @@ func (repository ItemOldPriceRepository) scanRow(row *sql.Row) (res models.ItemO
 		&res.ItemID,
 		&res.ItemCode,
 		&res.ItemName,
+		&res.ItemPicture,
 		&res.PriceListID,
 		&res.SellPrice,
 		&res.Quantity,

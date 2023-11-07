@@ -80,6 +80,27 @@ func (h *ItemOldPriceHandler) FindByID(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
+// ItemDetailFindByID ...
+func (h *ItemOldPriceHandler) ItemDetailFindByID(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.ItemOldPriceParameter{
+		ID: ctx.Params("id"),
+	}
+	if parameter.ID == "" {
+		price_list_err := " : ID is mandatory"
+		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter+price_list_err, http.StatusBadRequest)
+	}
+
+	uc := usecase.ItemOldPriceUC{ContractUC: h.ContractUC}
+	res, err := uc.ItemDetailFindByID(c, parameter)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
 // Add ...
 func (h *ItemOldPriceHandler) Add(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
