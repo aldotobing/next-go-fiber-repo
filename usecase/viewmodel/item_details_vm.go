@@ -18,4 +18,5 @@ type Uom struct {
 	Name             *string `json:"uom_name"`
 	Conversion       *string `json:"uom_line_conversion"`
 	ItemDetailsPrice *string `json:"item_price"`
+	LimitQuantity    *string `json:"limit_quantity,omitempty"`
 }

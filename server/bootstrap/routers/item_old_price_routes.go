@@ -27,6 +27,7 @@ func (route ItemOldPriceRoutes) RegisterRoute() {
 	r.Get("/", handler.FindAll)
 	r.Get("/select", handler.SelectAll)
 	r.Get("/id/:id", handler.FindByID)
+	r.Get("/item_detail/id/:id", handler.ItemDetailFindByID)
 	r.Post("/add", handler.Add)
 	r.Put("/edit/:id", handler.Update)
 	r.Delete("/delete/:id", handler.Delete)

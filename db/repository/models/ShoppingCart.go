@@ -20,6 +20,7 @@ type ShoppingCart struct {
 	ModifiedAt       *string `json:"modified_at"`
 	ItemPicture      *string `json:"img_source"`
 	TotalPrice       *string `json:"total_price"`
+	OldPrice         bool    `json:"old_price"`
 }
 
 type ShoppingCartItemBonus struct {
@@ -74,7 +75,8 @@ var (
 	ShoppingCartSelectStatement = `select def.id, cus.id as c_id,cus.customer_name,
 	it.id as i_id,it._name as i_name, uom.id as uo_id, uom._name as uo_name,
 	def.qty::integer, def.stock_qty::integer,
-	def.price, it.item_category_id, ic._name as cat_name, it.item_picture,def.total_price::bigint
+	def.price, it.item_category_id, ic._name as cat_name, it.item_picture,def.total_price::bigint,
+	def.old_price
 	from cart def
 	join customer cus on cus.id = def.customer_id
 	join item it on it.id = def.item_id
