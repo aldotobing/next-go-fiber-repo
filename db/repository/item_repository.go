@@ -531,6 +531,10 @@ func (repository ItemRepository) SelectAllV2(c context.Context, parameter models
 		conditionString += ` AND def.id NOT IN (83, 307, 393) `
 	}
 
+	if parameter.Code != "" {
+		conditionString += ` AND def.code IN ('` + parameter.Code + `') `
+	}
+
 	statement := selectStatement + conditionString +
 		`GROUP by def.id, td.MULTIPLY_DATA ` +
 		`ORDER BY ` + parameter.By + ` ` + parameter.Sort

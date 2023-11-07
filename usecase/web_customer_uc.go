@@ -399,6 +399,25 @@ func (uc WebCustomerUC) FindByIDNoCache(c context.Context, parameter models.WebC
 	return res, nil
 }
 
+// FindByCode ...
+func (uc WebCustomerUC) FindByCodes(c context.Context, parameter models.WebCustomerParameter) (res []viewmodel.CustomerVM, err error) {
+	// Fetch data from DB
+	repo := repository.NewWebCustomerRepository(uc.DB)
+	data, err := repo.FindByCodes(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	for _, d := range data {
+		var temp viewmodel.CustomerVM
+		uc.BuildBody(&d, &temp, false)
+		res = append(res, temp)
+	}
+
+	return res, nil
+}
+
 func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCustomerRequest, imgProfile, imgKtp *multipart.FileHeader) (res viewmodel.CustomerVM, err error) {
 
 	cacheKey := CustomerCacheKey + id
