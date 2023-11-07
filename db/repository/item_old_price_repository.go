@@ -198,7 +198,8 @@ func (repository ItemOldPriceRepository) Update(c context.Context, in viewmodel.
 	statement := `UPDATE ITEM_OLD_PRICE SET 
 		START_DATE = $1, 
 		END_DATE = $2, 
-		QTY = $3
+		QTY = $3,
+		UPDATED_AT = now()
 	WHERE id = $4
 	RETURNING id`
 
