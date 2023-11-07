@@ -23,12 +23,10 @@ func (h *ItemOldPriceHandler) SelectAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.ItemOldPriceParameter{
-		ID:                 ctx.Query("id"),
-		UomID:              ctx.Query("uom_id"),
-		PriceListVersionID: ctx.Query("price_list_version_id"),
-		Search:             ctx.Query("search"),
-		By:                 ctx.Query("by"),
-		Sort:               ctx.Query("sort"),
+		CustomerID: ctx.Query("customer_id"),
+		Search:     ctx.Query("search"),
+		By:         ctx.Query("by"),
+		Sort:       ctx.Query("sort"),
 	}
 	uc := usecase.ItemOldPriceUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectAll(c, parameter)
