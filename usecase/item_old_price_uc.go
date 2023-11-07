@@ -30,6 +30,7 @@ func (uc ItemOldPriceUC) BuildBody(in *models.ItemOldPrice, out *viewmodel.ItemO
 	out.ItemID = in.ItemID
 	out.ItemCode = in.ItemCode
 	out.ItemName = in.ItemName
+	out.ItemPicture = in.ItemPicture.String
 	out.UomID = in.UomID
 	out.UomName = in.UomName
 	out.StartDate = in.StartDate
