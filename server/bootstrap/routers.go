@@ -289,4 +289,7 @@ func (boot Bootstrap) RegisterRouters() {
 
 	voucherReedeemRoute := routers.VoucherRedeemRoutes{RouterGroup: apiV1, Handler: handler}
 	voucherReedeemRoute.RegisterRoute()
+
+	itemOldPriceRoute := routers.ItemOldPriceRoutes{RouterGroup: apiV1, Handler: handler}
+	itemOldPriceRoute.RegisterRoute()
 }

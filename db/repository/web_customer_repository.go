@@ -17,6 +17,7 @@ type IWebCustomerRepository interface {
 	FindAll(ctx context.Context, parameter models.WebCustomerParameter) ([]models.WebCustomer, int, error)
 	FindByID(c context.Context, parameter models.WebCustomerParameter) (models.WebCustomer, error)
 	FindByIDNoCache(c context.Context, parameter models.WebCustomerParameter) (models.WebCustomer, error)
+	FindByCodes(c context.Context, parameter models.WebCustomerParameter) (data []models.WebCustomer, err error)
 	Edit(c context.Context, model models.WebCustomer) (string, error)
 	EditBulk(c context.Context, in requests.WebCustomerBulkRequest) error
 	Add(c context.Context, model models.WebCustomer) (string, error)
@@ -423,6 +424,26 @@ func (repository WebCustomerRepository) FindByID(c context.Context, parameter mo
 	data, err = repository.scanRow(row)
 	if err != nil {
 		return data, err
+	}
+
+	return data, nil
+}
+
+// FindByCodes ...
+func (repository WebCustomerRepository) FindByCodes(c context.Context, parameter models.WebCustomerParameter) (data []models.WebCustomer, err error) {
+	statement := models.WebCustomerSelectStatement + ` WHERE c.customer_code in (` + parameter.Code + `)`
+	rows, err := repository.DB.QueryContext(c, statement)
+	if err != nil {
+		return
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		temp, err := repository.scanRows(rows)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
 	}
 
 	return data, nil
