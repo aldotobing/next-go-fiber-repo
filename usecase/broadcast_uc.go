@@ -129,11 +129,23 @@ func (uc BroadcastUC) FindByID(c context.Context, parameter models.BroadcastPara
 
 // Broadcast ...
 func (uc BroadcastUC) Broadcast(c context.Context, input *requests.BroadcastRequest) (err error) {
+	var customerCodes string
+	if input.CustomerCode != nil {
+		for _, datum := range input.CustomerCode {
+			if customerCodes == "" {
+				customerCodes += `"` + datum + `"`
+			} else {
+				customerCodes += `,"` + datum + `"`
+			}
+		}
+	}
+
 	data, err := CustomerUC{ContractUC: uc.ContractUC}.SelectAll(c, models.CustomerParameter{
 		By:             "c.created_date",
 		Sort:           "desc",
 		FlagToken:      true,
 		CustomerTypeId: input.CustomerTypeID,
+		CustomerCodes:  customerCodes,
 	})
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))

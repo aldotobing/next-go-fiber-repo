@@ -67,6 +67,7 @@ type CustomerParameter struct {
 	Name            string `json:"customer_name"`
 	CustomerTypeId  string `json:"custome_type_id"`
 	CustomerLevelId string `json:"custome_level_id"`
+	CustomerCodes   string `json:"customer_codes"`
 	UserId          string `json:"admin_user_id"`
 	BranchID        string `json:"branch_id"`
 	RegionID        string `json:"region_id"`
