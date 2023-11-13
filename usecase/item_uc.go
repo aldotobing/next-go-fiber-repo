@@ -56,6 +56,8 @@ func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter, 
 		additional := strings.Split(*data[i].AdditionalData, "|")
 
 		var uoms []viewmodel.Uom
+		var lowestVisibleUOM string
+		var lowestVisibleConversion float64
 		if len(additional) > 0 && additional[0] != "" {
 			// Find Lowest Price and lowest conversion
 			var lowestPrice, lowestConversion float64
@@ -83,6 +85,11 @@ func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter, 
 						conversion, _ := strconv.ParseFloat(perMultiDatum[2], 64)
 						price := strconv.FormatFloat(basePrice*conversion, 'f', 2, 64)
 
+						if lowestVisibleUOM == "" || conversion < lowestVisibleConversion {
+							lowestVisibleUOM = perMultiDatum[1]
+							lowestVisibleConversion = conversion
+						}
+
 						uoms = append(uoms, viewmodel.Uom{
 							ID:               &perMultiDatum[0],
 							Name:             &perMultiDatum[1],
@@ -104,6 +111,7 @@ func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter, 
 				ItemCategoryName: data[i].ItemCategoryName,
 				ItemPicture:      data[i].ItemPicture,
 				Uom:              uoms,
+				LowestUom:        lowestVisibleUOM,
 			})
 		}
 	}
