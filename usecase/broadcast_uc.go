@@ -133,9 +133,9 @@ func (uc BroadcastUC) Broadcast(c context.Context, input *requests.BroadcastRequ
 	if input.CustomerCode != nil {
 		for _, datum := range input.CustomerCode {
 			if customerCodes == "" {
-				customerCodes += `"` + datum + `"`
+				customerCodes += `'` + datum + `'`
 			} else {
-				customerCodes += `,"` + datum + `"`
+				customerCodes += `,'` + datum + `'`
 			}
 		}
 	}
