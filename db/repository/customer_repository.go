@@ -211,6 +211,10 @@ func (repository CustomerRepository) SelectAll(c context.Context, parameter mode
 		index++
 	}
 
+	if parameter.CustomerCodes != "" {
+		conditionString += ` AND C.CUSTOMER_CODE in (` + parameter.CustomerCodes + `)`
+	}
+
 	statement := models.CustomerSelectStatement + ` ` + models.CustomerWhereStatement +
 		` AND (LOWER(c."customer_name") LIKE $` + strconv.Itoa(index) + `) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	args = append(args, "%"+strings.ToLower(parameter.Search)+"%")
