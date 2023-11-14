@@ -266,6 +266,7 @@ func (uc BroadcastUC) BroadcastWithScheduler(c context.Context) (err error) {
 			RegionID:        param.RegionID,
 			RegionGroupID:   param.RegionGroupID,
 			CustomerLevelId: param.CustomerLevelID,
+			CustomerCodes:   param.CustomerCodes,
 		})
 		if err != nil {
 			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
@@ -302,6 +303,16 @@ func (uc BroadcastUC) BroadcastWithScheduler(c context.Context) (err error) {
 
 // Add ...
 func (uc BroadcastUC) Add(c context.Context, in requests.BroadcastRequest) (out viewmodel.BroadcastVM, err error) {
+	var customerCodes string
+	if in.CustomerCode != nil {
+		for _, datum := range in.CustomerCode {
+			if customerCodes == "" {
+				customerCodes += `'` + datum + `'`
+			} else {
+				customerCodes += `,'` + datum + `'`
+			}
+		}
+	}
 	out = viewmodel.BroadcastVM{
 		Title:          in.Title,
 		Body:           in.Body,
@@ -319,6 +330,7 @@ func (uc BroadcastUC) Add(c context.Context, in requests.BroadcastRequest) (out 
 			CustomerTypeName:  in.CustomerTypeName,
 			CustomerLevelID:   in.CustomerLevelID,
 			CustomerLevelName: in.CustomerLevelName,
+			CustomerCodes:     customerCodes,
 		},
 	}
 
