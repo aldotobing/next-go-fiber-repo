@@ -17,6 +17,8 @@ type VoucherRedeem struct {
 	VoucherCashValue   string         `json:"voucher_cash_value"`
 	VoucherDescription sql.NullString `json:"voucher_description"`
 	VoucherImageURL    string         `json:"voucher_image_url"`
+	VoucherStartDate   string         `json:"voucher_start_date"`
+	VoucherEndDate     string         `json:"voucher_end_date"`
 }
 
 // VoucherRedeemParameter ...
@@ -24,6 +26,7 @@ type VoucherRedeemParameter struct {
 	ID           string `json:"id"`
 	CustomerCode string `json:"customer_code"`
 	DocumentNo   string `json:"document_no"`
+	ShowAll      string `json:"show_all"`
 	Search       string `json:"search"`
 	Page         int    `json:"page"`
 	Offset       int    `json:"offset"`
@@ -49,7 +52,9 @@ var (
 		V._NAME,
 		V.CASH_VALUE,
 		V.DESCRIPTION,
-		V.IMAGE_URL
+		V.IMAGE_URL,
+		V.START_DATE,
+		V.END_DATE
 	FROM VOUCHER_REDEEM DEF
 	LEFT JOIN VOUCHER V ON V.ID = DEF.VOUCHER_ID
 	`

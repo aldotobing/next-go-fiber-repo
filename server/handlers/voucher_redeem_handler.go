@@ -23,11 +23,12 @@ type VoucherRedeemHandler struct {
 func (h *VoucherRedeemHandler) FindAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 	parameter := models.VoucherRedeemParameter{
-		Search: ctx.Query("search"),
-		Page:   str.StringToInt(ctx.Query("page")),
-		Limit:  str.StringToInt(ctx.Query("limit")),
-		By:     ctx.Query("by"),
-		Sort:   ctx.Query("sort"),
+		Search:  ctx.Query("search"),
+		ShowAll: ctx.Query("show_all"),
+		Page:    str.StringToInt(ctx.Query("page")),
+		Limit:   str.StringToInt(ctx.Query("limit")),
+		By:      ctx.Query("by"),
+		Sort:    ctx.Query("sort"),
 	}
 	uc := usecase.VoucherRedeemUC{ContractUC: h.ContractUC}
 	res, meta, err := uc.FindAll(c, parameter)
@@ -43,6 +44,7 @@ func (h *VoucherRedeemHandler) SelectAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 	parameter := models.VoucherRedeemParameter{
 		Search:       ctx.Query("search"),
+		ShowAll:      ctx.Query("show_all"),
 		CustomerCode: ctx.Query("customer_code"),
 		By:           ctx.Query("by"),
 		Sort:         ctx.Query("sort"),
