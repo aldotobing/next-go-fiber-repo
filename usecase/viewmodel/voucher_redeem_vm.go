@@ -15,4 +15,6 @@ type VoucherRedeemVM struct {
 	VoucherCashValue     string `json:"voucher_cash_value"`
 	VoucherDescription   string `json:"voucher_description"`
 	VoucherImageURL      string `json:"voucher_image_url"`
+	VoucherStartDate     string `json:"voucher_start_date"`
+	VoucherEndDate       string `json:"voucher_end_date"`
 }

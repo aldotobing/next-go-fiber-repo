@@ -49,6 +49,8 @@ func (repository VoucherRedeemRepository) scanRows(rows *sql.Rows) (res models.V
 		&res.VoucherCashValue,
 		&res.VoucherDescription,
 		&res.VoucherImageURL,
+		&res.VoucherStartDate,
+		&res.VoucherEndDate,
 	)
 
 	return
@@ -80,7 +82,7 @@ func (repository VoucherRedeemRepository) SelectAll(c context.Context, in models
 	var conditionString string
 
 	if in.CustomerCode != "" {
-		conditionString += ` AND DEF.CUSTOMER_CODE = ` + in.CustomerCode
+		conditionString += ` AND DEF.CUSTOMER_CODE = '` + in.CustomerCode + `'`
 	}
 
 	if in.ShowAll != "1" {
