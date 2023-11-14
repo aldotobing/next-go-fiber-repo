@@ -75,7 +75,9 @@ func (repository VoucherRepository) scanRow(row *sql.Row) (res models.Voucher, e
 func (repository VoucherRepository) SelectAll(c context.Context, parameter models.VoucherParameter) (data []models.Voucher, err error) {
 	var conditionString string
 
-	conditionString += ` AND NOW() BETWEEN DEF.START_DATE AND DEF.END_DATE`
+	if parameter.ShowAll != "1" {
+		conditionString += ` AND NOW() BETWEEN DEF.START_DATE AND DEF.END_DATE`
+	}
 	statement := models.VoucherSelectStatement + models.VoucherWhereStatement +
 		` AND (LOWER(def."_name") LIKE '%` + parameter.Search + `%')` + conditionString +
 		` ORDER BY ` + parameter.By + ` ` + parameter.Sort
@@ -102,7 +104,9 @@ func (repository VoucherRepository) SelectAll(c context.Context, parameter model
 func (repository VoucherRepository) FindAll(ctx context.Context, parameter models.VoucherParameter) (data []models.Voucher, count int, err error) {
 	var conditionString string
 
-	conditionString += ` AND NOW() BETWEEN DEF.START_DATE AND DEF.END_DATE`
+	if parameter.ShowAll != "1" {
+		conditionString += ` AND NOW() BETWEEN DEF.START_DATE AND DEF.END_DATE`
+	}
 	statement := models.VoucherSelectStatement + models.VoucherWhereStatement +
 		` AND (LOWER(def."_name") LIKE '%` + parameter.Search + `%')` + conditionString +
 		` ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $1 LIMIT $2`

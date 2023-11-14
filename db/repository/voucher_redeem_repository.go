@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"fmt"
 
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/usecase/viewmodel"
@@ -84,11 +83,14 @@ func (repository VoucherRedeemRepository) SelectAll(c context.Context, in models
 		conditionString += ` AND DEF.CUSTOMER_CODE = ` + in.CustomerCode
 	}
 
+	if in.ShowAll != "1" {
+		conditionString += ` AND (DEF.REDEEMED is null  or DEF.REDEEMED = '0') `
+	}
+
 	statement := models.VoucherRedeemSelectStatement + models.VoucherRedeemWhereStatement +
-		` AND (DEF.REDEEMED is null  or DEF.REDEEMED = '0') ` + conditionString +
+		conditionString +
 		` ORDER BY ` + in.By + ` ` + in.Sort
 
-	fmt.Println(statement)
 	rows, err := repository.DB.QueryContext(c, statement)
 
 	if err != nil {
@@ -111,7 +113,9 @@ func (repository VoucherRedeemRepository) SelectAll(c context.Context, in models
 func (repository VoucherRedeemRepository) FindAll(ctx context.Context, in models.VoucherRedeemParameter) (data []models.VoucherRedeem, count int, err error) {
 	var conditionString string
 
-	conditionString += ` AND (DEF.REDEEMED is null  or DEF.REDEEMED = '0') `
+	if in.ShowAll != "1" {
+		conditionString += ` AND (DEF.REDEEMED is null  or DEF.REDEEMED = '0') `
+	}
 
 	statement := models.VoucherRedeemSelectStatement + models.VoucherRedeemWhereStatement +
 		conditionString +

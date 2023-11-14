@@ -21,13 +21,14 @@ type Voucher struct {
 
 // VoucherParameter ...
 type VoucherParameter struct {
-	ID     string `json:"id"`
-	Search string `json:"search"`
-	Page   int    `json:"page"`
-	Offset int    `json:"offset"`
-	Limit  int    `json:"limit"`
-	By     string `json:"by"`
-	Sort   string `json:"sort"`
+	ID      string `json:"id"`
+	Search  string `json:"search"`
+	ShowAll string `json:"show_all"`
+	Page    int    `json:"page"`
+	Offset  int    `json:"offset"`
+	Limit   int    `json:"limit"`
+	By      string `json:"by"`
+	Sort    string `json:"sort"`
 }
 
 var (
