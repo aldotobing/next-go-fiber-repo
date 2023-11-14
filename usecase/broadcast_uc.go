@@ -202,6 +202,7 @@ func (uc BroadcastUC) BroadcastWithID(c context.Context, id string) (err error) 
 		RegionID:        param.RegionID,
 		RegionGroupID:   param.RegionGroupID,
 		CustomerLevelId: param.CustomerLevelID,
+		CustomerCodes:   param.CustomerCodes,
 	})
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
