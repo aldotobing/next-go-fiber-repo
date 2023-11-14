@@ -240,13 +240,10 @@ func (uc BroadcastUC) BroadcastWithID(c context.Context, id string) (err error) 
 // BroadcastWithScheduler ...
 func (uc BroadcastUC) BroadcastWithScheduler(c context.Context) (err error) {
 	broadcastRepo := repository.BroadcastRepository{uc.DB}
-	now := time.Now()
-	before := now.Add(-time.Hour * 1)
 	broadcastData, err := broadcastRepo.SelectAll(c, models.BroadcastParameter{
-		StartAt: before.Format("15:04:05"),
-		EndAt:   now.Format("15:04:05"),
-		Sort:    "asc",
-		By:      "b.id",
+		SchedulerParam: true,
+		Sort:           "asc",
+		By:             "b.id",
 	})
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
