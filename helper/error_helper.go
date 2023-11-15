@@ -156,8 +156,8 @@ var (
 
 	InvalidPhoneOrCode = "Nomor Hp atau Kode Toko Salah"
 
-	InvalidCustomerNotShown  = `Toko anda tidak diberi akses untuk login My Sidomuncul. Hubungi admin atau salesman untuk diberikan akses login My Sidomuncul`
-	InvalidCustomerNotActive = `Toko anda tidak diberi akses untuk login My Sidomuncul. Hubungi admin atau salesman untuk diberikan akses login My Sidomuncul`
+	InvalidCustomerNotShown  = `Toko anda Belum diberi akses untuk login My Sidomuncul. Hubungi admin atau salesman untuk diberikan akses login My Sidomuncul`
+	InvalidCustomerNotActive = `Toko anda Belum diberi akses untuk login My Sidomuncul. Hubungi admin atau salesman untuk diberikan akses login My Sidomuncul`
 
 	CidNotPresent = "cid_not_present"
 
