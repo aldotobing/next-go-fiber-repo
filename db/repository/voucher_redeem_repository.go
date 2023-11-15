@@ -72,6 +72,8 @@ func (repository VoucherRedeemRepository) scanRow(row *sql.Row) (res models.Vouc
 		&res.VoucherCashValue,
 		&res.VoucherDescription,
 		&res.VoucherImageURL,
+		&res.VoucherStartDate,
+		&res.VoucherEndDate,
 	)
 
 	return
