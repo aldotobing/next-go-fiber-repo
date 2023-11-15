@@ -26,6 +26,7 @@ type VoucherRedeemParameter struct {
 	ID           string `json:"id"`
 	CustomerCode string `json:"customer_code"`
 	DocumentNo   string `json:"document_no"`
+	VoucherID    string `json:"voucher_id"`
 	ShowAll      string `json:"show_all"`
 	Search       string `json:"search"`
 	Page         int    `json:"page"`

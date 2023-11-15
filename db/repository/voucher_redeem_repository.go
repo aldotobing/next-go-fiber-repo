@@ -91,6 +91,14 @@ func (repository VoucherRedeemRepository) SelectAll(c context.Context, in models
 		conditionString += ` AND (DEF.REDEEMED is null  or DEF.REDEEMED = '0') `
 	}
 
+	if in.VoucherID != "" {
+		conditionString += ` AND V.ID = ` + in.VoucherID
+	}
+
+	if in.Search != "" {
+		conditionString += ` AND V._NAME LIKE '%` + in.Search + `%'`
+	}
+
 	statement := models.VoucherRedeemSelectStatement + models.VoucherRedeemWhereStatement +
 		conditionString +
 		` ORDER BY ` + in.By + ` ` + in.Sort
@@ -119,6 +127,14 @@ func (repository VoucherRedeemRepository) FindAll(ctx context.Context, in models
 
 	if in.ShowAll != "1" {
 		conditionString += ` AND (DEF.REDEEMED is null  or DEF.REDEEMED = '0') `
+	}
+
+	if in.VoucherID != "" {
+		conditionString += ` AND V.ID = ` + in.VoucherID
+	}
+
+	if in.Search != "" {
+		conditionString += ` AND V._NAME LIKE '%` + in.Search + `%'`
 	}
 
 	statement := models.VoucherRedeemSelectStatement + models.VoucherRedeemWhereStatement +
