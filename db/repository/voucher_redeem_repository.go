@@ -158,7 +158,9 @@ func (repository VoucherRedeemRepository) FindAll(ctx context.Context, in models
 		return data, count, err
 	}
 
-	countQuery := `SELECT COUNT(*) FROM VOUCHER_REDEEM DEF ` + models.VoucherRedeemWhereStatement + conditionString
+	countQuery := `SELECT COUNT(*) 
+		FROM VOUCHER_REDEEM DEF 
+		LEFT JOIN VOUCHER V ON V.ID = DEF.VOUCHER_ID ` + models.VoucherRedeemWhereStatement + conditionString
 	err = repository.DB.QueryRow(countQuery).Scan(&count)
 
 	return
