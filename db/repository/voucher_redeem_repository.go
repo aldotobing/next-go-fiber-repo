@@ -96,7 +96,7 @@ func (repository VoucherRedeemRepository) SelectAll(c context.Context, in models
 	}
 
 	if in.Search != "" {
-		conditionString += ` AND V._NAME LIKE '%` + in.Search + `%'`
+		conditionString += ` AND (V._NAME LIKE '%` + in.Search + `%' OR DEF.CUSTOMER_CODE LIKE '%` + in.Search + `%')`
 	}
 
 	statement := models.VoucherRedeemSelectStatement + models.VoucherRedeemWhereStatement +
