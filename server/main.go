@@ -43,7 +43,7 @@ var (
 
 func main() {
 	os.Setenv("TZ", "Asia/Jakarta")
-	// load all config
+
 	configs, err := conf.LoadConfigs()
 	if err != nil {
 		log.Fatal(err.Error())
@@ -57,7 +57,6 @@ func main() {
 		Password: configs.EnvConfig["REDIS_PASSWORD"], // no password set
 		DB:       0,                                   // use default DB
 	})
-	// fmt.Println("Redis pass: " + configs.EnvConfig["REDIS_PASSWORD"])
 
 	redisStorage := &redisPkg.RedisClient{
 		Client: baseClient,
@@ -127,6 +126,7 @@ func main() {
 			return c.IP()
 		},
 		LimitReached: func(c *fiber.Ctx) error {
+			log.Printf("Rate limit reached for IP: %s", c.IP())
 			return c.SendStatus(fiber.StatusTooManyRequests)
 		},
 		//14-06-2023
@@ -164,7 +164,6 @@ func main() {
 		log.Fatalf("Error getting current working directory: %v", err)
 	}
 	log.Printf("Current working directory: %s", cwd)
-	// log.Fatal(boot.App.ListenTLS(configs.EnvConfig["APP_HOST"], "cert/api.crt", "cert/api.key"))
 
 }
 
