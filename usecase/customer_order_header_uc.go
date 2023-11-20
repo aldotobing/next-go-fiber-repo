@@ -136,6 +136,14 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 		}
 	}
 
+	if data.OldPriceID != "" {
+		_, err := ItemOldPriceUC{ContractUC: uc.ContractUC}.UpdatePreservedQuantity(c, data.OldPriceID, data.OldPriceQuantity)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "update_preserved_quantity", c.Value("requestid"))
+			return res, err
+		}
+	}
+
 	res = models.CustomerOrderHeader{
 		TransactionDate:      &data.TransactionDate,
 		TransactionTime:      &data.TransactionTime,
