@@ -194,8 +194,13 @@ func (repository ShoppingCartRepository) Add(c context.Context, model *models.Sh
 		created_date, created_by, qty , stock_qty,total_price, old_price )
 	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`
 
-	err = repository.DB.QueryRowContext(c, statement, model.CustomerID, model.ItemID, model.UomID, model.Price,
-		model.CreatedAt, model.CreatedBy, model.Qty, model.StockQty, model.TotalPrice, model.OldPrice).Scan(&res)
+	if model.OldPrice == nil {
+		err = repository.DB.QueryRowContext(c, statement, model.CustomerID, model.ItemID, model.UomID, model.Price,
+			model.CreatedAt, model.CreatedBy, model.Qty, model.StockQty, model.TotalPrice, nil).Scan(&res)
+	} else {
+		err = repository.DB.QueryRowContext(c, statement, model.CustomerID, model.ItemID, model.UomID, model.Price,
+			model.CreatedAt, model.CreatedBy, model.Qty, model.StockQty, model.TotalPrice, model.OldPrice).Scan(&res)
+	}
 
 	if err != nil {
 		return res, err
