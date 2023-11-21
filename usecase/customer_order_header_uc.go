@@ -136,13 +136,30 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 		}
 	}
 
+	var oldPriceData []viewmodel.ItemOldPriceCustomerOrderVM
 	if data.OldPriceID != "" {
-		_, err := ItemOldPriceUC{ContractUC: uc.ContractUC}.UpdatePreservedQuantity(c, data.OldPriceID, data.OldPriceQuantity)
-		if err != nil {
+		oldPriceIDs := strings.Split(data.OldPriceID, ",")
+		oldPriceQtys := strings.Split(data.OldPriceQuantity, ",")
+		if len(oldPriceIDs) != len(oldPriceQtys) {
+			err = errors.New("old_price_data_not_matched")
 			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "update_preserved_quantity", c.Value("requestid"))
 			return res, err
 		}
+		for i := range oldPriceIDs {
+			_, err := ItemOldPriceUC{ContractUC: uc.ContractUC}.UpdatePreservedQuantity(c, oldPriceIDs[i], oldPriceQtys[i])
+			if err != nil {
+				logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "update_preserved_quantity", c.Value("requestid"))
+				return res, err
+			}
+			oldPriceData = append(oldPriceData, viewmodel.ItemOldPriceCustomerOrderVM{
+				ID:       oldPriceIDs[i],
+				Quantity: oldPriceQtys[i],
+			})
+		}
+
 	}
+
+	oldPriceJson, _ := json.Marshal(oldPriceData)
 
 	res = models.CustomerOrderHeader{
 		TransactionDate:      &data.TransactionDate,
@@ -162,6 +179,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 		PriceLIstID:          &data.PriceLIstID,
 		LineList:             &data.LineList,
 		GlobalDiscAmount:     &global_disc_amount,
+		OldPriceData:         string(oldPriceJson),
 	}
 
 	res.ID, err = repo.CheckOut(c, &res)

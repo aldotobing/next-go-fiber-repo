@@ -23,3 +23,8 @@ type ItemOldPriceVM struct {
 	UpdatedAt    string `json:"updated_at"`
 	DeletedAt    string `json:"deleted_at"`
 }
+
+type ItemOldPriceCustomerOrderVM struct {
+	ID       string `json:"id"`
+	Quantity string `json:"quantity"`
+}
