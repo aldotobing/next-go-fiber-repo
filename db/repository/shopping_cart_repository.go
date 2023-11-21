@@ -38,7 +38,7 @@ func (repository ShoppingCartRepository) scanRows(rows *sql.Rows) (res models.Sh
 	err = rows.Scan(
 		&res.ID, &res.CustomerID, &res.CustomerName, &res.ItemID, &res.ItemName, &res.UomID, &res.UomName,
 		&res.Qty, &res.StockQty, &res.Price, &res.ItemCategoryID, &res.ItemCategoryName, &res.ItemPicture,
-		&res.TotalPrice, &res.OldPrice,
+		&res.TotalPrice, &res.OldPriceID,
 	)
 	if err != nil {
 
@@ -53,7 +53,7 @@ func (repository ShoppingCartRepository) scanRow(row *sql.Row) (res models.Shopp
 	err = row.Scan(
 		&res.ID, &res.CustomerID, &res.CustomerName, &res.ItemID, &res.ItemName, &res.UomID, &res.UomName,
 		&res.Qty, &res.StockQty, &res.Price, &res.ItemCategoryID, &res.ItemCategoryName, &res.ItemPicture,
-		&res.TotalPrice, &res.OldPrice,
+		&res.TotalPrice, &res.OldPriceID,
 	)
 	if err != nil {
 		return res, err
@@ -194,7 +194,7 @@ func (repository ShoppingCartRepository) Add(c context.Context, model *models.Sh
 		created_date, created_by, qty , stock_qty,total_price, old_price )
 	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`
 
-	if *model.OldPrice == "" {
+	if *model.OldPriceID == "" {
 		err = repository.DB.QueryRowContext(c, statement, model.CustomerID, model.ItemID, model.UomID, model.Price,
 			model.CreatedAt, model.CreatedBy, model.Qty, model.StockQty, model.TotalPrice, nil).Scan(&res)
 	} else {
