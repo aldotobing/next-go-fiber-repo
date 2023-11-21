@@ -349,13 +349,14 @@ func (repository CustomerOrderHeaderRepository) CheckOut(c context.Context, mode
 		payment_terms_id, expected_delivery_date, gross_amount,disc_amount,
 		taxable_amount, tax_amount, rounding_amount, net_amount,
 		tax_calc_method, salesman_id,
-		branch_id,price_list_id,status,global_disc_amount
+		branch_id,price_list_id,status,global_disc_amount, old_price_data
 		)values(
 			$1,$2,$3,$4,
 			$5,$6,$7,$8,
 			$9,$10,$11,$12,
 			$13,(select salesman_id from customer where id = $14),
-			(select branch_id from customer where id = $15),$16,'draft',$17
+			(select branch_id from customer where id = $15),$16,'draft',$17,
+			$18
 		)
 	RETURNING id`
 
@@ -371,6 +372,7 @@ func (repository CustomerOrderHeaderRepository) CheckOut(c context.Context, mode
 		model.TaxableAmount, model.TaxAmount, model.RoundingAmount, model.NetAmount,
 		model.TaxCalcMethod, model.CustomerID,
 		model.CustomerID, model.PriceLIstID, model.GlobalDiscAmount,
+		model.OldPriceData,
 	).Scan(&res)
 
 	if err != nil {
