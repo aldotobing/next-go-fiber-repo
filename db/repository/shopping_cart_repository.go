@@ -199,7 +199,7 @@ func (repository ShoppingCartRepository) Add(c context.Context, model *models.Sh
 			model.CreatedAt, model.CreatedBy, model.Qty, model.StockQty, model.TotalPrice, nil).Scan(&res)
 	} else {
 		err = repository.DB.QueryRowContext(c, statement, model.CustomerID, model.ItemID, model.UomID, model.Price,
-			model.CreatedAt, model.CreatedBy, model.Qty, model.StockQty, model.TotalPrice, model.OldPrice).Scan(&res)
+			model.CreatedAt, model.CreatedBy, model.Qty, model.StockQty, model.TotalPrice, model.OldPriceID).Scan(&res)
 	}
 
 	if err != nil {
