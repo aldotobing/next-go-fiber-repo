@@ -108,6 +108,7 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 	res.CustomerLevel = data.CustomerLevel.String
 	res.CustomerUserID = data.CustomerUserID.String
 	res.CustomerUserName = data.CustomerUserName.String
+	res.CustomerUserFirstLoginTime = data.CustomerUserFirstLoginTime.String
 	res.CustomerGender = data.CustomerGender.String
 	res.ModifiedBy = data.ModifiedBy.String
 	res.ModifiedDate = data.ModifiedDate.String
