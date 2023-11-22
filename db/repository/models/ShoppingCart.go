@@ -21,6 +21,7 @@ type ShoppingCart struct {
 	ItemPicture      *string `json:"img_source"`
 	TotalPrice       *string `json:"total_price"`
 	OldPrice         bool    `json:"old_price"`
+	OldPriceID       *string `json:"old_price_id"`
 }
 
 type ShoppingCartItemBonus struct {

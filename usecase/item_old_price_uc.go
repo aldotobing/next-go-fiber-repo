@@ -149,7 +149,14 @@ func (uc ItemOldPriceUC) ItemDetailFindByID(c context.Context, parameter models.
 			conversion, _ := strconv.ParseFloat(*res[i].Uom[j].Conversion, 64)
 
 			price := strconv.FormatFloat(basePrice*conversion, 'f', 2, 64)
-			limitQuantity := strconv.FormatFloat(float64(resData.Quantity)/conversion, 'f', 2, 64)
+
+			preservedQtyFloat, _ := strconv.ParseFloat(resData.PreservedQty, 64)
+			InvoiceQtyFloat, _ := strconv.ParseFloat(resData.InvoiceQty, 64)
+
+			limitQuantity := strconv.FormatFloat(
+				(float64(resData.Quantity)/conversion)-(preservedQtyFloat/conversion)-(InvoiceQtyFloat/conversion),
+				'f', 2, 64)
+
 			res[i].Uom[j].ItemDetailsPrice = &price
 			res[i].Uom[j].LimitQuantity = &limitQuantity
 		}
@@ -246,6 +253,23 @@ func (uc ItemOldPriceUC) Update(c context.Context, id string, in requests.ItemOl
 		StartDate: in.StartDate,
 		EndDate:   in.EndDate,
 		Quantity:  in.Quantity,
+	}
+
+	repo := repository.NewItemOldPriceRepository(uc.DB)
+	out.ID, err = repo.Update(c, out)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	return
+}
+
+// UpdatePreservedQuantity ...
+func (uc ItemOldPriceUC) UpdatePreservedQuantity(c context.Context, id string, quantity string) (out viewmodel.ItemOldPriceVM, err error) {
+	out = viewmodel.ItemOldPriceVM{
+		ID:           id,
+		PreservedQty: quantity,
 	}
 
 	repo := repository.NewItemOldPriceRepository(uc.DB)

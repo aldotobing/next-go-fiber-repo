@@ -11,5 +11,5 @@ type ShoppingCartRequest struct {
 	Qty          string `json:"qty"`
 	StockQty     string `json:"stock_qty"`
 	TotalPrice   string `json:"total_price"`
-	OldPrice     bool   `json:"old_price"`
+	OldPriceID   string `json:"old_price_id"`
 }

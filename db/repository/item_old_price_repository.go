@@ -17,6 +17,7 @@ type IItemOldPriceRepository interface {
 	FindByID(c context.Context, parameter models.ItemOldPriceParameter) (models.ItemOldPrice, error)
 	Add(c context.Context, in []viewmodel.ItemOldPriceVM) error
 	Update(c context.Context, in viewmodel.ItemOldPriceVM) (string, error)
+	UpdatePreservedQuantity(c context.Context, in viewmodel.ItemOldPriceVM) (string, error)
 	Delete(c context.Context, id string) (string, error)
 }
 
@@ -202,6 +203,22 @@ func (repository ItemOldPriceRepository) Update(c context.Context, in viewmodel.
 		END_DATE = $2, 
 		QTY = $3,
 		UPDATED_AT = now()
+	WHERE id = $4
+	RETURNING id`
+
+	err = repository.DB.QueryRowContext(c, statement,
+		in.StartDate,
+		in.EndDate,
+		in.Quantity,
+		in.ID).Scan(&res)
+
+	return
+}
+
+// UpdatePreservedQuantity ...
+func (repository ItemOldPriceRepository) UpdatePreservedQuantity(c context.Context, in viewmodel.ItemOldPriceVM) (res string, err error) {
+	statement := `UPDATE ITEM_OLD_PRICE SET 
+		preserved_qty = preserved_qty+$1
 	WHERE id = $4
 	RETURNING id`
 
