@@ -218,13 +218,12 @@ func (repository ItemOldPriceRepository) Update(c context.Context, in viewmodel.
 // UpdatePreservedQuantity ...
 func (repository ItemOldPriceRepository) UpdatePreservedQuantity(c context.Context, in viewmodel.ItemOldPriceVM) (res string, err error) {
 	statement := `UPDATE ITEM_OLD_PRICE SET 
-		preserved_qty = preserved_qty+$1
-	WHERE id = $4
+		preserved_qty = preserved_qty+$1,
+		UPDATED_AT = now()
+	WHERE id = $2
 	RETURNING id`
 
 	err = repository.DB.QueryRowContext(c, statement,
-		in.StartDate,
-		in.EndDate,
 		in.Quantity,
 		in.ID).Scan(&res)
 

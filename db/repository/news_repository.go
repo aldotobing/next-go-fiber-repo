@@ -13,6 +13,7 @@ type INewsRepository interface {
 	SelectAll(c context.Context, parameter models.NewsParameter) ([]models.News, error)
 	FindAll(ctx context.Context, parameter models.NewsParameter) ([]models.News, int, error)
 	Add(c context.Context, model *models.News) (*string, error)
+	AddBulk(c context.Context, model []models.News) error
 	// FindByID(c context.Context, parameter models.SalesInvoiceParameter) (models.SalesInvoice, error)
 	// FindByDocumentNo(c context.Context, parameter models.SalesInvoiceParameter) (models.SalesInvoice, error)
 	// FindByCustomerId(c context.Context, parameter models.SalesInvoiceParameter) (models.SalesInvoice, error)
@@ -133,6 +134,23 @@ func (repository NewsRepository) Add(c context.Context, model *models.News) (res
 		return res, err
 	}
 	return res, err
+}
+
+func (repository NewsRepository) AddBulk(c context.Context, model []models.News) (err error) {
+	var values string
+	for _, datum := range model {
+		if values == "" {
+			values += `('` + *datum.StartDate + `', '` + *datum.EndDate + `', '` + *datum.Title + `', '` + *datum.Description + `', '` + *datum.Active + `', '` + *datum.ImageUrl + `')`
+		} else {
+			values += `, ('` + *datum.StartDate + `', '` + *datum.EndDate + `', '` + *datum.Title + `', '` + *datum.Description + `', '` + *datum.Active + `', '` + *datum.ImageUrl + `')`
+		}
+	}
+	statement := `INSERT INTO news (start_date, end_date, title, description, active, image_url)
+	VALUES ` + values
+
+	err = repository.DB.QueryRowContext(c, statement).Err()
+
+	return err
 }
 
 // Delete ...

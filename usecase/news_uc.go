@@ -84,6 +84,33 @@ func (uc NewsUC) Add(c context.Context, data *requests.NewsRequest) (res models.
 	return res, err
 }
 
+// AddBulk ...
+func (uc NewsUC) AddBulk(c context.Context, data requests.NewsBulkRequest) (err error) {
+
+	repo := repository.NewNewsRepository(uc.DB)
+	// now := time.Now().UTC()
+	// strnow := now.Format(time.RFC3339)
+	var in []models.News
+	for i := range data.News {
+		in = append(in, models.News{
+			Title:       &data.News[i].Title,
+			Description: &data.News[i].Description,
+			StartDate:   &data.News[i].StartDate,
+			EndDate:     &data.News[i].EndDate,
+			Active:      &data.News[i].Active,
+			ImageUrl:    &data.News[i].ImageUrl,
+		})
+	}
+
+	err = repo.AddBulk(c, in)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	return
+}
+
 // AddPhoto ...
 func (uc NewsUC) AddPhoto(c context.Context, image *multipart.FileHeader) (out string, err error) {
 	awsUc := AwsUC{ContractUC: uc.ContractUC}

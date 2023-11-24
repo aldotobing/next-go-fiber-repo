@@ -10,3 +10,7 @@ type NewsRequest struct {
 	Active      string `json:"active"`
 	ImageUrl    string `json:"image_url"`
 }
+
+type NewsBulkRequest struct {
+	News []NewsRequest `json:"news"`
+}
