@@ -93,6 +93,8 @@ type WebCustomerParameter struct {
 	StartDate      string `json:"start_date"`
 	EndDate        string `json:"end_date"`
 	ShowInApp      string `json:"show_in_app"`
+	Active         string `json:"active"`
+	IsDataComplete string `json:"is_data_complete"`
 }
 
 // WebCustomerReportParameter ...
