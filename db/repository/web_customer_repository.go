@@ -389,6 +389,18 @@ func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter m
 		whereStatement = models.WebCustomerWhereStatementAll
 	}
 
+	if parameter.Active != "" {
+		conditionString += `AND C.ACTIVE = '` + parameter.Active + `'`
+	}
+
+	if parameter.IsDataComplete != "" {
+		if parameter.IsDataComplete == "1" {
+			conditionString += `AND C.is_data_completed = true`
+		} else {
+			conditionString += `AND C.is_data_completed = false`
+		}
+	}
+
 	query := models.WebCustomerSelectStatement + ` ` + whereStatement + ` ` + conditionString + `
 		AND (LOWER(c.customer_name) LIKE $` + strconv.Itoa(index) + ` or LOWER(c.customer_code) LIKE $` + strconv.Itoa(index) + `) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $` + strconv.Itoa(index+1) + ` LIMIT $` + strconv.Itoa(index+2)
 
