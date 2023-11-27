@@ -224,9 +224,8 @@ func (repository ItemOldPriceRepository) UpdatePreservedQuantity(c context.Conte
 	RETURNING id`
 
 	err = repository.DB.QueryRowContext(c, statement,
-		in.Quantity,
+		in.PreservedQty,
 		in.ID).Scan(&res)
-
 	return
 }
 
