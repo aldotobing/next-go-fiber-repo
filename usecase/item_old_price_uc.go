@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"log"
 	"strconv"
 
 	"nextbasis-service-v-0.1/db/repository"
@@ -275,7 +274,6 @@ func (uc ItemOldPriceUC) UpdatePreservedQuantity(c context.Context, id string, q
 
 	repo := repository.NewItemOldPriceRepository(uc.DB)
 	out.ID, err = repo.UpdatePreservedQuantity(c, out)
-	log.Fatal(err)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return
