@@ -158,6 +158,7 @@ func (repository WebCustomerRepository) scanRowsReport(rows *sql.Rows) (res mode
 		&res.SalesmanTypeCode,
 		&res.SalesmanTypeName,
 		&res.CustomerUserToken,
+		&res.CustomerUserFirstLoginTime,
 	)
 	if err != nil {
 
