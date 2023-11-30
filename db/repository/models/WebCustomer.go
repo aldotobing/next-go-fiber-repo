@@ -72,6 +72,7 @@ type WebCustomer struct {
 	IsDataComplete             bool           `json:"is_data_complete"`
 	SalesmanTypeCode           sql.NullString `json:"salesman_type_code"`
 	SalesmanTypeName           sql.NullString `json:"salesman_type_name"`
+	CustomerAdminValidate      bool           `json:"customer_admin_validate"`
 }
 
 // CustomerParameter ...
@@ -191,7 +192,8 @@ var (
 		coalesce(c.show_in_apps,0),
 		coalesce(C.is_data_completed,false),
 		ST.CODE,
-		ST._NAME
+		ST._NAME,
+		c.admin_validate
 	FROM CUSTOMER C
 	LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
 	LEFT JOIN REGION REG ON REG.ID = B.REGION_ID
