@@ -542,6 +542,7 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 		CustomerPhotoKtp:       sql.NullString{String: stringImageKTP},
 		UserID:                 sql.NullInt64{Int64: int64(data.UserID)},
 		ShowInApp:              sql.NullString{String: data.CustomerShowInApp},
+		CustomerAdminValidate:  data.AdminValidate,
 	}
 
 	in.ID.String, err = repo.Edit(c, in)
