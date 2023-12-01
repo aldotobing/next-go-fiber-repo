@@ -65,6 +65,7 @@ type CustomerVM struct {
 	CustomerFCMToken           string `json:"customer_fcm_token"`
 	SalesmanTypeCode           string `json:"salesman_type_code"`
 	SalesmanTypeName           string `json:"salesman_type_name"`
+	CustomerAdminValidate      bool   `json:"customer_admin_validate"`
 }
 
 type CustomerData struct {

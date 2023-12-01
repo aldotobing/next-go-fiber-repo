@@ -174,6 +174,7 @@ func (repository DashboardWebRepository) scanBranchCustomerDetailReportRows(rows
 		&res.StatusComplete, &res.StatusInstall,
 		&res.SalesmanCode, &res.SalesmanName,
 		&res.SalesmanTypeCode, &res.SalesmanTypeName,
+		&res.CustomerFirstLogin,
 	)
 	if err != nil {
 
