@@ -27,6 +27,7 @@ type WebCustomerRequest struct {
 	CustomerGender         string `json:"customer_gender"`
 	UserID                 int    `json:"user_id"`
 	CustomerShowInApp      string `json:"customer_show_in_app"`
+	AdminValidate          bool   `json:"customer_admin_validate"`
 }
 
 // WebCustomerBulkRequest ...

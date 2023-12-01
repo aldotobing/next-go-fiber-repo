@@ -42,7 +42,7 @@ func (uc ItemUC) SelectAll(c context.Context, parameter models.ItemParameter) (r
 }
 
 // SelectAllV2 ...
-func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter, allParam bool) (res []viewmodel.ItemVM, err error) {
+func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter, allParam, oldprice bool) (res []viewmodel.ItemVM, err error) {
 	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(0, 0, parameter.By, parameter.Sort, models.ItemOrderBy, models.ItemOrderByrByString)
 
 	repo := repository.NewItemRepository(uc.DB)
@@ -72,6 +72,12 @@ func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter, 
 					lowestPrice = price
 					lowestConversion = conversion
 					newestModifiedDate = dbUpdatedDate
+				} else if oldprice {
+					lowestPrice = price
+					lowestConversion = conversion
+					newestModifiedDate = dbUpdatedDate
+
+					oldprice = false
 				}
 			}
 

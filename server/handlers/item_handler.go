@@ -65,7 +65,7 @@ func (h *ItemHandler) SelectAllV2(ctx *fiber.Ctx) error {
 		ExceptId:           ctx.Query("except_id"),
 	}
 	uc := usecase.ItemUC{ContractUC: h.ContractUC}
-	res, err := uc.SelectAllV2(c, parameter, false)
+	res, err := uc.SelectAllV2(c, parameter, false, false)
 
 	type StructObject struct {
 		ListObject []viewmodel.ItemVM `json:"list_item"`

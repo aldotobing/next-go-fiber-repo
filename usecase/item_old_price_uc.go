@@ -124,7 +124,7 @@ func (uc ItemOldPriceUC) ItemDetailFindByID(c context.Context, parameter models.
 		ID:          resData.ItemID,
 		By:          "def.id",
 		PriceListId: resData.PriceListID,
-	}, false)
+	}, false, false)
 
 	itemUomLineData, err := WebItemUomLineUC{ContractUC: uc.ContractUC}.SelectAll(c, models.WebItemUomLineParameter{
 		ItemID: resData.ItemID,
@@ -195,7 +195,7 @@ func (uc ItemOldPriceUC) Add(c context.Context, in requests.ItemOldPriceBulkRequ
 			Code:        datum.ItemCode,
 			By:          "def.id",
 			PriceListId: customerPriceListID,
-		}, false)
+		}, false, true)
 
 		var itemID, uomID string
 		var itemPrice, conversion float64
