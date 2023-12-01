@@ -43,7 +43,7 @@ func (uc PromoItemLineUC) SelectAll(c context.Context, parameter models.PromoIte
 		priceListVersionID = *data[i].PriceListVersionID
 	}
 	fmt.Println(ids)
-	latestPrice, _ := ItemUC{ContractUC: uc.ContractUC}.SelectAllV2(c, models.ItemParameter{IDs: ids, PriceListVersionId: priceListVersionID, By: "def.created_date"}, true)
+	latestPrice, _ := ItemUC{ContractUC: uc.ContractUC}.SelectAllV2(c, models.ItemParameter{IDs: ids, PriceListVersionId: priceListVersionID, By: "def.created_date"}, true, false)
 	doubleChecker := make(map[string]string)
 	fmt.Println(latestPrice)
 	for i := range data {
