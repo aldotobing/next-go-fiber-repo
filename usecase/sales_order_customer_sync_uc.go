@@ -119,7 +119,7 @@ func (uc SalesOrderCustomerSyncUC) DataSync(c context.Context, parameter models.
 								messageType := "2"
 								if *invoiceObject.Status == "submitted" {
 									messageTemplate = helper.BuildProcessSalesOrderTransactionTemplate(salesorderHeader, orderline, useraccount, 1)
-									messageTitle = "Transaksi " + *invoiceObject.DocumentNo + " diproses."
+								messageTitle = "Transaksi " + *invoiceObject.DocumentNo + " diproses."
 								}
 
 								if useraccount.CustomerFCMToken != nil && *useraccount.CustomerFCMToken != "" {
@@ -172,6 +172,12 @@ func (uc SalesOrderCustomerSyncUC) DataSync(c context.Context, parameter models.
 											}
 										}
 									}
+
+								}
+
+								if useraccount.CustomerBranchPicPhoneNo != nil && useraccount.CustomerBranchPicName != nil {
+									picMessageTemplate := helper.BuildProcessSalesOrderTransactionTemplate(salesorderHeader, orderline, useraccount, 3)
+									_ = uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.CustomerBranchPicPhoneNo, picMessageTemplate)
 
 								}
 							}
