@@ -35,6 +35,7 @@ func (route DataSyncRoutes) RegisterRoute() {
 	tr.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
 	tr.Get("/voidedrequest", transhandler.CustomerOrderVoidDataSync)
 	tr.Get("/invoicedata", transhandler.InvoiceSync)
+	tr.Get("/return_invoicedata", transhandler.ReturnInvoiceSync)
 	tr.Get("/invoicedata/undone", transhandler.UndoneDataSync)
 	tr.Get("/sodata", transhandler.SalesOrderCustomerSync)
 	tr.Get("/revisedsodata", transhandler.SalesOrderCustomerRevisedSync)
