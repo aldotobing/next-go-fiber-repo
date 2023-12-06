@@ -56,6 +56,9 @@ func BuildProcessSalesOrderTransactionTemplate(customerOrderHeader models.SalesO
 	} else if mode == 2 {
 		msgbody += `*Kepada Yang Terhormat Salesman* \n\n`
 		msgbody += `*` + *userData.CustomerSalesmanName + `*`
+	} else if mode == 3 {
+		msgbody += `*Kepada Yang Terhormat PIC* \n\n`
+		msgbody += `*` + *userData.CustomerBranchPicName + `*`
 	}
 
 	msgbody += `\n\n*NO ORDERAN ` + *customerOrderHeader.DocumentNo + ` anda pada tanggal ` + dateString + CretaedBy + ` telah diproses*`
