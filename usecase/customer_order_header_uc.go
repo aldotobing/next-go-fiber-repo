@@ -447,6 +447,12 @@ func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter mode
 							}
 
 						}
+						if useraccount.CustomerBranchPicPhoneNo != nil && useraccount.CustomerBranchPicName != nil {
+							picMessageTemplate := helper.BuildTransactionTemplateForPIC(currentOrder, orderline, useraccount, *invoiceObject.Status)
+							if picMessageTemplate != "" {
+								_ = uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.CustomerBranchPicPhoneNo, picMessageTemplate)
+							}
+						}
 
 					}
 
