@@ -1,6 +1,8 @@
 package models
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 // DashboardWeb ...
 type DashboardWeb struct {
@@ -456,7 +458,7 @@ var (
 	DashboardWebBranchDetailSelectStatement = ` select * from os_fetch_dashborad_branchcustomerdata($1::integer,$2,$3,null,null,null)
 	   `
 
-	DashboardWebReportBranchDetailSelectStatement = ` select * from os_fetch_dashborad_branchcustomerdata3($1::varchar,$2,$3::varchar,$4,$5,null,null,null)
+	DashboardWebReportBranchDetailSelectStatement = ` select * from os_fetch_dashborad_branchcustomerdata4($1::varchar,$2,$3::varchar,$4,$5,null,null,null)
 	   `
 
 	DashboardWebBranchDetailSelectWithUserIDStatement = ` select * from os_fetch_dashborad_customerdata_using_user_id($1::integer,$2,$3,null,null,null)
