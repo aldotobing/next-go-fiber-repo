@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -307,6 +308,9 @@ func (h *TransactionVAHandler) PaidTransactionByVaCode(ctx *fiber.Ctx) error {
 		inputUpdate.VaPairID = input.PaymentRequestBody.TransactionID
 		inputUpdate.Amount = input.PaymentRequestBody.PaymentAmount
 
+		paidAmounts := strings.Split(inputUpdate.Amount, ".")
+
+		inputUpdate.Amount = paidAmounts[0]
 		if inputUpdate.Amount != *res.PaidAmount {
 			ObjectData.InquiryResult.Status.ErrorCode = "B5"
 			ObjectData.InquiryResult.Status.IsError = "true"
