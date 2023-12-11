@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -205,9 +206,37 @@ func (uc TransactionVAUC) PaidTransaction(c context.Context, id string, data *re
 
 		}
 
-		if fcustomer.CustomerPhone != nil && *fcustomer.CustomerPhone != "" {
-			msgcustomer := msgcustomerheader
-			senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*fcustomer.CustomerPhone, msgcustomer)
+		if fcustomer.CustomerBranchPicPhoneNo != nil && *fcustomer.CustomerBranchPicPhoneNo != "" {
+			salesInvoiceData, _ := SalesInvoiceUC{ContractUC: uc.ContractUC}.FindByDocumentNo(c, models.SalesInvoiceParameter{NoInvoice: *transactionVa.BasicInvoiceCode})
+			var invoiceLine []viewmodel.InvoiceLineVM
+			json.Unmarshal(*salesInvoiceData.InvoiceLine, &invoiceLine)
+
+			header := `*Kepada Yang Terhormat PIC*
+
+			*` + *fcustomer.CustomerBranchPicName + `*
+		
+			*NO ORDERAN ` + *salesInvoiceData.SourceDocumentNo + `*
+		
+			*NO INVOICE ` + *salesInvoiceData.NoInvoice + `*
+		
+			*pada tanggal ` + *salesInvoiceData.TrasactionDate + ` oleh Toko : ` + *fcustomer.CustomerName + ` ( ` + *fcustomer.CustomerAddress + ` )(` + *fcustomer.Code + `) dengan No. Virtual Account ` + *transactionVa.VACode + ` TELAH LUNAS*
+			
+			*Pelanggan dari salesman : ` + *fcustomer.CustomerSalesmanName + `(` + *fcustomer.CustomerSalesmanCode + `)*
+			
+			`
+
+			var detailLine string
+			detailLine += `Berikut merupakan rincian pesanan: \n`
+			for i := range invoiceLine {
+				detailLine += invoiceLine[i].Quantity + " " + invoiceLine[i].UomName + " " + invoiceLine[i].ItemName + "\n"
+			}
+			detailLine += `Senilai ` + *salesInvoiceData.NetAmount + ` Terima Kasih atas pesanan anda\n\n`
+
+			footer := `Salam Sehat
+				
+			NB : Bila ini bukan transaksi dari Toko Bapak/Ibu, silahkan periksa data transaksi di SFA WEB(NEXT)/WEB CMS MYSM.`
+
+			senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*fcustomer.CustomerBranchPicPhoneNo, header+detailLine+footer)
 			if senDwaMessage != nil {
 				fmt.Println("sukses")
 			}
