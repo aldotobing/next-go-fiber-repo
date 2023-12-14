@@ -88,6 +88,7 @@ func (repository CustomerRepository) scanRows(rows *sql.Rows) (res models.Custom
 		&res.CustomerFCMToken,
 		&res.CustomerPaymentTermsID,
 		&res.CustomerPaymentTermsCode,
+		&res.CustomerAdminValidate,
 	)
 	if err != nil {
 
@@ -153,6 +154,7 @@ func (repository CustomerRepository) scanRow(row *sql.Row) (res models.Customer,
 		&res.CustomerFCMToken,
 		&res.CustomerPaymentTermsID,
 		&res.CustomerPaymentTermsCode,
+		&res.CustomerAdminValidate,
 	)
 	if err != nil {
 		return res, err
