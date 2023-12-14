@@ -58,6 +58,7 @@ type Customer struct {
 	CustomerFCMToken           *string `json:"customer_fcm_token"`
 	CustomerPaymentTermsID     *string `json:"customer_payment_terms_id"`
 	CustomerPaymentTermsCode   *string `json:"customer_payment_terms_code"`
+	CustomerAdminValidate      bool    `json:"customer_admin_validate"`
 }
 
 // CustomerParameter ...
@@ -146,8 +147,8 @@ var (
 		c.customer_nik,
 		cl._name as cus_level_name,
 		C.price_list_id,C.price_list_version_id,
-		us.fcm_token,top.id as top_id, top.code as top_code
-
+		us.fcm_token,top.id as top_id, top.code as top_code,
+		c.admin_validate
 	FROM CUSTOMER C
 	LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
 	LEFT JOIN REGION REG ON REG.ID = B.REGION_ID
