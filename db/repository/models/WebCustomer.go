@@ -96,6 +96,7 @@ type WebCustomerParameter struct {
 	ShowInApp      string `json:"show_in_app"`
 	Active         string `json:"active"`
 	IsDataComplete string `json:"is_data_complete"`
+	AdminValidate  string `json:"admin_validate"`
 }
 
 // WebCustomerReportParameter ...
