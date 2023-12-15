@@ -405,6 +405,12 @@ func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter m
 		}
 	}
 
+	if parameter.AdminValidate == "1" {
+		conditionString += `AND C.admin_validate = true`
+	} else if parameter.AdminValidate == "0" {
+		conditionString += `AND C.admin_validate = false`
+	}
+
 	query := models.WebCustomerSelectStatement + ` ` + whereStatement + ` ` + conditionString + `
 		AND (LOWER(c.customer_name) LIKE $` + strconv.Itoa(index) + ` or LOWER(c.customer_code) LIKE $` + strconv.Itoa(index) + `) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $` + strconv.Itoa(index+1) + ` LIMIT $` + strconv.Itoa(index+2)
 
