@@ -29,6 +29,7 @@ func (route DataSyncRoutes) RegisterRoute() {
 	r.Get("/item_price", handler.ItemPriceDataSync)
 	r.Get("/customer", handler.CustomerDataSync)
 	r.Get("/salesman", handler.SalesmanDataSync)
+	r.Get("/item-uom-line", handler.ItemUomLineDataSync)
 
 	transhandler := handlers.TransactionDataSyncHandler{Handler: route.Handler}
 	tr := route.RouterGroup.Group("/api/sync/transaction")

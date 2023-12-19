@@ -115,3 +115,20 @@ func (h *DataSyncHandler) SalesmanDataSync(ctx *fiber.Ctx) error {
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
+
+// ItemDataSync ...
+func (h *DataSyncHandler) ItemUomLineDataSync(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.ItemUomLineSyncParameter{
+		ID:     ctx.Params("id"),
+		Search: ctx.Query("search"),
+		By:     ctx.Query("by"),
+		Sort:   ctx.Query("sort"),
+	}
+
+	uc := usecase.ItemUomLineSyncUC{ContractUC: h.ContractUC}
+	res, err := uc.DataSync(c, parameter)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}

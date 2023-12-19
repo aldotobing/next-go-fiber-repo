@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/go-redis/redis/v8"
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/pkg/functioncaller"
@@ -123,10 +122,11 @@ func (uc CityUC) FindByID(c context.Context, parameter models.CityParameter) (re
 	if err == nil {
 		// Data was found in Redis, return it
 		return res, nil
-	} else if err != redis.Nil {
-		// An error occurred that wasn't just "key doesn't exist"
-		return res, err
 	}
+	// else if err != redis.Nil {
+	// 	// An error occurred that wasn't just "key doesn't exist"
+	// 	return res, err
+	// }
 
 	// Data was not found in Redis, fetch from DB instead
 	repo := repository.NewCityRepository(uc.DB)
