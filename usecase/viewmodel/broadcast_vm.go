@@ -27,4 +27,5 @@ type BroadcastParameterVM struct {
 	CustomerLevelID   string `json:"customer_level_id"`
 	CustomerLevelName string `json:"customer_level_name"`
 	CustomerCodes     string `json:"customer_code"`
+	CustomerReligion  string `json:"customer_religion"`
 }
