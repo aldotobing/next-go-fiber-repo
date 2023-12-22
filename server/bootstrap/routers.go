@@ -292,4 +292,10 @@ func (boot Bootstrap) RegisterRouters() {
 
 	itemOldPriceRoute := routers.ItemOldPriceRoutes{RouterGroup: apiV1, Handler: handler}
 	itemOldPriceRoute.RegisterRoute()
+
+	pointRoute := routers.PointRoutes{RouterGroup: apiV1, Handler: handler}
+	pointRoute.RegisterRoute()
+
+	pointRulesRoute := routers.PointRulesRoutes{RouterGroup: apiV1, Handler: handler}
+	pointRulesRoute.RegisterRoute()
 }
