@@ -63,24 +63,25 @@ type Customer struct {
 
 // CustomerParameter ...
 type CustomerParameter struct {
-	ID              string `json:"customer_id"`
-	Code            string `json:"customer_code"`
-	Phone           string `json:"customer_phone"`
-	Name            string `json:"customer_name"`
-	CustomerTypeId  string `json:"custome_type_id"`
-	CustomerLevelId string `json:"custome_level_id"`
-	CustomerCodes   string `json:"customer_codes"`
-	UserId          string `json:"admin_user_id"`
-	BranchID        string `json:"branch_id"`
-	RegionID        string `json:"region_id"`
-	RegionGroupID   string `json:"region_group_id"`
-	FlagToken       bool   `json:"flag_token"`
-	Search          string `json:"search"`
-	Page            int    `json:"page"`
-	Offset          int    `json:"offset"`
-	Limit           int    `json:"limit"`
-	By              string `json:"by"`
-	Sort            string `json:"sort"`
+	ID               string `json:"customer_id"`
+	Code             string `json:"customer_code"`
+	Phone            string `json:"customer_phone"`
+	Name             string `json:"customer_name"`
+	CustomerTypeId   string `json:"custome_type_id"`
+	CustomerLevelId  string `json:"custome_level_id"`
+	CustomerCodes    string `json:"customer_codes"`
+	CustomerReligion string `json:"customer_religion"`
+	UserId           string `json:"admin_user_id"`
+	BranchID         string `json:"branch_id"`
+	RegionID         string `json:"region_id"`
+	RegionGroupID    string `json:"region_group_id"`
+	FlagToken        bool   `json:"flag_token"`
+	Search           string `json:"search"`
+	Page             int    `json:"page"`
+	Offset           int    `json:"offset"`
+	Limit            int    `json:"limit"`
+	By               string `json:"by"`
+	Sort             string `json:"sort"`
 }
 
 var (

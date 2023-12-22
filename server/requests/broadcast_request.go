@@ -17,5 +17,6 @@ type BroadcastRequest struct {
 	CustomerLevelID   string   `json:"customer_level_id"`
 	CustomerLevelName string   `json:"customer_level_name"`
 	CustomerCode      []string `json:"customer_code"`
+	CustomerReligion  string   `json:"customer_religion"`
 	RepeatEveryDay    bool     `json:"repeat_every_day"`
 }
