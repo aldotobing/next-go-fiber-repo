@@ -104,12 +104,14 @@ func (uc PointUC) GetBalance(c context.Context, parameter models.PointParameter)
 	cacheKey := fmt.Sprintf("balance_customer_id:%s",
 		parameter.CustomerID)
 
-	// Try getting data from cache
-	cachedData, err := uc.RedisClient.Get(cacheKey)
-	if err == nil && string(cachedData) != "" {
-		err := json.Unmarshal(cachedData, &out)
+	if parameter.Renewal != "1" {
+		// Try getting data from cache
+		cachedData, err := uc.RedisClient.Get(cacheKey)
+		if err == nil && string(cachedData) != "" {
+			err := json.Unmarshal(cachedData, &out)
 
-		return out, err
+			return out, err
+		}
 	}
 
 	repo := repository.NewPointRepository(uc.DB)

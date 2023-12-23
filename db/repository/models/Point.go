@@ -36,6 +36,7 @@ type PointParameter struct {
 	CustomerID string `json:"customer_id"`
 	StartDate  string `json:"start_date"`
 	EndDate    string `json:"end_date"`
+	Renewal    string `json:"renewal"`
 	Search     string `json:"search"`
 	ShowAll    string `json:"show_all"`
 	Page       int    `json:"page"`

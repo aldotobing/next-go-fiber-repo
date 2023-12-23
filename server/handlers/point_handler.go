@@ -77,6 +77,7 @@ func (h *PointHandler) GetBalance(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 	parameter := models.PointParameter{
 		CustomerID: ctx.Params("customer_id"),
+		Renewal:    ctx.Params("renewal"),
 	}
 	uc := usecase.PointUC{ContractUC: h.ContractUC}
 	res, err := uc.GetBalance(c, parameter)
