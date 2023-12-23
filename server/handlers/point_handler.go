@@ -24,6 +24,8 @@ func (h *PointHandler) FindAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 	parameter := models.PointParameter{
 		CustomerID: ctx.Query("customer_id"),
+		StartDate:  ctx.Query("start_date"),
+		EndDate:    ctx.Query("end_date"),
 		Page:       str.StringToInt(ctx.Query("page")),
 		Limit:      str.StringToInt(ctx.Query("limit")),
 		By:         ctx.Query("by"),

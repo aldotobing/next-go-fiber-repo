@@ -32,6 +32,8 @@ type PointGetBalance struct {
 type PointParameter struct {
 	ID         string `json:"id"`
 	CustomerID string `json:"customer_id"`
+	StartDate  string `json:"start_date"`
+	EndDate    string `json:"end_date"`
 	Search     string `json:"search"`
 	ShowAll    string `json:"show_all"`
 	Page       int    `json:"page"`

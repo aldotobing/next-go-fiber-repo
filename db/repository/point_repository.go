@@ -97,6 +97,10 @@ func (repository PointRepository) FindAll(ctx context.Context, parameter models.
 		conditionString += `AND DEF.CUSTOMER_ID = ` + parameter.CustomerID
 	}
 
+	if parameter.StartDate != "" && parameter.EndDate != "" {
+		conditionString += `AND DEF.CREATED_AT BETWEEN '` + parameter.StartDate + `' AND '` + parameter.EndDate + `'`
+	}
+
 	statement := models.PointSelectStatement + models.PointWhereStatement +
 		conditionString +
 		` ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $1 LIMIT $2`
