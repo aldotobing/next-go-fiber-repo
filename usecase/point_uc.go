@@ -45,6 +45,7 @@ func (uc PointUC) FindAll(c context.Context, parameter models.PointParameter) (o
 	}
 
 	p = uc.setPaginationResponse(parameter.Page, parameter.Limit, count)
+
 	for _, datum := range data {
 		var temp viewmodel.PointVM
 		uc.BuildBody(&datum, &temp)
