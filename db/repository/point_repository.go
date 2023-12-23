@@ -162,7 +162,7 @@ func (repository PointRepository) GetBalance(c context.Context, parameter models
 
 // Add ...
 func (repository PointRepository) Add(c context.Context, in viewmodel.PointVM) (res string, err error) {
-	statement := `INSERT INTO POINT (
+	statement := `INSERT INTO POINTS (
 			POINT_TYPE, 
 			INVOICE_ID,
 			POINT,
@@ -170,21 +170,16 @@ func (repository PointRepository) Add(c context.Context, in viewmodel.PointVM) (
 			CREATED_AT,
 			UPDATED_AT
 		)
-	VALUES ($1, $2, $3, $4, NOW(), NOW()) RETURNING id`
+	VALUES (` + in.PointType + `, ` + in.InvoiceID + `, '` + in.Point + `', ` + in.CustomerID + `, NOW(), NOW()) RETURNING id`
 
-	err = repository.DB.QueryRowContext(c, statement,
-		in.PointType,
-		in.InvoiceID,
-		in.Point,
-		in.CustomerID,
-	).Scan(&res)
+	err = repository.DB.QueryRowContext(c, statement).Scan(&res)
 
 	return
 }
 
 // Update ...
 func (repository PointRepository) Update(c context.Context, in viewmodel.PointVM) (res string, err error) {
-	statement := `UPDATE POINT SET 
+	statement := `UPDATE POINTS SET 
 		POINT_TYPE = $1, 
 		INVOICE_ID = $2, 
 		POINT = $3, 
@@ -205,7 +200,7 @@ func (repository PointRepository) Update(c context.Context, in viewmodel.PointVM
 
 // Delete ...
 func (repository PointRepository) Delete(c context.Context, id string) (res string, err error) {
-	statement := `UPDATE POINT SET 
+	statement := `UPDATE POINTS SET 
 	DELETED_AT = NOW()
 	WHERE id = ` + id + `
 	RETURNING id`
