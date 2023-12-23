@@ -143,7 +143,8 @@ func (repository PointRepository) FindByID(c context.Context, parameter models.P
 func (repository PointRepository) GetBalance(c context.Context, parameter models.PointParameter) (data models.PointGetBalance, err error) {
 	statement := `select coalesce(sum(case when pt."_name" = '` + models.PointTypeWithdraw + `' then DEF.point else 0 end),0) as withdraw,
 		coalesce(sum(case when pt."_name" = '` + models.PointTypeCashback + `' then DEF.point else 0 end),0) as cashback,
-		coalesce(sum(case when pt."_name" = '` + models.PointTypeLoyalty + `' then DEF.point else 0 end),0) as loyalty
+		coalesce(sum(case when pt."_name" = '` + models.PointTypeLoyalty + `' then DEF.point else 0 end),0) as loyalty,
+		coalesce(sum(case when pt."_name" = '` + models.PointTypePromo + `' then DEF.point else 0 end),0) as promo
 		from points DEF
 		left join point_type pt on pt.id = def.point_type ` +
 		`WHERE DEF.CUSTOMER_ID = ` + parameter.CustomerID
@@ -153,6 +154,7 @@ func (repository PointRepository) GetBalance(c context.Context, parameter models
 		&data.Withdraw,
 		&data.Cashback,
 		&data.Loyalty,
+		&data.Promo,
 	)
 
 	return

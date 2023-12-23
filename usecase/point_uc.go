@@ -124,6 +124,8 @@ func (uc PointUC) GetBalance(c context.Context, parameter models.PointParameter)
 	totalPoint += point
 	point, _ = strconv.ParseFloat(data.Loyalty, 64)
 	totalPoint += point
+	point, _ = strconv.ParseFloat(data.Promo, 64)
+	totalPoint += point
 	point, _ = strconv.ParseFloat(data.Withdraw, 64)
 	totalPoint -= point
 
