@@ -5,6 +5,7 @@ import "database/sql"
 const (
 	PointTypeWithdraw = "Withdraw"
 	PointTypeLoyalty  = "Loyalty"
+	PointTypePromo    = "Promo"
 	PointTypeCashback = "Cashback"
 )
 
@@ -25,6 +26,7 @@ type Point struct {
 type PointGetBalance struct {
 	Withdraw string `json:"withdraw"`
 	Loyalty  string `json:"loyalty"`
+	Promo    string `json:"promo"`
 	Cashback string `json:"cashback"`
 }
 
@@ -34,6 +36,7 @@ type PointParameter struct {
 	CustomerID string `json:"customer_id"`
 	StartDate  string `json:"start_date"`
 	EndDate    string `json:"end_date"`
+	Renewal    string `json:"renewal"`
 	Search     string `json:"search"`
 	ShowAll    string `json:"show_all"`
 	Page       int    `json:"page"`

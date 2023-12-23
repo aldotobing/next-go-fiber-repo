@@ -143,7 +143,8 @@ func (repository PointRepository) FindByID(c context.Context, parameter models.P
 func (repository PointRepository) GetBalance(c context.Context, parameter models.PointParameter) (data models.PointGetBalance, err error) {
 	statement := `select coalesce(sum(case when pt."_name" = '` + models.PointTypeWithdraw + `' then DEF.point else 0 end),0) as withdraw,
 		coalesce(sum(case when pt."_name" = '` + models.PointTypeCashback + `' then DEF.point else 0 end),0) as cashback,
-		coalesce(sum(case when pt."_name" = '` + models.PointTypeLoyalty + `' then DEF.point else 0 end),0) as loyalty
+		coalesce(sum(case when pt."_name" = '` + models.PointTypeLoyalty + `' then DEF.point else 0 end),0) as loyalty,
+		coalesce(sum(case when pt."_name" = '` + models.PointTypePromo + `' then DEF.point else 0 end),0) as promo
 		from points DEF
 		left join point_type pt on pt.id = def.point_type ` +
 		`WHERE DEF.CUSTOMER_ID = ` + parameter.CustomerID
@@ -153,6 +154,7 @@ func (repository PointRepository) GetBalance(c context.Context, parameter models
 		&data.Withdraw,
 		&data.Cashback,
 		&data.Loyalty,
+		&data.Promo,
 	)
 
 	return
@@ -160,7 +162,7 @@ func (repository PointRepository) GetBalance(c context.Context, parameter models
 
 // Add ...
 func (repository PointRepository) Add(c context.Context, in viewmodel.PointVM) (res string, err error) {
-	statement := `INSERT INTO POINT (
+	statement := `INSERT INTO POINTS (
 			POINT_TYPE, 
 			INVOICE_ID,
 			POINT,
@@ -168,21 +170,16 @@ func (repository PointRepository) Add(c context.Context, in viewmodel.PointVM) (
 			CREATED_AT,
 			UPDATED_AT
 		)
-	VALUES ($1, $2, $3, $4, NOW(), NOW()) RETURNING id`
+	VALUES (` + in.PointType + `, ` + in.InvoiceID + `, '` + in.Point + `', ` + in.CustomerID + `, NOW(), NOW()) RETURNING id`
 
-	err = repository.DB.QueryRowContext(c, statement,
-		in.PointType,
-		in.InvoiceID,
-		in.Point,
-		in.CustomerID,
-	).Scan(&res)
+	err = repository.DB.QueryRowContext(c, statement).Scan(&res)
 
 	return
 }
 
 // Update ...
 func (repository PointRepository) Update(c context.Context, in viewmodel.PointVM) (res string, err error) {
-	statement := `UPDATE POINT SET 
+	statement := `UPDATE POINTS SET 
 		POINT_TYPE = $1, 
 		INVOICE_ID = $2, 
 		POINT = $3, 
@@ -203,7 +200,7 @@ func (repository PointRepository) Update(c context.Context, in viewmodel.PointVM
 
 // Delete ...
 func (repository PointRepository) Delete(c context.Context, id string) (res string, err error) {
-	statement := `UPDATE POINT SET 
+	statement := `UPDATE POINTS SET 
 	DELETED_AT = NOW()
 	WHERE id = ` + id + `
 	RETURNING id`
