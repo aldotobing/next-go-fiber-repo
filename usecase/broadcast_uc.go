@@ -194,15 +194,16 @@ func (uc BroadcastUC) BroadcastWithID(c context.Context, id string) (err error) 
 	json.Unmarshal([]byte(broadcastData.Parameter.String), &param)
 
 	data, err := CustomerUC{ContractUC: uc.ContractUC}.SelectAll(c, models.CustomerParameter{
-		By:              "c.created_date",
-		Sort:            "desc",
-		FlagToken:       true,
-		CustomerTypeId:  param.CustomerTypeID,
-		BranchID:        param.BranchID,
-		RegionID:        param.RegionID,
-		RegionGroupID:   param.RegionGroupID,
-		CustomerLevelId: param.CustomerLevelID,
-		CustomerCodes:   param.CustomerCodes,
+		By:               "c.created_date",
+		Sort:             "desc",
+		FlagToken:        true,
+		CustomerTypeId:   param.CustomerTypeID,
+		BranchID:         param.BranchID,
+		RegionID:         param.RegionID,
+		RegionGroupID:    param.RegionGroupID,
+		CustomerLevelId:  param.CustomerLevelID,
+		CustomerCodes:    param.CustomerCodes,
+		CustomerReligion: param.CustomerReligion,
 	})
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
