@@ -24,6 +24,7 @@ func (h *PointHandler) FindAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 	parameter := models.PointParameter{
 		CustomerID: ctx.Query("customer_id"),
+		PointType:  ctx.Query("point_type"),
 		StartDate:  ctx.Query("start_date"),
 		EndDate:    ctx.Query("end_date"),
 		Page:       str.StringToInt(ctx.Query("page")),
@@ -45,6 +46,7 @@ func (h *PointHandler) SelectAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 	parameter := models.PointParameter{
 		CustomerID: ctx.Query("customer_id"),
+		PointType:  ctx.Query("point_type"),
 		By:         ctx.Query("by"),
 		Sort:       ctx.Query("sort"),
 	}

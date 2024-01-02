@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -67,7 +66,6 @@ func (repository WebUserRepository) SelectAll(c context.Context, parameter model
 		` AND (LOWER(def."login") LIKE $1  ) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 
-	log.Fatal(statement)
 	if err != nil {
 		return data, err
 	}

@@ -9,6 +9,7 @@ import (
 
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
+	"nextbasis-service-v-0.1/helper"
 	"nextbasis-service-v-0.1/pkg/functioncaller"
 	"nextbasis-service-v-0.1/pkg/logruslogger"
 	"nextbasis-service-v-0.1/server/requests"
@@ -26,11 +27,21 @@ func (uc PointUC) BuildBody(data *models.Point, res *viewmodel.PointVM) {
 	res.PointType = data.PointType
 	res.PointTypeName = data.PointTypeName
 	res.InvoiceID = data.InvoiceID.String
+	res.InvoiceDocumentNo = data.InvoiceDocumentNo.String
 	res.Point = data.Point
 	res.CustomerID = data.CustomerID
 	res.CreatedAt = data.CreatedAt
 	res.UpdatedAt = data.UpdatedAt.String
 	res.DeletedAt = data.DeletedAt.String
+	res.ExpiredAt = data.ExpiredAt.String
+
+	res.DetailCustomer = viewmodel.CustomerVM{
+		CustomerName:       data.Customer.CustomerName.String,
+		Code:               data.Customer.Code.String,
+		CustomerBranchCode: data.Customer.CustomerBranchCode.String,
+		CustomerBranchName: data.Customer.CustomerBranchName.String,
+		CustomerRegionName: data.Customer.CustomerRegionName.String,
+	}
 }
 
 // FindAll ...
@@ -143,11 +154,36 @@ func (uc PointUC) GetBalance(c context.Context, parameter models.PointParameter)
 
 // Add ...
 func (uc PointUC) Add(c context.Context, in requests.PointRequest) (out viewmodel.PointVM, err error) {
+	now := time.Now()
+	expiredAt := helper.GetExpiredPoint(now)
+
+	var customerCodes string
+	for _, datum := range in.CustomerCodes {
+		if customerCodes != "" {
+			customerCodes += ", '" + datum.CustomerCode + "'"
+		} else {
+			customerCodes += "'" + datum.CustomerCode + "'"
+		}
+	}
+
+	customerData, err := WebCustomerUC{ContractUC: uc.ContractUC}.SelectAll(c, models.WebCustomerParameter{
+		Code: customerCodes,
+		By:   "c.id",
+		Sort: "asc",
+	})
+
+	var customerIDs []string
+	for _, datum := range customerData {
+		customerIDs = append(customerIDs, datum.ID)
+	}
+
 	out = viewmodel.PointVM{
-		PointType:  in.PointType,
-		InvoiceID:  in.InvoiceID,
-		Point:      in.Point,
-		CustomerID: in.CustomerID,
+		PointType:   in.PointType,
+		InvoiceID:   in.InvoiceID,
+		Point:       in.Point,
+		CustomerID:  in.CustomerID,
+		ExpiredAt:   expiredAt,
+		CustomerIDs: customerIDs,
 	}
 
 	repo := repository.NewPointRepository(uc.DB)
