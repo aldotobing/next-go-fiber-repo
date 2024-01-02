@@ -107,6 +107,9 @@ func (uc PointRuleUC) Add(c context.Context, in requests.PointRuleRequest) (out 
 	for _, datum := range in.Customers {
 		customers = append(customers, viewmodel.PointRuleCustomerVM{
 			CustomerCode: datum.CustomerCode,
+			RegionID:     datum.RegionID,
+			Area:         datum.Area,
+			BranchID:     datum.BranchID,
 		})
 	}
 	out = viewmodel.PointRuleVM{
@@ -148,6 +151,9 @@ func (uc PointRuleUC) Update(c context.Context, id string, in requests.PointRule
 	for _, datum := range in.Customers {
 		customers = append(customers, viewmodel.PointRuleCustomerVM{
 			CustomerCode: datum.CustomerCode,
+			RegionID:     datum.RegionID,
+			Area:         datum.Area,
+			BranchID:     datum.BranchID,
 		})
 	}
 

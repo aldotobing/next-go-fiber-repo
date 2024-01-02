@@ -12,4 +12,7 @@ type PointRuleRequest struct {
 
 type PointRuleCustomer struct {
 	CustomerCode string `json:"customer_code"`
+	RegionID     string `json:"region_id"`
+	Area         string `json:"area"`
+	BranchID     string `json:"branch_id"`
 }
