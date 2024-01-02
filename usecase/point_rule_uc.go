@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
 	"mime/multipart"
 
 	"nextbasis-service-v-0.1/config"
@@ -29,6 +30,10 @@ func (uc PointRuleUC) BuildBody(data *models.PointRule, res *viewmodel.PointRule
 	res.CreatedAt = data.CreatedAt
 	res.UpdatedAt = data.UpdatedAt.String
 	res.DeletedAt = data.DeletedAt.String
+
+	if data.Customer.Valid {
+		json.Unmarshal([]byte(data.Customer.String), &res.Customers)
+	}
 }
 
 // FindAll ...
@@ -98,12 +103,19 @@ func (uc PointRuleUC) FindByID(c context.Context, parameter models.PointRulePara
 
 // Add ...
 func (uc PointRuleUC) Add(c context.Context, in requests.PointRuleRequest) (out viewmodel.PointRuleVM, err error) {
+	var customers []viewmodel.PointRuleCustomerVM
+	for _, datum := range in.Customers {
+		customers = append(customers, viewmodel.PointRuleCustomerVM{
+			CustomerCode: datum.CustomerCode,
+		})
+	}
 	out = viewmodel.PointRuleVM{
 		StartDate:       in.StartDate,
 		EndDate:         in.EndDate,
 		MinOrder:        in.MinOrder,
 		PointConversion: in.PointConversion,
 		MonthlyMaxPoint: in.MonthlyMaxPoint,
+		Customers:       customers,
 	}
 
 	repo := repository.NewPointRuleRepository(uc.DB)
@@ -132,6 +144,13 @@ func (uc PointRuleUC) AddPhoto(c context.Context, image *multipart.FileHeader) (
 
 // Update ...
 func (uc PointRuleUC) Update(c context.Context, id string, in requests.PointRuleRequest) (out viewmodel.PointRuleVM, err error) {
+	var customers []viewmodel.PointRuleCustomerVM
+	for _, datum := range in.Customers {
+		customers = append(customers, viewmodel.PointRuleCustomerVM{
+			CustomerCode: datum.CustomerCode,
+		})
+	}
+
 	out = viewmodel.PointRuleVM{
 		ID:              id,
 		StartDate:       in.StartDate,
@@ -139,6 +158,7 @@ func (uc PointRuleUC) Update(c context.Context, id string, in requests.PointRule
 		MinOrder:        in.MinOrder,
 		PointConversion: in.PointConversion,
 		MonthlyMaxPoint: in.MonthlyMaxPoint,
+		Customers:       customers,
 	}
 
 	repo := repository.NewPointRuleRepository(uc.DB)

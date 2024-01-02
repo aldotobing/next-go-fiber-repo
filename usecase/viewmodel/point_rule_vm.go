@@ -11,4 +11,10 @@ type PointRuleVM struct {
 	CreatedAt       string `json:"created_at"`
 	UpdatedAt       string `json:"updated_at"`
 	DeletedAt       string `json:"deleted_at"`
+
+	Customers []PointRuleCustomerVM `json:"customers"`
+}
+
+type PointRuleCustomerVM struct {
+	CustomerCode string `json:"customer_code"`
 }
