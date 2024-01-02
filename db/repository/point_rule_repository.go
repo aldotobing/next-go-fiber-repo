@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/usecase/viewmodel"
@@ -40,6 +41,7 @@ func (repository PointRuleRepository) scanRows(rows *sql.Rows) (res models.Point
 		&res.CreatedAt,
 		&res.UpdatedAt,
 		&res.DeletedAt,
+		&res.Customer,
 	)
 
 	return
@@ -57,6 +59,7 @@ func (repository PointRuleRepository) scanRow(row *sql.Row) (res models.PointRul
 		&res.CreatedAt,
 		&res.UpdatedAt,
 		&res.DeletedAt,
+		&res.Customer,
 	)
 
 	return
@@ -139,16 +142,19 @@ func (repository PointRuleRepository) Add(c context.Context, in viewmodel.PointR
 			POINT_CONVERSION,
 			MONTHLY_MAX_POINT,
 			CREATED_AT,
-			UPDATED_AT
+			UPDATED_AT,
+			CUSTOMER
 		)
-	VALUES ($1, $2, $3, $4, $5, NOW(), NOW()) RETURNING id`
+	VALUES ($1, $2, $3, $4, $5, NOW(), NOW(), $6) RETURNING id`
 
+	j, _ := json.Marshal(in.Customers)
 	err = repository.DB.QueryRowContext(c, statement,
 		in.StartDate,
 		in.EndDate,
 		in.MinOrder,
 		in.PointConversion,
 		in.MonthlyMaxPoint,
+		j,
 	).Scan(&res)
 
 	return
@@ -162,16 +168,19 @@ func (repository PointRuleRepository) Update(c context.Context, in viewmodel.Poi
 		MIN_ORDER = $3,
 		POINT_CONVERSION = $4,
 		MONTHLY_MAX_POINT = $5,
-		UPDATED_AT = now()
-	WHERE id = $6
+		UPDATED_AT = now(),
+		CUSTOMER = $6
+	WHERE id = $7
 	RETURNING id`
 
+	j, _ := json.Marshal(in.Customers)
 	err = repository.DB.QueryRowContext(c, statement,
 		in.StartDate,
 		in.EndDate,
 		in.MinOrder,
 		in.PointConversion,
 		in.MonthlyMaxPoint,
+		j,
 		in.ID).Scan(&res)
 
 	return

@@ -13,6 +13,8 @@ type PointRule struct {
 	CreatedAt       string         `json:"created_at"`
 	UpdatedAt       sql.NullString `json:"updated_at"`
 	DeletedAt       sql.NullString `json:"deleted_at"`
+
+	Customer sql.NullString `json:"customer"`
 }
 
 // PointRuleParameter ...
@@ -40,7 +42,8 @@ var (
 			DEF.MONTHLY_MAX_POINT,
 			DEF.CREATED_AT,
 			DEF.UPDATED_AT,
-			DEF.DELETED_AT
+			DEF.DELETED_AT,
+			DEF.CUSTOMER
 		FROM POINT_RULES DEF
 	`
 	PointRuleWhereStatement = `WHERE DEF.DELETED_AT IS NULL `

@@ -41,6 +41,15 @@ func (repository PointRepository) scanRows(rows *sql.Rows) (res models.Point, er
 		&res.CreatedAt,
 		&res.UpdatedAt,
 		&res.DeletedAt,
+		&res.ExpiredAt,
+
+		&res.Customer.CustomerName,
+		&res.Customer.Code,
+		&res.Customer.CustomerBranchCode,
+		&res.Customer.CustomerBranchName,
+		&res.Customer.CustomerRegionName,
+
+		&res.InvoiceDocumentNo,
 	)
 
 	return
@@ -58,6 +67,15 @@ func (repository PointRepository) scanRow(row *sql.Row) (res models.Point, err e
 		&res.CreatedAt,
 		&res.UpdatedAt,
 		&res.DeletedAt,
+		&res.ExpiredAt,
+
+		&res.Customer.CustomerName,
+		&res.Customer.Code,
+		&res.Customer.CustomerBranchCode,
+		&res.Customer.CustomerBranchName,
+		&res.Customer.CustomerRegionName,
+
+		&res.InvoiceDocumentNo,
 	)
 
 	return
@@ -66,6 +84,10 @@ func (repository PointRepository) scanRow(row *sql.Row) (res models.Point, err e
 // SelectAll ...
 func (repository PointRepository) SelectAll(c context.Context, parameter models.PointParameter) (data []models.Point, err error) {
 	var conditionString string
+
+	if parameter.PointType != "" {
+		conditionString += `AND DEF.POINT_TYPE = ` + parameter.PointType
+	}
 
 	statement := models.PointSelectStatement + models.PointWhereStatement +
 		conditionString +
@@ -99,6 +121,10 @@ func (repository PointRepository) FindAll(ctx context.Context, parameter models.
 
 	if parameter.StartDate != "" && parameter.EndDate != "" {
 		conditionString += `AND DEF.CREATED_AT BETWEEN '` + parameter.StartDate + `' AND '` + parameter.EndDate + `'`
+	}
+
+	if parameter.PointType != "" {
+		conditionString += `AND DEF.POINT_TYPE = ` + parameter.PointType
 	}
 
 	statement := models.PointSelectStatement + models.PointWhereStatement +
@@ -162,17 +188,28 @@ func (repository PointRepository) GetBalance(c context.Context, parameter models
 
 // Add ...
 func (repository PointRepository) Add(c context.Context, in viewmodel.PointVM) (res string, err error) {
+	var statementInsert string
+	if len(in.CustomerIDs) > 0 {
+		for _, datum := range in.CustomerIDs {
+			if statementInsert == "" {
+				statementInsert += `(` + in.PointType + `, ` + in.InvoiceID + `, '` + in.Point + `', ` + datum + `, NOW(), NOW(), '` + in.ExpiredAt + `')`
+			} else {
+				statementInsert += `, (` + in.PointType + `, ` + in.InvoiceID + `, '` + in.Point + `', ` + datum + `, NOW(), NOW(), '` + in.ExpiredAt + `')`
+			}
+		}
+	}
 	statement := `INSERT INTO POINTS (
 			POINT_TYPE, 
 			INVOICE_ID,
 			POINT,
 			CUSTOMER_ID,
 			CREATED_AT,
-			UPDATED_AT
+			UPDATED_AT,
+			EXPIRED_AT
 		)
-	VALUES (` + in.PointType + `, ` + in.InvoiceID + `, '` + in.Point + `', ` + in.CustomerID + `, NOW(), NOW()) RETURNING id`
+	VALUES ` + statementInsert
 
-	err = repository.DB.QueryRowContext(c, statement).Scan(&res)
+	err = repository.DB.QueryRowContext(c, statement).Err()
 
 	return
 }
