@@ -4,6 +4,7 @@ package models
 // 1	:table customer order
 // 2	:table so
 // 3	:invoice
+// 4	:broadcast
 type UserNotification struct {
 	ID        *string `json:"id"`
 	UserID    *string `json:"user_id"`

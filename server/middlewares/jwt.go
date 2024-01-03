@@ -1,6 +1,8 @@
 package middlewares
 
 import (
+	"crypto/hmac"
+	"crypto/sha512"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -107,6 +109,51 @@ func (jwtMiddleware JwtMiddleware) VerifyUser(ctx *fiber.Ctx) (err error) {
 
 	// set id to uce case contract
 	ctx.Locals("user_id", jweRes["user_id"].(string))
+
+	return ctx.Next()
+}
+
+// VerifyBasic ...
+func (jwtMiddleware JwtMiddleware) VerifySignature(ctx *fiber.Ctx) (err error) {
+	// fmt.Println(ctx.Body())
+	basicCid := `888`
+	codeBase := string(ctx.Body()[:])
+	MandiriCode := `BMRI_SIDO`
+	finalCode := basicCid + `:` + codeBase + `:` + MandiriCode
+
+	hashBody := []byte(finalCode)
+
+	hash := hmac.New(sha512.New, []byte("BMRI_SIDO"))
+	hash.Write(hashBody)
+	//	hash.Write(salt)
+	fmt.Printf("\n\nHMAC-sha512: %x", hash.Sum(nil))
+	basic := fmt.Sprintf("%x", hash.Sum(nil))
+
+	header := ctx.Get("signature")
+	cid := ctx.Get("cid")
+	// if !strings.Contains(header, "signature") {
+	// 	logruslogger.Log(logruslogger.WarnLevel, helper.HeaderNotPresent, functioncaller.PrintFuncName(), "middleware-jwt-header")
+	// 	return errors.New(helper.HeaderNotPresent)
+	// }
+	if &cid == nil || strings.Trim(cid, " ") == "" {
+		logruslogger.Log(logruslogger.WarnLevel, helper.CidNotPresent, functioncaller.PrintFuncName(), "middleware-jwt-header")
+		return errors.New(helper.CidNotPresent)
+	}
+
+	if cid != basicCid {
+		logruslogger.Log(logruslogger.WarnLevel, helper.UnexpectedCid, functioncaller.PrintFuncName(), "middleware-jwt-header")
+		return errors.New(helper.UnexpectedCid)
+	}
+
+	if &header == nil || strings.Trim(header, " ") == "" {
+		logruslogger.Log(logruslogger.WarnLevel, helper.HeaderNotPresent, functioncaller.PrintFuncName(), "middleware-jwt-header")
+		return errors.New(helper.HeaderNotPresent)
+	}
+	token := strings.Replace(header, "signature ", "", -1)
+	if strings.ToLower(token) != strings.ToLower(basic) {
+		logruslogger.Log(logruslogger.WarnLevel, basic, functioncaller.PrintFuncName(), "invalid-token")
+		return errors.New(helper.UnexpectedClaims)
+	}
 
 	return ctx.Next()
 }

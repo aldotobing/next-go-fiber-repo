@@ -101,7 +101,27 @@ func (h *CustomerOrderHeaderHandler) FindByID(ctx *fiber.Ctx) error {
 	uc := usecase.CustomerOrderHeaderUC{ContractUC: h.ContractUC}
 	res, err := uc.FindByID(c, parameter)
 
-	return h.SendResponse(ctx, res, nil, err, 0)
+	lineuc := usecase.CustomerOrderLineUC{ContractUC: h.ContractUC}
+	lineparameter := models.CustomerOrderLineParameter{
+		HeaderID: *res.ID,
+		Search:   ctx.Query("search"),
+		By:       "def.created_date",
+		Sort:     ctx.Query("sort"),
+	}
+	listLine, _ := lineuc.SelectAll(c, lineparameter)
+
+	if listLine != nil {
+		res.ListLine = listLine
+	}
+
+	type StructObject struct {
+		ListObjcet []models.CustomerOrderHeader `json:"list_customer_order"`
+	}
+
+	ObjcetData := new(StructObject)
+	ObjcetData.ListObjcet = append(ObjcetData.ListObjcet, res)
+
+	return h.SendResponse(ctx, ObjcetData, nil, err, 0)
 }
 
 // rest
@@ -125,7 +145,7 @@ func (h *CustomerOrderHeaderHandler) RestSelectAll(ctx *fiber.Ctx) error {
 			By:       ctx.Query("by"),
 			Sort:     ctx.Query("sort"),
 		}
-		listLine, _ := lineuc.SelectAll(c, lineparameter)
+		listLine, _ := lineuc.RestSelectAll(c, lineparameter)
 
 		if listLine != nil {
 			res[i].ListLine = listLine
@@ -199,6 +219,8 @@ func (h *CustomerOrderHeaderHandler) AppsSelectAll(ctx *fiber.Ctx) error {
 		Search:     ctx.Query("search"),
 		By:         ctx.Query("by"),
 		Sort:       ctx.Query("sort"),
+		StartDate:  ctx.Query("start_date"),
+		EndDate:    ctx.Query("end_date"),
 	}
 	uc := usecase.CustomerOrderHeaderUC{ContractUC: h.ContractUC}
 	res, err := uc.AppsSelectAll(c, parameter)
@@ -282,6 +304,15 @@ func (h *CustomerOrderHeaderHandler) AppsFindByID(ctx *fiber.Ctx) error {
 
 	uc := usecase.CustomerOrderHeaderUC{ContractUC: h.ContractUC}
 	res, err := uc.AppsFindByID(c, parameter)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+// FindByID ...
+func (h *CustomerOrderHeaderHandler) ReUpdateDate(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+	uc := usecase.CustomerOrderHeaderUC{ContractUC: h.ContractUC}
+	res, err := uc.ReUpdateModifiedDate(c)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }

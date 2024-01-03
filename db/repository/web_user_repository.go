@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strings"
 	"time"
 
@@ -17,6 +18,7 @@ type IWebUserRepository interface {
 	Add(c context.Context, model *models.WebUser) (*string, error)
 	Edit(c context.Context, model *models.WebUser) (*string, error)
 	Delete(c context.Context, id string, now time.Time) (*string, error)
+	FindByLogin(c context.Context, parameter models.WebUserParameter) (models.WebUser, error)
 }
 
 // WebUserRepository ...
@@ -124,6 +126,19 @@ func (repository WebUserRepository) FindByID(c context.Context, parameter models
 	return data, nil
 }
 
+// FindByID ...
+func (repository WebUserRepository) FindByLogin(c context.Context, parameter models.WebUserParameter) (data models.WebUser, err error) {
+	statement := models.WebUserSelectStatement + ` WHERE def.created_date IS NOT NULL AND def.login = $1`
+	row := repository.DB.QueryRowContext(c, statement, parameter.Login)
+
+	data, err = repository.scanRow(row)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
+}
+
 // Add ...
 func (repository WebUserRepository) Add(c context.Context, model *models.WebUser) (res *string, err error) {
 
@@ -142,21 +157,35 @@ func (repository WebUserRepository) Add(c context.Context, model *models.WebUser
 		return res, err
 	}
 
-	UserID := &res
-
 	parts := strings.Split(*model.UserRoleGroupIDList, ",")
-	if len(parts) >= 1 {
+	if len(parts) >= 1 && parts[0] != "" {
 		for pi, _ := range parts {
 			linestatement := `INSERT INTO user_role_group (user_id,role_group_id,created_date, modified_date)
 					VALUES ($1,$2, now(),now()) RETURNING id`
 			var resLine string
-			err = transaction.QueryRowContext(c, linestatement, UserID, parts[pi]).Scan(&resLine)
+			err = transaction.QueryRowContext(c, linestatement, res, parts[pi]).Scan(&resLine)
 			if err != nil {
 				return res, err
 			}
 		}
 	}
 
+	if len(model.BranchIDList) > 0 {
+		var inputUserBranchList string
+		for _, datum := range model.BranchIDList {
+			if inputUserBranchList == "" {
+				inputUserBranchList += `(` + *res + `, ` + datum + `, NOW(), NOW())`
+			} else {
+				inputUserBranchList += `, (` + *res + `, ` + datum + `, NOW(), NOW())`
+			}
+		}
+		userBranchStatement := `INSERT INTO user_branch (user_id, branch_id,created_date, modified_date) VALUES ` + inputUserBranchList
+		err = transaction.QueryRowContext(c, userBranchStatement).Err()
+		if err != nil {
+			transaction.Rollback()
+			return res, err
+		}
+	}
 	if err = transaction.Commit(); err != nil {
 		return res, err
 	}
@@ -174,32 +203,64 @@ func (repository WebUserRepository) Edit(c context.Context, model *models.WebUse
 	defer transaction.Rollback()
 
 	statement := `UPDATE _user SET 
-	login = $1,_password = $2, modified_date = now()
+	login = $1,_password = (case when ($2::character varying) is not null and trim($2::character varying) !='' then $2 else _password end) , modified_date = now()
 	 WHERE id = $3 RETURNING id`
 
 	err = transaction.QueryRowContext(c, statement, model.Login, model.Password,
 		model.ID).Scan(&res)
 	if err != nil {
+		transaction.Rollback()
 		return res, err
 	}
-	UserID := &res
 
 	parts := strings.Split(*model.UserRoleGroupIDList, ",")
 
-	if len(parts) >= 1 {
+	if len(parts) >= 1 && parts[0] != "" {
+		fmt.Println("banyak role = ", len(parts))
 		deletelinestatement := `delete from user_role_group WHERE user_id = $1`
 
-		deletedRow, _ := transaction.QueryContext(c, deletelinestatement, UserID)
+		deletedRow, err := transaction.QueryContext(c, deletelinestatement, res)
+		if err != nil {
+			transaction.Rollback()
+			return res, err
+		}
 		deletedRow.Close()
 
 		for pi, _ := range parts {
 			linestatement := `INSERT INTO user_role_group (user_id,role_group_id,created_date, modified_date)
 						VALUES ($1,$2, now(),now()) RETURNING id`
 			var resLine string
-			err = transaction.QueryRowContext(c, linestatement, UserID, parts[pi]).Scan(&resLine)
+			err = transaction.QueryRowContext(c, linestatement, res, parts[pi]).Scan(&resLine)
 			if err != nil {
+				transaction.Rollback()
 				return res, err
 			}
+		}
+	}
+
+	if len(model.BranchIDList) != 0 {
+		deleteBranchUser := `DELETE FROM user_branch where user_id = ` + *res
+		deletedBranchRow, err := transaction.QueryContext(c, deleteBranchUser)
+		if err != nil {
+			transaction.Rollback()
+			return res, err
+		}
+		deletedBranchRow.Close()
+
+		var inputUserBranchList string
+		for _, datum := range model.BranchIDList {
+			if inputUserBranchList == "" {
+				inputUserBranchList += `(` + *res + `, ` + datum + `, NOW(), NOW())`
+			} else {
+				inputUserBranchList += `, (` + *res + `, ` + datum + `, NOW(), NOW())`
+			}
+		}
+		userBranchStatement := `INSERT INTO user_branch (user_id, branch_id,created_date, modified_date) VALUES ` + inputUserBranchList
+		err = transaction.QueryRowContext(c, userBranchStatement).Err()
+
+		if err != nil {
+			transaction.Rollback()
+			return res, err
 		}
 	}
 
@@ -212,10 +273,35 @@ func (repository WebUserRepository) Edit(c context.Context, model *models.WebUse
 
 // Delete ...
 func (repository WebUserRepository) Delete(c context.Context, id string, now time.Time) (res *string, err error) {
+	transaction, err := repository.DB.BeginTx(c, nil)
+	if err != nil {
+		return res, err
+	}
+	defer transaction.Rollback()
+
+	deleteBranchUser := `DELETE FROM user_branch where user_id = ` + id
+	deletedBranchRow, err := transaction.QueryContext(c, deleteBranchUser)
+	if err != nil {
+		transaction.Rollback()
+		return res, err
+	}
+	deletedBranchRow.Close()
+
+	userroleeletelinestatement := `delete from user_role_group WHERE user_id = $1`
+
+	deletedRoleGroupRow, _ := transaction.QueryContext(c, userroleeletelinestatement, id)
+
+	deletedRoleGroupRow.Close()
+
 	deletelinestatement := `delete from _user WHERE id = $1`
 
-	deletedRow, _ := repository.DB.QueryContext(c, deletelinestatement, id)
+	deletedRow, _ := transaction.QueryContext(c, deletelinestatement, id)
+
 	deletedRow.Close()
+
+	if err = transaction.Commit(); err != nil {
+		return res, err
+	}
 
 	res = &id
 	return res, err

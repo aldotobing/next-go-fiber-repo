@@ -13,6 +13,8 @@ type IBranchRepository interface {
 	SelectAll(c context.Context, parameter models.BranchParameter) ([]models.Branch, error)
 	FindAll(ctx context.Context, parameter models.BranchParameter) ([]models.Branch, int, error)
 	FindByID(c context.Context, parameter models.BranchParameter) (models.Branch, error)
+	Update(c context.Context, in models.Branch) (res *string, err error)
+	GenerateAllUser(c context.Context, in models.Branch) (res *string, err error)
 }
 
 // BranchRepository ...
@@ -29,8 +31,15 @@ func NewBranchRepository(DB *sql.DB) IBranchRepository {
 func (repository BranchRepository) scanRows(rows *sql.Rows) (res models.Branch, err error) {
 	err = rows.Scan(
 		&res.ID,
-		&res.Code,
 		&res.Name,
+		&res.Code,
+		&res.Area,
+		&res.RegionID,
+		&res.RegionName,
+		&res.RegionGroupID,
+		&res.RegionGroupName,
+		&res.PICPhoneNo,
+		&res.PICName,
 	)
 	if err != nil {
 
@@ -44,8 +53,15 @@ func (repository BranchRepository) scanRows(rows *sql.Rows) (res models.Branch, 
 func (repository BranchRepository) scanRow(row *sql.Row) (res models.Branch, err error) {
 	err = row.Scan(
 		&res.ID,
-		&res.Code,
 		&res.Name,
+		&res.Code,
+		&res.Area,
+		&res.RegionID,
+		&res.RegionName,
+		&res.RegionGroupID,
+		&res.RegionGroupName,
+		&res.PICPhoneNo,
+		&res.PICName,
 	)
 
 	if err != nil {
@@ -63,8 +79,12 @@ func (repository BranchRepository) SelectAll(c context.Context, parameter models
 		conditionString += " and def.id in (select branch_id from user_branch where user_id = " + parameter.UserID + ")"
 	}
 
+	if parameter.RegionID != "" && parameter.RegionID != "0" {
+		conditionString += " and def.region_id = '" + parameter.RegionID + "'"
+	}
+
 	statement := models.BranchSelectStatement + ` ` + models.BranchWhereStatement +
-		` AND (LOWER(def."_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+		` AND (LOWER(def."_name") LIKE $1 or LOWER(def."branch_code") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 
 	if err != nil {
@@ -128,4 +148,33 @@ func (repository BranchRepository) FindByID(c context.Context, parameter models.
 	}
 
 	return data, nil
+}
+
+func (repository BranchRepository) Update(c context.Context, in models.Branch) (res *string, err error) {
+	statement := `UPDATE branch SET 
+			pic_phone_no = $1,
+			pic_name = $2
+		WHERE id = $3
+		RETURNING id`
+	err = repository.DB.QueryRowContext(c, statement,
+		in.PICPhoneNo,
+		in.PICName,
+		in.ID).Scan(&res)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func (repository BranchRepository) GenerateAllUser(c context.Context, in models.Branch) (res *string, err error) {
+	statement := `select generate_cus_user_data_by_branch_candstype as jumlah from generate_cus_user_data_by_branch_candstype($1,$1)
+	`
+	err = repository.DB.QueryRowContext(c, statement,
+		in.ID).Scan(&res)
+	if err != nil {
+		return
+	}
+
+	return
 }

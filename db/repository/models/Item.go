@@ -20,13 +20,29 @@ type Item struct {
 	Uom                *json.RawMessage `json:"item_uom"`
 }
 
+// ItemV2 ...
+type ItemV2 struct {
+	ID               *string `json:"id"`
+	Name             *string `json:"_name"`
+	Code             *string `json:"item_code"`
+	Description      *string `json:"item_description"`
+	ItemCategoryId   *string `json:"item_category_id"`
+	ItemCategoryName *string `json:"item_category_name"`
+	AdditionalData   *string `json:"additional_data"`
+	MultiplyData     *string `json:"multiply_data"`
+	ItemPicture      *string `json:"item_picture"`
+}
+
 // ItemParameter ...
 type ItemParameter struct {
 	ID                 string `json:"item_id"`
+	IDs                string `json:"item_ids"`
 	Code               string `json:"item_code"`
 	Name               string `json:"item_name"`
 	ItemCategoryId     string `json:"item_category_id"`
+	ItemCategoryName   string `json:"item_category_name"`
 	PriceListVersionId string `json:"price_list_version_id"`
+	PriceListId        string `json:"price_list_id"`
 	UomID              string `json:"uom_id"`
 	CustomerTypeId     string `json:"customer_type_id"`
 	Search             string `json:"search"`
@@ -85,22 +101,58 @@ var (
 	JOIN ITEM_PRICE IP ON IP.UOM_ID = UOM.ID AND IP.ITEM_ID = IUL.ITEM_ID
 	`
 
-	ItemSelectStatement = ` select def.id,def.code as item_code, def._name,def.description as i_descript,
-	def.item_category_id as cat_id, ic._name as ic_name,
-	u.id as uom_id, u._name as uom_name, 
-	iul.conversion as konversi, (x.price * iul.conversion) as harga,
-	x.plv_id as price_list_version_id, def.item_picture
-	from item def
-	LEFT JOIN ITEM_CATEGORY IC ON IC.ID = def.ITEM_CATEGORY_ID
-	join item_uom_line iul on def.id = iul.item_id
-	join uom u on u.id = iul.uom_id
-	join 
-	( select ip.item_id as i_id, iuls.uom_id as u_uom,  ip.price ,ip.price_list_version_id as plv_id
-	 from item_price ip 
-	 join item_uom_line iuls on iuls.item_id = ip.item_id and iuls.uom_id = ip.uom_id
-	 where iuls.conversion = 1 and ip.price_list_version_id = $1
-	 )x on x.i_id = def.id  `
+	ItemSelectStatement = ` 
+	SELECT
+		DEF.ID,DEF.CODE AS ITEM_CODE, 
+		DEF._NAME,DEF.DESCRIPTION AS I_DESCRIPT,
+		DEF.ITEM_CATEGORY_ID AS CAT_ID, 
+		IC._NAME AS IC_NAME,
+		U.ID AS UOM_ID, 
+		U._NAME AS UOM_NAME, 
+		IUL.CONVERSION AS KONVERSI, 
+		(X.PRICE * IUL.CONVERSION) AS HARGA,
+		X.PLV_ID AS PRICE_LIST_VERSION_ID, DEF.ITEM_PICTURE
+	FROM ITEM DEF
+	LEFT JOIN ITEM_CATEGORY IC ON IC.ID = DEF.ITEM_CATEGORY_ID
+	JOIN ITEM_UOM_LINE IUL ON DEF.ID = IUL.ITEM_ID
+	JOIN UOM U ON U.ID = IUL.UOM_ID
+	JOIN 
+	(SELECT IP.ITEM_ID AS I_ID, IULS.UOM_ID AS U_UOM,  IP.PRICE ,IP.PRICE_LIST_VERSION_ID AS PLV_ID
+	 FROM ITEM_PRICE IP 
+	 JOIN ITEM_UOM_LINE IULS ON IULS.ITEM_ID = IP.ITEM_ID AND IULS.UOM_ID = IP.UOM_ID
+	 WHERE IULS.CONVERSION = 1 AND IP.PRICE_LIST_VERSION_ID = $1) X ON X.I_ID = DEF.ID  `
 
 	// ItemWhereStatement ...
 	ItemWhereStatement = ` WHERE def.created_date IS NOT NULL AND IUL.VISIBILITY = 1 AND DEF.ACTIVE = 1 AND DEF.HIDE = 0 `
+
+	ItemV2SelectStatement = `with temp_data as(
+		select DEF.ID,
+		array_to_string((array_agg(U.ID || '#sep#' || u."_name" || '#sep#' || IUL."conversion" || '#sep#' || IUL."visibility" order by iul."conversion" asc)),'|') AS MULTIPLY_DATA
+		from item def
+		    left JOIN ITEM_UOM_LINE IUL ON IUL.ITEM_ID = DEF.ID 
+			left JOIN UOM U ON U.ID = IUL.UOM_ID
+	    WHERE def.created_date IS NOT NULL
+		{{ALL_PARAM}}
+		AND (LOWER(def."_name") LIKE LOWER($1))
+		group by def.id 
+		order by DEF.ID asc
+	)   
+	SELECT
+		DEF.ID,DEF.CODE AS ITEM_CODE,
+		DEF._NAME,
+		DEF.DESCRIPTION AS I_DESCRIPT,
+		DEF.ITEM_CATEGORY_ID AS CAT_IHalobroD,
+		array_to_string((array_agg(distinct ic."_name")),'|') AS category_name,
+		array_to_string((array_agg(U.ID || '#sep#' || u."_name" || '#sep#' || IUL.conversion::text || '#sep#' || ip.modified_date || '#sep#' || ip.price::text || '#sep#' || ip.price_list_version_id || '#sep#' || IUL.visibility order by ip.modified_date desc)),'|') AS additional_data,
+		td.MULTIPLY_DATA,
+		DEF.ITEM_PICTURE
+	FROM ITEM DEF
+	LEFT JOIN ITEM_CATEGORY IC ON IC.ID = DEF.ITEM_CATEGORY_ID
+	left JOIN ITEM_UOM_LINE IUL ON IUL.ITEM_ID = DEF.ID
+	left join item_price ip on ip.item_id = iul.item_id and ip.uom_id = iul.uom_id
+	left JOIN UOM U ON U.ID = IP.UOM_ID
+	left join TEMP_DATA TD on TD.ID = DEF.ID
+	WHERE def.created_date IS NOT NULL
+		{{ALL_PARAM}}
+		AND (LOWER(def."_name") LIKE LOWER($1)) `
 )

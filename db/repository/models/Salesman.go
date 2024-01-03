@@ -5,11 +5,13 @@ type Salesman struct {
 	ID      *string `json:"salesman_id"`
 	Name    *string `json:"salesman_name"`
 	PhoneNo *string `json:"phone_no"`
+	Code    *string `json:"salesman_code"`
 }
 
 // SalesmanParameter ...
 type SalesmanParameter struct {
 	ID       string `json:"salesman_id"`
+	IDs      string `json:"salesman_ids"`
 	UserID   string `json:"user_id"`
 	RegionID string `json:"region_id"`
 	Search   string `json:"search"`
@@ -31,7 +33,7 @@ var (
 	// SalesmanSelectStatement ...
 
 	SalesmanSelectStatement = `
-	select def.id,p._name, def.salesman_phone_no
+	select def.id,p._name, coalesce(def.salesman_phone_no, ''), coalesce(def.salesman_code, '')
 	from salesman def
 	join partner p on p.id = def.partner_id
 		`

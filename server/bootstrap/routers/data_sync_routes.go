@@ -27,12 +27,17 @@ func (route DataSyncRoutes) RegisterRoute() {
 	r.Get("/price_list", handler.PriceListDataSync)
 	r.Get("/price_list_version", handler.PriceListVersionDataSync)
 	r.Get("/item_price", handler.ItemPriceDataSync)
+	r.Get("/customer", handler.CustomerDataSync)
+	r.Get("/salesman", handler.SalesmanDataSync)
+	r.Get("/item-uom-line", handler.ItemUomLineDataSync)
 
 	transhandler := handlers.TransactionDataSyncHandler{Handler: route.Handler}
 	tr := route.RouterGroup.Group("/api/sync/transaction")
 	tr.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
 	tr.Get("/voidedrequest", transhandler.CustomerOrderVoidDataSync)
 	tr.Get("/invoicedata", transhandler.InvoiceSync)
+	tr.Get("/return_invoicedata", transhandler.ReturnInvoiceSync)
+	tr.Get("/invoicedata/undone", transhandler.UndoneDataSync)
 	tr.Get("/sodata", transhandler.SalesOrderCustomerSync)
 	tr.Get("/revisedsodata", transhandler.SalesOrderCustomerRevisedSync)
 

@@ -37,6 +37,8 @@ type CustomerOrderHeader struct {
 	VoidReasonID         *string             `json:"reason_id"`
 	VoidReasonText       *string             `json:"reason_text"`
 	OrderSource          *string             `json:"order_source"`
+	GlobalDiscAmount     *string             `json:"global_disc_amount"`
+	OldPriceData         string              `json:"old_price_data"`
 }
 
 // CustomerOrderHeaderParameter ...
@@ -52,6 +54,8 @@ type CustomerOrderHeaderParameter struct {
 	Limit      int    `json:"limit"`
 	By         string `json:"by"`
 	Sort       string `json:"sort"`
+	StartDate  string `json:"start_date"`
+	EndDate    string `json:"end_date"`
 }
 
 var (
@@ -64,7 +68,7 @@ var (
 
 	// CustomerOrderHeaderSelectStatement ...
 	CustomerOrderHeaderSelectStatement = ` select 
-	def.id as id_customer_order, def.document_no,to_char(def.transaction_date,'YYYY-MM-DD') as transaction_date ,to_char(def.transaction_time,'HH:MI:SS') as transaction_time,
+	def.id as id_customer_order, def.document_no,to_char(def.transaction_date,'YYYY-MM-DD') as transaction_date ,to_char(def.transaction_time,'HH24:MI:SS') as transaction_time,
 	def.cust_ship_to_id,cus.customer_name, def.tax_calc_method,
 	cus.salesman_id, s.salesman_name, def.payment_terms_id,top._name as top_name,
 	to_char(def.expected_delivery_date,'YYYY-MM-DD') as expected_d_date,b.id as b_id,b._name as b_name,
@@ -72,7 +76,8 @@ var (
 	def.status,def.gross_amount,def.taxable_amount, def.tax_amount,
 	def.rounding_amount, def.net_amount,def.disc_amount,
 	cus.customer_code as c_code, s.salesman_code as s_code, cus.customer_address,to_char(def.modified_date,'YYYY-MM-DD') as modified_date,
-	mtp._name as void_reason, 1 as order_source
+	mtp._name as void_reason, 1 as order_source,
+	coalesce(def.global_disc_amount,0)
 	from customer_order_header def
 	join customer cus on cus.id = def.cust_ship_to_id
 	left join salesman s on s.id = cus.salesman_id
@@ -93,7 +98,8 @@ var (
 	def.status,def.gross_amount,def.taxable_amount, def.tax_amount,
 	def.rounding_amount, def.net_amount,def.disc_amount,
 	cus.customer_code as c_code, s.salesman_code as s_code, cus.customer_address,to_char(def.modified_date,'YYYY-MM-DD') as modified_date,
-	def.void_reason_notes as void_reason , 2 as order_source
+	def.void_reason_notes as void_reason , 2 as order_source,
+	coalesce(def.global_disc_amount,0)
 	from sales_order_header def
 	join customer cus on cus.id = def.cust_ship_to_id
 	left join salesman s on s.id = cus.salesman_id

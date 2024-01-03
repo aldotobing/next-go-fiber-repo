@@ -34,10 +34,6 @@ func (uc WebItemUC) SelectAll(c context.Context, parameter models.WebItemParamet
 		return res, err
 	}
 
-	for i := range res {
-		uc.BuildBody(&res[i])
-	}
-
 	return res, err
 }
 
@@ -54,9 +50,6 @@ func (uc WebItemUC) FindAll(c context.Context, parameter models.WebItemParameter
 	}
 
 	p = uc.setPaginationResponse(parameter.Page, parameter.Limit, count)
-	for i := range res {
-		uc.BuildBody(&res[i])
-	}
 
 	return res, p, err
 }
@@ -69,9 +62,41 @@ func (uc WebItemUC) FindByID(c context.Context, parameter models.WebItemParamete
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
 	}
-	uc.BuildBody(&res)
 
 	return res, err
+}
+
+// FindByCategoryID ...
+func (uc WebItemUC) FindByCategoryID(c context.Context, categoryID string) (res []viewmodel.ItemDetailsVM, err error) {
+	repo := repository.NewWebItemRepository(uc.DB)
+	data, err := repo.FindByCategoryID(c, categoryID)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	for _, datum := range data {
+		var uomArr []viewmodel.Uom
+		uoms := strings.Split(*datum.UOMDetail, "|")
+		for _, uom := range uoms {
+			uomDetail := strings.Split(uom, "#sep#")
+			uomArr = append(uomArr, viewmodel.Uom{
+				ID:         &uomDetail[0],
+				Name:       &uomDetail[1],
+				Conversion: &uomDetail[2],
+			})
+		}
+		res = append(res, viewmodel.ItemDetailsVM{
+			ID:                 datum.ID,
+			Code:               datum.Code,
+			Name:               datum.Name,
+			ItemDetailsPicture: datum.ItemPicture,
+			Description:        datum.ItemDescription,
+			Uom:                uomArr,
+		})
+	}
+
+	return
 }
 
 // Edit ...
@@ -109,11 +134,14 @@ func (uc WebItemUC) Edit(c context.Context, id string, data *requests.WebItemReq
 	// now := time.Now().UTC()
 	// strnow := now.Format(time.RFC3339)
 	res = models.WebItem{
-		ID:             &id,
-		Code:           &data.Code,
-		Name:           &data.Name,
-		ItemPicture:    &strImg,
-		ItemCategoryId: &data.ItemCategoryId,
+		ID:              &id,
+		Code:            &data.Code,
+		Name:            &data.Name,
+		ItemPicture:     &strImg,
+		ItemCategoryId:  &data.ItemCategoryId,
+		ItemHide:        &data.ItemHide,
+		ItemActive:      &data.ItemActive,
+		ItemDescription: &data.ItemDescription,
 	}
 
 	res.ID, err = repo.Edit(c, &res)

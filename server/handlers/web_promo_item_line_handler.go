@@ -7,6 +7,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"nextbasis-service-v-0.1/db/repository/models"
+	"nextbasis-service-v-0.1/helper"
 	"nextbasis-service-v-0.1/pkg/str"
 	"nextbasis-service-v-0.1/server/requests"
 	"nextbasis-service-v-0.1/usecase"
@@ -102,6 +103,49 @@ func (h *WebPromoItemLineHandler) Add(ctx *fiber.Ctx) error {
 
 	uc := usecase.WebPromoItemLineUC{ContractUC: h.ContractUC}
 	res, err := uc.Add(c, input)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err.Error(), http.StatusBadRequest)
+	}
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+// AddByCategory ...
+func (h *WebPromoItemLineHandler) AddByCategory(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	input := new(requests.WebPromoItemLineAddByCategoryRequest)
+	if err := ctx.BodyParser(input); err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+	if err := h.Validator.Struct(input); err != nil {
+		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
+		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+	}
+
+	uc := usecase.WebPromoItemLineUC{ContractUC: h.ContractUC}
+	res, err := uc.AddByCategory(c, input)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err.Error(), http.StatusBadRequest)
+	}
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+// Delete ...
+func (h *WebPromoItemLineHandler) Delete(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	id := ctx.Params("id")
+	if id == "" {
+		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
+	}
+
+	uc := usecase.WebPromoItemLineUC{ContractUC: h.ContractUC}
+	res, err := uc.Delete(c, id)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err.Error(), http.StatusBadRequest)
+	}
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }

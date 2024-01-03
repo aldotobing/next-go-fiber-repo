@@ -88,14 +88,15 @@ func (repository SalesOrderCustomerSyncRepository) InsertDataWithLine(c context.
 		tax_calc_method ,salesman_id ,payment_terms_id ,company_id ,
 		branch_id ,price_list_id ,price_list_version_id ,status ,gross_amount ,
 		disc_amount ,taxable_amount ,tax_amount ,rounding_amount ,net_amount ,
-		global_disc_amount,cust_ship_to_id,expected_delivery_date,void_reason_notes
+		global_disc_amount,cust_ship_to_id,expected_delivery_date,void_reason_notes,
+		created_date,modified_date,request_document_no
 		)values(
 		$1, $2, $3, $4, (select id from customer where customer_code = $5),
 		$6, (select id from salesman where partner_id =(select id from partner where code = $7)), $8, $9, $10,
 		$11 ,$12, $13, $14, $15,
 		$16, $17, $18, $19, $20,
 		(select id from customer where customer_code = $21),
-		$22, $23
+		$22, $23, now(),now(),$24
 		)
 	RETURNING id`
 	transaction, err := repository.DB.BeginTx(c, nil)
@@ -123,7 +124,7 @@ func (repository SalesOrderCustomerSyncRepository) InsertDataWithLine(c context.
 		model.TaxCalcMethod, model.SalesmanCode, model.PaymentTermsID, model.CompanyID,
 		model.BranchID, model.PriceLIstID, model.PriceLIstVersionID, str.EmptyString(*model.Status), str.EmptyString(*model.GrossAmount),
 		model.DiscAmount, model.TaxableAmount, model.TaxAmount, model.RoundingAmount, model.NetAmount,
-		model.GlobalDiscAmount, model.CustomerCode, model.ExpectedDeliveryDate, model.VoidReasonNotes,
+		model.GlobalDiscAmount, model.CustomerCode, model.ExpectedDeliveryDate, model.VoidReasonNotes, model.SalesRequestCode,
 	).Scan(&res)
 
 	if err != nil {
@@ -144,7 +145,7 @@ func (repository SalesOrderCustomerSyncRepository) InsertDataWithLine(c context.
 				location_id 
 				
 				)values(
-				$1 ,$2 ,$3 ,( select id from item where code = $4 ) ,$5 ,
+				$1 ,$2 ,( select item_category_id from item where code = $3) ,( select id from item where code = $4 ) ,$5 ,
 				( select id from uom where code =$6 ) ,$7 ,$8 ,$9 ,$10 ,
 				$11 ,$12 ,$13 ,$14 ,$15 ,
 				$16 ,$17 ,$18 ,$19 ,$20,
@@ -153,7 +154,7 @@ func (repository SalesOrderCustomerSyncRepository) InsertDataWithLine(c context.
 			`
 			var resLine string
 			err = transaction.QueryRowContext(c, line_statement,
-				model.ID, lineObject.LineNo, lineObject.CategoryID, lineObject.ItemCode, lineObject.Qty,
+				model.ID, lineObject.LineNo, lineObject.ItemCode, lineObject.ItemCode, lineObject.Qty,
 				lineObject.UomCode, lineObject.StockQty, lineObject.UnitPrice, str.EmptyStringToZero(*lineObject.GrossAmount), str.EmptyStringToZero(*lineObject.UseDiscPercent),
 				str.EmptyStringToZero(*lineObject.DiscPercent1), str.EmptyStringToZero(*lineObject.DiscPercent2), str.EmptyStringToZero(*lineObject.DiscPercent3), str.EmptyStringToZero(*lineObject.DiscPercent4), str.EmptyStringToZero(*lineObject.DiscPercent5),
 				str.EmptyStringToZero(*lineObject.DiscountAmount), str.EmptyStringToZero(*lineObject.TaxableAmount), str.EmptyStringToZero(*lineObject.TaxAmount), str.EmptyStringToZero(*lineObject.RoundingAmount), str.EmptyStringToZero(*lineObject.NetAmount),

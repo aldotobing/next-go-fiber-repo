@@ -4,7 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"math"
 	"strings"
+	"time"
 
 	"nextbasis-service-v-0.1/db/repository/models"
 )
@@ -61,23 +63,50 @@ func (repository CustomerAchievementQuarter) scanRow(row *sql.Row) (res models.C
 // SelectAll ...
 func (repository CustomerAchievementQuarter) SelectAll(c context.Context, parameter models.CustomerAchievementQuarterParameter) (data []models.CustomerAchievementQuarter, err error) {
 	conditionString := ``
+
+	conditionStringQuarter := ``
+
+	quarterGetCurrentYear := ` and extract(year from sih.transaction_date) = (select extract (year from now())) `
+
+	/*
+		SET QUARTER
+	*/
+	currentTime := time.Now()
+	month := currentTime.Month()
+	quarter := int(math.Ceil(float64(month) / 3))
+
+	if quarter == 1 {
+
+		conditionStringQuarter += ` AND extract (month from SIH.TRANSACTION_DATE) in (1,2,3)  ` + quarterGetCurrentYear + ` `
+	}
+	if quarter == 2 {
+
+		conditionStringQuarter += ` AND extract (month from SIH.TRANSACTION_DATE) in (4,5,6) ` + quarterGetCurrentYear + ` `
+	}
+	if quarter == 3 {
+
+		conditionStringQuarter += ` AND extract (month from SIH.TRANSACTION_DATE) in (7,8,9) ` + quarterGetCurrentYear + ` `
+	}
+	if quarter == 4 {
+
+		conditionStringQuarter += ` AND extract (month from SIH.TRANSACTION_DATE) in (10,11,12) ` + quarterGetCurrentYear + ` `
+	}
+	/*
+		END QUARTER
+	*/
 	groupByString := ` GROUP BY CUS.ID, CUSTOMER_CODE, CUSTOMER_NAME `
 
 	if parameter.ID != "" {
 		conditionString += ` AND cus.id = '` + parameter.ID + `'`
 	}
 
-	statement := models.CustomerAchievementQuarterSelectStatement + ` ` + models.CustomerAchievementQuarterWhereStatement +
+	statement := models.CustomerAchievementQuarterSelectStatement + ` ` + models.CustomerAchievementQuarterWhereStatement + conditionStringQuarter +
 		` AND (LOWER(cus."customer_name") LIKE $1) ` + conditionString + groupByString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort +
 		` ), 0) AS ACHIEVEMENT ` +
 		` FROM CUSTOMER CUS ` +
 		` WHERE CUS.ID = '` + parameter.ID + `'`
 
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
-
-	//print
-	fmt.Println(statement)
-
 	if err != nil {
 		return data, err
 	}
@@ -99,11 +128,42 @@ func (repository CustomerAchievementQuarter) SelectAll(c context.Context, parame
 func (repository CustomerAchievementQuarter) FindAll(ctx context.Context, parameter models.CustomerAchievementQuarterParameter) (data []models.CustomerAchievementQuarter, count int, err error) {
 	conditionString := ``
 
+	conditionStringQuarter := ``
+
+	quarterGetCurrentYear := ` and extract(year from sih.transaction_date) = (select extract (year from now())) `
+
+	/*
+		SET QUARTER
+	*/
+	currentTime := time.Now()
+	month := currentTime.Month()
+	quarter := int(math.Ceil(float64(month) / 3))
+
+	if quarter == 1 {
+
+		conditionStringQuarter += ` AND extract (month from SIH.TRANSACTION_DATE) in (1,2,3)  ` + quarterGetCurrentYear + ` `
+	}
+	if quarter == 2 {
+
+		conditionStringQuarter += ` AND extract (month from SIH.TRANSACTION_DATE) in (4,5,6) ` + quarterGetCurrentYear + ` `
+	}
+	if quarter == 3 {
+
+		conditionStringQuarter += ` AND extract (month from SIH.TRANSACTION_DATE) in (7,8,9) ` + quarterGetCurrentYear + ` `
+	}
+	if quarter == 4 {
+
+		conditionStringQuarter += ` AND extract (month from SIH.TRANSACTION_DATE) in (10,11,12) ` + quarterGetCurrentYear + ` `
+	}
+	/*
+		END QUARTER
+	*/
+
 	if parameter.ID != "" {
 		conditionString += ` AND cus.id = '` + parameter.ID + `'`
 	}
 
-	query := models.CustomerAchievementQuarterSelectStatement + ` ` + models.CustomerAchievementQuarterWhereStatement + ` ` + conditionString + `
+	query := models.CustomerAchievementQuarterSelectStatement + ` ` + models.CustomerAchievementQuarterWhereStatement + conditionStringQuarter + ` ` + conditionString + `
 		AND (LOWER(cus."customer_name") LIKE $1  )` + `GROUP BY ` + `ORDER BY` + parameter.By + ` ` + parameter.Sort + ` OFFSET $2 LIMIT $3`
 	rows, err := repository.DB.Query(query, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
 	if err != nil {

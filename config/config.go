@@ -19,7 +19,6 @@ import (
 	"time"
 
 	firesorepkg "nextbasis-service-v-0.1/pkg/firestore"
-	miniopkg "nextbasis-service-v-0.1/pkg/minio"
 	"nextbasis-service-v-0.1/pkg/mssqldb"
 	postgresqlPkg "nextbasis-service-v-0.1/pkg/postgresql"
 	"nextbasis-service-v-0.1/pkg/recaptcha"
@@ -38,24 +37,25 @@ import (
 
 // Configs ...
 type Configs struct {
-	EnvConfig    map[string]string
-	DB           *sql.DB
-	DBMS         *sql.DB
-	RedisClient  redisPkg.RedisClient
-	JweCred      jwe.Credential
-	JwtCred      jwt.Credential
-	Aes          aes.Credential
-	AesFront     aesfront.Credential
-	Minio        *minio.Client
-	Aws          aws.AWSS3
-	Firestore    *firestore.Client
-	Mandrill     mandrill.Credential
-	Recaptcha    recaptcha.Credential
-	Mail         mail.Connection
-	Mailing      mailing.GoMailConfig
-	TwilioClient *twilioPkg.Client
-	WooWAClient  *whatsapp.Client
-	FCM          fcm.Connection
+	EnvConfig      map[string]string
+	DB             *sql.DB
+	DBMS           *sql.DB
+	RedisClient    redisPkg.RedisClient
+	JweCred        jwe.Credential
+	JwtCred        jwt.Credential
+	Aes            aes.Credential
+	AesFront       aesfront.Credential
+	Minio          *minio.Client
+	Aws            aws.AWSS3
+	Firestore      *firestore.Client
+	Mandrill       mandrill.Credential
+	Recaptcha      recaptcha.Credential
+	Mail           mail.Connection
+	Mailing        mailing.GoMailConfig
+	TwilioClient   *twilioPkg.Client
+	WooWAClient    *whatsapp.Client
+	WooWAOtpClient *whatsapp.Client
+	FCM            fcm.Connection
 }
 
 var (
@@ -138,16 +138,16 @@ func LoadConfigs() (res Configs, err error) {
 	}
 
 	// Minio connection
-	minioInfo := miniopkg.Connection{
-		EndSuperhub: res.EnvConfig["MINIO_ENDPOINT"],
-		AccessKey:   res.EnvConfig["MINIO_ACCESS_KEY_ID"],
-		SecretKey:   res.EnvConfig["MINIO_SECRET_ACCESS_KEY"],
-		UseSSL:      str.StringToBool(res.EnvConfig["MINIO_USE_SSL"]),
-	}
-	res.Minio, err = minioInfo.InitClient()
-	if err != nil {
-		return res, err
-	}
+	// minioInfo := miniopkg.Connection{
+	// 	EndSuperhub: res.EnvConfig["MINIO_ENDPOINT"],
+	// 	AccessKey:   res.EnvConfig["MINIO_ACCESS_KEY_ID"],
+	// 	SecretKey:   res.EnvConfig["MINIO_SECRET_ACCESS_KEY"],
+	// 	UseSSL:      str.StringToBool(res.EnvConfig["MINIO_USE_SSL"]),
+	// }
+	// res.Minio, err = minioInfo.InitClient()
+	// if err != nil {
+	// 	return res, err
+	// }
 
 	//Firestore
 
@@ -221,6 +221,7 @@ func LoadConfigs() (res Configs, err error) {
 	// setup twilio
 	res.TwilioClient = twilioPkg.NewTwilioClient(res.EnvConfig["TWILIO_SID"], res.EnvConfig["TWILIO_TOKEN"], res.EnvConfig["TWILIO_SEND_FROM"])
 	res.WooWAClient = whatsapp.NewWooWAClient(res.EnvConfig["WA_URL"], res.EnvConfig["WA_KEY"])
+	res.WooWAOtpClient = whatsapp.NewWooWAClient(res.EnvConfig["WA_URL"], res.EnvConfig["OTP_WA_KEY"])
 
 	// fmt.Printf("+%v", res.Aws)
 	res.FCM.APIKey = res.EnvConfig["FCM_API_KEY"]

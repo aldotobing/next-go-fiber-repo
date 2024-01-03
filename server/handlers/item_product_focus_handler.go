@@ -9,6 +9,7 @@ import (
 	"nextbasis-service-v-0.1/helper"
 	"nextbasis-service-v-0.1/pkg/str"
 	"nextbasis-service-v-0.1/usecase"
+	"nextbasis-service-v-0.1/usecase/viewmodel"
 )
 
 // ItemProductFocusHandler ...
@@ -28,6 +29,7 @@ func (h *ItemProductFocusHandler) SelectAll(ctx *fiber.Ctx) error {
 		By:                 ctx.Query("by"),
 		Sort:               ctx.Query("sort"),
 	}
+
 	uc := usecase.ItemProductFocusUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectAll(c, parameter)
 
@@ -88,4 +90,38 @@ func (h *ItemProductFocusHandler) FindByID(ctx *fiber.Ctx) error {
 	res, err := uc.FindByID(c, parameter)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+// SelectAllV2 ...
+func (h *ItemProductFocusHandler) SelectAllV2(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.ItemProductFocusParameter{
+		ItemCategoryId:     ctx.Query("item_category_id"),
+		PriceListVersionId: ctx.Query("price_list_version_id"),
+		CustomerTypeId:     ctx.Query("customer_type_id"),
+		Search:             ctx.Query("search"),
+		CustomerID:         ctx.Query("customer_id"),
+		By:                 ctx.Query("by"),
+		Sort:               ctx.Query("sort"),
+	}
+
+	if parameter.CustomerID == "" {
+		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
+	}
+
+	uc := usecase.ItemProductFocusUC{ContractUC: h.ContractUC}
+	res, err := uc.SelectAllV2(c, parameter)
+
+	type StructObject struct {
+		ListObjcet []viewmodel.ItemVM `json:"list_item"`
+	}
+
+	ObjcetData := new(StructObject)
+
+	if res != nil {
+		ObjcetData.ListObjcet = res
+	}
+
+	return h.SendResponse(ctx, ObjcetData, nil, err, 0)
 }

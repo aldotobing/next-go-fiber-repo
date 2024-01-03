@@ -30,6 +30,10 @@ var (
 	RecordAlreadyExist = "record_already_exist"
 	// NameAlreadyExist ...
 	NameAlreadyExist = "name_already_exist"
+	// CustomerShowInAppFalse ...
+	CustomerShowInAppFalse = "customer_not_show_in_app"
+	// CustomerInactive ...
+	CustomerInactive = "customer_inactive"
 	// ReferencedRecord ...
 	ReferencedRecord = "referenced_record"
 	// InvalidParameter ...
@@ -64,6 +68,8 @@ var (
 	InvalidStatus = "invalid_status"
 	// InvalidEmailOrPhone ...
 	InvalidEmailOrPhone = "invalid_email_phone"
+	// InvalidGender ...
+	InvalidGender = "invalid_gender"
 
 	// InvalidAreaCoverage ...
 	InvalidAreaCoverage = "invalid_area_coverage"
@@ -147,4 +153,35 @@ var (
 	WrongEmailOrPassword = "Email or password is wrong"
 
 	InvalidMinimumAmountOrder = "Order Minimal "
+
+	InvalidPhoneOrCode = "Nomor Hp atau Kode Toko Salah"
+
+	InvalidCustomerNotShown  = `Toko anda Belum diberi akses untuk login My Sidomuncul. Hubungi admin atau salesman untuk diberikan akses login My Sidomuncul`
+	InvalidCustomerNotActive = `Toko anda Belum diberi akses untuk login My Sidomuncul. Hubungi admin atau salesman untuk diberikan akses login My Sidomuncul`
+
+	CidNotPresent = "cid_not_present"
+
+	UnexpectedCid = "unexpected_cid"
+
+	StatusMandiriVaSuccess                     = "Transaction Success"
+	StatusMandiriVaSystemCurrentlyNotAvailable = "System Currently Unavailable"
+	StatusMandiriVaBillNotFound                = "Bill Not Found"
+	StatusMandiriVaBillAlreadyPaid             = "Bill Already Paid"
+	StatusMandiriVaBillBlocked                 = "Bill Is Blocked, Please Contact The Company"
+	StatusMandiriVaTransactionCantCalcel       = "Transaction Cant be Cancel"
+	StatusMandiriVaProviderDatabaseProblem     = "Provider Database Problem"
+	StatusMandiriTimeOut                       = "Time Out"
+	StatusMandiriVaLinkDown                    = "Link Down"
+)
+
+const (
+	StatusMandiriVaSuccessCode                     = "00"
+	StatusMandiriVaSystemCurrentlyNotAvailableCode = "01"
+	StatusMandiriVaBillNotFoundCode                = "B5"
+	StatusMandiriVaBillAlreadyPaidCode             = "B8"
+	StatusMandiriVaBillBlockedCode                 = "C0"
+	StatusMandiriVaTransactionCantCalcelCode       = "86"
+	StatusMandiriVaProviderDatabaseProblemCode     = "87"
+	StatusMandiriTimeOutCode                       = "89"
+	StatusMandiriVaLinkDownCode                    = "91"
 )

@@ -2,6 +2,9 @@ package usecase
 
 import (
 	"context"
+	"errors"
+	"strconv"
+	"time"
 
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -66,7 +69,79 @@ func (uc ItemDetailsUC) FindByID(c context.Context, parameter models.ItemDetails
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
 	}
-	uc.BuildBody(&res)
+
+	return res, err
+}
+
+// FindByIDV2 ...
+func (uc ItemDetailsUC) FindByIDV2(c context.Context, parameter models.ItemDetailsParameter) (res viewmodel.ItemDetailsVM, err error) {
+	repo := repository.NewItemDetailsRepository(uc.DB)
+
+	data, err := repo.FindByIDs(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	// Find Lowest Price and lowest conversion
+	var lowestPrice, lowestConversion float64
+	var lowestUOMName string
+	var updatedData time.Time
+	for _, datum := range data {
+		price, _ := strconv.ParseFloat(*datum.ItemDetailsPrice, 64)
+		conversion, _ := strconv.ParseFloat(*datum.UomLineConversion, 64)
+
+		dbUpdatedData, _ := time.Parse("2006-01-02T15:04:05.999999Z", datum.ItemPriceUpdatedAt.String)
+		if (updatedData.Before(dbUpdatedData)) || lowestPrice == 0 {
+			lowestPrice = price
+			lowestConversion = conversion
+			lowestUOMName = *datum.UomName
+
+			updatedData = dbUpdatedData
+		}
+		parameter.PriceListVersionId = *datum.PriceListVersionId
+	}
+
+	data, err = repo.FindByIDV2(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	basePrice := lowestPrice / lowestConversion
+	var uoms []viewmodel.Uom
+	for _, datum := range data {
+		if *datum.Visibility == "1" {
+			conversion, _ := strconv.ParseFloat(*datum.UomLineConversion, 64)
+			price := strconv.FormatFloat(basePrice*conversion, 'f', 2, 64)
+
+			uoms = append(uoms, viewmodel.Uom{
+				ID:               datum.UomID,
+				Name:             datum.UomName,
+				Conversion:       datum.UomLineConversion,
+				ItemDetailsPrice: &price,
+			})
+		}
+	}
+
+	if len(uoms) == 0 {
+		err = errors.New("uom not available")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uom_checker", c.Value("requestid"))
+		return
+	}
+
+	res = viewmodel.ItemDetailsVM{
+		ID:                      data[0].ID,
+		Code:                    data[0].Code,
+		Name:                    data[0].Name,
+		Description:             data[0].Description,
+		ItemDetailsCategoryId:   data[0].ItemDetailsCategoryId,
+		ItemDetailsCategoryName: data[0].ItemDetailsCategoryName,
+		ItemDetailsPicture:      data[0].ItemDetailsPicture,
+		LowestUOMName:           &lowestUOMName,
+		Uom:                     uoms,
+		PriceListVersionId:      &parameter.PriceListVersionId,
+	}
 
 	return res, err
 }

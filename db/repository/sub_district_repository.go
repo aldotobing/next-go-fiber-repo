@@ -61,6 +61,9 @@ func (repository SubDistrictRepository) SelectAll(c context.Context, parameter m
 	if parameter.DistrictID != "" {
 		conditionString += ` AND def.district_id = '` + parameter.DistrictID + `'`
 	}
+	if parameter.IDs != "" {
+		conditionString += ` AND def.id in (` + parameter.IDs + `)`
+	}
 
 	statement := models.SubDistrictSelectStatement + ` ` + models.SubDistrictWhereStatement +
 		` AND (LOWER(def."_name") LIKE $1  ) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort

@@ -25,6 +25,7 @@ func (h *CustomerTargetQuarterHandler) SelectAll(ctx *fiber.Ctx) error {
 
 	parameter := models.CustomerTargetQuarterParameter{
 		ID:     ctx.Query("customer_id"),
+		Code:   ctx.Query("customer_code"),
 		Search: ctx.Query("search"),
 		By:     ctx.Query("by"),
 		Sort:   ctx.Query("sort"),
@@ -113,7 +114,6 @@ func (h *CustomerTargetQuarterHandler) FetchClientDataTarget(params models.Custo
 
 	// var responseObject http.Response
 	json.Unmarshal(bodyBytes, &ObjectData)
-	fmt.Println("data ", ObjectData)
 
 	return ObjectData.QuartalTarget
 }

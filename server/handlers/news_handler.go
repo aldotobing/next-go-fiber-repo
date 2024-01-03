@@ -7,6 +7,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"nextbasis-service-v-0.1/db/repository/models"
+	"nextbasis-service-v-0.1/helper"
 	"nextbasis-service-v-0.1/pkg/str"
 	"nextbasis-service-v-0.1/server/requests"
 	"nextbasis-service-v-0.1/usecase"
@@ -89,6 +90,82 @@ func (h *NewsHandler) Add(ctx *fiber.Ctx) error {
 
 	uc := usecase.NewsUC{ContractUC: h.ContractUC}
 	res, err := uc.Add(c, input)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+// AddBulk ...
+func (h *NewsHandler) AddBulk(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	input := new(requests.NewsBulkRequest)
+	if err := ctx.BodyParser(input); err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+
+	if err := h.Validator.Struct(*input); err != nil {
+		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
+		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+	}
+
+	uc := usecase.NewsUC{ContractUC: h.ContractUC}
+	err := uc.AddBulk(c, *input)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+
+	return h.SendResponse(ctx, nil, nil, err, 0)
+}
+
+// Photo ...
+func (h *NewsHandler) Photo(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	image, _ := ctx.FormFile("image")
+
+	uc := usecase.NewsUC{ContractUC: h.ContractUC}
+	res, err := uc.AddPhoto(c, image)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+// Delete ...
+func (h *NewsHandler) Delete(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	id := ctx.Params("id")
+	if id == "" {
+		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
+	}
+
+	uc := usecase.NewsUC{ContractUC: h.ContractUC}
+	res, err := uc.Delete(c, id)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *NewsHandler) Edit(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	id := ctx.Params("id")
+	if id == "" {
+		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
+	}
+
+	input := new(requests.NewsRequest)
+	if err := ctx.BodyParser(input); err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+	if err := h.Validator.Struct(input); err != nil {
+		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
+		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+	}
+
+	uc := usecase.NewsUC{ContractUC: h.ContractUC}
+	res, err := uc.Edit(c, id, input)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }

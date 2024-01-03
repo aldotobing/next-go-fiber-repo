@@ -6,6 +6,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
+)
+
+var (
+	baseOTPRequstMessage = `JANGAN BERI kode ini ke siapa pun, TERMASUK SALESMAN & PIC SIDOMUNCUL. WASPADA PENIPUAN!
+
+	MASUK KE AKUN dengan kode verifikasi (OTP) #OTP#`
 )
 
 type Client struct {
@@ -31,9 +38,9 @@ func (cl Client) SendWA(phoneNo, txtMessages string) (err error) {
 	Waconf := new(confi)
 	Waconf.Key = cl.apikey
 	Waconf.Phone = phoneNo
-	Waconf.Pesan = "Your Otp is " + txtMessages
+	Waconf.Pesan = strings.ReplaceAll(baseOTPRequstMessage, "#OTP#", txtMessages)
 	jsonReq, err := json.Marshal(Waconf)
-
+	// fmt.Println("api key ", cl.apikey)
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", cl.apiurl, bytes.NewBuffer(jsonReq))
 	if err != nil {

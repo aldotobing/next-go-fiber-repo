@@ -99,6 +99,33 @@ func (h *WebPromoHandler) Add(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
+// Edit ...
+func (h *WebPromoHandler) Edit(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	id := ctx.Params("id")
+	if id == "" {
+		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
+	}
+
+	input := new(requests.WebPromoRequest)
+	err := json.Unmarshal([]byte(ctx.FormValue("form_data")), input)
+	if err := ctx.BodyParser(input); err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+	if err := h.Validator.Struct(input); err != nil {
+		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
+		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+	}
+
+	imgBanner, _ := ctx.FormFile("img_banner")
+
+	uc := usecase.WebPromoUC{ContractUC: h.ContractUC}
+	res, err := uc.Edit(c, input, imgBanner, id)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
 // Delete ...
 func (h *WebPromoHandler) Delete(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
@@ -110,6 +137,119 @@ func (h *WebPromoHandler) Delete(ctx *fiber.Ctx) error {
 
 	uc := usecase.WebPromoUC{ContractUC: h.ContractUC}
 	res, err := uc.Delete(c, id)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+// FindByID ...
+func (h *WebPromoHandler) FindByID(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.WebPromoParameter{
+		ID: ctx.Params("id"),
+	}
+	if parameter.ID == "" {
+		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
+	}
+
+	uc := usecase.WebPromoUC{ContractUC: h.ContractUC}
+	res, err := uc.FindByID(c, parameter)
+
+	ucEligible := usecase.WebCustomerTypeEligiblePromoUC{ContractUC: h.ContractUC}
+	resEligible, errEligible := ucEligible.SelectAll(c, models.WebCustomerTypeEligiblePromoParameter{
+		PromoID: *res.ID,
+		By:      "pr._name",
+	})
+
+	if resEligible == nil {
+		resEligible = make([]models.WebCustomerTypeEligiblePromo, 0)
+	}
+	var customerTypeIDList string
+	for i := range resEligible {
+		if resEligible[i].CustomerTypeId != nil {
+			if customerTypeIDList == "" {
+				customerTypeIDList += *resEligible[i].CustomerTypeId
+			} else {
+				customerTypeIDList += "," + *resEligible[i].CustomerTypeId
+			}
+		}
+	}
+	if errEligible == nil {
+		res.CustomerTypeList = &resEligible
+		res.CustomerTypeIdList = &customerTypeIDList
+	}
+
+	ucRegionEligible := usecase.WebRegionAreaEligiblePromoUC{ContractUC: h.ContractUC}
+	resRegionEligible, errRegionEligible := ucRegionEligible.SelectAll(c, models.WebRegionAreaEligiblePromoParameter{
+		PromoID: *res.ID,
+		By:      "pr._name",
+	})
+
+	if resRegionEligible == nil {
+		resRegionEligible = make([]models.WebRegionAreaEligiblePromo, 0)
+	}
+
+	var regionAreaIDList string
+	for i := range resRegionEligible {
+		if resRegionEligible[i].RegionID != nil {
+			if regionAreaIDList == "" {
+				regionAreaIDList += *resRegionEligible[i].RegionID
+			} else {
+				regionAreaIDList += "," + *resRegionEligible[i].RegionID
+			}
+		}
+	}
+	if errRegionEligible == nil {
+		res.RegionAreaList = &resRegionEligible
+		res.RegionAreaIdList = &regionAreaIDList
+	}
+
+	customerLevelUCEligible := usecase.WebCustomerLevelEligiblePromoUC{ContractUC: h.ContractUC}
+	customerLevelresEligible, errEligible := customerLevelUCEligible.SelectAll(c, models.WebCustomerLevelEligiblePromoParameter{
+		PromoID: *res.ID,
+		By:      "pr._name",
+	})
+
+	if customerLevelresEligible == nil {
+		customerLevelresEligible = make([]models.WebCustomerLevelEligiblePromo, 0)
+	}
+	var customerLevelIDList string
+	for i := range customerLevelresEligible {
+		if customerLevelresEligible[i].CustomerLevelId != nil {
+			if customerLevelIDList == "" {
+				customerLevelIDList += *customerLevelresEligible[i].CustomerLevelId
+			} else {
+				customerLevelIDList += "," + *customerLevelresEligible[i].CustomerLevelId
+			}
+		}
+	}
+	if errEligible == nil {
+		res.CustomerLevelList = &customerLevelresEligible
+		res.CustomerLevelIdList = &customerLevelIDList
+	}
+
+	branchUCEligible := usecase.WebBranchEligiblePromoUC{ContractUC: h.ContractUC}
+	branchresEligible, errEligible := branchUCEligible.SelectAll(c, models.WebBranchEligiblePromoParameter{
+		PromoID: *res.ID,
+		By:      "pr._name",
+	})
+	if branchresEligible == nil {
+		branchresEligible = make([]models.WebBranchEligiblePromo, 0)
+	}
+	var branchIDList string
+	for i := range branchresEligible {
+		if branchresEligible[i].BranchId != nil {
+			if branchIDList == "" {
+				branchIDList += *branchresEligible[i].BranchId
+			} else {
+				branchIDList += "," + *branchresEligible[i].BranchId
+			}
+		}
+	}
+	if errEligible == nil {
+		res.BranchList = &branchresEligible
+		res.BranchIdList = &branchIDList
+	}
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }

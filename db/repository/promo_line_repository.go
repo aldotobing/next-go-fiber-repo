@@ -14,7 +14,8 @@ type IPromoLine interface {
 	SelectAll(c context.Context, parameter models.PromoLineParameter) ([]models.PromoLine, error)
 	FindAll(ctx context.Context, parameter models.PromoLineParameter) ([]models.PromoLine, int, error)
 	Add(c context.Context, model *models.PromoLine) (*string, error)
-	// 	Edit(c context.Context, model *models.PromoLine) (*string, error)
+	Edit(c context.Context, model *models.PromoLine) (*string, error)
+	Delete(c context.Context, id int) (*string, error)
 	// 	EditAddress(c context.Context, model *models.PromoLine) (*string, error)
 }
 
@@ -38,9 +39,11 @@ func (repository PromoLine) scanRows(rows *sql.Rows) (res models.PromoLine, err 
 		&res.DiscPercent,
 		&res.DiscAmount,
 		&res.MinimumValue,
+		&res.MaximumValue,
 		&res.Multiply,
 		&res.Description,
 		&res.MinimumQty,
+		&res.MaximumQty,
 		&res.MinimumQtyUomID,
 		&res.PromoType,
 		&res.Strata,
@@ -62,9 +65,11 @@ func (repository PromoLine) scanRow(row *sql.Row) (res models.PromoLine, err err
 		&res.DiscPercent,
 		&res.DiscAmount,
 		&res.MinimumValue,
+		&res.MaximumValue,
 		&res.Multiply,
 		&res.Description,
 		&res.MinimumQty,
+		&res.MaximumQty,
 		&res.MinimumQtyUomID,
 		&res.PromoType,
 		&res.Strata,
@@ -168,30 +173,45 @@ func (repository PromoLine) FindByID(c context.Context, parameter models.PromoLi
 	return data, nil
 }
 
-// // Edit ...
-// func (repository PromoLine) Edit(c context.Context, model *models.PromoLine) (res *string, err error) {
-// 	statement := `UPDATE customer SET
-// 	customer_name = $1,
-// 	customer_address = $2,
-// 	customer_phone = $3,
-// 	customer_email = $4,
-// 	customer_cp_name = $5,
-// 	customer_profile_picture = $6
-// 	WHERE id = $7
-// 	RETURNING id`
-// 	err = repository.DB.QueryRowContext(c, statement,
-// 		model.PromoLineName,
-// 		model.PromoLineAddress,
-// 		model.PromoLinePhone,
-// 		model.PromoLineEmail,
-// 		model.PromoLineCpName,
-// 		model.PromoLineProfilePicture,
-// 		model.ID).Scan(&res)
-// 	if err != nil {
-// 		return res, err
-// 	}
-// 	return res, err
-// }
+// Edit ...
+func (repository PromoLine) Edit(c context.Context, model *models.PromoLine) (res *string, err error) {
+	statement := `UPDATE promo_line SET
+		global_max_qty = $1,
+		customer_max_qty = $2,
+		disc_pct = $3,
+		disc_amt = $4,
+		minimum_value = $5,
+		maximum_value = $6,
+		multiply = $7,
+		description = $8,
+		minimum_qty = $9,
+		maximum_qty = $10,
+		minimum_qty_uom_id = $11,
+		promo_type = $12,
+		strata = $13
+	WHERE id = $14
+	RETURNING id`
+	err = repository.DB.QueryRowContext(c, statement,
+		str.NullOrEmtyString(model.GlobalMaxQty),
+		str.NullOrEmtyString(model.CustomerMaxQty),
+		str.NullOrEmtyString(model.DiscPercent),
+		str.NullOrEmtyString(model.DiscAmount),
+		str.NullOrEmtyString(model.MinimumValue),
+		str.NullOrEmtyString(model.MaximumValue),
+		str.NullOrEmtyString(model.Multiply),
+		str.NullOrEmtyString(model.Description),
+		str.NullOrEmtyString(model.MinimumQty),
+		str.NullOrEmtyString(model.MaximumQty),
+		str.NullOrEmtyString(model.MinimumQtyUomID),
+		str.NullOrEmtyString(model.PromoType),
+		str.NullOrEmtyString(model.Strata),
+		model.ID).Scan(&res)
+
+	if err != nil {
+		return res, err
+	}
+	return res, err
+}
 
 func (repository PromoLine) Add(c context.Context, model *models.PromoLine) (res *string, err error) {
 	statement := `INSERT INTO promo_line (
@@ -201,11 +221,13 @@ func (repository PromoLine) Add(c context.Context, model *models.PromoLine) (res
 		disc_pct, 
 		disc_amt, 
 		minimum_value,
+		maximum_value,
 		multiply, 
 		description,
 		minimum_qty,
+		maximum_qty,
 		minimum_qty_uom_id,
-		promo_type, strata) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id`
+		promo_type, strata) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id`
 
 	err = repository.DB.QueryRowContext(c, statement,
 		str.NullString(model.PromoID),
@@ -214,9 +236,11 @@ func (repository PromoLine) Add(c context.Context, model *models.PromoLine) (res
 		str.NullString(model.DiscPercent),
 		str.NullString(model.DiscAmount),
 		str.NullString(model.MinimumValue),
+		str.NullString(model.MaximumValue),
 		str.NullString(model.Multiply),
 		str.NullString(model.Description),
 		str.NullString(model.MinimumQty),
+		str.NullString(model.MaximumQty),
 		str.NullOrEmtyString(model.MinimumQtyUomID),
 		str.NullString(model.PromoType),
 		str.NullString(model.Strata)).Scan(&res)
@@ -225,4 +249,11 @@ func (repository PromoLine) Add(c context.Context, model *models.PromoLine) (res
 		return res, err
 	}
 	return res, err
+}
+
+func (repo PromoLine) Delete(c context.Context, id int) (res *string, err error) {
+	statement := `DELETE FROM PROMO_LINE WHERE ID = $1 RETURNING id`
+
+	err = repo.DB.QueryRowContext(c, statement, id).Scan(&res)
+	return
 }

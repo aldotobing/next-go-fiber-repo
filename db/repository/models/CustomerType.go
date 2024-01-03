@@ -10,6 +10,7 @@ type CustomerType struct {
 // CustomerTypeParameter ...
 type CustomerTypeParameter struct {
 	ID       string `json:"customertype_id"`
+	IDs      string `json:"customertype_ids"`
 	UserID   string `json:"user_id"`
 	RegionID string `json:"region_id"`
 	Search   string `json:"search"`

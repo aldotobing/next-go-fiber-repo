@@ -11,6 +11,7 @@ import (
 
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
+	"nextbasis-service-v-0.1/helper"
 	"nextbasis-service-v-0.1/pkg/functioncaller"
 	"nextbasis-service-v-0.1/pkg/logruslogger"
 )
@@ -93,6 +94,97 @@ func (uc SalesOrderCustomerSyncUC) DataSync(c context.Context, parameter models.
 
 		if errinsert != nil {
 			fmt.Print(errinsert)
+		}
+
+		if errinsert == nil {
+			if invoiceObject.Status != nil {
+				userrepo := repository.NewCustomerRepository(uc.DB)
+				salesorderHeaderrepo := repository.NewSalesOrderHeaderRepository(uc.DB)
+				salesorderHeader, errheader := salesorderHeaderrepo.FindByCode(c, models.SalesOrderHeaderParameter{DocumentNo: *invoiceObject.DocumentNo})
+				if errheader == nil {
+					useraccount, erruser := userrepo.FindByID(c, models.CustomerParameter{ID: *salesorderHeader.CustomerID})
+
+					if erruser == nil && useraccount.CustomerFCMToken != nil && *useraccount.CustomerFCMToken != "" {
+
+						if errheader == nil {
+							orderlinerepo := repository.NewSalesOrderLineRepository(uc.DB)
+							orderline, errline := orderlinerepo.SelectAll(c, models.SalesOrderLineParameter{
+								HeaderID: *salesorderHeader.ID,
+								By:       "def.created_date",
+							})
+
+							if errline == nil {
+								messageTemplate := ""
+								messageTitle := ""
+								messageType := "2"
+								if *invoiceObject.Status == "submitted" {
+									messageTemplate = helper.BuildProcessSalesOrderTransactionTemplate(salesorderHeader, orderline, useraccount, 1)
+									messageTitle = "Transaksi " + *invoiceObject.DocumentNo + " diproses."
+								}
+
+								if useraccount.CustomerFCMToken != nil && *useraccount.CustomerFCMToken != "" {
+									FcmUc := FCMUC{ContractUC: uc.ContractUC}
+									_, errfcm := FcmUc.SendFCMMessage(c, messageTitle, messageTemplate, *useraccount.CustomerFCMToken)
+									if errfcm == nil {
+
+									}
+
+									userNotificationRepo := repository.NewUserNotificationRepository(uc.DB)
+									_, errnotifinsert := userNotificationRepo.Add(c, &models.UserNotification{
+										Title:  &messageTitle,
+										Text:   &messageTemplate,
+										Type:   &messageType,
+										UserID: invoiceObject.CustomerID,
+										RowID:  invoiceObject.ID,
+									})
+									if errnotifinsert == nil {
+
+									}
+
+								}
+
+								if useraccount.CustomerPhone != nil && *useraccount.CustomerPhone != "" {
+									// if messageTemplate != "" {
+									// senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.CustomerPhone, messageTemplate)
+									// if senDwaMessage != nil {
+									// 	fmt.Println("sukses")
+									// }
+
+									// }
+
+									if useraccount.CustomerSalesmanID != nil {
+										salesmanmessageTemplate := ""
+										salesmannRepo := repository.NewSalesmanRepository(uc.DB)
+										customerSales, errcustsales := salesmannRepo.FindByID(c, models.SalesmanParameter{ID: *useraccount.CustomerSalesmanID})
+
+										salesmanmessageTemplate = helper.BuildProcessSalesOrderTransactionTemplate(salesorderHeader, orderline, useraccount, 2)
+
+										if errcustsales == nil {
+											if customerSales.PhoneNo != nil {
+												if salesmanmessageTemplate != "" {
+
+													senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*customerSales.PhoneNo, salesmanmessageTemplate)
+													if senDwaMessage != nil {
+														fmt.Println("sukses")
+													}
+												}
+
+											}
+										}
+									}
+
+								}
+
+								// if useraccount.CustomerBranchPicPhoneNo != nil && useraccount.CustomerBranchPicName != nil {
+								// 	picMessageTemplate := helper.BuildProcessSalesOrderTransactionTemplate(salesorderHeader, orderline, useraccount, 3)
+								// 	_ = uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.CustomerBranchPicPhoneNo, picMessageTemplate)
+								// }
+							}
+						}
+
+					}
+				}
+			}
 		}
 
 		resBuilder = append(resBuilder, invoiceObject)

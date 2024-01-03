@@ -25,7 +25,9 @@ func (route WebPromoRoutes) RegisterRoute() {
 	r.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
 	r.Get("/", handler.FindAll)
 	r.Get("/select", handler.SelectAll)
+	r.Get("/id/:id", handler.FindByID)
 	r.Post("/", handler.Add)
+	r.Put("/id/:id", handler.Edit)
 	r.Delete("/id/:id", handler.Delete)
 
 }

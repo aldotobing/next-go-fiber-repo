@@ -6,6 +6,7 @@ type UserAccount struct {
 	Name               *string `json:"name"`
 	Code               *string `json:"code"`
 	Phone              *string `json:"phone"`
+	UserAddress        *string `json:"user_address"`
 	PriceListID        *string `json:"price_list_id"`
 	PriceListVersionID *string `json:"price_list_version_id"`
 	CustomerTypeID     *string `json:"customer_type_id"`
@@ -16,6 +17,10 @@ type UserAccount struct {
 	SalesmanCode       *string `json:"salesman_code"`
 	FireStoreUID       *string `json:"firestore_uid"`
 	FCMToken           *string `json:"fcm_token"`
+	RoleIDList         *string `json:"role_id_list"`
+	LoginCode          *string `json:"logincode"`
+	ShowInApp          bool    `json:"show_in_app"`
+	Active             string  `json:"active"`
 }
 
 type UserAccountParameter struct {
@@ -56,29 +61,35 @@ var (
 	}
 
 	// UserAccountSelectStatement ...
-	UserAccountSelectStatement = ` select def.id as user_id,cus.id as cus_id,
-	cus.customer_name,
-	cus.customer_code,cus.customer_phone,
-	cus.price_list_id,
-	(select plv.id from price_list_version plv where plv.price_list_id = pl.id and now()::date between plv.start_date and plv.end_date) as version_id,
-	cus.customer_type_id,cl._name cus_level_name,cus.customer_address,
-	s.id as salesman_id,s.salesman_code,s.salesman_name,cus.customer_phone,def.fcm_token
-	from _user def 
-	join customer cus on cus.id = def.partner_id 
-	left join price_list pl on pl.id = cus.price_list_id
-	left join customer_level cl on cl.id = cus.customer_level_id
-	left join salesman s on s.id = cus.salesman_id
+	UserAccountSelectStatement = ` 
+	select def.id,def.login,
+	coalesce(
+			(
+			select STRING_AGG(id::character varying,',') from role where id in (
+				select role_id from role_group_role_line 
+				where role_group_id in( select role_group_id from user_role_group where user_id = def.id) 
+				) and is_mysm=1
+			),''
+		),def.fcm_token,
+		coalesce(c.show_in_apps, '0'), coalesce(c.active,'0')
+	from _user def
+	left join customer c on c.user_id = def.id
+
 	`
 
 	// UserAccountSelectStatement ...
-	AdminUserAccountSelectStatement = ` select def.id as user_id,null as cus_id,
-	def.login,
-	null,null,
-	null,
-	null,
-	null,null,null,
-	null,null,null,null,null
-	from _user def
+	AdminUserAccountSelectStatement = ` select def.id,def.login,
+		coalesce(
+				(
+				select STRING_AGG(id::character varying,',') from role where id in (
+					select role_id from role_group_role_line 
+					where role_group_id in( select role_group_id from user_role_group where user_id = def.id) 
+					) and is_mysm=1
+				),''
+			),def.fcm_token,
+			coalesce(c.show_in_apps, '0'), coalesce(c.active,'0')
+		from _user def
+		left join customer c on c.user_id = def.id
 	`
 
 	// UserAccountWhereStatement ...

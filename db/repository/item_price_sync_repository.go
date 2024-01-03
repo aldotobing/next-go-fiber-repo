@@ -30,7 +30,7 @@ func NewItemPriceSyncRepository(DB *sql.DB) IItemPriceSyncRepository {
 // Scan rows
 func (repository ItemPriceSyncRepository) scanRows(rows *sql.Rows) (res models.ItemPriceSync, err error) {
 	err = rows.Scan(
-		&res.PriceListId, &res.PriceListCode, &res.ID, &res.PriceListVersionID, &res.PriceListVersionCode, &res.ItemId, &res.UomId, &res.Price, &res.CreatedDate, &res.ModifiedDate,
+		&res.PriceListId, &res.PriceListCode, &res.ID, &res.PriceListVersionID, &res.PriceListVersionCode, &res.ItemCode, &res.UomCode, &res.Price, &res.CreatedDate, &res.ModifiedDate,
 	)
 	if err != nil {
 
@@ -43,7 +43,7 @@ func (repository ItemPriceSyncRepository) scanRows(rows *sql.Rows) (res models.I
 // Scan row
 func (repository ItemPriceSyncRepository) scanRow(row *sql.Row) (res models.ItemPriceSync, err error) {
 	err = row.Scan(
-		&res.PriceListId, &res.PriceListCode, &res.ID, &res.PriceListVersionID, &res.PriceListVersionCode, &res.ItemId, &res.UomId, &res.Price, &res.CreatedDate, &res.ModifiedDate,
+		&res.PriceListId, &res.PriceListCode, &res.ID, &res.PriceListVersionID, &res.PriceListVersionCode, &res.ItemCode, &res.UomCode, &res.Price, &res.CreatedDate, &res.ModifiedDate,
 	)
 	if err != nil {
 		return res, err
@@ -53,9 +53,10 @@ func (repository ItemPriceSyncRepository) scanRow(row *sql.Row) (res models.Item
 }
 
 func (repository ItemPriceSyncRepository) FindItemPrice(c context.Context, parameter models.ItemPriceSyncParameter) (data models.ItemPriceSync, err error) {
-	statement := models.ItemPriceSyncSelectStatement + ` WHERE def.created_date IS NOT NULL AND lower(plv.description) = $1 and lower(pl.code) = $2 and def.item_id = $3 and def.uom_id = $4`
+	statement := models.ItemPriceSyncSelectStatement + ` WHERE def.created_date IS NOT NULL AND lower(plv.description) = $1 and lower(pl.code) = $2 and def.item_id =
+	 (select id from item where code = $3) and def.uom_id = (select id from uom where code = $4) `
 
-	row := repository.DB.QueryRowContext(c, statement, strings.ToLower(parameter.PriceListVersionCode), strings.ToLower(parameter.PriceListCode), parameter.ItemId, parameter.UomId)
+	row := repository.DB.QueryRowContext(c, statement, strings.ToLower(parameter.PriceListVersionCode), strings.ToLower(parameter.PriceListCode), parameter.ItemCode, parameter.UomCode)
 
 	data, err = repository.scanRow(row)
 	if err != nil {
@@ -87,12 +88,12 @@ func (repository ItemPriceSyncRepository) Add(c context.Context, model *models.I
 		(
 			select plvs.id from price_list_version plvs where lower(plvs.description) = $1 and plvs.price_list_id = (select pls.id from price_list pls where lower(pls.code) = $2)
 		),
-		$3, $4, $5, $6, $7
+		(select id from item where code = $3),( select id from uom where code = $4), $5, $6, $7
 		) RETURNING id`
 
 	err = repository.DB.QueryRowContext(c, statement,
 		strings.ToLower(*str.NullString(model.PriceListVersionCode)), strings.ToLower(*str.NullString(model.PriceListCode)),
-		str.NullString(model.ItemId), str.NullString(model.UomId), str.NullString(model.Price),
+		str.NullString(model.ItemCode), str.NullString(model.UomCode), str.NullString(model.Price),
 		str.NullString(model.CreatedDate),
 		str.NullString(model.ModifiedDate),
 	).Scan(&res)
@@ -110,13 +111,13 @@ func (repository ItemPriceSyncRepository) Edit(c context.Context, model *models.
 	(
 		select plvs.id from price_list_version plvs where lower(plvs.description) = $1 and plvs.price_list_id = (select pls.id from price_list pls where lower(pls.code) = $2)
 	), 
-	item_id = $3, uom_id=$4, price = $5,
+	item_id = (select id from item where code = $3), uom_id=( select id from uom where code = $4), price = $5,
 	 modified_date = $6
 	WHERE id = $7 RETURNING id`
 
 	err = repository.DB.QueryRowContext(c, statement,
 		strings.ToLower(*str.NullString(model.PriceListVersionCode)), strings.ToLower(*str.NullString(model.PriceListCode)),
-		str.NullString(model.ItemId), str.NullString(model.UomId), str.NullString(model.Price),
+		str.NullString(model.ItemCode), str.NullString(model.UomCode), str.NullString(model.Price),
 		str.NullString(model.ModifiedDate),
 		model.ID,
 	).Scan(&res)

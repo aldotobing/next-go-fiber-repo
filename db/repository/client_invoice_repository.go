@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -156,6 +157,56 @@ func (repository CilentInvoiceRepository) FindByDocumentNo(c context.Context, pa
 
 func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, model *models.CilentInvoice) (res string, err error) {
 
+	// Using a map to organize the print logic
+	fields := map[string]*string{
+		"ID":                   model.ID,
+		"DocumentNo":           model.DocumentNo,
+		"DocumentTypeID":       model.DocumentTypeID,
+		"TransactionDate":      model.TransactionDate,
+		"TransactionTime":      model.TransactionTime,
+		"CustomerID":           model.CustomerID,
+		"CustomerCode":         model.CustomerCode,
+		"CustomerName":         model.CustomerName,
+		"TaxCalcMethod":        model.TaxCalcMethod,
+		"SalesmanID":           model.SalesmanID,
+		"SalesmanCode":         model.SalesmanCode,
+		"SalesRequestCode":     model.SalesRequestCode,
+		"TransactionPoint":     model.TransactionPoint,
+		"SalesmanName":         model.SalesmanName,
+		"PaymentTermsID":       model.PaymentTermsID,
+		"PaymentTermsName":     model.PaymentTermsName,
+		"SalesOrderID":         model.SalesOrderID,
+		"CompanyID":            model.CompanyID,
+		"BranchID":             model.BranchID,
+		"BranchName":           model.BranchName,
+		"PriceListID":          model.PriceLIstID,
+		"PriceListName":        model.PriceLIstName,
+		"PriceListVersionID":   model.PriceLIstVersionID,
+		"PriceListVersionName": model.PriceLIstVersionName,
+		"Status":               model.Status,
+		"GrossAmount":          model.GrossAmount,
+		"TaxableAmount":        model.TaxableAmount,
+		"TaxAmount":            model.TaxAmount,
+		"RoundingAmount":       model.RoundingAmount,
+		"OutstandingAmount":    model.OutstandingAmount,
+		"NetAmount":            model.NetAmount,
+		"DueDate":              model.DueDate,
+		"DiscAmount":           model.DiscAmount,
+		"PaidAmount":           model.PaidAmount,
+		"NoPPN":                model.NoPPN,
+		"GlobalDiscAmount":     model.GlobalDiscAmount,
+		"InvoiceDate":          model.InvoiceDate,
+		"PaidDate":             model.PaidDate,
+	}
+
+	for fieldName, fieldValue := range fields {
+		if fieldValue != nil {
+			fmt.Printf("%s: %s\n", fieldName, *fieldValue)
+		} else {
+			fmt.Printf("%s: nil\n", fieldName)
+		}
+	}
+
 	availableinvoice, _ := repository.FindByDocumentNo(c, models.CilentInvoiceParameter{DocumentNo: *model.DocumentNo})
 
 	statement := `
@@ -165,14 +216,14 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 		branch_id ,price_list_id ,price_list_version_id ,status ,gross_amount ,
 		disc_amount ,taxable_amount ,tax_amount ,rounding_amount ,net_amount ,
 		outstanding_amount ,paid_amount ,due_date ,no_ppn ,global_disc_amount,
-		transaction_point 
+		transaction_point ,transaction_source_document_no, invoice_date,paid_date
 		)values(
 		$1, $2, $3, $4, (select id from customer where customer_code = $5),
 		$6, (select id from salesman where partner_id =(select id from partner where code = $7)), $8, $9, $10,
 		$11 ,$12, $13, $14, $15,
 		$16, $17, $18, $19, $20,
 		$21, $22, $23, $24, $25,
-		$26
+		$26, $27, $28, $29 
 		)
 	RETURNING id`
 	transaction, err := repository.DB.BeginTx(c, nil)
@@ -194,19 +245,21 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 		deletedHeaderRow.Close()
 
 	}
-
+	//oustanding amount = net amount
 	err = transaction.QueryRowContext(c, statement,
 		model.DocumentNo, model.DocumentTypeID, model.TransactionDate, model.TransactionTime, model.CustomerCode,
 		model.TaxCalcMethod, model.SalesmanCode, model.PaymentTermsID, model.SalesOrderID, model.CompanyID,
 		model.BranchID, model.PriceLIstID, model.PriceLIstVersionID, str.EmptyString(*model.Status), str.EmptyString(*model.GrossAmount),
 		model.DiscAmount, model.TaxableAmount, model.TaxAmount, model.RoundingAmount, model.NetAmount,
-		str.EmptyString(*model.OutstandingAmount), str.EmptyString(*model.PaidAmount), model.DueDate, model.NoPPN, model.GlobalDiscAmount,
-		str.EmptyString(*model.TransactionPoint),
+		str.EmptyString(*model.NetAmount), str.EmptyString(*model.PaidAmount), model.DueDate, model.NoPPN, model.GlobalDiscAmount,
+		str.EmptyString(*model.TransactionPoint), str.NullString(model.SalesRequestCode), str.NullString(model.InvoiceDate), str.NullString(model.PaidDate),
 	).Scan(&res)
 
 	if err != nil {
 		return res, err
 	}
+
+	fmt.Printf("Successfully inserted invoice with DocumentNo: %s and generated ID: %s\n", *model.DocumentNo, res)
 
 	model.ID = &res
 

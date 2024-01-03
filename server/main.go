@@ -6,8 +6,10 @@ import (
 	"os"
 	"time"
 
-	conf "nextbasis-service-v-0.1/config"
 	"nextbasis-service-v-0.1/helper"
+	redisPkg "nextbasis-service-v-0.1/pkg/redis"
+
+	conf "nextbasis-service-v-0.1/config"
 	"nextbasis-service-v-0.1/pkg/str"
 	"nextbasis-service-v-0.1/server/bootstrap"
 	_ "nextbasis-service-v-0.1/server/docs"
@@ -20,6 +22,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	enTranslations "github.com/go-playground/validator/v10/translations/en"
 	idTranslations "github.com/go-playground/validator/v10/translations/id"
+	redis "github.com/go-redis/redis/v7"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
@@ -40,7 +43,7 @@ var (
 
 func main() {
 	os.Setenv("TZ", "Asia/Jakarta")
-	// load all config
+
 	configs, err := conf.LoadConfigs()
 	if err != nil {
 		log.Fatal(err.Error())
@@ -48,48 +51,42 @@ func main() {
 	defer configs.DB.Close()
 	defer configs.DBMS.Close()
 
+	// Set up Redis client
+	baseClient := redis.NewClient(&redis.Options{
+		Addr:     configs.EnvConfig["REDIS_URL"],
+		Password: configs.EnvConfig["REDIS_PASSWORD"], // no password set
+		DB:       0,                                   // use default DB
+	})
+
+	redisStorage := &redisPkg.RedisClient{
+		Client: baseClient,
+	}
+
+	// Wrap base client in your custom RedisClient type
+	configs.RedisClient = redisPkg.RedisClient{
+		Client: baseClient,
+	}
+
+	pong, err := baseClient.Ping().Result()
+	if err != nil {
+		log.Fatalf("Could not connect to Redis: %v", err)
+	} else {
+		log.Printf("Connected to Redis: %v", pong)
+	}
+
 	// init validation driver
 	validatorInit(&configs)
 
 	// init fiber app
 	app := fiber.New(fiber.Config{
-		BodyLimit:    str.StringToInt(configs.EnvConfig["FILE_MAX_UPLOAD_SIZE"]),
-		ErrorHandler: middlewares.InternalServer,
+		BodyLimit:         str.StringToInt(configs.EnvConfig["FILE_MAX_UPLOAD_SIZE"]),
+		ErrorHandler:      middlewares.InternalServer,
+		ReduceMemoryUsage: true,
 	})
 	app.Get("/swagger/*", swagger.New(swagger.Config{ // custom
 		URL:         "/swagger/doc.json",
 		DeepLinking: false,
 	}))
-
-	// // Certificate manager
-	// m := &autocert.Manager{
-	// 	Prompt: autocert.AcceptTOS,
-	// 	// Replace with your domain
-	// 	HostPolicy: autocert.HostWhitelist("mysidomuncul.sidomuncul.co.id"),
-	// 	// Folder to store the certificates
-	// 	Cache: autocert.DirCache("../cert"),
-	// }
-
-	// // TLS Config
-	// cfg := &tls.Config{
-	// 	// Get Certificate from Let's Encrypt
-	// 	GetCertificate: m.GetCertificate,
-	// 	// By default NextProtos contains the "h2"
-	// 	// This has to be removed since Fasthttp does not support HTTP/2
-	// 	// Or it will cause a flood of PRI method logs
-	// 	// http://webconcepts.info/concepts/http-method/PRI
-	// 	NextProtos: []string{
-	// 		"http/1.1", "acme-tls/1",
-	// 	},
-	// }
-
-	// ln, err := tls.Listen("tcp", ":8443", cfg)
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	// Start server
-	// log.Fatal(app.Listener(ln))
 
 	ContractUC := usecase.ContractUC{
 		ReqID:       xid.New().String(),
@@ -110,6 +107,7 @@ func main() {
 		Mail:        configs.Mail,
 		Mailing:     configs.Mailing,
 		WhatsApp:    configs.WooWAClient,
+		OtpWhatsApp: configs.WooWAOtpClient,
 		AWSS3:       configs.Aws,
 		Fcm:         configs.FCM,
 	}
@@ -121,14 +119,22 @@ func main() {
 		Translator: translator,
 	}
 	boot.App.Use(limiter.New(limiter.Config{
-		Max:        100,
+		Max: 20,
+		// Max:	100,
 		Expiration: 1 * time.Second,
 		KeyGenerator: func(c *fiber.Ctx) string {
 			return c.IP()
 		},
 		LimitReached: func(c *fiber.Ctx) error {
+			log.Printf("Rate limit reached for IP: %s", c.IP())
 			return c.SendStatus(fiber.StatusTooManyRequests)
 		},
+		//14-06-2023
+		Storage:                redisStorage,
+		SkipFailedRequests:     false,
+		SkipSuccessfulRequests: false,
+		LimiterMiddleware:      limiter.SlidingWindow{},
+		//----------------
 	}))
 
 	boot.App.Use(recover.New())
@@ -144,9 +150,20 @@ func main() {
 		TimeFormat: time.RFC3339,
 		TimeZone:   "Asia/Jakarta",
 	}))
-	helper.SetCronJobs()
+	//boot.App.Use(compress.New())
+
+	//DISABLE SCHEDULER
+	//helper.SetCronJobs()
+
+	go helper.StartDBEventListener(configs)
+
 	boot.RegisterRouters()
 	log.Fatal(boot.App.Listen(configs.EnvConfig["APP_HOST"]))
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("Error getting current working directory: %v", err)
+	}
+	log.Printf("Current working directory: %s", cwd)
 
 }
 

@@ -102,9 +102,14 @@ func (h *CustomerHandler) FindByID(ctx *fiber.Ctx) error {
 
 	ObjectData.ListObject = res
 
-	target := h.FetchVisitDay(parameter)
-	if target != "" {
-		ObjectData.ListObject.VisitDay = &target
+	parameter.Code = *res.Code
+
+	visitDay, visitWeek := h.FetchVisitDay(parameter)
+	if visitDay != "" {
+		ObjectData.ListObject.VisitDay = &visitDay
+	}
+	if visitWeek != "" {
+		ObjectData.ListObject.VisitWeek = &visitWeek
 	}
 
 	return h.SendResponse(ctx, ObjectData, nil, err, 0)
@@ -160,7 +165,7 @@ func (h *CustomerHandler) EditAddress(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
-func (h *CustomerHandler) FetchVisitDay(params models.CustomerParameter) string {
+func (h *CustomerHandler) FetchVisitDay(params models.CustomerParameter) (visitDay, visitWeek string) {
 	jsonReq, err := json.Marshal(params)
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrv/rest/customer/visitday/1", bytes.NewBuffer(jsonReq))
@@ -185,7 +190,8 @@ func (h *CustomerHandler) FetchVisitDay(params models.CustomerParameter) string 
 	}
 
 	type resutlData struct {
-		VisitDay string `json:"visit_day"`
+		VisitDay  string `json:"visit_day"`
+		VisitWeek string `json:"visit_week"`
 	}
 
 	ObjectData := new(resutlData)
@@ -193,7 +199,7 @@ func (h *CustomerHandler) FetchVisitDay(params models.CustomerParameter) string 
 	// var responseObject http.Response
 	json.Unmarshal(bodyBytes, &ObjectData)
 
-	return ObjectData.VisitDay
+	return ObjectData.VisitDay, ObjectData.VisitWeek
 }
 
 // Edit ...

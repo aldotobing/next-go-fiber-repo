@@ -24,13 +24,17 @@ func (h *PromoContentHandler) SelectAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.PromoContentParameter{
-		ID:        ctx.Query("promo_id"),
-		Code:      ctx.Query("promo_code"),
-		StartDate: ctx.Query("start_date"),
-		EndDate:   ctx.Query("end_date"),
-		Search:    ctx.Query("search"),
-		By:        ctx.Query("by"),
-		Sort:      ctx.Query("sort"),
+		ID:              ctx.Query("promo_id"),
+		CustomerTypeId:  ctx.Query("customer_type_id"),
+		CustomerLevelID: ctx.Query("customer_level_id"),
+		BranchID:        ctx.Query("branch_id"),
+		RegionID:        ctx.Query("region_id"),
+		Code:            ctx.Query("promo_code"),
+		StartDate:       ctx.Query("start_date"),
+		EndDate:         ctx.Query("end_date"),
+		Search:          ctx.Query("search"),
+		By:              ctx.Query("by"),
+		Sort:            ctx.Query("sort"),
 	}
 	uc := usecase.PromoContentUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectAll(c, parameter)
@@ -53,19 +57,20 @@ func (h *PromoContentHandler) FindAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.PromoContentParameter{
-		ID:     ctx.Query("customer_id"),
-		Code:   ctx.Query("customer_code"),
-		Search: ctx.Query("search"),
-		Page:   str.StringToInt(ctx.Query("page")),
-		Limit:  str.StringToInt(ctx.Query("limit")),
-		By:     ctx.Query("by"),
-		Sort:   ctx.Query("sort"),
+		ID:             ctx.Query("promo_id"),
+		Code:           ctx.Query("customer_code"),
+		CustomerTypeId: ctx.Query("customer_type_id"),
+		Search:         ctx.Query("search"),
+		Page:           str.StringToInt(ctx.Query("page")),
+		Limit:          str.StringToInt(ctx.Query("limit")),
+		By:             ctx.Query("by"),
+		Sort:           ctx.Query("sort"),
 	}
 	uc := usecase.PromoContentUC{ContractUC: h.ContractUC}
 	res, meta, err := uc.FindAll(c, parameter)
 
 	type StructObject struct {
-		ListObject []models.PromoContent `json:"list_customer"`
+		ListObject []models.PromoContent `json:"list_promo"`
 	}
 
 	ObjectData := new(StructObject)

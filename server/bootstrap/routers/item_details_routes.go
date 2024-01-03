@@ -27,4 +27,5 @@ func (route ItemDetailsRoutes) RegisterRoute() {
 	r.Get("/", handler.FindAll)
 	r.Get("/select", handler.SelectAll)
 	r.Get("/id/:id", handler.FindByID)
+	r.Get("/v2/id/:id", handler.FindByIDV2)
 }

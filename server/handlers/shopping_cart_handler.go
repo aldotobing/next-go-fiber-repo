@@ -119,8 +119,31 @@ func (h *ShoppingCartHandler) Add(ctx *fiber.Ctx) error {
 func (h *ShoppingCartHandler) MultipleEdit(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
-	id := ctx.Params("customer_id")
-	if id == "" {
+	fmt.Println("tes")
+	listInput := new([]requests.ShoppingCartRequest)
+	if err := ctx.BodyParser(listInput); err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+
+	for _, input := range *listInput {
+		if err := h.Validator.Struct(input); err != nil {
+			errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
+			return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+		}
+	}
+
+	uc := usecase.ShoppingCartUC{ContractUC: h.ContractUC}
+	res, err := uc.MultipleEdit(c, listInput)
+	fmt.Println("tes 2")
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+// MultipleEditByCartID ...
+func (h *ShoppingCartHandler) MultipleEditByCartID(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	cartID := ctx.Params("cart_id")
+	if cartID == "" {
 		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
 	}
 
@@ -137,7 +160,7 @@ func (h *ShoppingCartHandler) MultipleEdit(ctx *fiber.Ctx) error {
 	}
 
 	uc := usecase.ShoppingCartUC{ContractUC: h.ContractUC}
-	res, err := uc.MultipleEdit(c, listInput)
+	res, err := uc.MultipleEditByCartID(c, listInput)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
@@ -244,6 +267,35 @@ func (h *ShoppingCartHandler) SelecGroupedtAll(ctx *fiber.Ctx) error {
 			ObjcetData.ListObjcet[i].ListShoppingChart = lineres
 
 		}
+	}
+
+	return h.SendResponse(ctx, ObjcetData, nil, err, 0)
+}
+
+// SelectAll ...
+func (h *ShoppingCartHandler) SelectAllBonus(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+	parameter := models.ShoppingCartParameter{
+		ListID: ctx.Query("chart_id_list"),
+		Search: ctx.Query("search"),
+		By:     ctx.Query("by"),
+		Sort:   ctx.Query("sort"),
+	}
+	uc := usecase.ShoppingCartUC{ContractUC: h.ContractUC}
+	res, err := uc.SelectAllBonus(c, parameter)
+
+	if err != nil {
+		fmt.Println("error", err.Error())
+	}
+
+	type StructObject struct {
+		ListObjcet []models.ShoppingCartItemBonus `json:"list_item_bonus"`
+	}
+
+	ObjcetData := new(StructObject)
+
+	if res != nil {
+		ObjcetData.ListObjcet = res
 	}
 
 	return h.SendResponse(ctx, ObjcetData, nil, err, 0)

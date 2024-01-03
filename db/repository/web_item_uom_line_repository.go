@@ -88,8 +88,6 @@ func (repository WebItemUomLineRepository) SelectAll(c context.Context, paramete
 		` AND (LOWER(i."_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 
-	fmt.Println(statement)
-
 	if err != nil {
 		return data, err
 	}

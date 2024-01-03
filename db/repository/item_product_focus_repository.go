@@ -12,6 +12,8 @@ import (
 // IItemProductFocusRepository ...
 type IItemProductFocusRepository interface {
 	SelectAll(c context.Context, parameter models.ItemProductFocusParameter) ([]models.ItemProductFocus, error)
+	SelectAllV2(c context.Context, parameter models.ItemProductFocusParameter, branchID, customerTypeID, customerPriceListID string) ([]models.ItemProductFocusV2, error)
+	CountByBranchID(c context.Context, branchID string) (int, error)
 	FindAll(ctx context.Context, parameter models.ItemProductFocusParameter) ([]models.ItemProductFocus, int, error)
 	FindByID(c context.Context, parameter models.ItemProductFocusParameter) (models.ItemProductFocus, error)
 	// Add(c context.Context, model *models.ItemProductFocus) (*string, error)
@@ -27,6 +29,19 @@ type ItemProductFocusRepository struct {
 // NewItemProductFocusRepository ...
 func NewItemProductFocusRepository(DB *sql.DB) IItemProductFocusRepository {
 	return &ItemProductFocusRepository{DB: DB}
+}
+
+// Scan rows
+func (repository ItemProductFocusRepository) scanRowsV2(rows *sql.Rows) (res models.ItemProductFocusV2, err error) {
+	err = rows.Scan(
+		&res.ID, &res.Code, &res.Name, &res.Description, &res.ItemPicture, &res.ItemCategory, &res.AdditionalData, &res.MultiplyData,
+	)
+	if err != nil {
+
+		return res, err
+	}
+
+	return res, nil
 }
 
 // Scan rows
@@ -98,6 +113,65 @@ func (repository ItemProductFocusRepository) SelectAll(c context.Context, parame
 	}
 
 	return data, err
+}
+
+// SelectAllV2 ...
+func (repository ItemProductFocusRepository) SelectAllV2(c context.Context, parameter models.ItemProductFocusParameter, branchID, customerTypeID, customerPriceListID string) (data []models.ItemProductFocusV2, err error) {
+	conditionString := ``
+
+	conditionString += `AND DEF.BRANCH_ID = '` + branchID + `'`
+	conditionString += ` AND IP.PRICE_LIST_VERSION_ID = (SELECT id FROM price_list_version WHERE price_list_id = ` + customerPriceListID + `` + `)` + ` `
+
+	if parameter.ItemCategoryId != "" {
+		conditionString += ` AND i.Item_category_id = '` + parameter.ItemCategoryId + `'`
+	}
+
+	/*
+		customerType 7 = Apotek Lokal
+		customerType 15 = MT LOKAL INDEPENDEN
+		defId 83 = TOLAK ANGIN CAIR /D5
+		Tampilkan TAC D5 hanya pada kedua customerType di atas
+	*/
+	if customerTypeID != "" && (customerTypeID != "7" && customerTypeID != "15") {
+		conditionString += ` AND i.id NOT IN (83, 307, 393) `
+	}
+
+	statement := models.ItemProductFocusV2SelectStatement + ` ` + models.ItemProductFocusV2WhereStatement +
+		` AND (LOWER(i."_name") LIKE $1) ` + conditionString +
+		` GROUP BY I.ID, def.id, TD.MULTIPLY_DATA` +
+		` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+	fmt.Println(statement)
+	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
+
+	if err != nil {
+		return data, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+
+		temp, err := repository.scanRowsV2(rows)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
+	}
+
+	return data, err
+}
+
+// CountByBranchID ...
+func (repository ItemProductFocusRepository) CountByBranchID(c context.Context, branchID string) (out int, err error) {
+	conditionString := `WHERE def.created_date IS not NULL `
+
+	conditionString += `AND DEF.BRANCH_ID = '` + branchID + `'`
+
+	statement := models.ItemProductFocusV2CountStatement + ` ` + conditionString
+	rows := repository.DB.QueryRowContext(c, statement)
+
+	err = rows.Scan(&out)
+
+	return
 }
 
 // FindAll ...

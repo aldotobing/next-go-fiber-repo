@@ -13,6 +13,7 @@ type ISalesOrderHeaderRepository interface {
 	SelectAll(c context.Context, parameter models.SalesOrderHeaderParameter) ([]models.SalesOrderHeader, error)
 	FindAll(ctx context.Context, parameter models.SalesOrderHeaderParameter) ([]models.SalesOrderHeader, int, error)
 	FindByID(c context.Context, parameter models.SalesOrderHeaderParameter) (models.SalesOrderHeader, error)
+	FindByCode(c context.Context, parameter models.SalesOrderHeaderParameter) (models.SalesOrderHeader, error)
 }
 
 // SalesOrderHeaderRepository ...
@@ -153,6 +154,19 @@ func (repository SalesOrderHeaderRepository) FindAll(ctx context.Context, parame
 func (repository SalesOrderHeaderRepository) FindByID(c context.Context, parameter models.SalesOrderHeaderParameter) (data models.SalesOrderHeader, err error) {
 	statement := models.SalesOrderHeaderSelectStatement + ` WHERE def.created_date IS not NULL AND def.id = $1`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
+
+	data, err = repository.scanRow(row)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
+}
+
+// FindByCode ...
+func (repository SalesOrderHeaderRepository) FindByCode(c context.Context, parameter models.SalesOrderHeaderParameter) (data models.SalesOrderHeader, err error) {
+	statement := models.SalesOrderHeaderSelectStatement + ` WHERE def.created_date IS not NULL AND def.document_no = $1 order by def.id desc limit 1 `
+	row := repository.DB.QueryRowContext(c, statement, parameter.DocumentNo)
 
 	data, err = repository.scanRow(row)
 	if err != nil {

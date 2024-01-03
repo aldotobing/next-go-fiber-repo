@@ -2,8 +2,11 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"mime/multipart"
 	"strings"
+	"time"
 
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -22,8 +25,43 @@ type CustomerUC struct {
 func (uc CustomerUC) BuildBody(res *models.Customer) {
 }
 
+const CustomerCacheKey = "customer:"
+
 // SelectAll ...
+// func (uc CustomerUC) SelectAll(c context.Context, parameter models.CustomerParameter) (res []models.Customer, err error) {
+// 	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(0, 0, parameter.By, parameter.Sort, models.CustomerOrderBy, models.CustomerOrderByrByString)
+
+// 	repo := repository.NewCustomerRepository(uc.DB)
+// 	res, err = repo.SelectAll(c, parameter)
+
+// 	if err != nil {
+// 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+// 		return res, err
+// 	}
+
+// 	for i := range res {
+// 		uc.BuildBody(&res[i])
+// 	}
+
+// 	return res, err
+// }
+
 func (uc CustomerUC) SelectAll(c context.Context, parameter models.CustomerParameter) (res []models.Customer, err error) {
+
+	// Define the cache key
+	cacheKey := CustomerCacheKey + parameter.By + ":" + parameter.Sort + ":" + parameter.BranchID + ":" +
+		parameter.CustomerTypeId + ":" + parameter.RegionID + ":" + parameter.RegionGroupID + ":" + parameter.CustomerLevelId +
+		":" + parameter.CustomerCodes + ":" + parameter.CustomerReligion
+
+	// Try to get data from Redis cache first
+	err = uc.RedisClient.GetFromRedis(cacheKey, &res)
+	if err == nil {
+		fmt.Println("from redis : ", cacheKey)
+		// If the data exists in the cache, return it
+		return res, nil
+	}
+
+	// If the data does not exist in the cache, fetch it from the DB
 	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(0, 0, parameter.By, parameter.Sort, models.CustomerOrderBy, models.CustomerOrderByrByString)
 
 	repo := repository.NewCustomerRepository(uc.DB)
@@ -37,6 +75,9 @@ func (uc CustomerUC) SelectAll(c context.Context, parameter models.CustomerParam
 	for i := range res {
 		uc.BuildBody(&res[i])
 	}
+
+	// Cache the result in Redis with an expiration time of 1 hour
+	uc.RedisClient.StoreToRedistWithExpired(cacheKey, res, "1h")
 
 	return res, err
 }
@@ -75,8 +116,62 @@ func (uc CustomerUC) FindByID(c context.Context, parameter models.CustomerParame
 	return res, err
 }
 
+// func (uc CustomerUC) FindByID(c context.Context, parameter models.CustomerParameter) (res models.Customer, err error) {
+// 	// Define cache key
+// 	cacheKey := CustomerCacheKey + parameter.ID
+
+// 	// Try to fetch the data from Redis first
+// 	val, err := uc.RedisClient.Client.Get(cacheKey).Result()
+// 	if err != nil && err != redis.Nil {
+// 		// If there is an error other than "key does not exist", return error
+// 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_get", uc.ReqID)
+// 		return res, err
+// 	}
+// 	if err == nil {
+// 		// If cache exists
+// 		err = json.Unmarshal([]byte(val), &res)
+// 		if err != nil {
+// 			// If there is an error in unmarshaling, log and proceed to fetch data from repository
+// 			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_unmarshal", uc.ReqID)
+// 		} else {
+// 			// If unmarshaling successful, return result
+// 			return res, nil
+// 		}
+// 	}
+
+// 	repo := repository.NewCustomerRepository(uc.DB)
+// 	res, err = repo.FindByID(c, parameter)
+// 	if err != nil {
+// 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+// 		return res, err
+// 	}
+// 	uc.BuildBody(&res)
+
+// 	// Save result into Redis
+// 	jsonData, err := json.Marshal(res)
+// 	if err != nil {
+// 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
+// 	} else {
+// 		err = uc.RedisClient.Client.Set(cacheKey, jsonData, time.Hour).Err()
+// 		if err != nil {
+// 			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
+// 		}
+// 	}
+
+// 	return res, err
+// }
+
 // Edit ,...
 func (uc CustomerUC) Edit(c context.Context, id string, data *requests.CustomerRequest, imgProfile *multipart.FileHeader, imgKtp *multipart.FileHeader) (res models.Customer, err error) {
+
+	// Invalidate the cache before update
+	cacheKey := CustomerCacheKey + id
+	err = uc.RedisClient.Client.Del(cacheKey).Err()
+	if err != nil {
+		// Log error
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_del", uc.ReqID)
+		return res, err
+	}
 
 	currentObjectUc, err := uc.FindByID(c, models.CustomerParameter{ID: id})
 	ctx := "FileUC.Upload"
@@ -150,13 +245,35 @@ func (uc CustomerUC) Edit(c context.Context, id string, data *requests.CustomerR
 		return res, err
 	}
 
-	return res, err
+	birthDate, _ := time.Parse("2006-01-02T15:04:05Z", *currentObjectUc.CustomerBirthDate)
+	birthDateString := birthDate.Format("2006-01-02")
+	currentObjectUc.CustomerBirthDate = &birthDateString
+	err = CustomerLogUC{ContractUC: uc.ContractUC}.Add(c, currentObjectUc, res, id, 0)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "add_logs", uc.ReqID)
+		return res, err
+	}
+	// Invalidate the cache before update
+	err = uc.RedisClient.Client.Del(cacheKey).Err()
+	if err != nil {
+		// Log error
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_del", uc.ReqID)
+		return res, err
+	}
+
+	// Refresh the data from the repository
+	refreshedRes, err := repo.FindByID(c, models.CustomerParameter{ID: *res.ID})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	return refreshedRes, err
 }
 
 func (uc CustomerUC) EditAddress(c context.Context, id string, data *requests.CustomerRequest) (res models.Customer, err error) {
 	repo := repository.NewCustomerRepository(uc.DB)
-	// now := time.Now().UTC()
-	// strnow := now.Format(time.RFC3339)
+
 	res = models.Customer{
 		ID:                    &id,
 		CustomerName:          &data.CustomerName,
@@ -174,10 +291,34 @@ func (uc CustomerUC) EditAddress(c context.Context, id string, data *requests.Cu
 		return res, err
 	}
 
+	// Redis integration
+	cacheKey := CustomerCacheKey + id
+
+	// Update the cache with new data
+	jsonData, err := json.Marshal(res)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
+		return res, err
+	}
+	err = uc.RedisClient.Client.Set(cacheKey, jsonData, time.Hour).Err()
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
+		return res, err
+	}
+
 	return res, err
 }
 
 func (uc CustomerUC) BackendEdit(c context.Context, id string, data *requests.CustomerRequest, imgProfile *multipart.FileHeader) (res models.Customer, err error) {
+
+	// Invalidate the cache before update
+	cacheKey := CustomerCacheKey + id
+	err = uc.RedisClient.Client.Del(cacheKey).Err()
+	if err != nil {
+		// Log error
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_del", uc.ReqID)
+		return res, err
+	}
 
 	// currentObjectUc, err := uc.FindByID(c, models.MpBankParameter{ID: id})
 	currentObjectUc, err := uc.FindByID(c, models.CustomerParameter{ID: id})
@@ -208,8 +349,7 @@ func (uc CustomerUC) BackendEdit(c context.Context, id string, data *requests.Cu
 
 	}
 	repo := repository.NewCustomerRepository(uc.DB)
-	// now := time.Now().UTC()
-	// strnow := now.Format(time.RFC3339)
+
 	res = models.Customer{
 		ID:                     &id,
 		Code:                   &data.Code,
@@ -231,8 +371,22 @@ func (uc CustomerUC) BackendEdit(c context.Context, id string, data *requests.Cu
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
 	}
+	// Invalidate the cache before refresh
+	err = uc.RedisClient.Client.Del(cacheKey).Err()
+	if err != nil {
+		// Log error
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_del", uc.ReqID)
+		return res, err
+	}
 
-	return res, err
+	// Refresh the data from the repository
+	refreshedRes, err := repo.FindByID(c, models.CustomerParameter{ID: *res.ID})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	return refreshedRes, err
 }
 
 func (uc CustomerUC) BackendAdd(c context.Context, data *requests.CustomerRequest, imgProfile *multipart.FileHeader) (res models.Customer, err error) {

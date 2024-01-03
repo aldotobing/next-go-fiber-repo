@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"nextbasis-service-v-0.1/db/repository/models"
+	"nextbasis-service-v-0.1/pkg/str"
 	"nextbasis-service-v-0.1/usecase"
 
 	"github.com/gofiber/fiber/v2"
@@ -40,6 +41,40 @@ func (h *TransactionDataSyncHandler) InvoiceSync(ctx *fiber.Ctx) error {
 	}
 	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
 	res, err := uc.DataSync(c, parameter)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *TransactionDataSyncHandler) ReturnInvoiceSync(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.CilentReturnInvoiceParameter{
+		CustomerID: ctx.Params("customer_id"),
+		Search:     ctx.Query("search"),
+		By:         ctx.Query("by"),
+		Sort:       ctx.Query("sort"),
+	}
+	uc := usecase.CilentReturnInvoiceUC{ContractUC: h.ContractUC}
+	res, err := uc.DataSync(c, parameter)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *TransactionDataSyncHandler) UndoneDataSync(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.CilentInvoiceParameter{
+		CustomerID: ctx.Params("customer_id"),
+		Search:     ctx.Query("search"),
+		By:         ctx.Query("by"),
+		Sort:       ctx.Query("sort"),
+		StartDate:  ctx.Query("start_date"),
+		EndDate:    ctx.Query("end_date"),
+		Page:       str.StringToInt(ctx.Query("page")),
+		Limit:      str.StringToInt(ctx.Query("limit")),
+	}
+	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
+	res, err := uc.UndoneDataSync(c, parameter)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }

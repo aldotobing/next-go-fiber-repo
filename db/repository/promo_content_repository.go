@@ -40,6 +40,7 @@ func (repository PromoContent) scanRows(rows *sql.Rows) (res models.PromoContent
 		&res.StartDate,
 		&res.EndDate,
 		&res.Active,
+		&res.Priority,
 	)
 	if err != nil {
 
@@ -59,6 +60,7 @@ func (repository PromoContent) scanRow(row *sql.Row) (res models.PromoContent, e
 		&res.StartDate,
 		&res.EndDate,
 		&res.Active,
+		&res.Priority,
 	)
 	if err != nil {
 		return res, err
@@ -75,6 +77,34 @@ func (repository PromoContent) SelectAll(c context.Context, parameter models.Pro
 		conditionString += ` AND start_date >= ` + `'` +
 			parameter.StartDate + `'::date` + ` AND end_date <= ` + `'` + parameter.EndDate + `'::date` +
 			` + INTERVAL ` + `'1 MONTH' `
+	} else {
+		conditionString += ` AND now()::date BETWEEN PC.START_DATE AND END_DATE `
+	}
+
+	if parameter.CustomerTypeId != "" {
+		conditionString += ` AND (PC.ID IN (SELECT promo_id FROM customer_type_eligible_promo ctep WHERE customer_type_id = ` + parameter.CustomerTypeId + `) ` +
+			` OR PC.ID NOT IN (SELECT promo_id FROM customer_type_eligible_promo)) `
+	}
+
+	if parameter.CustomerLevelID != "" {
+		conditionString += ` AND PC.ID IN (SELECT pc2.id 
+			FROM promo pc2
+			left join customer_level_eligible_promo ctep on ctep.promo_id = pc2.id
+			WHERE ctep.customer_level_id = ` + parameter.CustomerLevelID + ` or ctep.id is null)`
+	}
+
+	if parameter.BranchID != "" {
+		conditionString += ` AND PC.ID IN (SELECT pc2.id 
+			FROM promo pc2
+			left join branch_eligible_promo BEP on BEP.promo_id = pc2.id
+			WHERE BEP.branch_id = ` + parameter.BranchID + ` or BEP.id is null)`
+	}
+
+	if parameter.RegionID != "" {
+		conditionString += ` AND PC.ID IN (SELECT pc2.id 
+			FROM promo pc2
+			left join region_area_eligible_promo REP on REP.promo_id = pc2.id
+			WHERE REP.region_id = ` + parameter.RegionID + ` or REP.id is null)`
 	}
 
 	statement := models.PromoContentSelectStatement + ` ` + models.PromoContentWhereStatement +
@@ -108,6 +138,11 @@ func (repository PromoContent) FindAll(ctx context.Context, parameter models.Pro
 
 	if parameter.ID != "" {
 		conditionString += ` AND cus.id = '` + parameter.ID + `'`
+	}
+
+	if parameter.CustomerTypeId != "" {
+		conditionString += ` AND (PC.ID IN (SELECT promo_id FROM customer_type_eligible_promo ctep WHERE customer_type_id = ` + parameter.CustomerTypeId + `) ` +
+			` OR PC.ID NOT IN (SELECT promo_id FROM customer_type_eligible_promo)) `
 	}
 
 	query := models.PromoContentSelectStatement + ` ` + models.PromoContentWhereStatement + ` ` + conditionString + `
@@ -177,17 +212,44 @@ func (repository PromoContent) FindByID(c context.Context, parameter models.Prom
 // }
 
 func (repository PromoContent) Add(c context.Context, model *models.PromoContent) (res *string, err error) {
+
+	transaction, err := repository.DB.BeginTx(c, nil)
+	if err != nil {
+		return res, err
+	}
+	defer transaction.Rollback()
+
 	statement := `INSERT INTO promo (code, _name, description, url_banner,
 		start_date, end_date, active)
 	VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`
 
-	err = repository.DB.QueryRowContext(c, statement, model.Code, model.PromoName, model.PromoDescription, model.PromoUrlBanner,
+	err = transaction.QueryRowContext(c, statement, model.Code, model.PromoName, model.PromoDescription, model.PromoUrlBanner,
 		model.StartDate, model.EndDate, 1).Scan(&res)
 
 	fmt.Println("PROMO INSERT : " + statement)
 
 	if err != nil {
 		fmt.Println("INSERT PROMO BERHASIL! :)")
+		return res, err
+	}
+
+	PromoId := &res
+
+	parts := strings.Split(*model.CustomerTypeIdList, ",")
+	if len(parts) >= 1 {
+		for pi, _ := range parts {
+			linestatement := `INSERT INTO customer_type_eligible_promo (
+				customer_type_id, promo_id, created_date, modified_date)
+					VALUES ($1, $2, now(), now()) RETURNING id`
+			var resLine string
+			err = transaction.QueryRowContext(c, linestatement, parts[pi], PromoId).Scan(&resLine)
+			if err != nil {
+				return res, err
+			}
+		}
+	}
+
+	if err = transaction.Commit(); err != nil {
 		return res, err
 	}
 	return res, err
