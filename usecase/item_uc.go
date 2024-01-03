@@ -42,11 +42,11 @@ func (uc ItemUC) SelectAll(c context.Context, parameter models.ItemParameter) (r
 }
 
 // SelectAllV2 ...
-func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter) (res []viewmodel.ItemVM, err error) {
+func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter, allParam, oldprice bool) (res []viewmodel.ItemVM, err error) {
 	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(0, 0, parameter.By, parameter.Sort, models.ItemOrderBy, models.ItemOrderByrByString)
 
 	repo := repository.NewItemRepository(uc.DB)
-	data, err := repo.SelectAllV2(c, parameter)
+	data, err := repo.SelectAllV2(c, parameter, allParam)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return
@@ -56,6 +56,8 @@ func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter) 
 		additional := strings.Split(*data[i].AdditionalData, "|")
 
 		var uoms []viewmodel.Uom
+		var lowestVisibleUOM string
+		var lowestVisibleConversion float64
 		if len(additional) > 0 && additional[0] != "" {
 			// Find Lowest Price and lowest conversion
 			var lowestPrice, lowestConversion float64
@@ -70,6 +72,12 @@ func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter) 
 					lowestPrice = price
 					lowestConversion = conversion
 					newestModifiedDate = dbUpdatedDate
+				} else if oldprice {
+					lowestPrice = price
+					lowestConversion = conversion
+					newestModifiedDate = dbUpdatedDate
+
+					oldprice = false
 				}
 			}
 
@@ -82,6 +90,11 @@ func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter) 
 					if perMultiDatum[3] == "1" {
 						conversion, _ := strconv.ParseFloat(perMultiDatum[2], 64)
 						price := strconv.FormatFloat(basePrice*conversion, 'f', 2, 64)
+
+						if lowestVisibleUOM == "" || conversion < lowestVisibleConversion {
+							lowestVisibleUOM = perMultiDatum[1]
+							lowestVisibleConversion = conversion
+						}
 
 						uoms = append(uoms, viewmodel.Uom{
 							ID:               &perMultiDatum[0],
@@ -104,6 +117,7 @@ func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter) 
 				ItemCategoryName: data[i].ItemCategoryName,
 				ItemPicture:      data[i].ItemPicture,
 				Uom:              uoms,
+				LowestUom:        lowestVisibleUOM,
 			})
 		}
 	}

@@ -2,7 +2,9 @@ package usecase
 
 import (
 	"context"
+	"mime/multipart"
 
+	"nextbasis-service-v-0.1/config"
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/pkg/functioncaller"
@@ -71,6 +73,7 @@ func (uc NewsUC) Add(c context.Context, data *requests.NewsRequest) (res models.
 		StartDate:   &data.StartDate,
 		EndDate:     &data.EndDate,
 		Active:      &data.Active,
+		ImageUrl:    &data.ImageUrl,
 	}
 	res.ID, err = repo.Add(c, &res)
 	if err != nil {
@@ -79,6 +82,47 @@ func (uc NewsUC) Add(c context.Context, data *requests.NewsRequest) (res models.
 	}
 
 	return res, err
+}
+
+// AddBulk ...
+func (uc NewsUC) AddBulk(c context.Context, data requests.NewsBulkRequest) (err error) {
+
+	repo := repository.NewNewsRepository(uc.DB)
+	// now := time.Now().UTC()
+	// strnow := now.Format(time.RFC3339)
+	var in []models.News
+	for i := range data.News {
+		in = append(in, models.News{
+			Title:       &data.News[i].Title,
+			Description: &data.News[i].Description,
+			StartDate:   &data.News[i].StartDate,
+			EndDate:     &data.News[i].EndDate,
+			Active:      &data.News[i].Active,
+			ImageUrl:    &data.News[i].ImageUrl,
+		})
+	}
+
+	err = repo.AddBulk(c, in)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	return
+}
+
+// AddPhoto ...
+func (uc NewsUC) AddPhoto(c context.Context, image *multipart.FileHeader) (out string, err error) {
+	awsUc := AwsUC{ContractUC: uc.ContractUC}
+	awsUc.AWSS3.Directory = "image/news"
+	imgBannerFile, err := awsUc.Upload("image/news", image)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "upload_file", c.Value("requestid"))
+		return
+	}
+	out = config.ImagePath + imgBannerFile.FilePath
+
+	return
 }
 
 // Delete ...
@@ -105,6 +149,7 @@ func (uc NewsUC) Edit(c context.Context, id string, data *requests.NewsRequest) 
 		StartDate:   &data.StartDate,
 		EndDate:     &data.EndDate,
 		Active:      &data.Active,
+		ImageUrl:    &data.ImageUrl,
 	}
 
 	res.ID, err = repo.Edit(c, &res)

@@ -174,6 +174,11 @@ func (uc SalesOrderCustomerSyncUC) DataSync(c context.Context, parameter models.
 									}
 
 								}
+
+								// if useraccount.CustomerBranchPicPhoneNo != nil && useraccount.CustomerBranchPicName != nil {
+								// 	picMessageTemplate := helper.BuildProcessSalesOrderTransactionTemplate(salesorderHeader, orderline, useraccount, 3)
+								// 	_ = uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.CustomerBranchPicPhoneNo, picMessageTemplate)
+								// }
 							}
 						}
 

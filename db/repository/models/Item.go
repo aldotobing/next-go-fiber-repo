@@ -36,6 +36,7 @@ type ItemV2 struct {
 // ItemParameter ...
 type ItemParameter struct {
 	ID                 string `json:"item_id"`
+	IDs                string `json:"item_ids"`
 	Code               string `json:"item_code"`
 	Name               string `json:"item_name"`
 	ItemCategoryId     string `json:"item_category_id"`
@@ -131,8 +132,7 @@ var (
 		    left JOIN ITEM_UOM_LINE IUL ON IUL.ITEM_ID = DEF.ID 
 			left JOIN UOM U ON U.ID = IUL.UOM_ID
 	    WHERE def.created_date IS NOT NULL
-		AND DEF.ACTIVE = 1
-		AND DEF.HIDE = 0
+		{{ALL_PARAM}}
 		AND (LOWER(def."_name") LIKE LOWER($1))
 		group by def.id 
 		order by DEF.ID asc
@@ -143,7 +143,7 @@ var (
 		DEF.DESCRIPTION AS I_DESCRIPT,
 		DEF.ITEM_CATEGORY_ID AS CAT_IHalobroD,
 		array_to_string((array_agg(distinct ic."_name")),'|') AS category_name,
-		array_to_string((array_agg(U.ID || '#sep#' || u."_name" || '#sep#' || IUL.conversion::text || '#sep#' || ip.modified_date || '#sep#' || ip.price::text || '#sep#' || ip.price_list_version_id || '#sep#' || IUL.visibility order by iul."conversion" asc)),'|') AS additional_data,
+		array_to_string((array_agg(U.ID || '#sep#' || u."_name" || '#sep#' || IUL.conversion::text || '#sep#' || ip.modified_date || '#sep#' || ip.price::text || '#sep#' || ip.price_list_version_id || '#sep#' || IUL.visibility order by ip.modified_date desc)),'|') AS additional_data,
 		td.MULTIPLY_DATA,
 		DEF.ITEM_PICTURE
 	FROM ITEM DEF
@@ -153,7 +153,6 @@ var (
 	left JOIN UOM U ON U.ID = IP.UOM_ID
 	left join TEMP_DATA TD on TD.ID = DEF.ID
 	WHERE def.created_date IS NOT NULL
-		AND DEF.ACTIVE = 1
-		AND DEF.HIDE = 0
+		{{ALL_PARAM}}
 		AND (LOWER(def."_name") LIKE LOWER($1)) `
 )

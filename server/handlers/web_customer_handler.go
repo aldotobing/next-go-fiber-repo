@@ -70,6 +70,9 @@ func (h *WebCustomerHandler) FindAll(ctx *fiber.Ctx) error {
 		Sort:           ctx.Query("sort"),
 		PhoneNumber:    ctx.Query("phone_number"),
 		ShowInApp:      ctx.Query("show_in_app"),
+		Active:         ctx.Query("active"),
+		IsDataComplete: ctx.Query("is_data_complete"),
+		AdminValidate:  ctx.Query("admin_validate"),
 	}
 	uc := usecase.WebCustomerUC{ContractUC: h.ContractUC}
 	res, meta, err := uc.FindAll(c, parameter)
@@ -114,42 +117,38 @@ func (h *WebCustomerHandler) FindByID(ctx *fiber.Ctx) error {
 
 	target := h.FetchVisitDay(parameter)
 	if target != "" {
-		objectData.ListObject.VisitDay = &target
+		objectData.ListObject.VisitDay = target
 	}
 
-	var customerCode string
-	if res.Code != nil {
-		customerCode = *res.Code
-	}
 	objectData.CustomerTarget = helper.FetchClientDataTarget(models.CustomerTargetSemesterParameter{
-		ID:   *res.ID,
-		Code: customerCode,
+		ID:   res.ID,
+		Code: res.Code,
 	})
 
 	achievement := make(map[string]interface{})
 	quarterAchievement, _ := usecase.CustomerAchievementQuarterUC{ContractUC: h.ContractUC}.SelectAll(c, models.CustomerAchievementQuarterParameter{
-		ID: *res.ID,
+		ID: res.ID,
 		By: "cus.created_date",
 	})
 	if len(quarterAchievement) == 1 {
 		achievement["quater_achievement"] = quarterAchievement[0].Achievement
 	}
 	semesterAchievement, _ := usecase.CustomerAchievementSemesterUC{ContractUC: h.ContractUC}.SelectAll(c, models.CustomerAchievementSemesterParameter{
-		ID: *res.ID,
+		ID: res.ID,
 		By: "cus.created_date",
 	})
 	if len(semesterAchievement) == 1 {
 		achievement["semester_achievement"] = semesterAchievement[0].Achievement
 	}
 	yearAchievement, _ := usecase.CustomerAchievementYearUC{ContractUC: h.ContractUC}.SelectAll(c, models.CustomerAchievementYearParameter{
-		ID: *res.ID,
+		ID: res.ID,
 		By: "cus.created_date",
 	})
 	if len(yearAchievement) == 1 {
 		achievement["year_achievement"] = yearAchievement[0].Achievement
 	}
 	annualAchievement, _ := usecase.CustomerAchievementUC{ContractUC: h.ContractUC}.SelectAll(c, models.CustomerAchievementParameter{
-		ID: *res.ID,
+		ID: res.ID,
 		By: "cus.created_date",
 	})
 	if len(annualAchievement) == 1 {
@@ -158,8 +157,8 @@ func (h *WebCustomerHandler) FindByID(ctx *fiber.Ctx) error {
 	objectData.CustomerAchievement = achievement
 
 	objectData.SalesmanVisit = helper.FetchVisitDay(models.CustomerParameter{
-		ID:   *res.ID,
-		Code: customerCode,
+		ID:   res.ID,
+		Code: res.Code,
 	})
 
 	return h.SendResponse(ctx, objectData, nil, err, 0)
@@ -232,6 +231,28 @@ func (h *WebCustomerHandler) Edit(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
+// EditBulk ...
+func (h *WebCustomerHandler) EditBulk(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	input := new(requests.WebCustomerBulkRequest)
+	if err := ctx.BodyParser(input); err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+	if err := h.Validator.Struct(input); err != nil {
+		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
+		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+	}
+
+	uc := usecase.WebCustomerUC{ContractUC: h.ContractUC}
+	err := uc.EditBulk(c, *input)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+
+	return h.SendResponse(ctx, nil, nil, err, 0)
+}
+
 // Edit ...
 func (h *WebCustomerHandler) Add(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
@@ -252,9 +273,9 @@ func (h *WebCustomerHandler) Add(ctx *fiber.Ctx) error {
 
 	imgProfile, _ := ctx.FormFile("img_profile")
 	uc := usecase.WebCustomerUC{ContractUC: h.ContractUC}
-	res, err := uc.Add(c, input, imgProfile)
+	_, err = uc.Add(c, input, imgProfile)
 
-	return h.SendResponse(ctx, res, nil, err, 0)
+	return h.SendResponse(ctx, nil, nil, err, 0)
 }
 
 // ReportSelect ...

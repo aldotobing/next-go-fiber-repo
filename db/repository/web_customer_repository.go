@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
+	"nextbasis-service-v-0.1/server/requests"
 )
 
 // ICustomerRepository ...
@@ -15,8 +16,11 @@ type IWebCustomerRepository interface {
 	SelectAll(c context.Context, parameter models.WebCustomerParameter) ([]models.WebCustomer, error)
 	FindAll(ctx context.Context, parameter models.WebCustomerParameter) ([]models.WebCustomer, int, error)
 	FindByID(c context.Context, parameter models.WebCustomerParameter) (models.WebCustomer, error)
-	Edit(c context.Context, model *models.WebCustomer) (*string, error)
-	Add(c context.Context, model *models.WebCustomer) (*string, error)
+	FindByIDNoCache(c context.Context, parameter models.WebCustomerParameter) (models.WebCustomer, error)
+	FindByCodes(c context.Context, parameter models.WebCustomerParameter) (data []models.WebCustomer, err error)
+	Edit(c context.Context, model models.WebCustomer) (string, error)
+	EditBulk(c context.Context, in requests.WebCustomerBulkRequest) error
+	Add(c context.Context, model models.WebCustomer) (string, error)
 	ReportSelect(c context.Context, parameter models.WebCustomerReportParameter) ([]models.WebCustomer, error)
 }
 
@@ -85,6 +89,7 @@ func (repository WebCustomerRepository) scanRows(rows *sql.Rows) (res models.Web
 		&res.CustomerUserID,
 		&res.CustomerUserName,
 		&res.CustomerUserToken,
+		&res.CustomerUserFirstLoginTime,
 		&res.ModifiedBy,
 		&res.ModifiedDate,
 		&res.CustomerPriceListID,
@@ -93,6 +98,7 @@ func (repository WebCustomerRepository) scanRows(rows *sql.Rows) (res models.Web
 		&res.IsDataComplete,
 		&res.SalesmanTypeCode,
 		&res.SalesmanTypeName,
+		&res.CustomerAdminValidate,
 	)
 	if err != nil {
 
@@ -153,6 +159,8 @@ func (repository WebCustomerRepository) scanRowsReport(rows *sql.Rows) (res mode
 		&res.SalesmanTypeCode,
 		&res.SalesmanTypeName,
 		&res.CustomerUserToken,
+		&res.CustomerUserFirstLoginTime,
+		&res.CustomerAdminValidate,
 	)
 	if err != nil {
 
@@ -217,6 +225,7 @@ func (repository WebCustomerRepository) scanRow(row *sql.Row) (res models.WebCus
 		&res.CustomerUserID,
 		&res.CustomerUserName,
 		&res.CustomerUserToken,
+		&res.CustomerUserFirstLoginTime,
 		&res.ModifiedBy,
 		&res.ModifiedDate,
 		&res.CustomerPriceListID,
@@ -225,6 +234,7 @@ func (repository WebCustomerRepository) scanRow(row *sql.Row) (res models.WebCus
 		&res.IsDataComplete,
 		&res.SalesmanTypeCode,
 		&res.SalesmanTypeName,
+		&res.CustomerAdminValidate,
 	)
 	if err != nil {
 		return res, err
@@ -259,6 +269,10 @@ func (repository WebCustomerRepository) SelectAll(c context.Context, parameter m
 
 	if parameter.SalesmanTypeID != "" {
 		conditionString += ` AND st.id = ` + parameter.SalesmanTypeID
+	}
+
+	if parameter.Code != "" {
+		conditionString += ` AND C.CUSTOMER_CODE IN (` + parameter.Code + `)`
 	}
 
 	statement := models.WebCustomerSelectStatement + ` ` + models.WebCustomerWhereStatement +
@@ -383,6 +397,24 @@ func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter m
 		whereStatement = models.WebCustomerWhereStatementAll
 	}
 
+	if parameter.Active != "" {
+		conditionString += `AND C.ACTIVE = '` + parameter.Active + `'`
+	}
+
+	if parameter.IsDataComplete != "" {
+		if parameter.IsDataComplete == "1" {
+			conditionString += `AND C.is_data_completed = true`
+		} else {
+			conditionString += `AND C.is_data_completed = false`
+		}
+	}
+
+	if parameter.AdminValidate == "1" {
+		conditionString += `AND C.admin_validate = true`
+	} else if parameter.AdminValidate == "0" {
+		conditionString += `AND C.admin_validate = false`
+	}
+
 	query := models.WebCustomerSelectStatement + ` ` + whereStatement + ` ` + conditionString + `
 		AND (LOWER(c.customer_name) LIKE $` + strconv.Itoa(index) + ` or LOWER(c.customer_code) LIKE $` + strconv.Itoa(index) + `) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $` + strconv.Itoa(index+1) + ` LIMIT $` + strconv.Itoa(index+2)
 
@@ -415,6 +447,41 @@ func (repository WebCustomerRepository) FindByID(c context.Context, parameter mo
 	statement := models.WebCustomerSelectStatement + ` WHERE c.id = $1`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
 
+	fmt.Println(statement)
+
+	data, err = repository.scanRow(row)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
+}
+
+// FindByCodes ...
+func (repository WebCustomerRepository) FindByCodes(c context.Context, parameter models.WebCustomerParameter) (data []models.WebCustomer, err error) {
+	statement := models.WebCustomerSelectStatement + ` WHERE c.customer_code in (` + parameter.Code + `)`
+	rows, err := repository.DB.QueryContext(c, statement)
+	if err != nil {
+		return
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		temp, err := repository.scanRows(rows)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
+	}
+
+	return data, nil
+}
+
+// FindByID ...
+func (repository WebCustomerRepository) FindByIDNoCache(c context.Context, parameter models.WebCustomerParameter) (data models.WebCustomer, err error) {
+	statement := models.WebCustomerSelectStatement + ` WHERE c.id = $1`
+	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
+
 	// fmt.Println(statement)
 
 	data, err = repository.scanRow(row)
@@ -426,7 +493,7 @@ func (repository WebCustomerRepository) FindByID(c context.Context, parameter mo
 }
 
 // Edit ...
-func (repository WebCustomerRepository) Edit(c context.Context, model *models.WebCustomer) (res *string, err error) {
+func (repository WebCustomerRepository) Edit(c context.Context, model models.WebCustomer) (res string, err error) {
 	statement := `UPDATE customer SET 
 		customer_name = $1, 
 		customer_address = $2, 
@@ -444,27 +511,29 @@ func (repository WebCustomerRepository) Edit(c context.Context, model *models.We
 		customer_cp_name = $14,
 		modified_date = now(),
 		modified_by = $15,
-		show_in_apps = $16
-	WHERE id = $17
+		show_in_apps = $16,
+		admin_validate = $17
+	WHERE id = $18
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
-		model.CustomerName,
-		model.CustomerAddress,
-		model.CustomerUserID,
-		model.CustomerPhone,
-		model.CustomerReligion,
-		model.CustomerNik,
-		model.CustomerLevelID,
-		model.CustomerGender,
-		model.Code,
-		model.CustomerEmail,
-		model.CustomerBirthDate,
-		model.CustomerProfilePicture,
-		model.CustomerPhotoKtp,
-		model.CustomerCpName,
-		model.UserID,
-		model.ShowInApp,
-		model.ID).Scan(&res)
+		model.CustomerName.String,
+		model.CustomerAddress.String,
+		model.CustomerUserID.String,
+		model.CustomerPhone.String,
+		model.CustomerReligion.String,
+		model.CustomerNik.String,
+		model.CustomerLevelID.Int64,
+		model.CustomerGender.String,
+		model.Code.String,
+		model.CustomerEmail.String,
+		model.CustomerBirthDate.String,
+		model.CustomerProfilePicture.String,
+		model.CustomerPhotoKtp.String,
+		model.CustomerCpName.String,
+		model.UserID.Int64,
+		model.ShowInApp.String,
+		model.CustomerAdminValidate,
+		model.ID.String).Scan(&res)
 
 	if err != nil {
 		return res, err
@@ -472,8 +541,31 @@ func (repository WebCustomerRepository) Edit(c context.Context, model *models.We
 	return res, err
 }
 
+// EditBulk ...
+func (repo WebCustomerRepository) EditBulk(c context.Context, in requests.WebCustomerBulkRequest) (err error) {
+	var customersCode string
+	for _, datum := range in.Customers {
+		if customersCode == "" {
+			customersCode += `'` + datum.Code + `'`
+		} else {
+			customersCode += `, '` + datum.Code + `'`
+		}
+	}
+	statement := `UPDATE customer SET 
+		show_in_apps = $1,
+		active = $2,
+		modified_by = $3
+	WHERE customer_code in (` + customersCode + `)`
+	err = repo.DB.QueryRowContext(c, statement,
+		in.ShowInApp,
+		in.Active,
+		in.UserID).Err()
+
+	return
+}
+
 // Add ...
-func (repository WebCustomerRepository) Add(c context.Context, model *models.WebCustomer) (res *string, err error) {
+func (repository WebCustomerRepository) Add(c context.Context, model models.WebCustomer) (res string, err error) {
 	statement := `INSERT INTO customer (
 			customer_name, customer_address, customer_phone, customer_email,
 			customer_cp_name, customer_profile_picture, created_date, modified_date, 
@@ -489,14 +581,14 @@ func (repository WebCustomerRepository) Add(c context.Context, model *models.Web
 			$14, $15, $16
 		) RETURNING id`
 
-	fmt.Println(statement)
+	customerUserID, _ := strconv.Atoi(model.CustomerUserID.String)
 
 	err = repository.DB.QueryRowContext(c, statement,
-		model.CustomerName, model.CustomerAddress, model.CustomerPhone, model.CustomerEmail,
-		model.CustomerCpName, model.CustomerProfilePicture,
-		model.CustomerTaxCalcMethod, model.CustomerBranchID, model.Code,
-		model.CustomerSalesmanID, model.CustomerUserID, model.CustomerReligion, model.CustomerNik,
-		model.CustomerLevelID, model.CustomerGender, model.CustomerBirthDate,
+		model.CustomerName.String, model.CustomerAddress.String, model.CustomerPhone.String, model.CustomerEmail.String,
+		model.CustomerCpName.String, model.CustomerProfilePicture.String,
+		model.CustomerTaxCalcMethod.String, model.CustomerBranchID.String, model.Code.String,
+		model.CustomerSalesmanID.String, customerUserID, model.CustomerReligion.String, model.CustomerNik.String,
+		int(model.CustomerLevelID.Int64), model.CustomerGender.String, model.CustomerBirthDate.String,
 	).Scan(&res)
 
 	if err != nil {

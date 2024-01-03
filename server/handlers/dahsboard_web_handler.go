@@ -62,10 +62,11 @@ func (h *DashboardWebHandler) GetRegionDetailData(ctx *fiber.Ctx) error {
 
 	uc := usecase.DashboardWebUC{ContractUC: h.ContractUC}
 	res, err := uc.GetRegionDetailData(c, models.DashboardWebRegionParameter{
-		GroupID:   ctx.Query("group_id"),
-		RegionID:  ctx.Query("region_id"),
-		StartDate: ctx.Query("start_date"),
-		EndDate:   ctx.Query("end_date"),
+		GroupID:         ctx.Query("group_id"),
+		RegionID:        ctx.Query("region_id"),
+		StartDate:       ctx.Query("start_date"),
+		EndDate:         ctx.Query("end_date"),
+		CustomerLevelID: ctx.Query("customer_level_id"),
 	})
 
 	return h.SendResponse(ctx, res, nil, err, 0)
@@ -175,14 +176,15 @@ func (h *DashboardWebHandler) GetAllBranchDataByUserID(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.DashboardWebBranchParameter{
-		Search:    ctx.Query("search"),
-		Page:      str.StringToInt(ctx.Query("page")),
-		Limit:     str.StringToInt(ctx.Query("limit")),
-		By:        ctx.Query("by"),
-		Sort:      ctx.Query("sort"),
-		StartDate: ctx.Query("start_date"),
-		EndDate:   ctx.Query("end_date"),
-		UserID:    ctx.Query("user_id"),
+		CustomerLevelID: ctx.Query("customer_level_id"),
+		Search:          ctx.Query("search"),
+		Page:            str.StringToInt(ctx.Query("page")),
+		Limit:           str.StringToInt(ctx.Query("limit")),
+		By:              ctx.Query("by"),
+		Sort:            ctx.Query("sort"),
+		StartDate:       ctx.Query("start_date"),
+		EndDate:         ctx.Query("end_date"),
+		UserID:          ctx.Query("user_id"),
 	}
 
 	uc := usecase.DashboardWebUC{ContractUC: h.ContractUC}
@@ -324,6 +326,30 @@ func (h *DashboardWebHandler) GetOmzetValueByCustomerID(ctx *fiber.Ctx) error {
 
 	uc := usecase.DashboardWebUC{ContractUC: h.ContractUC}
 	res, err := uc.GetOmzetValueByCustomerID(c, parameter, customerID)
+	if err != nil {
+		h.SendResponse(ctx, res, nil, err, 0)
+	}
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *DashboardWebHandler) GetOmzetValueGraph(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.DashboardWebBranchParameter{
+		Year:            ctx.Query("year"),
+		ItemID:          ctx.Query("item_id"),
+		ItemCategoryID:  ctx.Query("item_category_id"),
+		ItemIDs:         ctx.Query("item_ids"),
+		ItemCategoryIDs: ctx.Query("item_category_ids"),
+		UserID:          ctx.Query("user_id"),
+		RegionID:        ctx.Query("region_id"),
+		RegionGroupID:   ctx.Query("region_group_id"),
+		BranchID:        ctx.Query("branch_id"),
+	}
+
+	uc := usecase.DashboardWebUC{ContractUC: h.ContractUC}
+	res, err := uc.GetOmzetValueGraph(c, parameter)
 	if err != nil {
 		h.SendResponse(ctx, res, nil, err, 0)
 	}

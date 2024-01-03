@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -14,6 +13,7 @@ type INewsRepository interface {
 	SelectAll(c context.Context, parameter models.NewsParameter) ([]models.News, error)
 	FindAll(ctx context.Context, parameter models.NewsParameter) ([]models.News, int, error)
 	Add(c context.Context, model *models.News) (*string, error)
+	AddBulk(c context.Context, model []models.News) error
 	// FindByID(c context.Context, parameter models.SalesInvoiceParameter) (models.SalesInvoice, error)
 	// FindByDocumentNo(c context.Context, parameter models.SalesInvoiceParameter) (models.SalesInvoice, error)
 	// FindByCustomerId(c context.Context, parameter models.SalesInvoiceParameter) (models.SalesInvoice, error)
@@ -35,7 +35,8 @@ func NewNewsRepository(DB *sql.DB) INewsRepository {
 // Scan rows
 func (repository NewsRepository) scanRows(rows *sql.Rows) (res models.News, err error) {
 	err = rows.Scan(
-		&res.ID, &res.Title, &res.Description, &res.StartDate, &res.EndDate,
+		&res.ID, &res.Title, &res.Description, &res.StartDate, &res.EndDate, &res.ImageUrl,
+		&res.Active,
 	)
 	if err != nil {
 
@@ -48,7 +49,8 @@ func (repository NewsRepository) scanRows(rows *sql.Rows) (res models.News, err 
 // Scan row
 func (repository NewsRepository) scanRow(row *sql.Row) (res models.News, err error) {
 	err = row.Scan(
-		&res.ID, &res.Title, &res.Description, &res.StartDate, &res.StartDate,
+		&res.ID, &res.Title, &res.Description, &res.StartDate, &res.EndDate, &res.ImageUrl,
+		&res.Active,
 	)
 	if err != nil {
 		return res, err
@@ -68,8 +70,6 @@ func (repository NewsRepository) SelectAll(c context.Context, parameter models.N
 	conditionString += ` AND now()::date between def.start_date and def.end_date `
 	statement := models.NewsSelectStatement + ` ` + models.NewsWhereStatement +
 		` AND (LOWER(def."title") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
-	fmt.Println(statement)
-	fmt.Println(parameter.StartDate)
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Title)+"%")
 
 	if err != nil {
@@ -124,15 +124,33 @@ func (repository NewsRepository) FindAll(ctx context.Context, parameter models.N
 }
 
 func (repository NewsRepository) Add(c context.Context, model *models.News) (res *string, err error) {
-	statement := `INSERT INTO news (start_date, end_date, title, description, active)
-	VALUES ($1, $2, $3, $4, $5) RETURNING id`
+	statement := `INSERT INTO news (start_date, end_date, title, description, active, image_url)
+	VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`
 
-	err = repository.DB.QueryRowContext(c, statement, model.StartDate, model.EndDate, model.Title, model.Description, 1).Scan(&res)
+	err = repository.DB.QueryRowContext(c, statement,
+		model.StartDate, model.EndDate, model.Title, model.Description, 1, model.ImageUrl).Scan(&res)
 
 	if err != nil {
 		return res, err
 	}
 	return res, err
+}
+
+func (repository NewsRepository) AddBulk(c context.Context, model []models.News) (err error) {
+	var values string
+	for _, datum := range model {
+		if values == "" {
+			values += `('` + *datum.StartDate + `', '` + *datum.EndDate + `', '` + *datum.Title + `', '` + *datum.Description + `', '` + *datum.Active + `', '` + *datum.ImageUrl + `')`
+		} else {
+			values += `, ('` + *datum.StartDate + `', '` + *datum.EndDate + `', '` + *datum.Title + `', '` + *datum.Description + `', '` + *datum.Active + `', '` + *datum.ImageUrl + `')`
+		}
+	}
+	statement := `INSERT INTO news (start_date, end_date, title, description, active, image_url)
+	VALUES ` + values
+
+	err = repository.DB.QueryRowContext(c, statement).Err()
+
+	return err
 }
 
 // Delete ...
@@ -149,9 +167,18 @@ func (repository NewsRepository) Delete(c context.Context, id string) (res strin
 
 // Edit ...
 func (repository NewsRepository) Edit(c context.Context, model *models.News) (res *string, err error) {
-	statement := `UPDATE news SET start_date = $1, end_date = $2, title = $3, description = $4, active = $5 WHERE id = $6 RETURNING id`
+	statement := `UPDATE news SET 
+		start_date = $1, 
+		end_date = $2, 
+		title = $3, 
+		description = $4, 
+		active = $5,
+		image_url = $6
+	WHERE id = $7 RETURNING id`
 
-	err = repository.DB.QueryRowContext(c, statement, model.StartDate, model.EndDate, model.Title, model.Description, model.Active, model.ID).Scan(&res)
+	err = repository.DB.QueryRowContext(c, statement,
+		model.StartDate, model.EndDate, model.Title, model.Description, model.Active, model.ImageUrl,
+		model.ID).Scan(&res)
 	if err != nil {
 		return res, err
 	}

@@ -17,6 +17,7 @@ type Customer struct {
 	CustomerBranchAddress      *string `json:"customer_branch_address"`
 	CustomerBranchLat          *string `json:"customer_branch_lat"`
 	CustomerBranchLng          *string `json:"customer_branch_lng"`
+	CustomerBranchPicName      *string `json:"customer_branch_pic_name"`
 	CustomerBranchPicPhoneNo   *string `json:"customer_branch_pic_phone_no"`
 	CustomerRegionID           *string `json:"customer_region_id"`
 	CustomerRegionCode         *string `json:"customer_region_code"`
@@ -57,27 +58,30 @@ type Customer struct {
 	CustomerFCMToken           *string `json:"customer_fcm_token"`
 	CustomerPaymentTermsID     *string `json:"customer_payment_terms_id"`
 	CustomerPaymentTermsCode   *string `json:"customer_payment_terms_code"`
+	CustomerAdminValidate      bool    `json:"customer_admin_validate"`
 }
 
 // CustomerParameter ...
 type CustomerParameter struct {
-	ID              string `json:"customer_id"`
-	Code            string `json:"customer_code"`
-	Phone           string `json:"customer_phone"`
-	Name            string `json:"customer_name"`
-	CustomerTypeId  string `json:"custome_type_id"`
-	CustomerLevelId string `json:"custome_level_id"`
-	UserId          string `json:"admin_user_id"`
-	BranchID        string `json:"branch_id"`
-	RegionID        string `json:"region_id"`
-	RegionGroupID   string `json:"region_group_id"`
-	FlagToken       bool   `json:"flag_token"`
-	Search          string `json:"search"`
-	Page            int    `json:"page"`
-	Offset          int    `json:"offset"`
-	Limit           int    `json:"limit"`
-	By              string `json:"by"`
-	Sort            string `json:"sort"`
+	ID               string `json:"customer_id"`
+	Code             string `json:"customer_code"`
+	Phone            string `json:"customer_phone"`
+	Name             string `json:"customer_name"`
+	CustomerTypeId   string `json:"custome_type_id"`
+	CustomerLevelId  string `json:"custome_level_id"`
+	CustomerCodes    string `json:"customer_codes"`
+	CustomerReligion string `json:"customer_religion"`
+	UserId           string `json:"admin_user_id"`
+	BranchID         string `json:"branch_id"`
+	RegionID         string `json:"region_id"`
+	RegionGroupID    string `json:"region_group_id"`
+	FlagToken        bool   `json:"flag_token"`
+	Search           string `json:"search"`
+	Page             int    `json:"page"`
+	Offset           int    `json:"offset"`
+	Limit            int    `json:"limit"`
+	By               string `json:"by"`
+	Sort             string `json:"sort"`
 }
 
 var (
@@ -113,6 +117,7 @@ var (
 		B.ADDRESS AS BRANCH_ADRESS,
 		B.LATITUDE AS BRANCH_LATITUDE,
 		B.LONGITUDE AS BRANCH_LONGITUDE,
+		B.PIC_NAME AS PIC_NAME,
 		B.PIC_PHONE_NO AS PIC_PHONE_NO,
 		REG.ID as REGION_ID,
 		REG.CODE AS REGION_CODE,
@@ -143,8 +148,8 @@ var (
 		c.customer_nik,
 		cl._name as cus_level_name,
 		C.price_list_id,C.price_list_version_id,
-		us.fcm_token,top.id as top_id, top.code as top_code
-
+		us.fcm_token,top.id as top_id, top.code as top_code,
+		c.admin_validate
 	FROM CUSTOMER C
 	LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
 	LEFT JOIN REGION REG ON REG.ID = B.REGION_ID

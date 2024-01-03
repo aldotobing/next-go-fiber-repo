@@ -11,5 +11,6 @@ type ItemVM struct {
 	ItemCategoryName   *string `json:"item_category_name"`
 	ItemPicture        *string `json:"item_picture"`
 	PriceListVersionId *string `json:"price_list_version_id"`
+	LowestUom          string  `json:"lowest_uom"`
 	Uom                []Uom   `json:"item_uom"`
 }

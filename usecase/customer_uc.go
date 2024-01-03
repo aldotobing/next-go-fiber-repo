@@ -50,7 +50,8 @@ func (uc CustomerUC) SelectAll(c context.Context, parameter models.CustomerParam
 
 	// Define the cache key
 	cacheKey := CustomerCacheKey + parameter.By + ":" + parameter.Sort + ":" + parameter.BranchID + ":" +
-		parameter.CustomerTypeId + ":" + parameter.RegionID + ":" + parameter.RegionGroupID + ":" + parameter.CustomerLevelId
+		parameter.CustomerTypeId + ":" + parameter.RegionID + ":" + parameter.RegionGroupID + ":" + parameter.CustomerLevelId +
+		":" + parameter.CustomerCodes + ":" + parameter.CustomerReligion
 
 	// Try to get data from Redis cache first
 	err = uc.RedisClient.GetFromRedis(cacheKey, &res)
@@ -241,6 +242,15 @@ func (uc CustomerUC) Edit(c context.Context, id string, data *requests.CustomerR
 	res.ID, err = repo.Edit(c, &res)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	birthDate, _ := time.Parse("2006-01-02T15:04:05Z", *currentObjectUc.CustomerBirthDate)
+	birthDateString := birthDate.Format("2006-01-02")
+	currentObjectUc.CustomerBirthDate = &birthDateString
+	err = CustomerLogUC{ContractUC: uc.ContractUC}.Add(c, currentObjectUc, res, id, 0)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "add_logs", uc.ReqID)
 		return res, err
 	}
 	// Invalidate the cache before update

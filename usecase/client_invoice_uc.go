@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -153,6 +154,8 @@ func (uc CilentInvoiceUC) DataSync(c context.Context, parameter models.CilentInv
 	strnow := now.Format(time.RFC3339)
 	parameter.DateParam = strnow
 
+	fmt.Println("Get Date" + parameter.DateParam)
+
 	jsonReq, err := json.Marshal(parameter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal json: %w", err)
@@ -172,12 +175,18 @@ func (uc CilentInvoiceUC) DataSync(c context.Context, parameter models.CilentInv
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute request: %w", err)
 	}
+
+	if resp == nil || resp.Body == nil {
+		return nil, errors.New("response or response body is nil")
+	}
 	defer resp.Body.Close()
 
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
+
+	fmt.Println("Response Body:", string(bodyBytes))
 
 	var res []models.CilentInvoice
 	if err := json.Unmarshal(bodyBytes, &res); err != nil {

@@ -1,6 +1,8 @@
 package models
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 // DashboardWeb ...
 type DashboardWeb struct {
@@ -59,6 +61,7 @@ type DashboardWebBranchDetail struct {
 	SalesmanName             *string `json:"salesman_name"`
 	SalesmanTypeCode         *string `json:"salesman_type_code"`
 	SalesmanTypeName         *string `json:"salesman_type_name"`
+	CustomerFirstLogin       *string `json:"customer_user_first_login_time"`
 }
 
 type DashboardWebGetWithUserID struct {
@@ -88,18 +91,21 @@ type DashboardWebGetWithUserID struct {
 	CompleteCustomer        *string `json:"complete_customer"`
 }
 type OmzetValueModel struct {
-	RegionID            sql.NullString `json:"region_id"`
-	RegionName          sql.NullString `json:"region_name"`
-	RegionGroupID       sql.NullString `json:"region_group_id"`
-	RegionGroupName     sql.NullString `json:"region_group_name"`
-	BranchID            sql.NullString `json:"branch_id"`
-	CustomerID          sql.NullString `json:"customer_id"`
-	ItemID              sql.NullString `json:"item_id"`
-	ItemName            sql.NullString `json:"item_name"`
-	TotalGrossAmount    string         `json:"total_gross_amount"`
-	TotalNettAmount     string         `json:"total_nett_amount"`
-	TotalQuantity       string         `json:"total_quantity"`
-	TotalActiveCustomer string         `json:"total_active_customer"`
+	TransactionYearMonth string         `json:"transaction_year_month"`
+	TransactionYear      string         `json:"transaction_year"`
+	TransactionMonthName string         `json:"transaction_month_name"`
+	RegionID             sql.NullString `json:"region_id"`
+	RegionName           sql.NullString `json:"region_name"`
+	RegionGroupID        sql.NullString `json:"region_group_id"`
+	RegionGroupName      sql.NullString `json:"region_group_name"`
+	BranchID             sql.NullString `json:"branch_id"`
+	CustomerID           sql.NullString `json:"customer_id"`
+	ItemID               sql.NullString `json:"item_id"`
+	ItemName             sql.NullString `json:"item_name"`
+	TotalGrossAmount     string         `json:"total_gross_amount"`
+	TotalNettAmount      string         `json:"total_nett_amount"`
+	TotalQuantity        string         `json:"total_quantity"`
+	TotalActiveCustomer  string         `json:"total_active_customer"`
 }
 
 type OmzetValueBranchModel struct {
@@ -177,17 +183,18 @@ type DashboardWebParameter struct {
 }
 
 type DashboardWebRegionParameter struct {
-	BranchID  string `json:"branch_id"`
-	GroupID   string `json:"group_id"`
-	RegionID  string `json:"region_id"`
-	Search    string `json:"search"`
-	Page      int    `json:"page"`
-	Offset    int    `json:"offset"`
-	Limit     int    `json:"limit"`
-	By        string `json:"by"`
-	Sort      string `json:"sort"`
-	StartDate string `json:"start_date"`
-	EndDate   string `json:"end_date"`
+	BranchID        string `json:"branch_id"`
+	GroupID         string `json:"group_id"`
+	RegionID        string `json:"region_id"`
+	CustomerLevelID string `json:"customer_level_id"`
+	Search          string `json:"search"`
+	Page            int    `json:"page"`
+	Offset          int    `json:"offset"`
+	Limit           int    `json:"limit"`
+	By              string `json:"by"`
+	Sort            string `json:"sort"`
+	StartDate       string `json:"start_date"`
+	EndDate         string `json:"end_date"`
 }
 
 type DashboardWebBranchParameter struct {
@@ -211,6 +218,7 @@ type DashboardWebBranchParameter struct {
 	CustomerLevelID string `json:"customer_level_id"`
 	CustomerTypeID  string `json:"customer_type_id"`
 	BranchArea      string `json:"branch_area"`
+	Year            string `json:"year"`
 }
 
 var (
@@ -436,7 +444,7 @@ var (
 		
 	 `
 	DashboardWebRegionDetailByRegionIDSelectStatement = `
-	select * from os_fetch_dashborad_regiongroupdetaildata_by_region_id($1::integer,$2::integer,$3,$4,null,null,null) `
+	select * from os_fetch_dashborad_regiongroupdetaildata_by_region_id($1::integer,$2::integer,$3,$4,$5,null,null,null) `
 
 	DashboardWebCustomerDetailByRegionDetailByRegionIDSelectStatement = `
 	select * from os_fetch_dashborad_get_total_user_by_branch_id($1::integer,$2,$3) `
@@ -450,7 +458,7 @@ var (
 	DashboardWebBranchDetailSelectStatement = ` select * from os_fetch_dashborad_branchcustomerdata($1::integer,$2,$3,null,null,null)
 	   `
 
-	DashboardWebReportBranchDetailSelectStatement = ` select * from os_fetch_dashborad_branchcustomerdata2($1::varchar,$2,$3::varchar,$4,$5,null,null,null)
+	DashboardWebReportBranchDetailSelectStatement = ` select * from os_fetch_dashborad_branchcustomerdata4($1::varchar,$2,$3::varchar,$4,$5,null,null,null)
 	   `
 
 	DashboardWebBranchDetailSelectWithUserIDStatement = ` select * from os_fetch_dashborad_customerdata_using_user_id($1::integer,$2,$3,null,null,null)

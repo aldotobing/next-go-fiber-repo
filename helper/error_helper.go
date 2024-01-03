@@ -30,6 +30,10 @@ var (
 	RecordAlreadyExist = "record_already_exist"
 	// NameAlreadyExist ...
 	NameAlreadyExist = "name_already_exist"
+	// CustomerShowInAppFalse ...
+	CustomerShowInAppFalse = "customer_not_show_in_app"
+	// CustomerInactive ...
+	CustomerInactive = "customer_inactive"
 	// ReferencedRecord ...
 	ReferencedRecord = "referenced_record"
 	// InvalidParameter ...
@@ -151,6 +155,9 @@ var (
 	InvalidMinimumAmountOrder = "Order Minimal "
 
 	InvalidPhoneOrCode = "Nomor Hp atau Kode Toko Salah"
+
+	InvalidCustomerNotShown  = `Toko anda Belum diberi akses untuk login My Sidomuncul. Hubungi admin atau salesman untuk diberikan akses login My Sidomuncul`
+	InvalidCustomerNotActive = `Toko anda Belum diberi akses untuk login My Sidomuncul. Hubungi admin atau salesman untuk diberikan akses login My Sidomuncul`
 
 	CidNotPresent = "cid_not_present"
 

@@ -18,6 +18,7 @@ type ItemDetails struct {
 	PriceListVersionId      *string        `json:"price_list_version_id"`
 	Visibility              *string        `json:"visibility"`
 	ItemPriceCreatedAT      sql.NullString `json:"item_price_crated_at"`
+	ItemPriceUpdatedAt      sql.NullString `json:"item_price_crated_at"`
 }
 
 // ItemDetailsParameter ...
@@ -65,7 +66,8 @@ var (
 		IUL.CONVERSION AS IUL_CONVERSION,
 		IP.PRICE AS ITEM_PRICE,
 		IP.PRICE_LIST_VERSION_ID AS PRICE_LIST_VERSION_ID,
-		IP.created_date
+		IP.created_date, 
+		IP.modified_date 
 	FROM ITEM_UOM_LINE IUL
 	LEFT JOIN ITEM DEF ON IUL.ITEM_ID = DEF.ID
 	LEFT JOIN ITEM_CATEGORY IC ON IC.ID = DEF.ITEM_CATEGORY_ID

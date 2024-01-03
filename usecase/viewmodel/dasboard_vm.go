@@ -140,6 +140,14 @@ type OmzetValueItemVM struct {
 	Omzet    *string `json:"omzet"`
 }
 
+type OmzetValueGraphVM struct {
+	ID                   string `json:"id"`
+	TransactionYear      string `json:"transaction_year"`
+	TransactionMonthName string `json:"transaction_month_name"`
+	TotalQuantity        string `json:"total_quantity"`
+	TotalOmzet           string `json:"total_omzet"`
+}
+
 type DashboardTrackingInvoiceVM struct {
 	RegionGroupName             string `json:"region_group_name"`
 	RegionName                  string `json:"region_name"`

@@ -23,11 +23,12 @@ type VoucherHandler struct {
 func (h *VoucherHandler) FindAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 	parameter := models.VoucherParameter{
-		Search: ctx.Query("search"),
-		Page:   str.StringToInt(ctx.Query("page")),
-		Limit:  str.StringToInt(ctx.Query("limit")),
-		By:     ctx.Query("by"),
-		Sort:   ctx.Query("sort"),
+		Search:  ctx.Query("search"),
+		ShowAll: ctx.Query("show_all"),
+		Page:    str.StringToInt(ctx.Query("page")),
+		Limit:   str.StringToInt(ctx.Query("limit")),
+		By:      ctx.Query("by"),
+		Sort:    ctx.Query("sort"),
 	}
 	uc := usecase.VoucherUC{ContractUC: h.ContractUC}
 	res, meta, err := uc.FindAll(c, parameter)
@@ -42,9 +43,10 @@ func (h *VoucherHandler) FindAll(ctx *fiber.Ctx) error {
 func (h *VoucherHandler) SelectAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 	parameter := models.VoucherParameter{
-		Search: ctx.Query("search"),
-		By:     ctx.Query("by"),
-		Sort:   ctx.Query("sort"),
+		Search:  ctx.Query("search"),
+		ShowAll: ctx.Query("show_all"),
+		By:      ctx.Query("by"),
+		Sort:    ctx.Query("sort"),
 	}
 	uc := usecase.VoucherUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectAll(c, parameter)

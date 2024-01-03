@@ -91,7 +91,7 @@ func (uc ItemDetailsUC) FindByIDV2(c context.Context, parameter models.ItemDetai
 		price, _ := strconv.ParseFloat(*datum.ItemDetailsPrice, 64)
 		conversion, _ := strconv.ParseFloat(*datum.UomLineConversion, 64)
 
-		dbUpdatedData, _ := time.Parse("2006-01-02T15:04:05.999999Z", datum.ItemPriceCreatedAT.String)
+		dbUpdatedData, _ := time.Parse("2006-01-02T15:04:05.999999Z", datum.ItemPriceUpdatedAt.String)
 		if (updatedData.Before(dbUpdatedData)) || lowestPrice == 0 {
 			lowestPrice = price
 			lowestConversion = conversion

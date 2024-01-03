@@ -28,4 +28,6 @@ type CustomerOrderHeaderRequest struct {
 	DiscAmount           string `json:"disc_amount"`
 	LineList             string `json:"line_list"`
 	VoucherRedeemID      string `json:"voucher_redeem_id"`
+	OldPriceID           string `json:"old_price_id"`
+	OldPriceQuantity     string `json:"old_price_qty"`
 }

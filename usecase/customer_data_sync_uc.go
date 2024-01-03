@@ -3,6 +3,7 @@ package usecase
 import (
 	"bytes"
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -83,7 +84,7 @@ func (uc CustomerDataSyncUC) Edit(c context.Context, id string, data *requests.C
 // SelectAll ...
 func (uc CustomerDataSyncUC) DataSync(c context.Context, parameter models.CustomerDataSyncParameter) (res []models.CustomerDataSync, err error) {
 	repo := repository.NewCustomerDataSyncRepository(uc.DB)
-
+	baseuserrepo := repository.NewWebUserRepository(uc.DB)
 	loc, _ := time.LoadLocation("Asia/Jakarta")
 	now := time.Now().In(loc).Add(
 		time.Minute * time.Duration(-15))
@@ -111,30 +112,48 @@ func (uc CustomerDataSyncUC) DataSync(c context.Context, parameter models.Custom
 
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("error ")
+		// fmt.Println("error ")
 		fmt.Print(err.Error())
 	}
 
 	// var responseObject http.Response
 	json.Unmarshal(bodyBytes, &res)
-	fmt.Printf("API Response as struct %+v\n", &res)
+	// fmt.Printf("API Response as struct %+v\n", &res)
 
 	var resBuilder []models.CustomerDataSync
 	for _, itemObject := range res {
-		fmt.Println("masuk perulangan")
+		// fmt.Println("masuk perulangan")
 		currentItem, _ := uc.FindByCode(c, models.CustomerDataSyncParameter{Code: *itemObject.Code})
 
+		itemObject.UserID.String = currentItem.UserID.String
+		if !currentItem.UserID.Valid {
+			userData, err := WebUserUC{ContractUC: uc.ContractUC}.Add(c, &requests.WebUserRequest{
+				Login:               *itemObject.Code,
+				Password:            *itemObject.Code,
+				UserRoleGroupIDList: "25",
+			})
+			if err == nil {
+				itemObject.UserID = sql.NullString{String: *userData.ID, Valid: true}
+			} else if err != nil {
+				usersrc, errusers := baseuserrepo.FindByLogin(c, models.WebUserParameter{Login: *itemObject.Code})
+				if errusers == nil {
+					itemObject.UserID = sql.NullString{String: *usersrc.ID, Valid: true}
+				}
+			}
+		}
+
 		if currentItem.ID != nil {
-			fmt.Println("not null")
+
 			itemObject.ID = currentItem.ID
 			_, errupdate := repo.Edit(c, &itemObject)
 			if errupdate != nil {
-				fmt.Print(errupdate)
+				// fmt.Println("error nya", *itemObject.ID)
+				fmt.Println(errupdate)
 			}
 		} else {
 			_, errinsert := repo.Add(c, &itemObject)
 			if errinsert != nil {
-				fmt.Print(errinsert)
+				fmt.Println(errinsert)
 			}
 		}
 

@@ -129,11 +129,23 @@ func (uc BroadcastUC) FindByID(c context.Context, parameter models.BroadcastPara
 
 // Broadcast ...
 func (uc BroadcastUC) Broadcast(c context.Context, input *requests.BroadcastRequest) (err error) {
+	var customerCodes string
+	if input.CustomerCode != nil {
+		for _, datum := range input.CustomerCode {
+			if customerCodes == "" {
+				customerCodes += `'` + datum + `'`
+			} else {
+				customerCodes += `,'` + datum + `'`
+			}
+		}
+	}
+
 	data, err := CustomerUC{ContractUC: uc.ContractUC}.SelectAll(c, models.CustomerParameter{
 		By:             "c.created_date",
 		Sort:           "desc",
 		FlagToken:      true,
 		CustomerTypeId: input.CustomerTypeID,
+		CustomerCodes:  customerCodes,
 	})
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
@@ -182,14 +194,16 @@ func (uc BroadcastUC) BroadcastWithID(c context.Context, id string) (err error) 
 	json.Unmarshal([]byte(broadcastData.Parameter.String), &param)
 
 	data, err := CustomerUC{ContractUC: uc.ContractUC}.SelectAll(c, models.CustomerParameter{
-		By:              "c.created_date",
-		Sort:            "desc",
-		FlagToken:       true,
-		CustomerTypeId:  param.CustomerTypeID,
-		BranchID:        param.BranchID,
-		RegionID:        param.RegionID,
-		RegionGroupID:   param.RegionGroupID,
-		CustomerLevelId: param.CustomerLevelID,
+		By:               "c.created_date",
+		Sort:             "desc",
+		FlagToken:        true,
+		CustomerTypeId:   param.CustomerTypeID,
+		BranchID:         param.BranchID,
+		RegionID:         param.RegionID,
+		RegionGroupID:    param.RegionGroupID,
+		CustomerLevelId:  param.CustomerLevelID,
+		CustomerCodes:    param.CustomerCodes,
+		CustomerReligion: param.CustomerReligion,
 	})
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
@@ -227,13 +241,10 @@ func (uc BroadcastUC) BroadcastWithID(c context.Context, id string) (err error) 
 // BroadcastWithScheduler ...
 func (uc BroadcastUC) BroadcastWithScheduler(c context.Context) (err error) {
 	broadcastRepo := repository.BroadcastRepository{uc.DB}
-	now := time.Now()
-	before := now.Add(-time.Hour * 1)
 	broadcastData, err := broadcastRepo.SelectAll(c, models.BroadcastParameter{
-		StartAt: before.Format("15:04:05"),
-		EndAt:   now.Format("15:04:05"),
-		Sort:    "asc",
-		By:      "b.id",
+		SchedulerParam: true,
+		Sort:           "asc",
+		By:             "b.id",
 	})
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
@@ -246,14 +257,16 @@ func (uc BroadcastUC) BroadcastWithScheduler(c context.Context) (err error) {
 		json.Unmarshal([]byte(broadcastDatum.Parameter.String), &param)
 
 		data, err := CustomerUC{ContractUC: uc.ContractUC}.SelectAll(c, models.CustomerParameter{
-			By:              "c.created_date",
-			Sort:            "desc",
-			FlagToken:       true,
-			CustomerTypeId:  param.CustomerTypeID,
-			BranchID:        param.BranchID,
-			RegionID:        param.RegionID,
-			RegionGroupID:   param.RegionGroupID,
-			CustomerLevelId: param.CustomerLevelID,
+			By:               "c.created_date",
+			Sort:             "desc",
+			FlagToken:        true,
+			CustomerTypeId:   param.CustomerTypeID,
+			BranchID:         param.BranchID,
+			RegionID:         param.RegionID,
+			RegionGroupID:    param.RegionGroupID,
+			CustomerLevelId:  param.CustomerLevelID,
+			CustomerCodes:    param.CustomerCodes,
+			CustomerReligion: param.CustomerReligion,
 		})
 		if err != nil {
 			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
@@ -290,6 +303,16 @@ func (uc BroadcastUC) BroadcastWithScheduler(c context.Context) (err error) {
 
 // Add ...
 func (uc BroadcastUC) Add(c context.Context, in requests.BroadcastRequest) (out viewmodel.BroadcastVM, err error) {
+	var customerCodes string
+	if in.CustomerCode != nil {
+		for _, datum := range in.CustomerCode {
+			if customerCodes == "" {
+				customerCodes += `'` + datum + `'`
+			} else {
+				customerCodes += `,'` + datum + `'`
+			}
+		}
+	}
 	out = viewmodel.BroadcastVM{
 		Title:          in.Title,
 		Body:           in.Body,
@@ -307,6 +330,8 @@ func (uc BroadcastUC) Add(c context.Context, in requests.BroadcastRequest) (out 
 			CustomerTypeName:  in.CustomerTypeName,
 			CustomerLevelID:   in.CustomerLevelID,
 			CustomerLevelName: in.CustomerLevelName,
+			CustomerCodes:     customerCodes,
+			CustomerReligion:  in.CustomerReligion,
 		},
 	}
 

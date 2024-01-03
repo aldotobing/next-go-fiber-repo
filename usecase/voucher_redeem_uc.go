@@ -32,6 +32,8 @@ func (uc VoucherRedeemUC) BuildBody(data *models.VoucherRedeem, res *viewmodel.V
 	res.VoucherCashValue = data.VoucherCashValue
 	res.VoucherDescription = data.VoucherDescription.String
 	res.VoucherImageURL = data.VoucherImageURL
+	res.VoucherStartDate = data.VoucherStartDate
+	res.VoucherEndDate = data.VoucherEndDate
 }
 
 // FindAll ...

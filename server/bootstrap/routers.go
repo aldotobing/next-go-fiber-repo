@@ -130,6 +130,10 @@ func (boot Bootstrap) RegisterRouters() {
 	CustomerRoutes := routers.CustomerRoutes{RouterGroup: apiV1, Handler: handler}
 	CustomerRoutes.RegisterRoute()
 
+	//Customer routes
+	customerLogRoutes := routers.CustomerLogRoutes{RouterGroup: apiV1, Handler: handler}
+	customerLogRoutes.RegisterRoute()
+
 	//Customer Level routes
 	CustomerLevelRoutes := routers.CustomerLevelRoutes{RouterGroup: apiV1, Handler: handler}
 	CustomerLevelRoutes.RegisterRoute()
@@ -285,4 +289,13 @@ func (boot Bootstrap) RegisterRouters() {
 
 	voucherReedeemRoute := routers.VoucherRedeemRoutes{RouterGroup: apiV1, Handler: handler}
 	voucherReedeemRoute.RegisterRoute()
+
+	itemOldPriceRoute := routers.ItemOldPriceRoutes{RouterGroup: apiV1, Handler: handler}
+	itemOldPriceRoute.RegisterRoute()
+
+	pointRoute := routers.PointRoutes{RouterGroup: apiV1, Handler: handler}
+	pointRoute.RegisterRoute()
+
+	pointRulesRoute := routers.PointRulesRoutes{RouterGroup: apiV1, Handler: handler}
+	pointRulesRoute.RegisterRoute()
 }
