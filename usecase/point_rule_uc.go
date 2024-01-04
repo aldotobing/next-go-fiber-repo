@@ -107,9 +107,7 @@ func (uc PointRuleUC) Add(c context.Context, in requests.PointRuleRequest) (out 
 	for _, datum := range in.Customers {
 		customers = append(customers, viewmodel.PointRuleCustomerVM{
 			CustomerCode: datum.CustomerCode,
-			RegionID:     datum.RegionID,
-			Area:         datum.Area,
-			BranchID:     datum.BranchID,
+			Value:        datum.Value,
 		})
 	}
 	out = viewmodel.PointRuleVM{
@@ -123,6 +121,12 @@ func (uc PointRuleUC) Add(c context.Context, in requests.PointRuleRequest) (out 
 
 	repo := repository.NewPointRuleRepository(uc.DB)
 	out.ID, err = repo.Add(c, out)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	err = WebCustomerUC{ContractUC: uc.ContractUC}.EditIndexPoint(c, customers)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return
@@ -151,9 +155,7 @@ func (uc PointRuleUC) Update(c context.Context, id string, in requests.PointRule
 	for _, datum := range in.Customers {
 		customers = append(customers, viewmodel.PointRuleCustomerVM{
 			CustomerCode: datum.CustomerCode,
-			RegionID:     datum.RegionID,
-			Area:         datum.Area,
-			BranchID:     datum.BranchID,
+			Value:        datum.Value,
 		})
 	}
 
@@ -169,6 +171,12 @@ func (uc PointRuleUC) Update(c context.Context, id string, in requests.PointRule
 
 	repo := repository.NewPointRuleRepository(uc.DB)
 	out.ID, err = repo.Update(c, out)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	err = WebCustomerUC{ContractUC: uc.ContractUC}.EditIndexPoint(c, customers)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return

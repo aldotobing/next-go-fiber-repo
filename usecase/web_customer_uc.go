@@ -593,6 +593,18 @@ func (uc WebCustomerUC) EditBulk(c context.Context, data requests.WebCustomerBul
 	return
 }
 
+func (uc WebCustomerUC) EditIndexPoint(c context.Context, in []viewmodel.PointRuleCustomerVM) (err error) {
+	repo := repository.NewWebCustomerRepository(uc.DB)
+
+	err = repo.EditIndexPoint(c, in)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	return
+}
+
 // func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCustomerRequest, imgProfile, imgKtp *multipart.FileHeader) (res models.WebCustomer, err error) {
 
 // 	// currentObjectUc, err := uc.FindByID(c, models.MpBankParameter{ID: id})
