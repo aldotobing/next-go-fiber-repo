@@ -9,6 +9,7 @@ import (
 
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/server/requests"
+	"nextbasis-service-v-0.1/usecase/viewmodel"
 )
 
 // ICustomerRepository ...
@@ -20,6 +21,7 @@ type IWebCustomerRepository interface {
 	FindByCodes(c context.Context, parameter models.WebCustomerParameter) (data []models.WebCustomer, err error)
 	Edit(c context.Context, model models.WebCustomer) (string, error)
 	EditBulk(c context.Context, in requests.WebCustomerBulkRequest) error
+	EditIndexPoint(c context.Context, in []viewmodel.PointRuleCustomerVM) error
 	Add(c context.Context, model models.WebCustomer) (string, error)
 	ReportSelect(c context.Context, parameter models.WebCustomerReportParameter) ([]models.WebCustomer, error)
 }
@@ -560,6 +562,29 @@ func (repo WebCustomerRepository) EditBulk(c context.Context, in requests.WebCus
 		in.ShowInApp,
 		in.Active,
 		in.UserID).Err()
+
+	return
+}
+
+func (repo WebCustomerRepository) EditIndexPoint(c context.Context, in []viewmodel.PointRuleCustomerVM) (err error) {
+	var customersCode string
+
+	for _, datum := range in {
+		if customersCode == "" {
+			customersCode += `('` + datum.CustomerCode + `', ` + datum.Value + `)`
+		} else {
+			customersCode += `, ('` + datum.CustomerCode + `', ` + datum.Value + `)`
+		}
+	}
+
+	statement := `update customer as c set
+		index_point = val.column_a
+	from (values
+		` + customersCode + `
+	) as val(column_b, column_a) 
+	where c.customer_code = val.column_b;`
+
+	err = repo.DB.QueryRowContext(c, statement).Err()
 
 	return
 }
