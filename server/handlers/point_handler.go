@@ -90,6 +90,21 @@ func (h *PointHandler) GetBalance(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
+// GetBalanceAll ...
+func (h *PointHandler) GetBalanceAll(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+	parameter := models.PointParameter{
+		CustomerID: ctx.Params("customer_id"),
+	}
+	uc := usecase.PointUC{ContractUC: h.ContractUC}
+	res, err := uc.GetBalanceAll(c, parameter)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
 // Add ...
 func (h *PointHandler) Add(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
