@@ -28,6 +28,7 @@ func (route PointRoutes) RegisterRoute() {
 	r.Get("/select", handler.SelectAll)
 	r.Get("/id/:customer_id", handler.FindByID)
 	r.Get("/balance/customer_id/:customer_id", handler.GetBalance)
+	r.Get("/balance/all/customer_id/:customer_id", handler.GetBalanceAll)
 	r.Post("/", handler.Add)
 	r.Put("/:id", handler.Update)
 	r.Delete("/:id", handler.Delete)
