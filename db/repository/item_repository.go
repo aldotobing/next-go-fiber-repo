@@ -527,7 +527,9 @@ func (repository ItemRepository) SelectAllV2(c context.Context, parameter models
 		conditionString += ` or (LOWER (ic."_name") like ` + `'%` + strings.ToLower(parameter.ItemCategoryName) + `%')`
 	}
 
-	if parameter.CustomerTypeId != "" && (parameter.CustomerTypeId != "7" && parameter.CustomerTypeId != "15") {
+	if parameter.CustomerTypeId != "" && (parameter.CustomerTypeId != "7" &&
+		parameter.CustomerTypeId != "15" &&
+		parameter.CustomerTypeId != "9") {
 		conditionString += ` AND def.id NOT IN (83, 307, 393) `
 	}
 
