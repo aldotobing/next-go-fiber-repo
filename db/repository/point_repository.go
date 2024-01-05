@@ -89,6 +89,10 @@ func (repository PointRepository) SelectAll(c context.Context, parameter models.
 		conditionString += `AND DEF.POINT_TYPE = ` + parameter.PointType
 	}
 
+	if parameter.CustomerID != "" {
+		conditionString += `AND DEF.CUSTOMER_ID = ` + parameter.CustomerID
+	}
+
 	statement := models.PointSelectStatement + models.PointWhereStatement +
 		conditionString +
 		` ORDER BY ` + parameter.By + ` ` + parameter.Sort
