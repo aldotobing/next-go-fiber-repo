@@ -146,7 +146,6 @@ var (
 		C.salesman_id as c_salesman_id,
 		concat('` + CustomerImagePath + `',C.customer_photo_ktp) AS CUST_KTP_PICTURE,
 		c.customer_nik,
-		cl._name as cus_level_name,
 		C.price_list_id,C.price_list_version_id,
 		us.fcm_token,top.id as top_id, top.code as top_code,
 		c.admin_validate
@@ -163,10 +162,12 @@ var (
 	LEFT JOIN CUSTOMER_GIFT CG ON CG.CUSTOMER_ID = C.ID
 	LEFT JOIN CUSTOMER_POINT CP ON CP.CUSTOMER_ID = C.ID
 	LEFT JOIN LOYALTY LOY ON LOY.CUSTOMER_ID = C.ID
-	left join customer_level cl on cl.id = c.customer_level_id
 	left join _user us on us.id = C.user_id
 	left join term_of_payment top on top.id = C.payment_terms_id
 	`
+
+	// cl._name as cus_level_name,
+	// left join customer_level cl on cl.id = c.customer_level_id
 
 	// CustomerWhereStatement ...
 	CustomerWhereStatement = ` WHERE c.created_date IS not NULL and c.show_in_apps = 1 `
