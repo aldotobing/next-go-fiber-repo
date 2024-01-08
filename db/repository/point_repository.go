@@ -177,7 +177,7 @@ func (repository PointRepository) GetBalance(c context.Context, parameter models
 		coalesce(sum(case when pt."_name" = '` + models.PointTypePromo + `' then DEF.point else 0 end),0) as promo
 		from points DEF
 		left join point_type pt on pt.id = def.point_type ` +
-		`WHERE DEF.CUSTOMER_ID = ` + parameter.CustomerID
+		`WHERE DEF.DELETED_AT IS NULL AND DEF.CUSTOMER_ID = ` + parameter.CustomerID
 	row := repository.DB.QueryRowContext(c, statement)
 
 	err = row.Scan(
