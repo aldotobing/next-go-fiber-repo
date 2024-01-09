@@ -16,7 +16,7 @@ type ICilentInvoiceRepository interface {
 	FindAll(ctx context.Context, parameter models.CilentInvoiceParameter) ([]models.CilentInvoice, int, error)
 	FindByID(c context.Context, parameter models.CilentInvoiceParameter) (models.CilentInvoice, error)
 	FindByDocumentNo(c context.Context, parameter models.CilentInvoiceParameter) (models.CilentInvoice, error)
-	InsertDataWithLine(c context.Context, model *models.CilentInvoice) (res string, err error)
+	InsertDataWithLine(c context.Context, model *models.CilentInvoice) (res string, finishFlag bool, err error)
 }
 
 // CilentInvoiceRepository ...
@@ -155,7 +155,7 @@ func (repository CilentInvoiceRepository) FindByDocumentNo(c context.Context, pa
 	return data, nil
 }
 
-func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, model *models.CilentInvoice) (res string, err error) {
+func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, model *models.CilentInvoice) (res string, finishFlag bool, err error) {
 
 	// Using a map to organize the print logic
 	fields := map[string]*string{
@@ -228,7 +228,7 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 	RETURNING id`
 	transaction, err := repository.DB.BeginTx(c, nil)
 	if err != nil {
-		return res, err
+		return res, finishFlag, err
 	}
 	defer transaction.Rollback()
 
@@ -256,7 +256,7 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 	).Scan(&res)
 
 	if err != nil {
-		return res, err
+		return res, finishFlag, err
 	}
 
 	fmt.Printf("Successfully inserted invoice with DocumentNo: %s and generated ID: %s\n", *model.DocumentNo, res)
@@ -294,7 +294,7 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 			).Scan(&resLine)
 
 			if err != nil {
-				return res, err
+				return res, finishFlag, err
 			}
 		}
 	}
@@ -305,13 +305,14 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 		updateCOStatusRow, _ := transaction.QueryContext(c, updatechecoutstatus, model.SalesRequestCode)
 		updateCOStatusRow.Close()
 
+		finishFlag = true
 	}
 
 	if err = transaction.Commit(); err != nil {
-		return res, err
+		return res, finishFlag, err
 	}
 
-	return res, err
+	return res, finishFlag, err
 }
 
 // insert into sales_invoice_header (

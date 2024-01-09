@@ -177,6 +177,31 @@ func (uc PointUC) GetBalanceAll(c context.Context, parameter models.PointParamet
 	return
 }
 
+// GetPointThisMonth ...
+func (uc PointUC) GetPointThisMonth(c context.Context, customerID string) (out viewmodel.PointBalanceVM, err error) {
+
+	repo := repository.NewPointRepository(uc.DB)
+	data, err := repo.GetBalance(c, models.PointParameter{
+		CustomerID: customerID,
+		Month:      strconv.Itoa(int(time.Now().Month())),
+		Year:       strconv.Itoa(time.Now().Year()),
+	})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	var totalPoint float64
+	point, _ := strconv.ParseFloat(data.Cashback, 64)
+	totalPoint += point
+
+	out = viewmodel.PointBalanceVM{
+		Balance: strconv.FormatFloat(totalPoint, 'f', 2, 64),
+	}
+
+	return
+}
+
 // Add ...
 func (uc PointUC) Add(c context.Context, in requests.PointRequest) (out viewmodel.PointVM, err error) {
 	now := time.Now()

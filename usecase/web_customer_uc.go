@@ -127,6 +127,7 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 	res.SalesmanTypeCode = data.SalesmanTypeCode.String
 	res.SalesmanTypeName = data.SalesmanTypeName.String
 	res.CustomerAdminValidate = data.CustomerAdminValidate
+	res.IndexPoint = data.IndexPoint
 }
 
 // SelectAll ...
