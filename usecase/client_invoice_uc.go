@@ -198,12 +198,12 @@ func (uc CilentInvoiceUC) DataSync(c context.Context, parameter models.CilentInv
 
 	var resBuilder []models.CilentInvoice
 	for _, invoiceObject := range res {
-		_, finishFlag, err := repo.InsertDataWithLine(c, &invoiceObject)
+		_, _, err := repo.InsertDataWithLine(c, &invoiceObject)
 		if err != nil {
 			// return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
 		}
 
-		if strings.Contains("CO", *invoiceObject.SalesRequestCode) && finishFlag {
+		if strings.Contains("CO", *invoiceObject.SalesRequestCode) && *invoiceObject.OutstandingAmount == "0.00" {
 			customer, _ := WebCustomerUC{ContractUC: uc.ContractUC}.FindByCodes(c, models.WebCustomerParameter{Code: *invoiceObject.CustomerCode})
 			if len(customer) == 1 {
 				if customer[0].IndexPoint == 1 {
@@ -286,12 +286,12 @@ func (uc CilentInvoiceUC) UndoneDataSync(c context.Context, parameter models.Cil
 
 	var resBuilder []models.CilentInvoice
 	for _, invoiceObject := range res {
-		_, finishFlag, err := repo.InsertDataWithLine(c, &invoiceObject)
+		_, _, err := repo.InsertDataWithLine(c, &invoiceObject)
 		if err != nil {
 			// return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
 		}
 
-		if strings.Contains("CO", *invoiceObject.SalesRequestCode) && finishFlag {
+		if strings.Contains("CO", *invoiceObject.SalesRequestCode) && *invoiceObject.OutstandingAmount == "0.00" {
 			customer, _ := WebCustomerUC{ContractUC: uc.ContractUC}.FindByCodes(c, models.WebCustomerParameter{Code: *invoiceObject.CustomerCode})
 			if len(customer) == 1 {
 				if customer[0].IndexPoint == 1 {
