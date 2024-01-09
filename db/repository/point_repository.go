@@ -171,6 +171,12 @@ func (repository PointRepository) FindByID(c context.Context, parameter models.P
 
 // GetBalance ...
 func (repository PointRepository) GetBalance(c context.Context, parameter models.PointParameter) (data models.PointGetBalance, err error) {
+	var whereStatement string
+	if parameter.Month != "" && parameter.Year != "" {
+		whereStatement += ` AND extract(month from def.created_at) = '` + parameter.Month + `' 
+		and EXTRACT(YEAR from def.created_at) = '` + parameter.Year + `'`
+	}
+
 	statement := `select coalesce(sum(case when pt."_name" = '` + models.PointTypeWithdraw + `' then DEF.point else 0 end),0) as withdraw,
 		coalesce(sum(case when pt."_name" = '` + models.PointTypeCashback + `' then DEF.point else 0 end),0) as cashback,
 		coalesce(sum(case when pt."_name" = '` + models.PointTypeLoyalty + `' then DEF.point else 0 end),0) as loyalty,

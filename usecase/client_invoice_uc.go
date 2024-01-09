@@ -8,12 +8,15 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/pkg/functioncaller"
 	"nextbasis-service-v-0.1/pkg/logruslogger"
+	"nextbasis-service-v-0.1/server/requests"
 	"nextbasis-service-v-0.1/usecase/viewmodel"
 )
 
@@ -195,9 +198,48 @@ func (uc CilentInvoiceUC) DataSync(c context.Context, parameter models.CilentInv
 
 	var resBuilder []models.CilentInvoice
 	for _, invoiceObject := range res {
-		_, err := repo.InsertDataWithLine(c, &invoiceObject)
+		_, finishFlag, err := repo.InsertDataWithLine(c, &invoiceObject)
 		if err != nil {
 			// return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
+		}
+
+		if strings.Contains("CO", *invoiceObject.SalesRequestCode) && finishFlag {
+			customer, _ := WebCustomerUC{ContractUC: uc.ContractUC}.FindByCodes(c, models.WebCustomerParameter{Code: *invoiceObject.CustomerCode})
+			if len(customer) == 1 {
+				if customer[0].IndexPoint == 1 {
+					pointRules, _ := PointRuleUC{ContractUC: uc.ContractUC}.SelectAll(c, models.PointRuleParameter{
+						Now:  time.Now().Format("2006-01-02"),
+						By:   "def.id",
+						Sort: "asc",
+					})
+					pointUC := PointUC{ContractUC: uc.ContractUC}
+					pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID)
+					for _, rules := range pointRules {
+						pointMonthly, _ := strconv.ParseFloat(pointThisMonth.Balance, 64)
+						maxMonthly, _ := strconv.ParseFloat(rules.MonthlyMaxPoint, 64)
+						if pointMonthly > maxMonthly {
+							continue
+						}
+						minOrder, _ := strconv.ParseFloat(rules.MinOrder, 64)
+						netOmount, _ := strconv.ParseFloat(*invoiceObject.NetAmount, 64)
+						if netOmount < minOrder {
+							continue
+						}
+
+						pointConversion, _ := strconv.ParseFloat(rules.PointConversion, 64)
+						getPoint := netOmount / pointConversion
+
+						pointUC.Add(c, requests.PointRequest{
+							CustomerCodes: []requests.PointCustomerCode{
+								{CustomerCode: customer[0].Code},
+							},
+							InvoiceID: *invoiceObject.DocumentNo,
+							Point:     strconv.FormatFloat(getPoint, 'f', 2, 64),
+							PointType: "2",
+						})
+					}
+				}
+			}
 		}
 		resBuilder = append(resBuilder, invoiceObject)
 	}
@@ -244,9 +286,48 @@ func (uc CilentInvoiceUC) UndoneDataSync(c context.Context, parameter models.Cil
 
 	var resBuilder []models.CilentInvoice
 	for _, invoiceObject := range res {
-		_, err := repo.InsertDataWithLine(c, &invoiceObject)
+		_, finishFlag, err := repo.InsertDataWithLine(c, &invoiceObject)
 		if err != nil {
 			// return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
+		}
+
+		if strings.Contains("CO", *invoiceObject.SalesRequestCode) && finishFlag {
+			customer, _ := WebCustomerUC{ContractUC: uc.ContractUC}.FindByCodes(c, models.WebCustomerParameter{Code: *invoiceObject.CustomerCode})
+			if len(customer) == 1 {
+				if customer[0].IndexPoint == 1 {
+					pointRules, _ := PointRuleUC{ContractUC: uc.ContractUC}.SelectAll(c, models.PointRuleParameter{
+						Now:  time.Now().Format("2006-01-02"),
+						By:   "def.id",
+						Sort: "asc",
+					})
+					pointUC := PointUC{ContractUC: uc.ContractUC}
+					pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID)
+					for _, rules := range pointRules {
+						pointMonthly, _ := strconv.ParseFloat(pointThisMonth.Balance, 64)
+						maxMonthly, _ := strconv.ParseFloat(rules.MonthlyMaxPoint, 64)
+						if pointMonthly > maxMonthly {
+							continue
+						}
+						minOrder, _ := strconv.ParseFloat(rules.MinOrder, 64)
+						netOmount, _ := strconv.ParseFloat(*invoiceObject.NetAmount, 64)
+						if netOmount < minOrder {
+							continue
+						}
+
+						pointConversion, _ := strconv.ParseFloat(rules.PointConversion, 64)
+						getPoint := netOmount / pointConversion
+
+						pointUC.Add(c, requests.PointRequest{
+							CustomerCodes: []requests.PointCustomerCode{
+								{CustomerCode: customer[0].Code},
+							},
+							InvoiceID: *invoiceObject.DocumentNo,
+							Point:     strconv.FormatFloat(getPoint, 'f', 2, 64),
+							PointType: "2",
+						})
+					}
+				}
+			}
 		}
 		resBuilder = append(resBuilder, invoiceObject)
 	}
