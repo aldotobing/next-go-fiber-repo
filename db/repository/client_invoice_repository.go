@@ -251,7 +251,7 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 		model.TaxCalcMethod, model.SalesmanCode, model.PaymentTermsID, model.SalesOrderID, model.CompanyID,
 		model.BranchID, model.PriceLIstID, model.PriceLIstVersionID, str.EmptyString(*model.Status), str.EmptyString(*model.GrossAmount),
 		model.DiscAmount, model.TaxableAmount, model.TaxAmount, model.RoundingAmount, model.NetAmount,
-		str.EmptyString(*model.NetAmount), str.EmptyString(*model.PaidAmount), model.DueDate, model.NoPPN, model.GlobalDiscAmount,
+		str.EmptyString(*model.OutstandingAmount), str.EmptyString(*model.PaidAmount), model.DueDate, model.NoPPN, model.GlobalDiscAmount,
 		str.EmptyString(*model.TransactionPoint), str.NullString(model.SalesRequestCode), str.NullString(model.InvoiceDate), str.NullString(model.PaidDate),
 	).Scan(&res)
 
