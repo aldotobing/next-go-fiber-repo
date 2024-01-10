@@ -203,8 +203,11 @@ func (uc CilentInvoiceUC) DataSync(c context.Context, parameter models.CilentInv
 			// return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
 		}
 
-		if strings.Contains("CO", *invoiceObject.SalesRequestCode) && *invoiceObject.OutstandingAmount == "0.00" {
-			customer, _ := WebCustomerUC{ContractUC: uc.ContractUC}.FindByCodes(c, models.WebCustomerParameter{Code: *invoiceObject.CustomerCode})
+		if invoiceObject.SalesRequestCode != nil && strings.Contains(*invoiceObject.SalesRequestCode, "CO") &&
+			invoiceObject.OutstandingAmount != nil && *invoiceObject.OutstandingAmount == "0.00" &&
+			invoiceObject.CustomerCode != nil && invoiceObject.NetAmount != nil &&
+			invoiceObject.DocumentNo != nil {
+			customer, _ := WebCustomerUC{ContractUC: uc.ContractUC}.FindByCodes(c, models.WebCustomerParameter{Code: `'` + *invoiceObject.CustomerCode + `'`})
 			if len(customer) == 1 {
 				if customer[0].IndexPoint == 1 {
 					pointRules, _ := PointRuleUC{ContractUC: uc.ContractUC}.SelectAll(c, models.PointRuleParameter{
@@ -234,7 +237,7 @@ func (uc CilentInvoiceUC) DataSync(c context.Context, parameter models.CilentInv
 								{CustomerCode: customer[0].Code},
 							},
 							InvoiceID: *invoiceObject.DocumentNo,
-							Point:     strconv.FormatFloat(getPoint, 'f', 2, 64),
+							Point:     strconv.FormatFloat(getPoint, 'f', 0, 64),
 							PointType: "2",
 						})
 					}
