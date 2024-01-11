@@ -531,44 +531,6 @@ func (uc CilentInvoiceUC) UndoneDataSync(c context.Context, parameter models.Cil
 			// return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
 		}
 
-		if strings.Contains("CO", *invoiceObject.SalesRequestCode) && *invoiceObject.OutstandingAmount == "0.00" {
-			customer, _ := WebCustomerUC{ContractUC: uc.ContractUC}.FindByCodes(c, models.WebCustomerParameter{Code: *invoiceObject.CustomerCode})
-			if len(customer) == 1 {
-				if customer[0].IndexPoint == 1 {
-					pointRules, _ := PointRuleUC{ContractUC: uc.ContractUC}.SelectAll(c, models.PointRuleParameter{
-						Now:  time.Now().Format("2006-01-02"),
-						By:   "def.id",
-						Sort: "asc",
-					})
-					pointUC := PointUC{ContractUC: uc.ContractUC}
-					pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID)
-					for _, rules := range pointRules {
-						pointMonthly, _ := strconv.ParseFloat(pointThisMonth.Balance, 64)
-						maxMonthly, _ := strconv.ParseFloat(rules.MonthlyMaxPoint, 64)
-						if pointMonthly > maxMonthly {
-							continue
-						}
-						minOrder, _ := strconv.ParseFloat(rules.MinOrder, 64)
-						netOmount, _ := strconv.ParseFloat(*invoiceObject.NetAmount, 64)
-						if netOmount < minOrder {
-							continue
-						}
-
-						pointConversion, _ := strconv.ParseFloat(rules.PointConversion, 64)
-						getPoint := netOmount / pointConversion
-
-						pointUC.Add(c, requests.PointRequest{
-							CustomerCodes: []requests.PointCustomerCode{
-								{CustomerCode: customer[0].Code},
-							},
-							InvoiceDocumentNo: *invoiceObject.DocumentNo,
-							Point:             strconv.FormatFloat(getPoint, 'f', 2, 64),
-							PointType:         "2",
-						})
-					}
-				}
-			}
-		}
 		resBuilder = append(resBuilder, invoiceObject)
 	}
 
