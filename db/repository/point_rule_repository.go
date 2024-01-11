@@ -69,6 +69,9 @@ func (repository PointRuleRepository) scanRow(row *sql.Row) (res models.PointRul
 func (repository PointRuleRepository) SelectAll(c context.Context, parameter models.PointRuleParameter) (data []models.PointRule, err error) {
 	var conditionString string
 
+	if parameter.Now != "" {
+		conditionString += ` AND '` + parameter.Now + `' BETWEEN DEF.START_DATE AND DEF.END_DATE `
+	}
 	statement := models.PointRuleSelectStatement + models.PointRuleWhereStatement +
 		conditionString +
 		` ORDER BY ` + parameter.By + ` ` + parameter.Sort

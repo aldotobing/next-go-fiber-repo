@@ -5,7 +5,6 @@ type PointVM struct {
 	ID                string `json:"id"`
 	PointType         string `json:"point_type"`
 	PointTypeName     string `json:"point_type_name"`
-	InvoiceID         string `json:"invoice_id"`
 	InvoiceDocumentNo string `json:"invoice_document_no"`
 	Point             string `json:"point"`
 	CustomerID        string `json:"customer_id"`

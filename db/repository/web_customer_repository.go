@@ -101,6 +101,7 @@ func (repository WebCustomerRepository) scanRows(rows *sql.Rows) (res models.Web
 		&res.SalesmanTypeCode,
 		&res.SalesmanTypeName,
 		&res.CustomerAdminValidate,
+		&res.IndexPoint,
 	)
 	if err != nil {
 
@@ -237,6 +238,7 @@ func (repository WebCustomerRepository) scanRow(row *sql.Row) (res models.WebCus
 		&res.SalesmanTypeCode,
 		&res.SalesmanTypeName,
 		&res.CustomerAdminValidate,
+		&res.IndexPoint,
 	)
 	if err != nil {
 		return res, err

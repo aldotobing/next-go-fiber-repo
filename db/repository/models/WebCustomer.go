@@ -73,6 +73,7 @@ type WebCustomer struct {
 	SalesmanTypeCode           sql.NullString `json:"salesman_type_code"`
 	SalesmanTypeName           sql.NullString `json:"salesman_type_name"`
 	CustomerAdminValidate      bool           `json:"customer_admin_validate"`
+	IndexPoint                 int            `json:"index_point"`
 }
 
 // CustomerParameter ...
@@ -194,7 +195,8 @@ var (
 		coalesce(C.is_data_completed,false),
 		ST.CODE,
 		ST._NAME,
-		c.admin_validate
+		c.admin_validate,
+		c.index_point
 	FROM CUSTOMER C
 	LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
 	LEFT JOIN REGION REG ON REG.ID = B.REGION_ID

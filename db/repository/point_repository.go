@@ -35,7 +35,7 @@ func (repository PointRepository) scanRows(rows *sql.Rows) (res models.Point, er
 		&res.ID,
 		&res.PointType,
 		&res.PointTypeName,
-		&res.InvoiceID,
+		&res.InvoiceDocumentNo,
 		&res.Point,
 		&res.CustomerID,
 		&res.CreatedAt,
@@ -48,8 +48,6 @@ func (repository PointRepository) scanRows(rows *sql.Rows) (res models.Point, er
 		&res.Customer.CustomerBranchCode,
 		&res.Customer.CustomerBranchName,
 		&res.Customer.CustomerRegionName,
-
-		&res.InvoiceDocumentNo,
 	)
 
 	return
@@ -61,7 +59,7 @@ func (repository PointRepository) scanRow(row *sql.Row) (res models.Point, err e
 		&res.ID,
 		&res.PointType,
 		&res.PointTypeName,
-		&res.InvoiceID,
+		&res.InvoiceDocumentNo,
 		&res.Point,
 		&res.CustomerID,
 		&res.CreatedAt,
@@ -74,8 +72,6 @@ func (repository PointRepository) scanRow(row *sql.Row) (res models.Point, err e
 		&res.Customer.CustomerBranchCode,
 		&res.Customer.CustomerBranchName,
 		&res.Customer.CustomerRegionName,
-
-		&res.InvoiceDocumentNo,
 	)
 
 	return
@@ -171,6 +167,12 @@ func (repository PointRepository) FindByID(c context.Context, parameter models.P
 
 // GetBalance ...
 func (repository PointRepository) GetBalance(c context.Context, parameter models.PointParameter) (data models.PointGetBalance, err error) {
+	var whereStatement string
+	if parameter.Month != "" && parameter.Year != "" {
+		whereStatement += ` AND extract(month from def.created_at) = '` + parameter.Month + `' 
+		and EXTRACT(YEAR from def.created_at) = '` + parameter.Year + `'`
+	}
+
 	statement := `select coalesce(sum(case when pt."_name" = '` + models.PointTypeWithdraw + `' then DEF.point else 0 end),0) as withdraw,
 		coalesce(sum(case when pt."_name" = '` + models.PointTypeCashback + `' then DEF.point else 0 end),0) as cashback,
 		coalesce(sum(case when pt."_name" = '` + models.PointTypeLoyalty + `' then DEF.point else 0 end),0) as loyalty,
@@ -196,15 +198,15 @@ func (repository PointRepository) Add(c context.Context, in viewmodel.PointVM) (
 	if len(in.CustomerIDs) > 0 {
 		for _, datum := range in.CustomerIDs {
 			if statementInsert == "" {
-				statementInsert += `(` + in.PointType + `, ` + in.InvoiceID + `, '` + in.Point + `', ` + datum + `, NOW(), NOW(), '` + in.ExpiredAt + `')`
+				statementInsert += `(` + in.PointType + `, ` + in.InvoiceDocumentNo + `, '` + in.Point + `', ` + datum + `, NOW(), NOW(), '` + in.ExpiredAt + `')`
 			} else {
-				statementInsert += `, (` + in.PointType + `, ` + in.InvoiceID + `, '` + in.Point + `', ` + datum + `, NOW(), NOW(), '` + in.ExpiredAt + `')`
+				statementInsert += `, (` + in.PointType + `, ` + in.InvoiceDocumentNo + `, '` + in.Point + `', ` + datum + `, NOW(), NOW(), '` + in.ExpiredAt + `')`
 			}
 		}
 	}
 	statement := `INSERT INTO POINTS (
 			POINT_TYPE, 
-			INVOICE_ID,
+			INVOICE_DOCUMENT_NO,
 			POINT,
 			CUSTOMER_ID,
 			CREATED_AT,
@@ -222,7 +224,7 @@ func (repository PointRepository) Add(c context.Context, in viewmodel.PointVM) (
 func (repository PointRepository) Update(c context.Context, in viewmodel.PointVM) (res string, err error) {
 	statement := `UPDATE POINTS SET 
 		POINT_TYPE = $1, 
-		INVOICE_ID = $2, 
+		INVOICE_DOCUMENT_NO = $2, 
 		POINT = $3, 
 		CUSTOMER_ID = $4,
 		UPDATED_AT = now()
@@ -231,7 +233,7 @@ func (repository PointRepository) Update(c context.Context, in viewmodel.PointVM
 
 	err = repository.DB.QueryRowContext(c, statement,
 		in.PointType,
-		in.InvoiceID,
+		in.InvoiceDocumentNo,
 		in.Point,
 		in.CustomerID,
 		in.ID).Scan(&res)

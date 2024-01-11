@@ -66,6 +66,7 @@ type CustomerVM struct {
 	SalesmanTypeCode           string `json:"salesman_type_code"`
 	SalesmanTypeName           string `json:"salesman_type_name"`
 	CustomerAdminValidate      bool   `json:"customer_admin_validate"`
+	IndexPoint                 int    `json:"index_point"`
 }
 
 type CustomerData struct {
