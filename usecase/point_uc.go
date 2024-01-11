@@ -26,7 +26,6 @@ func (uc PointUC) BuildBody(data *models.Point, res *viewmodel.PointVM) {
 	res.ID = data.ID
 	res.PointType = data.PointType
 	res.PointTypeName = data.PointTypeName
-	res.InvoiceID = data.InvoiceID.String
 	res.InvoiceDocumentNo = data.InvoiceDocumentNo.String
 	res.Point = data.Point
 	res.CustomerID = data.CustomerID
@@ -228,12 +227,12 @@ func (uc PointUC) Add(c context.Context, in requests.PointRequest) (out viewmode
 	}
 
 	out = viewmodel.PointVM{
-		PointType:   in.PointType,
-		InvoiceID:   in.InvoiceID,
-		Point:       in.Point,
-		CustomerID:  in.CustomerID,
-		ExpiredAt:   expiredAt,
-		CustomerIDs: customerIDs,
+		PointType:         in.PointType,
+		InvoiceDocumentNo: in.InvoiceDocumentNo,
+		Point:             in.Point,
+		CustomerID:        in.CustomerID,
+		ExpiredAt:         expiredAt,
+		CustomerIDs:       customerIDs,
 	}
 
 	repo := repository.NewPointRepository(uc.DB)
@@ -249,11 +248,11 @@ func (uc PointUC) Add(c context.Context, in requests.PointRequest) (out viewmode
 // Update ...
 func (uc PointUC) Update(c context.Context, id string, in requests.PointRequest) (out viewmodel.PointVM, err error) {
 	out = viewmodel.PointVM{
-		ID:         id,
-		PointType:  in.PointType,
-		InvoiceID:  in.InvoiceID,
-		Point:      in.Point,
-		CustomerID: in.CustomerID,
+		ID:                id,
+		PointType:         in.PointType,
+		InvoiceDocumentNo: in.InvoiceDocumentNo,
+		Point:             in.Point,
+		CustomerID:        in.CustomerID,
 	}
 
 	repo := repository.NewPointRepository(uc.DB)

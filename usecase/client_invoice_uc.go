@@ -472,9 +472,9 @@ func (uc CilentInvoiceUC) DataSync(c context.Context, parameter models.CilentInv
 								CustomerCodes: []requests.PointCustomerCode{
 									{CustomerCode: customer[0].Code},
 								},
-								InvoiceID: *invoiceObject.DocumentNo,
-								Point:     strconv.FormatFloat(getPoint, 'f', 0, 64),
-								PointType: "2",
+								InvoiceDocumentNo: *invoiceObject.DocumentNo,
+								Point:             strconv.FormatFloat(getPoint, 'f', 0, 64),
+								PointType:         "2",
 							})
 						}
 					}
@@ -561,9 +561,9 @@ func (uc CilentInvoiceUC) UndoneDataSync(c context.Context, parameter models.Cil
 							CustomerCodes: []requests.PointCustomerCode{
 								{CustomerCode: customer[0].Code},
 							},
-							InvoiceID: *invoiceObject.DocumentNo,
-							Point:     strconv.FormatFloat(getPoint, 'f', 2, 64),
-							PointType: "2",
+							InvoiceDocumentNo: *invoiceObject.DocumentNo,
+							Point:             strconv.FormatFloat(getPoint, 'f', 2, 64),
+							PointType:         "2",
 						})
 					}
 				}
