@@ -201,7 +201,7 @@ func (uc CilentInvoiceUC) DataSync(c context.Context, parameter models.CilentInv
 	for _, invoiceObject := range res {
 		_, _, err := repo.InsertDataWithLine(c, &invoiceObject)
 		if err != nil {
-			// return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
+			return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
 		}
 
 		if invoiceObject.SalesRequestCode != nil && strings.Contains(*invoiceObject.SalesRequestCode, "CO") &&
@@ -220,7 +220,6 @@ func (uc CilentInvoiceUC) DataSync(c context.Context, parameter models.CilentInv
 					pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID)
 					for _, rules := range pointRules {
 						pointMonthly, _ := strconv.ParseFloat(pointThisMonth.Balance, 64)
-						pointMonthly = 45000
 						maxMonthly, _ := strconv.ParseFloat(rules.MonthlyMaxPoint, 64)
 
 						minOrder, _ := strconv.ParseFloat(rules.MinOrder, 64)
