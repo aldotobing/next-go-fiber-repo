@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -220,6 +221,12 @@ func (uc PointUC) Add(c context.Context, in requests.PointRequest) (out viewmode
 		By:   "c.id",
 		Sort: "asc",
 	})
+
+	if len(customerData) < 1 {
+		err = errors.New(customerCodes + "not found / show_in_app = 0 ")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
 
 	var customerIDs []string
 	for _, datum := range customerData {
