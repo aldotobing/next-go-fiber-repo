@@ -22,7 +22,11 @@ type Point struct {
 	DeletedAt         sql.NullString `json:"deleted_at"`
 	ExpiredAt         sql.NullString `json:"expired_at"`
 
-	Customer WebCustomer `json:"customer"`
+	Customer     WebCustomer   `json:"customer"`
+	Branch       Branch        `json:"branch"`
+	Region       WebRegionArea `json:"region"`
+	Partner      WebPartner    `json:"partner"`
+	SalesInvoice SalesInvoice  `json:"sales_invoice"`
 }
 
 // PointGetBalance ...
@@ -35,21 +39,24 @@ type PointGetBalance struct {
 
 // PointParameter ...
 type PointParameter struct {
-	ID         string `json:"id"`
-	Month      string `json:"month"`
-	Year       string `json:"year"`
-	CustomerID string `json:"customer_id"`
-	PointType  string `json:"point_type"`
-	StartDate  string `json:"start_date"`
-	EndDate    string `json:"end_date"`
-	Renewal    string `json:"renewal"`
-	Search     string `json:"search"`
-	ShowAll    string `json:"show_all"`
-	Page       int    `json:"page"`
-	Offset     int    `json:"offset"`
-	Limit      int    `json:"limit"`
-	By         string `json:"by"`
-	Sort       string `json:"sort"`
+	ID            string `json:"id"`
+	Month         string `json:"month"`
+	Year          string `json:"year"`
+	CustomerID    string `json:"customer_id"`
+	PointType     string `json:"point_type"`
+	StartDate     string `json:"start_date"`
+	EndDate       string `json:"end_date"`
+	Renewal       string `json:"renewal"`
+	Search        string `json:"search"`
+	ShowAll       string `json:"show_all"`
+	RegionID      string `json:"region_id"`
+	RegionGroupID string `json:"region_group_id"`
+	BranchID      string `json:"branch_id"`
+	Page          int    `json:"page"`
+	Offset        int    `json:"offset"`
+	Limit         int    `json:"limit"`
+	By            string `json:"by"`
+	Sort          string `json:"sort"`
 }
 
 var (

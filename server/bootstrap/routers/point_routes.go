@@ -32,4 +32,6 @@ func (route PointRoutes) RegisterRoute() {
 	r.Post("/", handler.Add)
 	r.Put("/:id", handler.Update)
 	r.Delete("/:id", handler.Delete)
+
+	r.Get("/report", handler.Report)
 }

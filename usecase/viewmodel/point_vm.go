@@ -20,3 +20,17 @@ type PointVM struct {
 type PointBalanceVM struct {
 	Balance string `json:"balance"`
 }
+
+// PointReportVM ....
+type PointReportVM struct {
+	BranchCode        string `json:"branch_code"`
+	BranchName        string `json:"branch_name"`
+	RegionName        string `json:"region_name"`
+	RegionGroupName   string `json:"region_group_name"`
+	PartnerCode       string `json:"partner_code"`
+	PartnerName       string `json:"partner_name"`
+	InvoiceDocumentNo string `json:"invoice_document_no"`
+	NetAmount         string `json:"net_amount"`
+	Point             string `json:"point"`
+	TrasactionDate    string `json:"transaction_date"`
+}
