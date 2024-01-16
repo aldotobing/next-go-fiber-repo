@@ -104,6 +104,24 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 	}
 	res.CustomerPhotoKtp = photoktpURL
 
+	var photoktpDashboardURL string
+	if data.CustomerPhotoKtpDashboard.Valid {
+		photoktpDashboardURL = models.CustomerImagePath + data.CustomerPhotoKtpDashboard.String
+	}
+	res.CustomerPhotoKtpDashboard = photoktpDashboardURL
+
+	var photoNPWPURL string
+	if data.CustomerPhotoNpwp.Valid {
+		photoNPWPURL = models.CustomerImagePath + data.CustomerPhotoNpwp.String
+	}
+	res.CustomerPhotoNpwp = photoNPWPURL
+
+	var photoNPWPDashboardURL string
+	if data.CustomerPhotoNpwpDashboard.Valid {
+		photoNPWPDashboardURL = models.CustomerImagePath + data.CustomerPhotoNpwpDashboard.String
+	}
+	res.CustomerPhotoNpwpDashboard = photoNPWPDashboardURL
+
 	// res.CustomerLevelID = int(data.CustomerLevelID.Int64)
 	// res.CustomerLevel = data.CustomerLevel.String
 	res.CustomerUserID = data.CustomerUserID.String
@@ -421,7 +439,9 @@ func (uc WebCustomerUC) FindByCodes(c context.Context, parameter models.WebCusto
 	return res, nil
 }
 
-func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCustomerRequest, imgProfile, imgKtp *multipart.FileHeader) (res viewmodel.CustomerVM, err error) {
+func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCustomerRequest,
+	imgProfile, imgKtp,
+	imgKtpDashboard, imgNPWP, imgNPWPDashboard *multipart.FileHeader) (res viewmodel.CustomerVM, err error) {
 
 	cacheKey := CustomerCacheKey + id
 
@@ -511,6 +531,69 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 		stringImageKTP = imgBannerFile.FileName
 	}
 
+	var stringImageKTPDashboard string
+	if currentObjectUc.CustomerPhotoKtpDashboard != "" {
+		stringImageKTPDashboard = strings.ReplaceAll(currentObjectUc.CustomerPhotoKtp, models.CustomerImagePath, "")
+	}
+	if imgKtpDashboard != nil {
+		awsUc.AWSS3.Directory = "image/customer"
+		if &stringImageKTPDashboard != nil && strings.Trim(stringImageKTPDashboard, " ") != "" {
+			_, err = awsUc.Delete(awsUc.AWSS3.Directory, stringImageKTPDashboard)
+			if err != nil {
+				logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "s3", uc.ReqID)
+			}
+		}
+
+		imgBannerFile, err := awsUc.Upload(awsUc.AWSS3.Directory, imgKtpDashboard)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "upload_file", c.Value("requestid"))
+			return res, err
+		}
+		stringImageKTPDashboard = imgBannerFile.FileName
+	}
+
+	var stringImageNpwp string
+	if currentObjectUc.CustomerPhotoNpwp != "" {
+		stringImageNpwp = strings.ReplaceAll(currentObjectUc.CustomerPhotoNpwp, models.CustomerImagePath, "")
+	}
+	if imgNPWP != nil {
+		awsUc.AWSS3.Directory = "image/customer"
+		if &stringImageNpwp != nil && strings.Trim(stringImageNpwp, " ") != "" {
+			_, err = awsUc.Delete(awsUc.AWSS3.Directory, stringImageNpwp)
+			if err != nil {
+				logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "s3", uc.ReqID)
+			}
+		}
+
+		imgBannerFile, err := awsUc.Upload(awsUc.AWSS3.Directory, imgNPWP)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "upload_file", c.Value("requestid"))
+			return res, err
+		}
+		stringImageNpwp = imgBannerFile.FileName
+	}
+
+	var stringImageNpwpDashboard string
+	if currentObjectUc.CustomerPhotoNpwpDashboard != "" {
+		stringImageNpwpDashboard = strings.ReplaceAll(currentObjectUc.CustomerPhotoNpwpDashboard, models.CustomerImagePath, "")
+	}
+	if imgNPWPDashboard != nil {
+		awsUc.AWSS3.Directory = "image/customer"
+		if &stringImageNpwpDashboard != nil && strings.Trim(stringImageNpwpDashboard, " ") != "" {
+			_, err = awsUc.Delete(awsUc.AWSS3.Directory, stringImageNpwpDashboard)
+			if err != nil {
+				logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "s3", uc.ReqID)
+			}
+		}
+
+		imgBannerFile, err := awsUc.Upload(awsUc.AWSS3.Directory, imgNPWPDashboard)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "upload_file", c.Value("requestid"))
+			return res, err
+		}
+		stringImageNpwpDashboard = imgBannerFile.FileName
+	}
+
 	repo := repository.NewWebCustomerRepository(uc.DB)
 	// now := time.Now().UTC()
 	// strnow := now.Format(time.RFC3339)
@@ -522,28 +605,31 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 		data.CustomerShowInApp = currentObjectUc.CustomerShowInApp
 	}
 	in := models.WebCustomer{
-		ID:                     sql.NullString{String: id},
-		Code:                   sql.NullString{String: data.Code},
-		CustomerName:           sql.NullString{String: data.CustomerName},
-		CustomerAddress:        sql.NullString{String: data.CustomerAddress},
-		CustomerPhone:          sql.NullString{String: data.CustomerPhone},
-		CustomerEmail:          sql.NullString{String: data.CustomerEmail},
-		CustomerCpName:         sql.NullString{String: data.CustomerCpName},
-		CustomerProfilePicture: sql.NullString{String: strImgprofile},
-		CustomerTaxCalcMethod:  sql.NullString{String: data.CustomerTaxCalcMethod},
-		CustomerActiveStatus:   sql.NullString{String: data.CustomerActiveStatus},
-		CustomerSalesmanID:     sql.NullString{String: data.CustomerSalesmanID},
-		CustomerBranchID:       sql.NullString{String: data.CustomerBranchID},
-		CustomerNik:            sql.NullString{String: data.CustomerNik},
-		CustomerUserID:         sql.NullString{String: data.CustomerUserID},
-		CustomerReligion:       sql.NullString{String: data.CustomerReligion},
-		CustomerLevelID:        sql.NullInt64{Int64: int64(data.CustomerLevelID)},
-		CustomerGender:         sql.NullString{String: data.CustomerGender},
-		CustomerBirthDate:      sql.NullString{String: data.CustomerBirthDate},
-		CustomerPhotoKtp:       sql.NullString{String: stringImageKTP},
-		UserID:                 sql.NullInt64{Int64: int64(data.UserID)},
-		ShowInApp:              sql.NullString{String: data.CustomerShowInApp},
-		CustomerAdminValidate:  data.AdminValidate,
+		ID:                         sql.NullString{String: id},
+		Code:                       sql.NullString{String: data.Code},
+		CustomerName:               sql.NullString{String: data.CustomerName},
+		CustomerAddress:            sql.NullString{String: data.CustomerAddress},
+		CustomerPhone:              sql.NullString{String: data.CustomerPhone},
+		CustomerEmail:              sql.NullString{String: data.CustomerEmail},
+		CustomerCpName:             sql.NullString{String: data.CustomerCpName},
+		CustomerProfilePicture:     sql.NullString{String: strImgprofile},
+		CustomerTaxCalcMethod:      sql.NullString{String: data.CustomerTaxCalcMethod},
+		CustomerActiveStatus:       sql.NullString{String: data.CustomerActiveStatus},
+		CustomerSalesmanID:         sql.NullString{String: data.CustomerSalesmanID},
+		CustomerBranchID:           sql.NullString{String: data.CustomerBranchID},
+		CustomerNik:                sql.NullString{String: data.CustomerNik},
+		CustomerUserID:             sql.NullString{String: data.CustomerUserID},
+		CustomerReligion:           sql.NullString{String: data.CustomerReligion},
+		CustomerLevelID:            sql.NullInt64{Int64: int64(data.CustomerLevelID)},
+		CustomerGender:             sql.NullString{String: data.CustomerGender},
+		CustomerBirthDate:          sql.NullString{String: data.CustomerBirthDate},
+		CustomerPhotoKtp:           sql.NullString{String: stringImageKTP},
+		CustomerPhotoKtpDashboard:  sql.NullString{String: stringImageKTPDashboard},
+		CustomerPhotoNpwp:          sql.NullString{String: stringImageNpwp},
+		CustomerPhotoNpwpDashboard: sql.NullString{String: stringImageNpwpDashboard},
+		UserID:                     sql.NullInt64{Int64: int64(data.UserID)},
+		ShowInApp:                  sql.NullString{String: data.CustomerShowInApp},
+		CustomerAdminValidate:      data.AdminValidate,
 	}
 
 	in.ID.String, err = repo.Edit(c, in)
