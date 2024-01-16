@@ -225,8 +225,11 @@ func (h *WebCustomerHandler) Edit(ctx *fiber.Ctx) error {
 
 	imgProfile, _ := ctx.FormFile("img_profile")
 	imgKtp, _ := ctx.FormFile("img_ktp")
+	imgKtpDasboard, _ := ctx.FormFile("img_ktp_dasboard")
+	imgNpwp, _ := ctx.FormFile("img_npwp")
+	imgNpwpDashboard, _ := ctx.FormFile("img_npwp_dashboard")
 	uc := usecase.WebCustomerUC{ContractUC: h.ContractUC}
-	res, err := uc.Edit(c, id, input, imgProfile, imgKtp)
+	res, err := uc.Edit(c, id, input, imgProfile, imgKtp, imgKtpDasboard, imgNpwp, imgNpwpDashboard)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
