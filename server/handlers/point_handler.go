@@ -171,3 +171,24 @@ func (h *PointHandler) Delete(ctx *fiber.Ctx) error {
 
 	return h.SendResponse(ctx, nil, nil, err, 0)
 }
+
+// Report ...
+func (h *PointHandler) Report(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+	parameter := models.PointParameter{
+		StartDate:     ctx.Query("start_date"),
+		EndDate:       ctx.Query("end_date"),
+		RegionID:      ctx.Query("region_id"),
+		RegionGroupID: ctx.Query("region_group_id"),
+		BranchID:      ctx.Query("branch_id"),
+		By:            ctx.Query("by"),
+		Sort:          ctx.Query("sort"),
+	}
+	uc := usecase.PointUC{ContractUC: h.ContractUC}
+	res, err := uc.Report(c, parameter)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}

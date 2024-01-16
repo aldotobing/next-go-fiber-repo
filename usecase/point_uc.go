@@ -283,3 +283,38 @@ func (uc PointUC) Delete(c context.Context, in string) (err error) {
 
 	return
 }
+
+// Report ...
+func (uc PointUC) Report(c context.Context, parameter models.PointParameter) (out []viewmodel.PointReportVM, err error) {
+	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.VoucherOrderBy, models.VoucherOrderByrByString)
+
+	repo := repository.NewPointRepository(uc.DB)
+	data, err := repo.Report(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	for _, datum := range data {
+		temp := viewmodel.PointReportVM{
+			BranchCode:        *datum.Branch.Code,
+			BranchName:        *datum.Branch.Name,
+			RegionName:        *datum.Region.Name,
+			RegionGroupName:   *datum.Region.GroupName,
+			PartnerCode:       *datum.Partner.Code,
+			PartnerName:       *datum.Partner.PartnerName,
+			InvoiceDocumentNo: datum.InvoiceDocumentNo.String,
+			NetAmount:         *datum.SalesInvoice.NetAmount,
+			Point:             datum.Point,
+			TrasactionDate:    *datum.SalesInvoice.TrasactionDate,
+		}
+
+		out = append(out, temp)
+	}
+
+	if out == nil {
+		out = make([]viewmodel.PointReportVM, 0)
+	}
+
+	return
+}

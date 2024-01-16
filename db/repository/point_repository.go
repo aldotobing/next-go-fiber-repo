@@ -17,6 +17,7 @@ type IPointRepository interface {
 	Add(c context.Context, model viewmodel.PointVM) (string, error)
 	Update(c context.Context, model viewmodel.PointVM) (string, error)
 	Delete(c context.Context, id string) (string, error)
+	Report(c context.Context, parameter models.PointParameter) ([]models.Point, error)
 }
 
 // PointRepository ...
@@ -250,4 +251,58 @@ func (repository PointRepository) Delete(c context.Context, id string) (res stri
 	err = repository.DB.QueryRowContext(c, statement).Scan(&res)
 
 	return
+}
+
+func (repository PointRepository) Report(c context.Context, parameter models.PointParameter) (data []models.Point, err error) {
+	var conditionString string
+
+	if parameter.StartDate != "" && parameter.EndDate != "" {
+		conditionString += ` AND sih.transaction_date between '` + parameter.StartDate + `' and '` + parameter.EndDate + `'`
+	}
+
+	if parameter.BranchID != "" {
+		conditionString += ` AND B.ID = ` + parameter.BranchID
+	}
+
+	if parameter.RegionGroupID != "" {
+		conditionString += ` AND R.GROUP_ID = ` + parameter.RegionGroupID
+	}
+	if parameter.RegionID != "" {
+		conditionString += ` AND R.ID = ` + parameter.RegionID
+	}
+
+	statement := `select b.branch_code, b."_name", r._name, r.group_name, 
+		pt.code, pt."_name", 
+		p.invoice_document_no, sih.net_amount, p.point, sih.transaction_date
+		from points p
+		left join sales_invoice_header sih on sih.document_no = p.invoice_document_no 
+		left join customer c on c.id = p.customer_id 
+		left join branch b on b.id = c.branch_id 
+		left join region r on r.id = b.region_id
+		left join partner pt on pt.id = c.partner_id
+		WHERE P.DELETED_AT IS NULL AND P.POINT_TYPE = 2 ` + conditionString + `
+		order by branch_code asc;`
+
+	rows, err := repository.DB.QueryContext(c, statement)
+
+	if err != nil {
+		return data, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var temp models.Point
+		err = rows.Scan(
+			&temp.Branch.Code, &temp.Branch.Name, &temp.Region.Name, &temp.Region.GroupName,
+			&temp.Partner.Code, &temp.Partner.PartnerName,
+			&temp.InvoiceDocumentNo, &temp.SalesInvoice.NetAmount, &temp.Point, &temp.SalesInvoice.TrasactionDate,
+		)
+
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
+	}
+
+	return data, err
 }
