@@ -102,6 +102,9 @@ func (repository WebCustomerRepository) scanRows(rows *sql.Rows) (res models.Web
 		&res.SalesmanTypeName,
 		&res.CustomerAdminValidate,
 		&res.IndexPoint,
+		&res.CustomerPhotoKtpDashboard,
+		&res.CustomerPhotoNpwp,
+		&res.CustomerPhotoNpwpDashboard,
 	)
 	if err != nil {
 
@@ -239,6 +242,9 @@ func (repository WebCustomerRepository) scanRow(row *sql.Row) (res models.WebCus
 		&res.SalesmanTypeName,
 		&res.CustomerAdminValidate,
 		&res.IndexPoint,
+		&res.CustomerPhotoKtpDashboard,
+		&res.CustomerPhotoNpwp,
+		&res.CustomerPhotoNpwpDashboard,
 	)
 	if err != nil {
 		return res, err
@@ -516,8 +522,11 @@ func (repository WebCustomerRepository) Edit(c context.Context, model models.Web
 		modified_date = now(),
 		modified_by = $15,
 		show_in_apps = $16,
-		admin_validate = $17
-	WHERE id = $18
+		admin_validate = $17,
+		customer_photo_ktp_dashboard = $18,
+		customer_photo_npwp = $19,
+		customer_photo_npwp_dashboard = $20
+	WHERE id = $21
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		model.CustomerName.String,
@@ -537,6 +546,9 @@ func (repository WebCustomerRepository) Edit(c context.Context, model models.Web
 		model.UserID.Int64,
 		model.ShowInApp.String,
 		model.CustomerAdminValidate,
+		model.CustomerPhotoKtpDashboard,
+		model.CustomerPhotoNpwp,
+		model.CustomerPhotoNpwpDashboard,
 		model.ID.String).Scan(&res)
 
 	if err != nil {
