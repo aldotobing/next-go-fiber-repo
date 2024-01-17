@@ -546,9 +546,9 @@ func (repository WebCustomerRepository) Edit(c context.Context, model models.Web
 		model.UserID.Int64,
 		model.ShowInApp.String,
 		model.CustomerAdminValidate,
-		model.CustomerPhotoKtpDashboard,
-		model.CustomerPhotoNpwp,
-		model.CustomerPhotoNpwpDashboard,
+		model.CustomerPhotoKtpDashboard.String,
+		model.CustomerPhotoNpwp.String,
+		model.CustomerPhotoNpwpDashboard.String,
 		model.ID.String).Scan(&res)
 
 	if err != nil {
