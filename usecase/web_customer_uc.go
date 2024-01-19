@@ -533,7 +533,7 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 
 	var stringImageKTPDashboard string
 	if currentObjectUc.CustomerPhotoKtpDashboard != "" {
-		stringImageKTPDashboard = strings.ReplaceAll(currentObjectUc.CustomerPhotoKtp, models.CustomerImagePath, "")
+		stringImageKTPDashboard = strings.ReplaceAll(currentObjectUc.CustomerPhotoKtpDashboard, models.CustomerImagePath, "")
 	}
 	if imgKtpDashboard != nil {
 		awsUc.AWSS3.Directory = "image/customer"
