@@ -301,4 +301,7 @@ func (boot Bootstrap) RegisterRouters() {
 
 	couponRoute := routers.CouponRoutes{RouterGroup: apiV1, Handler: handler}
 	couponRoute.RegisterRoute()
+
+	couponRedeemRoute := routers.CouponRedeemRoutes{RouterGroup: apiV1, Handler: handler}
+	couponRedeemRoute.RegisterRoute()
 }

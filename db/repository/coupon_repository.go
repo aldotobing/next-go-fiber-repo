@@ -119,7 +119,7 @@ func (repository CouponRepository) FindAll(ctx context.Context, parameter models
 		return data, count, err
 	}
 
-	countQuery := `SELECT COUNT(*) FROM POINT_RULES def ` + models.CouponWhereStatement +
+	countQuery := `SELECT COUNT(*) FROM COUPONS def ` + models.CouponWhereStatement +
 		conditionString
 	err = repository.DB.QueryRow(countQuery).Scan(&count)
 

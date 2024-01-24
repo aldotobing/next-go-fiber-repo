@@ -33,7 +33,7 @@ func (uc CouponUC) BuildBody(data *models.Coupon, res *viewmodel.CouponVM) {
 
 // FindAll ...
 func (uc CouponUC) FindAll(c context.Context, parameter models.CouponParameter) (out []viewmodel.CouponVM, p viewmodel.PaginationVM, err error) {
-	parameter.Offset, parameter.Limit, parameter.Page, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.PointRuleOrderBy, models.PointRuleOrderByrByString)
+	parameter.Offset, parameter.Limit, parameter.Page, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.CouponOrderBy, models.CouponOrderByrByString)
 
 	repo := repository.NewCouponRepository(uc.DB)
 	data, count, err := repo.FindAll(c, parameter)
@@ -59,7 +59,7 @@ func (uc CouponUC) FindAll(c context.Context, parameter models.CouponParameter) 
 
 // SelectAll ...
 func (uc CouponUC) SelectAll(c context.Context, parameter models.CouponParameter) (out []viewmodel.CouponVM, err error) {
-	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.PointRuleOrderBy, models.PointRuleOrderByrByString)
+	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.CouponOrderBy, models.CouponOrderByrByString)
 
 	repo := repository.NewCouponRepository(uc.DB)
 	data, err := repo.SelectAll(c, parameter)
