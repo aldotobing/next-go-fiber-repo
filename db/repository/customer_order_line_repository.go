@@ -185,6 +185,9 @@ func (repository CustomerOrderLineRepository) RestSelectAll(c context.Context, p
 	if parameter.HeaderID != "" {
 		conditionString += ` AND def.header_id = '` + parameter.HeaderID + `'`
 	}
+	if parameter.ExcludeBonuses != "" && parameter.ExcludeBonuses == "1" {
+		conditionString += ` AND coalesce(def.from_promo,0) = 0 `
+	}
 
 	statement := models.RestCustomerOrderLineSelectStatement + ` ` + models.CustomerOrderLineWhereStatement +
 		` AND (LOWER(cus."customer_name") LIKE $1 ) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
