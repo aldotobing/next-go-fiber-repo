@@ -252,6 +252,29 @@ func (uc PointUC) Add(c context.Context, in requests.PointRequest) (out viewmode
 	return
 }
 
+// AddWithdraw ...
+func (uc PointUC) AddWithdraw(c context.Context, in requests.PointRequest) (out viewmodel.PointVM, err error) {
+	out = viewmodel.PointVM{
+		PointType:  "3",
+		Point:      in.Point,
+		CustomerID: in.CustomerID,
+	}
+
+	repo := repository.NewPointRepository(uc.DB)
+	out.ID, err = repo.AddWithdraw(c, out)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	uc.GetBalance(c, models.PointParameter{
+		CustomerID: in.CustomerID,
+		Renewal:    "1",
+	})
+
+	return
+}
+
 // Update ...
 func (uc PointUC) Update(c context.Context, id string, in requests.PointRequest) (out viewmodel.PointVM, err error) {
 	out = viewmodel.PointVM{

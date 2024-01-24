@@ -1,0 +1,162 @@
+package usecase
+
+import (
+	"context"
+	"errors"
+	"mime/multipart"
+	"strconv"
+
+	"nextbasis-service-v-0.1/config"
+	"nextbasis-service-v-0.1/db/repository"
+	"nextbasis-service-v-0.1/db/repository/models"
+	"nextbasis-service-v-0.1/pkg/functioncaller"
+	"nextbasis-service-v-0.1/pkg/logruslogger"
+	"nextbasis-service-v-0.1/server/requests"
+	"nextbasis-service-v-0.1/usecase/viewmodel"
+)
+
+// CouponRedeemUC ...
+type CouponRedeemUC struct {
+	*ContractUC
+}
+
+// BuildBody ...
+func (uc CouponRedeemUC) BuildBody(data *models.CouponRedeem, res *viewmodel.CouponRedeemVM) {
+	res.ID = data.ID
+	res.CouponID = data.CouponID
+	res.CouponName = data.CouponName
+	res.CouponDescription = data.CouponDescription
+	res.CustomerID = data.CustomerID
+	res.CustomerName = data.CustomerName
+	res.Redeem = data.Redeem
+	res.RedeemAt = data.RedeemAt.String
+	res.CreatedAt = data.CreatedAt
+	res.UpdatedAt = data.UpdatedAt.String
+	res.DeletedAt = data.DeletedAt.String
+}
+
+// FindAll ...
+func (uc CouponRedeemUC) FindAll(c context.Context, parameter models.CouponRedeemParameter) (out []viewmodel.CouponRedeemVM, p viewmodel.PaginationVM, err error) {
+	parameter.Offset, parameter.Limit, parameter.Page, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.PointRuleOrderBy, models.PointRuleOrderByrByString)
+
+	repo := repository.NewCouponRedeemRepository(uc.DB)
+	data, count, err := repo.FindAll(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	p = uc.setPaginationResponse(parameter.Page, parameter.Limit, count)
+	for _, datum := range data {
+		var temp viewmodel.CouponRedeemVM
+		uc.BuildBody(&datum, &temp)
+
+		out = append(out, temp)
+	}
+
+	if out == nil {
+		out = make([]viewmodel.CouponRedeemVM, 0)
+	}
+
+	return
+}
+
+// SelectAll ...
+func (uc CouponRedeemUC) SelectAll(c context.Context, parameter models.CouponRedeemParameter) (out []viewmodel.CouponRedeemVM, err error) {
+	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.PointRuleOrderBy, models.PointRuleOrderByrByString)
+
+	repo := repository.NewCouponRedeemRepository(uc.DB)
+	data, err := repo.SelectAll(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	for _, datum := range data {
+		var temp viewmodel.CouponRedeemVM
+		uc.BuildBody(&datum, &temp)
+
+		out = append(out, temp)
+	}
+
+	if out == nil {
+		out = make([]viewmodel.CouponRedeemVM, 0)
+	}
+
+	return
+}
+
+// FindByID ...
+func (uc CouponRedeemUC) FindByID(c context.Context, parameter models.CouponRedeemParameter) (out viewmodel.CouponRedeemVM, err error) {
+	repo := repository.NewCouponRedeemRepository(uc.DB)
+	data, err := repo.FindByID(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	uc.BuildBody(&data, &out)
+
+	return
+}
+
+// Add ...
+func (uc CouponRedeemUC) Add(c context.Context, in requests.CouponRedeemRequest) (out viewmodel.CouponRedeemVM, err error) {
+	couponData, err := CouponUC{ContractUC: uc.ContractUC}.FindByID(c, models.CouponParameter{ID: in.CouponID})
+	if err != nil {
+		err = errors.New("coupon not found")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	pointUC := PointUC{ContractUC: uc.ContractUC}
+	customerPoint, err := pointUC.GetBalance(c, models.PointParameter{
+		CustomerID: in.CustomerID,
+		Renewal:    "1",
+	})
+	if err != nil {
+		err = errors.New("customer point not found")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	point, _ := strconv.ParseFloat(customerPoint.Balance, 64)
+	couponConversion, _ := strconv.ParseFloat(couponData.PointConversion, 64)
+	if point < couponConversion {
+		err = errors.New("there are insufficient point on your account")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "insufficient_point", c.Value("requestid"))
+		return
+	}
+	out = viewmodel.CouponRedeemVM{
+		CouponID:   in.CouponID,
+		CustomerID: in.CustomerID,
+	}
+
+	repo := repository.NewCouponRedeemRepository(uc.DB)
+	out.ID, err = repo.Add(c, out)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	pointUC.AddWithdraw(c, requests.PointRequest{
+		Point:      couponData.PointConversion,
+		CustomerID: in.CustomerID,
+	})
+
+	return
+}
+
+// AddPhoto ...
+func (uc CouponRedeemUC) AddPhoto(c context.Context, image *multipart.FileHeader) (out string, err error) {
+	awsUc := AwsUC{ContractUC: uc.ContractUC}
+	awsUc.AWSS3.Directory = "image/voucher"
+	imgBannerFile, err := awsUc.Upload("image/voucher", image)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "upload_file", c.Value("requestid"))
+		return
+	}
+	out = config.ImagePath + imgBannerFile.FilePath
+
+	return
+}

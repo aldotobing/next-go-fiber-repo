@@ -15,6 +15,7 @@ type IPointRepository interface {
 	FindByID(c context.Context, parameter models.PointParameter) (models.Point, error)
 	GetBalance(c context.Context, parameter models.PointParameter) (models.PointGetBalance, error)
 	Add(c context.Context, model viewmodel.PointVM) (string, error)
+	AddWithdraw(c context.Context, in viewmodel.PointVM) (res string, err error)
 	Update(c context.Context, model viewmodel.PointVM) (string, error)
 	Delete(c context.Context, id string) (string, error)
 	Report(c context.Context, parameter models.PointParameter) ([]models.Point, error)
@@ -217,6 +218,24 @@ func (repository PointRepository) Add(c context.Context, in viewmodel.PointVM) (
 	VALUES ` + statementInsert
 
 	err = repository.DB.QueryRowContext(c, statement).Err()
+
+	return
+}
+
+// AddWithdraw ...
+func (repository PointRepository) AddWithdraw(c context.Context, in viewmodel.PointVM) (res string, err error) {
+	statement := `INSERT INTO POINTS (
+			POINT_TYPE,
+			POINT,
+			CUSTOMER_ID,
+			CREATED_AT,
+			UPDATED_AT
+		)
+	VALUES (
+		$1, $2, $3, now(), now()
+	)`
+
+	err = repository.DB.QueryRowContext(c, statement, in.PointType, in.Point, in.CustomerID).Err()
 
 	return
 }
