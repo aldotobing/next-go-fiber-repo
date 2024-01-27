@@ -120,7 +120,7 @@ func (repository ItemProductFocusRepository) SelectAllV2(c context.Context, para
 	conditionString := ``
 
 	conditionString += `AND DEF.BRANCH_ID = '` + branchID + `'`
-	conditionString += ` AND IP.PRICE_LIST_VERSION_ID = (SELECT id FROM price_list_version WHERE price_list_id = ` + customerPriceListID + `` + `)` + ` `
+	conditionString += ` AND IP.PRICE_LIST_VERSION_ID in (SELECT id FROM price_list_version WHERE price_list_id = ` + customerPriceListID + `` + `)` + ` `
 
 	if parameter.ItemCategoryId != "" {
 		conditionString += ` AND i.Item_category_id = '` + parameter.ItemCategoryId + `'`
