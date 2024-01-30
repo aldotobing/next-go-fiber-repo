@@ -14,6 +14,7 @@ type ICouponRedeemRepository interface {
 	FindAll(ctx context.Context, parameter models.CouponRedeemParameter) ([]models.CouponRedeem, int, error)
 	FindByID(c context.Context, parameter models.CouponRedeemParameter) (models.CouponRedeem, error)
 	Add(c context.Context, model viewmodel.CouponRedeemVM) (string, error)
+	Redeem(c context.Context, model viewmodel.CouponRedeemVM) (string, error)
 }
 
 // CouponRedeemRepository ...
@@ -34,11 +35,13 @@ func (repository CouponRedeemRepository) scanRows(rows *sql.Rows) (res models.Co
 		&res.CustomerID,
 		&res.Redeem,
 		&res.RedeemAt,
+		&res.RedeemedToDocumentNo,
 		&res.CreatedAt,
 		&res.UpdatedAt,
 		&res.DeletedAt,
 		&res.CouponName,
 		&res.CouponDescription,
+		&res.CouponPointConversion,
 		&res.CustomerName,
 	)
 
@@ -51,11 +54,15 @@ func (repository CouponRedeemRepository) scanRow(row *sql.Row) (res models.Coupo
 		&res.ID,
 		&res.CouponID,
 		&res.CustomerID,
+		&res.Redeem,
+		&res.RedeemAt,
+		&res.RedeemedToDocumentNo,
 		&res.CreatedAt,
 		&res.UpdatedAt,
 		&res.DeletedAt,
 		&res.CouponName,
 		&res.CouponDescription,
+		&res.CouponPointConversion,
 		&res.CustomerName,
 	)
 
@@ -150,6 +157,24 @@ func (repository CouponRedeemRepository) Add(c context.Context, in viewmodel.Cou
 		in.CouponID,
 		in.CustomerID,
 	).Scan(&res)
+
+	return
+}
+
+// Redeem ...
+func (repository CouponRedeemRepository) Redeem(c context.Context, in viewmodel.CouponRedeemVM) (res string, err error) {
+	statement := `UPDATE COUPON_REDEEM SET 
+		REDEEMED = $1, 
+		REDEEMED_AT = NOW(),
+		REDEEM_TO_DOC_NO = $2,
+		UPDATED_AT = now()
+	WHERE id = $3
+	RETURNING id`
+
+	err = repository.DB.QueryRowContext(c, statement,
+		in.Redeem,
+		in.RedeemedToDocumentNo,
+		in.ID).Scan(&res)
 
 	return
 }
