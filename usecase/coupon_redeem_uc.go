@@ -5,10 +5,12 @@ import (
 	"errors"
 	"mime/multipart"
 	"strconv"
+	"time"
 
 	"nextbasis-service-v-0.1/config"
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
+	"nextbasis-service-v-0.1/helper"
 	"nextbasis-service-v-0.1/pkg/functioncaller"
 	"nextbasis-service-v-0.1/pkg/logruslogger"
 	"nextbasis-service-v-0.1/server/requests"
@@ -35,6 +37,7 @@ func (uc CouponRedeemUC) BuildBody(data *models.CouponRedeem, res *viewmodel.Cou
 	res.CreatedAt = data.CreatedAt
 	res.UpdatedAt = data.UpdatedAt.String
 	res.DeletedAt = data.DeletedAt.String
+	res.ExpiredAt = data.ExpiredAt.String
 }
 
 // FindAll ...
@@ -129,9 +132,11 @@ func (uc CouponRedeemUC) Add(c context.Context, in requests.CouponRedeemRequest)
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "insufficient_point", c.Value("requestid"))
 		return
 	}
+
 	out = viewmodel.CouponRedeemVM{
 		CouponID:   in.CouponID,
 		CustomerID: in.CustomerID,
+		ExpiredAt:  helper.GetExpiredOneMonth(time.Now()),
 	}
 
 	repo := repository.NewCouponRedeemRepository(uc.DB)
