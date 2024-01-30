@@ -17,6 +17,7 @@ type CouponRedeem struct {
 	CreatedAt             string         `json:"created_at"`
 	UpdatedAt             sql.NullString `json:"updated_at"`
 	DeletedAt             sql.NullString `json:"deleted_at"`
+	ExpiredAt             sql.NullString `json:"expired_at"`
 }
 
 // CouponRedeemParameter ...
@@ -48,6 +49,7 @@ var (
 			DEF.CREATED_AT,
 			DEF.UPDATED_AT,
 			DEF.DELETED_AT,
+			DEF.EXPIRED_AT,
 			CP._NAME,
 			CP.DESCRIPTION,
 			CP.POINT_CONVERSION,

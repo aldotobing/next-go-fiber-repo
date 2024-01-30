@@ -11,6 +11,7 @@ type CouponRedeemVM struct {
 	CreatedAt             string `json:"created_at"`
 	UpdatedAt             string `json:"updated_at"`
 	DeletedAt             string `json:"deleted_at"`
+	ExpiredAt             string `json:"expired_at"`
 	CouponName            string `json:"coupon_name"`
 	CouponDescription     string `json:"coupon_description"`
 	CouponPointConversion string `json:"coupon_point_conversion"`
