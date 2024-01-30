@@ -88,7 +88,7 @@ func (uc CustomerOrderHeaderUC) FindByID(c context.Context, parameter models.Cus
 func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.CustomerOrderHeaderRequest) (res models.CustomerOrderHeader, err error) {
 
 	repo := repository.NewCustomerOrderHeaderRepository(uc.DB)
-
+	couponUC := CouponRedeemUC{ContractUC: uc.ContractUC}
 	chekablerepo := repository.NewShoppingCartRepository(uc.DB)
 	vredeemrepo := repository.NewVoucherRedeemRepository(uc.DB)
 	checkAble, err := chekablerepo.GetTotal(c, models.ShoppingCartParameter{
@@ -130,9 +130,24 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 			vcr, errvcr := vcrrepo.FindByID(c, models.VoucherParameter{ID: vcrr.VoucherID})
 			if errvcr == nil {
 				if &vcr.CashValue != nil && vcr.CashValue != "" {
-					global_disc_amount = vcr.CashValue
+					cashVal, _ := strconv.ParseFloat(vcr.CashValue, 64)
+					globalDisc, _ := strconv.ParseFloat(global_disc_amount, 64)
+					globalDisc += cashVal
+
+					global_disc_amount = strconv.FormatFloat(globalDisc, 'f', 2, 64)
 				}
 			}
+		}
+	}
+
+	if data.CouponRedeemID != "" {
+		coupon, err := couponUC.FindByID(c, models.CouponRedeemParameter{ID: data.VoucherRedeemID})
+		if err == nil {
+			cashVal, _ := strconv.ParseFloat(coupon.CouponPointConversion, 64)
+			globalDisc, _ := strconv.ParseFloat(global_disc_amount, 64)
+			globalDisc += cashVal
+
+			global_disc_amount = strconv.FormatFloat(globalDisc, 'f', 2, 64)
 		}
 	}
 
@@ -208,6 +223,13 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 				if errvredem != nil {
 					fmt.Println("redeem voucher error,", errvredem)
 				}
+			}
+
+			if data.CouponRedeemID != "" {
+				couponUC.Redeem(c, models.CouponRedeemParameter{
+					ID:                   data.VoucherRedeemID,
+					RedeemedToDocumentNo: *order.DocumentNo,
+				})
 			}
 			// fmt.Println("tanggal ", *order.TransactionDate)
 			dateString := pkgtime.GetDate(*order.TransactionDate+"T00:00:00Z", "02 - 01 - 2006", "Asia/Jakarta")

@@ -26,10 +26,12 @@ func (uc CouponRedeemUC) BuildBody(data *models.CouponRedeem, res *viewmodel.Cou
 	res.CouponID = data.CouponID
 	res.CouponName = data.CouponName
 	res.CouponDescription = data.CouponDescription
+	res.CouponPointConversion = data.CouponPointConversion
 	res.CustomerID = data.CustomerID
 	res.CustomerName = data.CustomerName
 	res.Redeem = data.Redeem
 	res.RedeemAt = data.RedeemAt.String
+	res.RedeemedToDocumentNo = data.RedeemedToDocumentNo.String
 	res.CreatedAt = data.CreatedAt
 	res.UpdatedAt = data.UpdatedAt.String
 	res.DeletedAt = data.DeletedAt.String
@@ -143,6 +145,24 @@ func (uc CouponRedeemUC) Add(c context.Context, in requests.CouponRedeemRequest)
 		Point:      couponData.PointConversion,
 		CustomerID: in.CustomerID,
 	})
+
+	return
+}
+
+// Redeem ...
+func (uc CouponRedeemUC) Redeem(c context.Context, in models.CouponRedeemParameter) (out viewmodel.CouponRedeemVM, err error) {
+	out = viewmodel.CouponRedeemVM{
+		ID:                   in.ID,
+		Redeem:               "1",
+		RedeemedToDocumentNo: in.RedeemedToDocumentNo,
+	}
+
+	repo := repository.NewCouponRedeemRepository(uc.DB)
+	out.ID, err = repo.Redeem(c, out)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
 
 	return
 }
