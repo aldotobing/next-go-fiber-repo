@@ -43,10 +43,11 @@ func (h *CouponRedeemHandler) FindAll(ctx *fiber.Ctx) error {
 func (h *CouponRedeemHandler) SelectAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 	parameter := models.CouponRedeemParameter{
-		Search:  ctx.Query("search"),
-		ShowAll: ctx.Query("show_all"),
-		By:      ctx.Query("by"),
-		Sort:    ctx.Query("sort"),
+		Search:     ctx.Query("search"),
+		ShowAll:    ctx.Query("show_all"),
+		CustomerID: ctx.Query("customer_id"),
+		By:         ctx.Query("by"),
+		Sort:       ctx.Query("sort"),
 	}
 	uc := usecase.CouponRedeemUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectAll(c, parameter)
