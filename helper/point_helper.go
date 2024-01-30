@@ -18,3 +18,9 @@ func GetExpiredPoint(in time.Time) (res string) {
 	res = date.Format("2006-01-02")
 	return
 }
+
+func GetExpiredOneMonth(in time.Time) (res string) {
+	in = in.AddDate(0, 1, 0)
+	res = in.Format("2006-01-02")
+	return
+}

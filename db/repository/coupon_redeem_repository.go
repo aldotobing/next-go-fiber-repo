@@ -39,6 +39,7 @@ func (repository CouponRedeemRepository) scanRows(rows *sql.Rows) (res models.Co
 		&res.CreatedAt,
 		&res.UpdatedAt,
 		&res.DeletedAt,
+		&res.ExpiredAt,
 		&res.CouponName,
 		&res.CouponDescription,
 		&res.CouponPointConversion,
@@ -60,6 +61,7 @@ func (repository CouponRedeemRepository) scanRow(row *sql.Row) (res models.Coupo
 		&res.CreatedAt,
 		&res.UpdatedAt,
 		&res.DeletedAt,
+		&res.ExpiredAt,
 		&res.CouponName,
 		&res.CouponDescription,
 		&res.CouponPointConversion,
@@ -73,13 +75,13 @@ func (repository CouponRedeemRepository) scanRow(row *sql.Row) (res models.Coupo
 func (repository CouponRedeemRepository) SelectAll(c context.Context, parameter models.CouponRedeemParameter) (data []models.CouponRedeem, err error) {
 	var conditionString string
 
+	conditionString += ` AND DEF.REDEEMED_AT IS NULL AND NOW()::DATE<DEF.EXPIRED_AT`
 	if parameter.CustomerID != "" {
 		conditionString += ` AND DEF.CUSTOMER_ID = ` + parameter.CustomerID
 	}
 	statement := models.CouponRedeemSelectStatement + models.CouponRedeemWhereStatement +
 		conditionString +
 		` ORDER BY ` + parameter.By + ` ` + parameter.Sort
-
 	rows, err := repository.DB.QueryContext(c, statement)
 
 	if err != nil {
@@ -101,6 +103,8 @@ func (repository CouponRedeemRepository) SelectAll(c context.Context, parameter 
 // FindAll ...
 func (repository CouponRedeemRepository) FindAll(ctx context.Context, parameter models.CouponRedeemParameter) (data []models.CouponRedeem, count int, err error) {
 	var conditionString string
+
+	conditionString += ` AND DEF.REDEEMED_AT IS NULL AND NOW()::DATE<DEF.EXPIRED_AT`
 
 	if parameter.CustomerID != "" {
 		conditionString += ` AND DEF.CUSTOMER_ID = ` + parameter.CustomerID
@@ -149,13 +153,15 @@ func (repository CouponRedeemRepository) Add(c context.Context, in viewmodel.Cou
 			COUPON_ID, 
 			CUSTOMER_ID,
 			CREATED_AT,
-			UPDATED_AT
+			UPDATED_AT,
+			EXPIRED_AT
 		)
-	VALUES ($1, $2, NOW(), NOW()) RETURNING id`
+	VALUES ($1, $2, NOW(), NOW(), $3) RETURNING id`
 
 	err = repository.DB.QueryRowContext(c, statement,
 		in.CouponID,
 		in.CustomerID,
+		in.ExpiredAt,
 	).Scan(&res)
 
 	return
