@@ -75,7 +75,9 @@ func (repository CouponRedeemRepository) scanRow(row *sql.Row) (res models.Coupo
 func (repository CouponRedeemRepository) SelectAll(c context.Context, parameter models.CouponRedeemParameter) (data []models.CouponRedeem, err error) {
 	var conditionString string
 
-	conditionString += ` AND DEF.REDEEMED_AT IS NULL AND NOW()::DATE<DEF.EXPIRED_AT`
+	if parameter.ShowAll == "" {
+		conditionString += ` AND DEF.REDEEMED_AT IS NULL AND NOW()::DATE<DEF.EXPIRED_AT`
+	}
 	if parameter.CustomerID != "" {
 		conditionString += ` AND DEF.CUSTOMER_ID = ` + parameter.CustomerID
 	}
