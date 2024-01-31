@@ -99,7 +99,6 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 		return res, errors.New("Try Again Later")
 	}
 
-	fmt.Println("sebelom", data.LineList)
 	switch {
 	// case checkAble.IsAble == nil || *checkAble.IsAble == "0":
 	// 	bayar, _ := strconv.ParseFloat(*checkAble.MinOmzet, 0)
@@ -109,7 +108,6 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 	case checkAble.IsMinOrder == nil || *checkAble.IsMinOrder == "0":
 		bayar, _ := strconv.ParseFloat(*checkAble.MinOrder, 0)
 		minOrder := number.FormatCurrency(bayar, "", ".", "", 0)
-		fmt.Println("invalid min amount")
 		return res, errors.New(helper.InvalidMinimumAmountOrder + minOrder + ` rupiah.`)
 	}
 
@@ -141,7 +139,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 	}
 
 	if data.CouponRedeemID != "" {
-		coupon, err := couponUC.FindByID(c, models.CouponRedeemParameter{ID: data.VoucherRedeemID})
+		coupon, err := couponUC.FindByID(c, models.CouponRedeemParameter{ID: data.CouponRedeemID})
 		if err == nil {
 			cashVal, _ := strconv.ParseFloat(coupon.CouponPointConversion, 64)
 			globalDisc, _ := strconv.ParseFloat(global_disc_amount, 64)
@@ -227,7 +225,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 
 			if data.CouponRedeemID != "" {
 				couponUC.Redeem(c, models.CouponRedeemParameter{
-					ID:                   data.VoucherRedeemID,
+					ID:                   data.CouponRedeemID,
 					RedeemedToDocumentNo: *order.DocumentNo,
 				})
 			}
