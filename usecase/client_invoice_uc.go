@@ -147,7 +147,7 @@ func (uc CilentInvoiceUC) FindByDocumentNo(c context.Context, parameter models.C
 // }
 
 func (uc CilentInvoiceUC) DataSync(c context.Context, parameter models.CilentInvoiceParameter) ([]models.CilentInvoice, error) {
-	// repo := repository.NewCilentInvoiceRepository(uc.DB)
+	repo := repository.NewCilentInvoiceRepository(uc.DB)
 
 	loc, err := time.LoadLocation("Asia/Jakarta")
 	if err != nil {
@@ -199,10 +199,10 @@ func (uc CilentInvoiceUC) DataSync(c context.Context, parameter models.CilentInv
 
 	var resBuilder []models.CilentInvoice
 	for _, invoiceObject := range res {
-		// _, _, err := repo.InsertDataWithLine(c, &invoiceObject)
-		// if err != nil {
-		// 	return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
-		// }
+		_, _, err := repo.InsertDataWithLine(c, &invoiceObject)
+		if err != nil {
+			return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
+		}
 
 		if invoiceObject.SalesRequestCode != nil && strings.Contains(*invoiceObject.SalesRequestCode, "CO") &&
 			invoiceObject.OutstandingAmount != nil && *invoiceObject.OutstandingAmount == "0.00" &&
