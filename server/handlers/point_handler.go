@@ -127,6 +127,28 @@ func (h *PointHandler) Add(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
+// AddInject ...
+func (h *PointHandler) AddInject(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	input := new(requests.PointRequest)
+	if err := ctx.BodyParser(input); err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+	if err := h.Validator.Struct(input); err != nil {
+		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
+		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+	}
+
+	uc := usecase.PointUC{ContractUC: h.ContractUC}
+	res, err := uc.AddInject(c, *input)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
 // Update ...
 func (h *PointHandler) Update(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)

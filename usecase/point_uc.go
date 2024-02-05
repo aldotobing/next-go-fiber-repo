@@ -252,6 +252,56 @@ func (uc PointUC) Add(c context.Context, in requests.PointRequest) (out viewmode
 	return
 }
 
+// AddInject ...
+func (uc PointUC) AddInject(c context.Context, in requests.PointRequest) (out []viewmodel.PointVM, err error) {
+	now := time.Now()
+	expiredAt := helper.GetExpiredPoint(now)
+
+	var customerCodes string
+	for _, datum := range in.CustomerCodes {
+		if customerCodes != "" {
+			customerCodes += ", '" + datum.CustomerCode + "'"
+		} else {
+			customerCodes += "'" + datum.CustomerCode + "'"
+		}
+	}
+
+	customerData, err := WebCustomerUC{ContractUC: uc.ContractUC}.SelectAll(c, models.WebCustomerParameter{
+		Code: customerCodes,
+		By:   "c.id",
+		Sort: "asc",
+	})
+
+	if len(customerData) < 1 {
+		err = errors.New(customerCodes + "not found / show_in_app = 0 ")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	for _, datum := range customerData {
+		for _, y := range in.CustomerCodes {
+			if y.CustomerCode == datum.Code {
+				out = append(out, viewmodel.PointVM{
+					PointType:         in.PointType,
+					InvoiceDocumentNo: "INJECT-" + in.UserID + "-" + y.CustomerCode + "-" + now.Format(time.DateTime),
+					Point:             y.Point,
+					CustomerID:        datum.ID,
+					ExpiredAt:         expiredAt,
+				})
+			}
+		}
+	}
+
+	repo := repository.NewPointRepository(uc.DB)
+	_, err = repo.AddInject(c, out)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	return
+}
+
 // AddWithdraw ...
 func (uc PointUC) AddWithdraw(c context.Context, in requests.PointRequest) (out viewmodel.PointVM, err error) {
 	out = viewmodel.PointVM{
