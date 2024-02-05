@@ -20,6 +20,28 @@ type CouponRedeem struct {
 	ExpiredAt             sql.NullString `json:"expired_at"`
 }
 
+// CouponRedeemReport ...
+type CouponRedeemReport struct {
+	ID                    string         `json:"id"`
+	CouponID              string         `json:"coupon_id"`
+	CouponName            string         `json:"coupon_name"`
+	CouponDescription     string         `json:"coupon_description"`
+	CouponPointConversion string         `json:"coupon_point_conversion"`
+	CustomerID            string         `json:"customer_id"`
+	CustomerName          string         `json:"customer_name"`
+	Redeem                string         `json:"redeem"`
+	RedeemAt              sql.NullString `json:"redeem_at"`
+	RedeemedToDocumentNo  sql.NullString `json:"redeem_to_doc_no"`
+	CreatedAt             string         `json:"created_at"`
+	UpdatedAt             sql.NullString `json:"updated_at"`
+	DeletedAt             sql.NullString `json:"deleted_at"`
+	ExpiredAt             sql.NullString `json:"expired_at"`
+	BranchName            string         `json:"branch_name"`
+	BranchCode            string         `json:"branch_code"`
+	RegionName            string         `json:"region_name"`
+	RegionGroupName       string         `json:"region_group_name"`
+}
+
 // CouponRedeemParameter ...
 type CouponRedeemParameter struct {
 	ID                   string `json:"id"`
@@ -28,6 +50,11 @@ type CouponRedeemParameter struct {
 	ShowAll              string `json:"show_all"`
 	CustomerID           string `json:"customer_id"`
 	RedeemedToDocumentNo string `json:"redeem_to_doc_no"`
+	StartDate            string `json:"start_date"`
+	EndDate              string `json:"end_date"`
+	BranchID             string `json:"branch_id"`
+	RegionID             string `json:"region_id"`
+	RegionGroupID        string `json:"region_group_id"`
 	Page                 int    `json:"page"`
 	Offset               int    `json:"offset"`
 	Limit                int    `json:"limit"`
