@@ -15,7 +15,6 @@ type PointVM struct {
 
 	DetailCustomer CustomerVM `json:"customer_detail,omitempty"`
 	CustomerIDs    []string   `json:"customer_ids,omitempty"`
-	CustomerPoints []string   `json:"customer_points,omitempty"`
 }
 
 type PointBalanceVM struct {

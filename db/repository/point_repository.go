@@ -15,7 +15,7 @@ type IPointRepository interface {
 	FindByID(c context.Context, parameter models.PointParameter) (models.Point, error)
 	GetBalance(c context.Context, parameter models.PointParameter) (models.PointGetBalance, error)
 	Add(c context.Context, model viewmodel.PointVM) (string, error)
-	AddInject(c context.Context, model viewmodel.PointVM) (string, error)
+	AddInject(c context.Context, model []viewmodel.PointVM) (string, error)
 	AddWithdraw(c context.Context, in viewmodel.PointVM) (res string, err error)
 	Update(c context.Context, model viewmodel.PointVM) (string, error)
 	Delete(c context.Context, id string) (string, error)
@@ -224,14 +224,14 @@ func (repository PointRepository) Add(c context.Context, in viewmodel.PointVM) (
 }
 
 // AddInject ...
-func (repository PointRepository) AddInject(c context.Context, in viewmodel.PointVM) (res string, err error) {
+func (repository PointRepository) AddInject(c context.Context, in []viewmodel.PointVM) (res string, err error) {
 	var statementInsert string
-	if len(in.CustomerIDs) > 0 {
-		for i, datum := range in.CustomerIDs {
+	if len(in) > 0 {
+		for _, datum := range in {
 			if statementInsert == "" {
-				statementInsert += `(` + in.PointType + `, '` + in.InvoiceDocumentNo + `', '` + in.CustomerPoints[i] + `', ` + datum + `, NOW(), NOW(), '` + in.ExpiredAt + `')`
+				statementInsert += `(` + datum.PointType + `, '` + datum.InvoiceDocumentNo + `', '` + datum.Point + `', ` + datum.CustomerID + `, NOW(), NOW(), '` + datum.ExpiredAt + `')`
 			} else {
-				statementInsert += `, (` + in.PointType + `, '` + in.InvoiceDocumentNo + `', '` + in.CustomerPoints[i] + `', ` + datum + `, NOW(), NOW(), '` + in.ExpiredAt + `')`
+				statementInsert += `, (` + datum.PointType + `, '` + datum.InvoiceDocumentNo + `', '` + datum.Point + `', ` + datum.CustomerID + `, NOW(), NOW(), '` + datum.ExpiredAt + `')`
 			}
 		}
 	}

@@ -252,8 +252,8 @@ func (uc PointUC) Add(c context.Context, in requests.PointRequest) (out viewmode
 	return
 }
 
-// Add ...
-func (uc PointUC) AddInject(c context.Context, in requests.PointRequest) (out viewmodel.PointVM, err error) {
+// AddInject ...
+func (uc PointUC) AddInject(c context.Context, in requests.PointRequest) (out []viewmodel.PointVM, err error) {
 	now := time.Now()
 	expiredAt := helper.GetExpiredPoint(now)
 
@@ -278,34 +278,22 @@ func (uc PointUC) AddInject(c context.Context, in requests.PointRequest) (out vi
 		return
 	}
 
-	var customerIDs, points []string
 	for _, datum := range customerData {
-		customerIDs = append(customerIDs, datum.ID)
-
 		for _, y := range in.CustomerCodes {
 			if y.CustomerCode == datum.Code {
-				if y.Point == "" {
-					points = append(points, in.Point)
-				} else {
-					points = append(points, y.Point)
-				}
-				break
+				out = append(out, viewmodel.PointVM{
+					PointType:         in.PointType,
+					InvoiceDocumentNo: "INJECT-" + in.UserID + "-" + y.CustomerCode + "-" + now.Format(time.DateTime),
+					Point:             y.Point,
+					CustomerID:        datum.ID,
+					ExpiredAt:         expiredAt,
+				})
 			}
 		}
 	}
 
-	out = viewmodel.PointVM{
-		PointType:         in.PointType,
-		InvoiceDocumentNo: in.InvoiceDocumentNo,
-		Point:             in.Point,
-		CustomerID:        in.CustomerID,
-		ExpiredAt:         expiredAt,
-		CustomerIDs:       customerIDs,
-		CustomerPoints:    points,
-	}
-
 	repo := repository.NewPointRepository(uc.DB)
-	out.ID, err = repo.AddInject(c, out)
+	_, err = repo.AddInject(c, out)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return
