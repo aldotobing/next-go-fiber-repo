@@ -283,7 +283,7 @@ func (uc PointUC) AddInject(c context.Context, in requests.PointRequest) (out []
 			if y.CustomerCode == datum.Code {
 				out = append(out, viewmodel.PointVM{
 					PointType:         in.PointType,
-					InvoiceDocumentNo: "INJECT-" + in.UserID + "-" + y.CustomerCode + "-" + now.Format(time.DateTime),
+					InvoiceDocumentNo: "INJECT-" + in.UserID + "-" + y.CustomerCode + "-" + now.Format("2006-01-02 15:04:05"),
 					Point:             y.Point,
 					CustomerID:        datum.ID,
 					ExpiredAt:         expiredAt,
