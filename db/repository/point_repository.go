@@ -15,6 +15,7 @@ type IPointRepository interface {
 	FindByID(c context.Context, parameter models.PointParameter) (models.Point, error)
 	GetBalance(c context.Context, parameter models.PointParameter) (models.PointGetBalance, error)
 	Add(c context.Context, model viewmodel.PointVM) (string, error)
+	AddInject(c context.Context, model viewmodel.PointVM) (string, error)
 	AddWithdraw(c context.Context, in viewmodel.PointVM) (res string, err error)
 	Update(c context.Context, model viewmodel.PointVM) (string, error)
 	Delete(c context.Context, id string) (string, error)
@@ -203,6 +204,34 @@ func (repository PointRepository) Add(c context.Context, in viewmodel.PointVM) (
 				statementInsert += `(` + in.PointType + `, '` + in.InvoiceDocumentNo + `', '` + in.Point + `', ` + datum + `, NOW(), NOW(), '` + in.ExpiredAt + `')`
 			} else {
 				statementInsert += `, (` + in.PointType + `, '` + in.InvoiceDocumentNo + `', '` + in.Point + `', ` + datum + `, NOW(), NOW(), '` + in.ExpiredAt + `')`
+			}
+		}
+	}
+	statement := `INSERT INTO POINTS (
+			POINT_TYPE, 
+			INVOICE_DOCUMENT_NO,
+			POINT,
+			CUSTOMER_ID,
+			CREATED_AT,
+			UPDATED_AT,
+			EXPIRED_AT
+		)
+	VALUES ` + statementInsert
+
+	err = repository.DB.QueryRowContext(c, statement).Err()
+
+	return
+}
+
+// AddInject ...
+func (repository PointRepository) AddInject(c context.Context, in viewmodel.PointVM) (res string, err error) {
+	var statementInsert string
+	if len(in.CustomerIDs) > 0 {
+		for i, datum := range in.CustomerIDs {
+			if statementInsert == "" {
+				statementInsert += `(` + in.PointType + `, '` + in.InvoiceDocumentNo + `', '` + in.CustomerPoints[i] + `', ` + datum + `, NOW(), NOW(), '` + in.ExpiredAt + `')`
+			} else {
+				statementInsert += `, (` + in.PointType + `, '` + in.InvoiceDocumentNo + `', '` + in.CustomerPoints[i] + `', ` + datum + `, NOW(), NOW(), '` + in.ExpiredAt + `')`
 			}
 		}
 	}
