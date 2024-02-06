@@ -29,6 +29,8 @@ func (uc CouponUC) BuildBody(data *models.Coupon, res *viewmodel.CouponVM) {
 	res.CreatedAt = data.CreatedAt
 	res.UpdatedAt = data.UpdatedAt.String
 	res.DeletedAt = data.DeletedAt.String
+	res.Interval = int(data.Interval.Int64)
+	res.PhotoURL = data.PhotoURL.String
 }
 
 // FindAll ...
@@ -104,6 +106,8 @@ func (uc CouponUC) Add(c context.Context, in requests.CouponRequest) (out viewmo
 		PointConversion: in.PointConversion,
 		Name:            in.Name,
 		Description:     in.Description,
+		Interval:        in.Interval,
+		PhotoURL:        in.PhotoURL,
 	}
 
 	repo := repository.NewCouponRepository(uc.DB)
@@ -119,8 +123,8 @@ func (uc CouponUC) Add(c context.Context, in requests.CouponRequest) (out viewmo
 // AddPhoto ...
 func (uc CouponUC) AddPhoto(c context.Context, image *multipart.FileHeader) (out string, err error) {
 	awsUc := AwsUC{ContractUC: uc.ContractUC}
-	awsUc.AWSS3.Directory = "image/voucher"
-	imgBannerFile, err := awsUc.Upload("image/voucher", image)
+	awsUc.AWSS3.Directory = "image/coupon"
+	imgBannerFile, err := awsUc.Upload("image/coupon", image)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "upload_file", c.Value("requestid"))
 		return
@@ -139,6 +143,8 @@ func (uc CouponUC) Update(c context.Context, id string, in requests.CouponReques
 		PointConversion: in.PointConversion,
 		Name:            in.Name,
 		Description:     in.Description,
+		Interval:        in.Interval,
+		PhotoURL:        in.PhotoURL,
 	}
 
 	repo := repository.NewCouponRepository(uc.DB)

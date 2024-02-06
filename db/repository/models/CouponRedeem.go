@@ -9,6 +9,7 @@ type CouponRedeem struct {
 	CouponName            string         `json:"coupon_name"`
 	CouponDescription     string         `json:"coupon_description"`
 	CouponPointConversion string         `json:"coupon_point_conversion"`
+	CouponPhotoURL        sql.NullString `json:"coupon_photo_url"`
 	CustomerID            string         `json:"customer_id"`
 	CustomerName          string         `json:"customer_name"`
 	Redeem                string         `json:"redeem"`
@@ -29,6 +30,7 @@ type CouponRedeemReport struct {
 	CouponPointConversion string         `json:"coupon_point_conversion"`
 	CustomerID            string         `json:"customer_id"`
 	CustomerName          string         `json:"customer_name"`
+	CustomerCode          string         `json:"customer_code"`
 	Redeem                string         `json:"redeem"`
 	RedeemAt              sql.NullString `json:"redeem_at"`
 	RedeemedToDocumentNo  sql.NullString `json:"redeem_to_doc_no"`
@@ -40,6 +42,7 @@ type CouponRedeemReport struct {
 	BranchCode            string         `json:"branch_code"`
 	RegionName            string         `json:"region_name"`
 	RegionGroupName       string         `json:"region_group_name"`
+	CustomerLevelName     sql.NullString `json:"customer_level_name"`
 }
 
 // CouponRedeemParameter ...
@@ -80,6 +83,7 @@ var (
 			CP._NAME,
 			CP.DESCRIPTION,
 			CP.POINT_CONVERSION,
+			CP.PHOTO_URL,
 			C.CUSTOMER_NAME
 		FROM COUPON_REDEEM DEF
 		LEFT JOIN COUPONS CP ON CP.ID = DEF.COUPON_ID

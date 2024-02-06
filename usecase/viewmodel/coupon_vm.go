@@ -11,4 +11,6 @@ type CouponVM struct {
 	CreatedAt       string `json:"created_at"`
 	UpdatedAt       string `json:"updated_at"`
 	DeletedAt       string `json:"deleted_at"`
+	Interval        int    `json:"interval"`
+	PhotoURL        string `json:"photo_url"`
 }
