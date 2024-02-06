@@ -214,10 +214,12 @@ func (uc CouponRedeemUC) SelectReport(c context.Context, parameter models.Coupon
 			CouponDescription:     datum.CouponDescription,
 			CouponPointConversion: datum.CouponPointConversion,
 			CustomerName:          datum.CustomerName,
+			CustomerCode:          datum.CustomerCode,
 			BranchName:            datum.BranchName,
 			BranchCode:            datum.BranchCode,
 			RegionName:            datum.RegionName,
 			RegionGroupName:       datum.RegionGroupName,
+			CustomerLevelName:     datum.CustomerLevelName.String,
 		})
 	}
 

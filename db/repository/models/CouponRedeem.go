@@ -30,6 +30,7 @@ type CouponRedeemReport struct {
 	CouponPointConversion string         `json:"coupon_point_conversion"`
 	CustomerID            string         `json:"customer_id"`
 	CustomerName          string         `json:"customer_name"`
+	CustomerCode          string         `json:"customer_code"`
 	Redeem                string         `json:"redeem"`
 	RedeemAt              sql.NullString `json:"redeem_at"`
 	RedeemedToDocumentNo  sql.NullString `json:"redeem_to_doc_no"`
@@ -41,6 +42,7 @@ type CouponRedeemReport struct {
 	BranchCode            string         `json:"branch_code"`
 	RegionName            string         `json:"region_name"`
 	RegionGroupName       string         `json:"region_group_name"`
+	CustomerLevelName     sql.NullString `json:"customer_level_name"`
 }
 
 // CouponRedeemParameter ...

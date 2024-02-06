@@ -208,13 +208,13 @@ func (repository CouponRedeemRepository) SelectReport(c context.Context, paramet
 	}
 
 	if parameter.BranchID != "" {
-		conditionString += ` AND B.ID = ` + parameter.BranchID
+		conditionString += ` AND B.ID in (` + parameter.BranchID + `)`
 	}
 	if parameter.RegionGroupID != "" {
-		conditionString += ` AND R.GROUP_ID = ` + parameter.RegionGroupID
+		conditionString += ` AND R.GROUP_ID in (` + parameter.RegionGroupID + `)`
 	}
 	if parameter.RegionID != "" {
-		conditionString += ` AND R.ID = ` + parameter.RegionID
+		conditionString += ` AND R.ID in (` + parameter.RegionID + `)`
 	}
 
 	statement := `SELECT 
@@ -232,13 +232,16 @@ func (repository CouponRedeemRepository) SelectReport(c context.Context, paramet
 			CP.DESCRIPTION,
 			CP.POINT_CONVERSION,
 			C.CUSTOMER_NAME,
+			C.CUSTOMER_CODE,
 			B._NAME,
 			B.BRANCH_CODE,
 			R._NAME,
-			R.GROUP_NAME
+			R.GROUP_NAME,
+			CL._NAME
 		FROM COUPON_REDEEM DEF
 		LEFT JOIN COUPONS CP ON CP.ID = DEF.COUPON_ID
 		LEFT JOIN CUSTOMER C ON C.ID = DEF.CUSTOMER_ID
+		LEFT JOIN CUSTOMER_LEVEL CL ON CL.ID = C.CUSTOMER_LEVEL_ID
 		LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
 		LEFT JOIN REGION R ON R.ID = B.REGION_ID
 		WHERE DEF.DELETED_AT IS NULL ` + conditionString +
@@ -268,10 +271,12 @@ func (repository CouponRedeemRepository) SelectReport(c context.Context, paramet
 			&temp.CouponDescription,
 			&temp.CouponPointConversion,
 			&temp.CustomerName,
+			&temp.CustomerCode,
 			&temp.BranchName,
 			&temp.BranchCode,
 			&temp.RegionName,
 			&temp.RegionGroupName,
+			&temp.CustomerLevelName,
 		)
 		if err != nil {
 			return data, err
