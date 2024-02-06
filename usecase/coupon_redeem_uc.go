@@ -185,3 +185,44 @@ func (uc CouponRedeemUC) AddPhoto(c context.Context, image *multipart.FileHeader
 
 	return
 }
+
+// SelectReport ...
+func (uc CouponRedeemUC) SelectReport(c context.Context, parameter models.CouponRedeemParameter) (out []viewmodel.CouponRedeemReportVM, err error) {
+	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.PointRuleOrderBy, models.PointRuleOrderByrByString)
+
+	repo := repository.NewCouponRedeemRepository(uc.DB)
+	data, err := repo.SelectReport(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	for _, datum := range data {
+		out = append(out, viewmodel.CouponRedeemReportVM{
+			ID:                    datum.ID,
+			CouponID:              datum.CouponID,
+			CustomerID:            datum.CustomerID,
+			Redeem:                datum.Redeem,
+			RedeemAt:              datum.RedeemAt.String,
+			RedeemedToDocumentNo:  datum.RedeemedToDocumentNo.String,
+			CreatedAt:             datum.CreatedAt,
+			UpdatedAt:             datum.UpdatedAt.String,
+			DeletedAt:             datum.DeletedAt.String,
+			ExpiredAt:             datum.ExpiredAt.String,
+			CouponName:            datum.CouponName,
+			CouponDescription:     datum.CouponDescription,
+			CouponPointConversion: datum.CouponPointConversion,
+			CustomerName:          datum.CustomerName,
+			BranchName:            datum.BranchName,
+			BranchCode:            datum.BranchCode,
+			RegionName:            datum.RegionName,
+			RegionGroupName:       datum.RegionGroupName,
+		})
+	}
+
+	if out == nil {
+		out = make([]viewmodel.CouponRedeemReportVM, 0)
+	}
+
+	return
+}
