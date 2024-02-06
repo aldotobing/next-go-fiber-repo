@@ -28,6 +28,7 @@ func (route CouponRoutes) RegisterRoute() {
 	r.Get("/select", handler.SelectAll)
 	r.Get("/id/:id", handler.FindByID)
 	r.Post("/", handler.Add)
+	r.Post("/photo", handler.Photo)
 	r.Put("/:id", handler.Update)
 	r.Delete("/:id", handler.Delete)
 }

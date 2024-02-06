@@ -7,4 +7,6 @@ type CouponRequest struct {
 	PointConversion string `json:"point_conversion" validate:"required"`
 	Name            string `json:"name" validate:"required"`
 	Description     string `json:"description" validate:"required"`
+	Interval        int    `json:"interval"`
+	PhotoURL        string `json:"photo_url"`
 }

@@ -13,6 +13,8 @@ type Coupon struct {
 	CreatedAt       string         `json:"created_at"`
 	UpdatedAt       sql.NullString `json:"updated_at"`
 	DeletedAt       sql.NullString `json:"deleted_at"`
+	Interval        sql.NullInt64  `json:"interval"`
+	PhotoURL        sql.NullString `json:"photo_url"`
 }
 
 // CouponParameter ...
@@ -41,7 +43,9 @@ var (
 			DEF.DESCRIPTION,
 			DEF.CREATED_AT,
 			DEF.UPDATED_AT,
-			DEF.DELETED_AT
+			DEF.DELETED_AT,
+			DEF.INTERVAL_DAY,
+			DEF.PHOTO_URL
 		FROM COUPONS DEF
 	`
 	CouponWhereStatement = `WHERE DEF.DELETED_AT IS NULL `

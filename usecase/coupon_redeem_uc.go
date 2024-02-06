@@ -29,6 +29,7 @@ func (uc CouponRedeemUC) BuildBody(data *models.CouponRedeem, res *viewmodel.Cou
 	res.CouponName = data.CouponName
 	res.CouponDescription = data.CouponDescription
 	res.CouponPointConversion = data.CouponPointConversion
+	res.CouponPhotoURL = data.CouponPhotoURL.String
 	res.CustomerID = data.CustomerID
 	res.CustomerName = data.CustomerName
 	res.Redeem = data.Redeem
@@ -136,7 +137,7 @@ func (uc CouponRedeemUC) Add(c context.Context, in requests.CouponRedeemRequest)
 	out = viewmodel.CouponRedeemVM{
 		CouponID:   in.CouponID,
 		CustomerID: in.CustomerID,
-		ExpiredAt:  helper.GetExpiredOneMonth(time.Now()),
+		ExpiredAt:  helper.GetExpiredWithInterval(time.Now(), couponData.Interval),
 	}
 
 	repo := repository.NewCouponRedeemRepository(uc.DB)

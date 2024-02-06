@@ -9,6 +9,7 @@ type CouponRedeem struct {
 	CouponName            string         `json:"coupon_name"`
 	CouponDescription     string         `json:"coupon_description"`
 	CouponPointConversion string         `json:"coupon_point_conversion"`
+	CouponPhotoURL        sql.NullString `json:"coupon_photo_url"`
 	CustomerID            string         `json:"customer_id"`
 	CustomerName          string         `json:"customer_name"`
 	Redeem                string         `json:"redeem"`
@@ -80,6 +81,7 @@ var (
 			CP._NAME,
 			CP.DESCRIPTION,
 			CP.POINT_CONVERSION,
+			CP.PHOTO_URL,
 			C.CUSTOMER_NAME
 		FROM COUPON_REDEEM DEF
 		LEFT JOIN COUPONS CP ON CP.ID = DEF.COUPON_ID

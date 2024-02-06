@@ -15,6 +15,7 @@ type CouponRedeemVM struct {
 	CouponName            string `json:"coupon_name"`
 	CouponDescription     string `json:"coupon_description"`
 	CouponPointConversion string `json:"coupon_point_conversion"`
+	CouponPhotoURL        string `json:"coupon_photo_url"`
 	CustomerName          string `json:"customer_name"`
 }
 

@@ -44,6 +44,7 @@ func (repository CouponRedeemRepository) scanRows(rows *sql.Rows) (res models.Co
 		&res.CouponName,
 		&res.CouponDescription,
 		&res.CouponPointConversion,
+		&res.CouponPhotoURL,
 		&res.CustomerName,
 	)
 
@@ -66,6 +67,7 @@ func (repository CouponRedeemRepository) scanRow(row *sql.Row) (res models.Coupo
 		&res.CouponName,
 		&res.CouponDescription,
 		&res.CouponPointConversion,
+		&res.CouponPhotoURL,
 		&res.CustomerName,
 	)
 

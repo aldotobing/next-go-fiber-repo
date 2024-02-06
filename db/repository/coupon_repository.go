@@ -40,6 +40,8 @@ func (repository CouponRepository) scanRows(rows *sql.Rows) (res models.Coupon, 
 		&res.CreatedAt,
 		&res.UpdatedAt,
 		&res.DeletedAt,
+		&res.Interval,
+		&res.PhotoURL,
 	)
 
 	return
@@ -57,6 +59,8 @@ func (repository CouponRepository) scanRow(row *sql.Row) (res models.Coupon, err
 		&res.CreatedAt,
 		&res.UpdatedAt,
 		&res.DeletedAt,
+		&res.Interval,
+		&res.PhotoURL,
 	)
 
 	return
@@ -145,9 +149,11 @@ func (repository CouponRepository) Add(c context.Context, in viewmodel.CouponVM)
 			_NAME,
 			DESCRIPTION,
 			CREATED_AT,
-			UPDATED_AT
+			UPDATED_AT,
+			INTERVAL_DAY,
+			PHOTO_URL
 		)
-	VALUES ($1, $2, $3, $4, $5, NOW(), NOW()) RETURNING id`
+	VALUES ($1, $2, $3, $4, $5, NOW(), NOW(), $6, $7) RETURNING id`
 
 	err = repository.DB.QueryRowContext(c, statement,
 		in.StartDate,
@@ -155,6 +161,8 @@ func (repository CouponRepository) Add(c context.Context, in viewmodel.CouponVM)
 		in.PointConversion,
 		in.Name,
 		in.Description,
+		in.Interval,
+		in.PhotoURL,
 	).Scan(&res)
 
 	return
@@ -168,8 +176,10 @@ func (repository CouponRepository) Update(c context.Context, in viewmodel.Coupon
 		POINT_CONVERSION = $3,
 		_NAME = $4,
 		DESCRIPTION = $5,
-		UPDATED_AT = now()
-	WHERE id = $6
+		UPDATED_AT = now(),
+		INTERVAL_DAY = $6,
+		PHOTO_URL = $7
+	WHERE id = $8
 	RETURNING id`
 
 	err = repository.DB.QueryRowContext(c, statement,
@@ -178,6 +188,8 @@ func (repository CouponRepository) Update(c context.Context, in viewmodel.Coupon
 		in.PointConversion,
 		in.Name,
 		in.Description,
+		in.Interval,
+		in.PhotoURL,
 		in.ID).Scan(&res)
 
 	return
