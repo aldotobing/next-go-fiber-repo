@@ -58,6 +58,7 @@ type CouponRedeemParameter struct {
 	BranchID             string `json:"branch_id"`
 	RegionID             string `json:"region_id"`
 	RegionGroupID        string `json:"region_group_id"`
+	CustomerLevelID      string `json:"customer_level_id"`
 	Page                 int    `json:"page"`
 	Offset               int    `json:"offset"`
 	Limit                int    `json:"limit"`

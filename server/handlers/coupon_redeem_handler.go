@@ -114,16 +114,17 @@ func (h *CouponRedeemHandler) Photo(ctx *fiber.Ctx) error {
 func (h *CouponRedeemHandler) ReportSelect(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 	parameter := models.CouponRedeemParameter{
-		Search:        ctx.Query("search"),
-		ShowAll:       ctx.Query("show_all"),
-		CustomerID:    ctx.Query("customer_id"),
-		StartDate:     ctx.Query("start_date"),
-		EndDate:       ctx.Query("end_date"),
-		BranchID:      ctx.Query("branch_id"),
-		RegionID:      ctx.Query("region_id"),
-		RegionGroupID: ctx.Query("region_group_id"),
-		By:            ctx.Query("by"),
-		Sort:          ctx.Query("sort"),
+		Search:          ctx.Query("search"),
+		ShowAll:         ctx.Query("show_all"),
+		CustomerID:      ctx.Query("customer_id"),
+		CustomerLevelID: ctx.Query("customer_level_id"),
+		StartDate:       ctx.Query("start_date"),
+		EndDate:         ctx.Query("end_date"),
+		BranchID:        ctx.Query("branch_id"),
+		RegionID:        ctx.Query("region_id"),
+		RegionGroupID:   ctx.Query("region_group_id"),
+		By:              ctx.Query("by"),
+		Sort:            ctx.Query("sort"),
 	}
 	uc := usecase.CouponRedeemUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectReport(c, parameter)
