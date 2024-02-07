@@ -126,7 +126,12 @@ func (repository PromoItemLineRepository) SelectAll(c context.Context, parameter
 
 	if parameter.CustomerID != "" {
 		conditionString += `AND IP.PRICE_LIST_VERSION_ID =
-	(SELECT price_list_version_id FROM customer WHERE id = ` + parameter.CustomerID + `` + `)` + ` `
+		(
+			SELECT plv.id 
+			FROM customer c 
+       			left join price_list pl on pl.id = c.price_list_id
+        		left join price_list_version plv on plv.price_list_id = pl.id
+    		WHERE c.id  = ` + parameter.CustomerID + ` LIMIT 1) `
 	}
 
 	if parameter.StartDate != "" && parameter.EndDate != "" {

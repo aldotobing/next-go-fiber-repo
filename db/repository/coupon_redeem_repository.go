@@ -15,6 +15,7 @@ type ICouponRedeemRepository interface {
 	FindByID(c context.Context, parameter models.CouponRedeemParameter) (models.CouponRedeem, error)
 	Add(c context.Context, model viewmodel.CouponRedeemVM) (string, error)
 	Redeem(c context.Context, model viewmodel.CouponRedeemVM) (string, error)
+	SelectReport(c context.Context, parameter models.CouponRedeemParameter) ([]models.CouponRedeemReport, error)
 }
 
 // CouponRedeemRepository ...
@@ -43,6 +44,7 @@ func (repository CouponRedeemRepository) scanRows(rows *sql.Rows) (res models.Co
 		&res.CouponName,
 		&res.CouponDescription,
 		&res.CouponPointConversion,
+		&res.CouponPhotoURL,
 		&res.CustomerName,
 	)
 
@@ -65,6 +67,7 @@ func (repository CouponRedeemRepository) scanRow(row *sql.Row) (res models.Coupo
 		&res.CouponName,
 		&res.CouponDescription,
 		&res.CouponPointConversion,
+		&res.CouponPhotoURL,
 		&res.CustomerName,
 	)
 
@@ -185,4 +188,105 @@ func (repository CouponRedeemRepository) Redeem(c context.Context, in viewmodel.
 		in.ID).Scan(&res)
 
 	return
+}
+
+// SelectReport ...
+func (repository CouponRedeemRepository) SelectReport(c context.Context, parameter models.CouponRedeemParameter) (data []models.CouponRedeemReport, err error) {
+	var conditionString string
+
+	if parameter.ShowAll == "" {
+		conditionString += ` AND DEF.REDEEMED_AT IS NULL AND NOW()::DATE<DEF.EXPIRED_AT`
+	}
+	if parameter.CustomerID != "" {
+		conditionString += ` AND DEF.CUSTOMER_ID = ` + parameter.CustomerID
+	}
+
+	if parameter.StartDate != "" && parameter.EndDate != "" {
+		conditionString += ` AND DEF.CREATED_AT::DATE BETWEEN '` + parameter.StartDate + `' AND '` + parameter.EndDate + `'`
+	} else {
+		conditionString += ` AND DEF.CREATED_AT::DATE BETWEEN date_trunc('MONTH',now())::DATE AND now()::date`
+	}
+
+	if parameter.BranchID != "" {
+		conditionString += ` AND B.ID in (` + parameter.BranchID + `)`
+	}
+	if parameter.RegionGroupID != "" {
+		conditionString += ` AND R.GROUP_ID in (` + parameter.RegionGroupID + `)`
+	}
+	if parameter.RegionID != "" {
+		conditionString += ` AND R.ID in (` + parameter.RegionID + `)`
+	}
+
+	if parameter.CustomerLevelID != "" {
+		conditionString += ` AND C.CUSTOMER_LEVEL_ID IN (` + parameter.CustomerLevelID + `)`
+	}
+
+	statement := `SELECT 
+			DEF.ID, 
+			DEF.COUPON_ID,
+			DEF.CUSTOMER_ID,
+			DEF.REDEEMED,
+			DEF.REDEEMED_AT,
+			DEF.REDEEM_TO_DOC_NO,
+			DEF.CREATED_AT,
+			DEF.UPDATED_AT,
+			DEF.DELETED_AT,
+			DEF.EXPIRED_AT,
+			CP._NAME,
+			CP.DESCRIPTION,
+			CP.POINT_CONVERSION,
+			C.CUSTOMER_NAME,
+			C.CUSTOMER_CODE,
+			B._NAME,
+			B.BRANCH_CODE,
+			R._NAME,
+			R.GROUP_NAME,
+			CL._NAME
+		FROM COUPON_REDEEM DEF
+		LEFT JOIN COUPONS CP ON CP.ID = DEF.COUPON_ID
+		LEFT JOIN CUSTOMER C ON C.ID = DEF.CUSTOMER_ID
+		LEFT JOIN CUSTOMER_LEVEL CL ON CL.ID = C.CUSTOMER_LEVEL_ID
+		LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
+		LEFT JOIN REGION R ON R.ID = B.REGION_ID
+		WHERE DEF.DELETED_AT IS NULL ` + conditionString +
+		` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+	rows, err := repository.DB.QueryContext(c, statement)
+
+	if err != nil {
+		return data, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var temp models.CouponRedeemReport
+
+		err = rows.Scan(
+			&temp.ID,
+			&temp.CouponID,
+			&temp.CustomerID,
+			&temp.Redeem,
+			&temp.RedeemAt,
+			&temp.RedeemedToDocumentNo,
+			&temp.CreatedAt,
+			&temp.UpdatedAt,
+			&temp.DeletedAt,
+			&temp.ExpiredAt,
+			&temp.CouponName,
+			&temp.CouponDescription,
+			&temp.CouponPointConversion,
+			&temp.CustomerName,
+			&temp.CustomerCode,
+			&temp.BranchName,
+			&temp.BranchCode,
+			&temp.RegionName,
+			&temp.RegionGroupName,
+			&temp.CustomerLevelName,
+		)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
+	}
+
+	return data, err
 }

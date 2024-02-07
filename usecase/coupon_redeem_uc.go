@@ -29,6 +29,7 @@ func (uc CouponRedeemUC) BuildBody(data *models.CouponRedeem, res *viewmodel.Cou
 	res.CouponName = data.CouponName
 	res.CouponDescription = data.CouponDescription
 	res.CouponPointConversion = data.CouponPointConversion
+	res.CouponPhotoURL = data.CouponPhotoURL.String
 	res.CustomerID = data.CustomerID
 	res.CustomerName = data.CustomerName
 	res.Redeem = data.Redeem
@@ -136,7 +137,7 @@ func (uc CouponRedeemUC) Add(c context.Context, in requests.CouponRedeemRequest)
 	out = viewmodel.CouponRedeemVM{
 		CouponID:   in.CouponID,
 		CustomerID: in.CustomerID,
-		ExpiredAt:  helper.GetExpiredOneMonth(time.Now()),
+		ExpiredAt:  helper.GetExpiredWithInterval(time.Now(), couponData.Interval),
 	}
 
 	repo := repository.NewCouponRedeemRepository(uc.DB)
@@ -182,6 +183,49 @@ func (uc CouponRedeemUC) AddPhoto(c context.Context, image *multipart.FileHeader
 		return
 	}
 	out = config.ImagePath + imgBannerFile.FilePath
+
+	return
+}
+
+// SelectReport ...
+func (uc CouponRedeemUC) SelectReport(c context.Context, parameter models.CouponRedeemParameter) (out []viewmodel.CouponRedeemReportVM, err error) {
+	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.PointRuleOrderBy, models.PointRuleOrderByrByString)
+
+	repo := repository.NewCouponRedeemRepository(uc.DB)
+	data, err := repo.SelectReport(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	for _, datum := range data {
+		out = append(out, viewmodel.CouponRedeemReportVM{
+			ID:                    datum.ID,
+			CouponID:              datum.CouponID,
+			CustomerID:            datum.CustomerID,
+			Redeem:                datum.Redeem,
+			RedeemAt:              datum.RedeemAt.String,
+			RedeemedToDocumentNo:  datum.RedeemedToDocumentNo.String,
+			CreatedAt:             datum.CreatedAt,
+			UpdatedAt:             datum.UpdatedAt.String,
+			DeletedAt:             datum.DeletedAt.String,
+			ExpiredAt:             datum.ExpiredAt.String,
+			CouponName:            datum.CouponName,
+			CouponDescription:     datum.CouponDescription,
+			CouponPointConversion: datum.CouponPointConversion,
+			CustomerName:          datum.CustomerName,
+			CustomerCode:          datum.CustomerCode,
+			BranchName:            datum.BranchName,
+			BranchCode:            datum.BranchCode,
+			RegionName:            datum.RegionName,
+			RegionGroupName:       datum.RegionGroupName,
+			CustomerLevelName:     datum.CustomerLevelName.String,
+		})
+	}
+
+	if out == nil {
+		out = make([]viewmodel.CouponRedeemReportVM, 0)
+	}
 
 	return
 }

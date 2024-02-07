@@ -28,4 +28,6 @@ func (route CouponRedeemRoutes) RegisterRoute() {
 	r.Get("/select", handler.SelectAll)
 	r.Get("/id/:id", handler.FindByID)
 	r.Post("/", handler.Add)
+
+	r.Get("/report", handler.ReportSelect)
 }
