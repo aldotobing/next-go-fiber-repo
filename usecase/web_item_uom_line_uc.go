@@ -21,7 +21,7 @@ func (uc WebItemUomLineUC) BuildBody(res *models.WebItemUomLine) {
 
 // SelectAll ...
 func (uc WebItemUomLineUC) SelectAll(c context.Context, parameter models.WebItemUomLineParameter) (res []models.WebItemUomLine, err error) {
-	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(0, 0, parameter.By, parameter.Sort, models.ItemOrderBy, models.ItemOrderByrByString)
+	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(0, 0, parameter.By, parameter.Sort, models.WebItemUomLineOrderBy, models.WebItemUomLineOrderByrByString)
 
 	repo := repository.NewWebItemUomLineRepository(uc.DB)
 	res, err = repo.SelectAll(c, parameter)
