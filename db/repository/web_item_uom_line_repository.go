@@ -40,6 +40,7 @@ func (repository WebItemUomLineRepository) scanRows(rows *sql.Rows) (res models.
 		&res.ItemCategoryName,
 		&res.ItemUomName,
 		&res.ItemUomConversion,
+		&res.Visibility,
 	)
 	if err != nil {
 
@@ -61,6 +62,7 @@ func (repository WebItemUomLineRepository) scanRow(row *sql.Row) (res models.Web
 		&res.ItemCategoryName,
 		&res.ItemUomName,
 		&res.ItemUomConversion,
+		&res.Visibility,
 	)
 
 	if err != nil {
