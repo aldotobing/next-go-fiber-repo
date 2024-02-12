@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -41,6 +40,7 @@ func (repository WebItemUomLineRepository) scanRows(rows *sql.Rows) (res models.
 		&res.ItemCategoryName,
 		&res.ItemUomName,
 		&res.ItemUomConversion,
+		&res.Visibility,
 	)
 	if err != nil {
 
@@ -62,9 +62,9 @@ func (repository WebItemUomLineRepository) scanRow(row *sql.Row) (res models.Web
 		&res.ItemCategoryName,
 		&res.ItemUomName,
 		&res.ItemUomConversion,
+		&res.Visibility,
 	)
 
-	fmt.Println(err)
 	if err != nil {
 		return res, err
 	}
@@ -87,7 +87,6 @@ func (repository WebItemUomLineRepository) SelectAll(c context.Context, paramete
 	statement := models.WebItemUomLineSelectStatement + ` ` + models.WebItemUomLineWhereStatement +
 		` AND (LOWER(i."_name") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
-
 	if err != nil {
 		return data, err
 	}
@@ -123,8 +122,6 @@ func (repository WebItemUomLineRepository) FindAll(ctx context.Context, paramete
 	if err != nil {
 		return data, count, err
 	}
-
-	fmt.Println(query)
 
 	defer rows.Close()
 	for rows.Next() {

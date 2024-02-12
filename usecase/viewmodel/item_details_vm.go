@@ -19,4 +19,5 @@ type Uom struct {
 	Conversion       *string `json:"uom_line_conversion"`
 	ItemDetailsPrice *string `json:"item_price"`
 	LimitQuantity    *string `json:"limit_quantity,omitempty"`
+	Visibility       string  `json:"visibility,omitempty"`
 }
