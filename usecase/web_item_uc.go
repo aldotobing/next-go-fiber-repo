@@ -79,7 +79,11 @@ func (uc WebItemUC) FindByID(c context.Context, parameter models.WebItemParamete
 			ID:         uomData[i].ID,
 			Name:       uomData[i].ItemName,
 			Conversion: uomData[i].ItemUomConversion,
+			Visibility: uomData[i].Visibility,
 		})
+	}
+	if uoms == nil {
+		uoms = make([]viewmodel.Uom, 0)
 	}
 
 	res = viewmodel.WebItemVM{
