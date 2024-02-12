@@ -122,8 +122,8 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 	}
 	res.CustomerPhotoNpwpDashboard = photoNPWPDashboardURL
 
-	// res.CustomerLevelID = int(data.CustomerLevelID.Int64)
-	// res.CustomerLevel = data.CustomerLevel.String
+	res.CustomerLevelID = int(data.CustomerLevelID.Int64)
+	res.CustomerLevel = data.CustomerLevel.String
 	res.CustomerUserID = data.CustomerUserID.String
 	res.CustomerUserName = data.CustomerUserName.String
 	res.CustomerUserFirstLoginTime = data.CustomerUserFirstLoginTime.String
