@@ -30,7 +30,7 @@ type WebItemUomLineParameter struct {
 
 var (
 	// WebItemUomLineOrderBy ...
-	WebItemUomLineOrderBy = []string{"def.id", "def._name", "def.created_date", "iul.conversion"}
+	WebItemUomLineOrderBy = []string{"def.id", "def._name", "def.created_date", "def.conversion"}
 	// WebItemUomLineOrderByrByString ...
 	WebItemUomLineOrderByrByString = []string{
 		"def._name",

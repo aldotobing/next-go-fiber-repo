@@ -66,7 +66,6 @@ func (repository WebItemRepository) scanRow(row *sql.Row) (res models.WebItem, e
 		&res.ItemDescription,
 	)
 
-	fmt.Println(err)
 	if err != nil {
 		return res, err
 	}
