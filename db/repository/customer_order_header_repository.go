@@ -234,6 +234,16 @@ func (repository CustomerOrderHeaderRepository) FindAll(ctx context.Context, par
 		index++
 	}
 
+	if parameter.StartDate != "" && parameter.EndDate != "" {
+		conditionString += ` AND def.transaction_date between $` + strconv.Itoa(index) + ` and $` + strconv.Itoa(index+1)
+		args = append(args, parameter.StartDate)
+		args = append(args, parameter.EndDate)
+		argsCount = append(argsCount, parameter.StartDate)
+		argsCount = append(argsCount, parameter.EndDate)
+		index++
+		index++
+	}
+
 	query := models.CustomerOrderHeaderSelectStatement + ` ` + models.CustomerOrderHeaderWhereStatement + ` ` + conditionString + `
 		AND (LOWER(cus."customer_name") LIKE $` + strconv.Itoa(index) + ` OR LOWER(def."document_no") LIKE $` + strconv.Itoa(index) + `) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $` + strconv.Itoa(index+1) + ` LIMIT $` + strconv.Itoa(index+2)
 
