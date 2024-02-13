@@ -77,7 +77,7 @@ func (uc WebItemUC) FindByID(c context.Context, parameter models.WebItemParamete
 	for i := range uomData {
 		uoms = append(uoms, viewmodel.Uom{
 			ID:         uomData[i].ID,
-			Name:       uomData[i].ItemName,
+			Name:       uomData[i].ItemUomName,
 			Conversion: uomData[i].ItemUomConversion,
 			Visibility: uomData[i].Visibility,
 		})
