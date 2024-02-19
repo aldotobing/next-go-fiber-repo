@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -21,6 +20,7 @@ type IWebCustomerRepository interface {
 	FindByCodes(c context.Context, parameter models.WebCustomerParameter) (data []models.WebCustomer, err error)
 	Edit(c context.Context, model models.WebCustomer) (string, error)
 	EditBulk(c context.Context, in requests.WebCustomerBulkRequest) error
+	EditMaxPoint(c context.Context, in []requests.WebCustomerMaxPointRequest) error
 	EditIndexPoint(c context.Context, in []viewmodel.PointRuleCustomerVM) error
 	Add(c context.Context, model models.WebCustomer) (string, error)
 	ReportSelect(c context.Context, parameter models.WebCustomerReportParameter) ([]models.WebCustomer, error)
@@ -105,6 +105,7 @@ func (repository WebCustomerRepository) scanRows(rows *sql.Rows) (res models.Web
 		&res.CustomerPhotoKtpDashboard,
 		&res.CustomerPhotoNpwp,
 		&res.CustomerPhotoNpwpDashboard,
+		&res.MonthlyMaxPoint,
 	)
 	if err != nil {
 
@@ -245,6 +246,7 @@ func (repository WebCustomerRepository) scanRow(row *sql.Row) (res models.WebCus
 		&res.CustomerPhotoKtpDashboard,
 		&res.CustomerPhotoNpwp,
 		&res.CustomerPhotoNpwpDashboard,
+		&res.MonthlyMaxPoint,
 	)
 	if err != nil {
 		return res, err
@@ -288,9 +290,6 @@ func (repository WebCustomerRepository) SelectAll(c context.Context, parameter m
 	statement := models.WebCustomerSelectStatement + ` ` + models.WebCustomerWhereStatement +
 		` AND (LOWER(c.customer_name) LIKE $1 or LOWER(c.customer_code) LIKE $1 ) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
-
-	//print
-	// fmt.Println(statement)
 
 	if err != nil {
 		return data, err
@@ -457,8 +456,6 @@ func (repository WebCustomerRepository) FindByID(c context.Context, parameter mo
 	statement := models.WebCustomerSelectStatement + ` WHERE c.id = $1`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
 
-	fmt.Println(statement)
-
 	data, err = repository.scanRow(row)
 	if err != nil {
 		return data, err
@@ -491,8 +488,6 @@ func (repository WebCustomerRepository) FindByCodes(c context.Context, parameter
 func (repository WebCustomerRepository) FindByIDNoCache(c context.Context, parameter models.WebCustomerParameter) (data models.WebCustomer, err error) {
 	statement := models.WebCustomerSelectStatement + ` WHERE c.id = $1`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
-
-	// fmt.Println(statement)
 
 	data, err = repository.scanRow(row)
 	if err != nil {
@@ -576,6 +571,30 @@ func (repo WebCustomerRepository) EditBulk(c context.Context, in requests.WebCus
 		in.ShowInApp,
 		in.Active,
 		in.UserID).Err()
+
+	return
+}
+
+// EditMaxPoint ...
+func (repo WebCustomerRepository) EditMaxPoint(c context.Context, in []requests.WebCustomerMaxPointRequest) (err error) {
+	var customersCode string
+
+	for _, datum := range in {
+		if customersCode == "" {
+			customersCode += `('` + datum.CustomerCode + `', ` + datum.MonthlyMaxPoint + `)`
+		} else {
+			customersCode += `, ('` + datum.CustomerCode + `', ` + datum.MonthlyMaxPoint + `)`
+		}
+	}
+
+	statement := `update customer as c set
+		monthly_max_point = val.column_a
+	from (values
+		` + customersCode + `
+	) as val(column_b, column_a) 
+	where c.customer_code = val.column_b;`
+
+	err = repo.DB.QueryRowContext(c, statement).Err()
 
 	return
 }

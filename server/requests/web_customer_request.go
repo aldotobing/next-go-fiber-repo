@@ -37,3 +37,9 @@ type WebCustomerBulkRequest struct {
 	ShowInApp string               `json:"show_in_app"`
 	Customers []WebCustomerRequest `json:"customers"`
 }
+
+// WebCustomerMaxPointRequest ...
+type WebCustomerMaxPointRequest struct {
+	CustomerCode    string `json:"customer_code"`
+	MonthlyMaxPoint string `json:"monthly_max_point"`
+}

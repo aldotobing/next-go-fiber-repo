@@ -77,6 +77,7 @@ type WebCustomer struct {
 	SalesmanTypeName           sql.NullString `json:"salesman_type_name"`
 	CustomerAdminValidate      bool           `json:"customer_admin_validate"`
 	IndexPoint                 int            `json:"index_point"`
+	MonthlyMaxPoint            sql.NullString `json:"monthly_max_point"`
 }
 
 // CustomerParameter ...
@@ -202,7 +203,8 @@ var (
 		c.index_point,
 		C.customer_photo_ktp_dashboard,
 		C.customer_photo_npwp,
-		C.customer_photo_npwp_dashboard
+		C.customer_photo_npwp_dashboard,
+		c.monthly_max_point
 	FROM CUSTOMER C
 	LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
 	LEFT JOIN REGION REG ON REG.ID = B.REGION_ID
