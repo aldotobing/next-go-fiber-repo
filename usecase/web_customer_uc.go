@@ -146,6 +146,7 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 	res.SalesmanTypeName = data.SalesmanTypeName.String
 	res.CustomerAdminValidate = data.CustomerAdminValidate
 	res.IndexPoint = data.IndexPoint
+	res.MonthlyMaxPoint = data.MonthlyMaxPoint.String
 }
 
 // SelectAll ...
@@ -672,6 +673,18 @@ func (uc WebCustomerUC) EditBulk(c context.Context, data requests.WebCustomerBul
 	repo := repository.NewWebCustomerRepository(uc.DB)
 
 	err = repo.EditBulk(c, data)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	return
+}
+
+func (uc WebCustomerUC) EditMaxPoint(c context.Context, data []requests.WebCustomerMaxPointRequest) (err error) {
+	repo := repository.NewWebCustomerRepository(uc.DB)
+
+	err = repo.EditMaxPoint(c, data)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return
