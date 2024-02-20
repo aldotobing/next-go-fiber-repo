@@ -359,7 +359,7 @@ func (uc CilentInvoiceUC) PutRedisDataSync(c context.Context, parameter models.C
 			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
 			return res, err
 		}
-		err = uc.RedisClient.StoreToRedis(cacheKey, jsonData)
+		err = uc.RedisClient.Client.Set(cacheKey, jsonData, time.Hour*24).Err()
 		if err != nil {
 			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
 			return res, err
