@@ -158,8 +158,6 @@ func (uc CilentInvoiceUC) DataSync(c context.Context, parameter models.CilentInv
 	strnow := now.Format(time.RFC3339)
 	parameter.DateParam = strnow
 
-	fmt.Println("Get Date" + parameter.DateParam)
-
 	jsonReq, err := json.Marshal(parameter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal json: %w", err)
@@ -190,8 +188,6 @@ func (uc CilentInvoiceUC) DataSync(c context.Context, parameter models.CilentInv
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	fmt.Println("Response Body:", string(bodyBytes))
-
 	var res []models.CilentInvoice
 	if err := json.Unmarshal([]byte(bodyBytes), &res); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
@@ -220,7 +216,13 @@ func (uc CilentInvoiceUC) DataSync(c context.Context, parameter models.CilentInv
 					pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID)
 					for _, rules := range pointRules {
 						pointMonthly, _ := strconv.ParseFloat(pointThisMonth.Balance, 64)
-						maxMonthly, _ := strconv.ParseFloat(rules.MonthlyMaxPoint, 64)
+
+						var maxMonthly float64
+						if customer[0].MonthlyMaxPoint != "" {
+							maxMonthly, _ = strconv.ParseFloat(customer[0].MonthlyMaxPoint, 64)
+						} else {
+							maxMonthly, _ = strconv.ParseFloat(rules.MonthlyMaxPoint, 64)
+						}
 
 						minOrder, _ := strconv.ParseFloat(rules.MinOrder, 64)
 						netOmount, _ := strconv.ParseFloat(*invoiceObject.NetAmount, 64)
