@@ -30,7 +30,7 @@ func (h *TransactionDataSyncHandler) CustomerOrderVoidDataSync(ctx *fiber.Ctx) e
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
-func (h *TransactionDataSyncHandler) InvoiceSync(ctx *fiber.Ctx) error {
+func (h *TransactionDataSyncHandler) InvoiceSyncPutToRedis(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.CilentInvoiceParameter{
@@ -40,7 +40,16 @@ func (h *TransactionDataSyncHandler) InvoiceSync(ctx *fiber.Ctx) error {
 		Sort:       ctx.Query("sort"),
 	}
 	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
-	res, err := uc.DataSync(c, parameter)
+	res, err := uc.PutRedisDataSync(c, parameter)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *TransactionDataSyncHandler) InvoiceSyncGetRedis(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
+	res, err := uc.GetRedisDataSync(c)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
