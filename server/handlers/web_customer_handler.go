@@ -260,15 +260,14 @@ func (h *WebCustomerHandler) EditBulk(ctx *fiber.Ctx) error {
 func (h *WebCustomerHandler) EditMaxPoint(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
-	input := new([]requests.WebCustomerMaxPointRequest)
+	input := new(requests.WebCustomerMaxPointRequestHeader)
 	if err := ctx.BodyParser(input); err != nil {
 		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
 	}
-	for _, datum := range *input {
-		if err := h.Validator.Struct(datum); err != nil {
-			errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
-			return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
-		}
+
+	if err := h.Validator.Struct(input); err != nil {
+		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
+		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
 	}
 
 	uc := usecase.WebCustomerUC{ContractUC: h.ContractUC}

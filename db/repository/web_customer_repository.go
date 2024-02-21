@@ -20,7 +20,7 @@ type IWebCustomerRepository interface {
 	FindByCodes(c context.Context, parameter models.WebCustomerParameter) (data []models.WebCustomer, err error)
 	Edit(c context.Context, model models.WebCustomer) (string, error)
 	EditBulk(c context.Context, in requests.WebCustomerBulkRequest) error
-	EditMaxPoint(c context.Context, in []requests.WebCustomerMaxPointRequest) error
+	EditMaxPoint(c context.Context, in requests.WebCustomerMaxPointRequestHeader) error
 	EditIndexPoint(c context.Context, in []viewmodel.PointRuleCustomerVM) error
 	Add(c context.Context, model models.WebCustomer) (string, error)
 	ReportSelect(c context.Context, parameter models.WebCustomerReportParameter) ([]models.WebCustomer, error)
@@ -576,10 +576,10 @@ func (repo WebCustomerRepository) EditBulk(c context.Context, in requests.WebCus
 }
 
 // EditMaxPoint ...
-func (repo WebCustomerRepository) EditMaxPoint(c context.Context, in []requests.WebCustomerMaxPointRequest) (err error) {
+func (repo WebCustomerRepository) EditMaxPoint(c context.Context, in requests.WebCustomerMaxPointRequestHeader) (err error) {
 	var customersCode string
 
-	for _, datum := range in {
+	for _, datum := range in.Detail {
 		if customersCode == "" {
 			customersCode += `('` + datum.CustomerCode + `', ` + datum.MonthlyMaxPoint + `)`
 		} else {
