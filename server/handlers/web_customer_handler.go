@@ -59,20 +59,21 @@ func (h *WebCustomerHandler) SelectAll(ctx *fiber.Ctx) error {
 func (h *WebCustomerHandler) FindAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 	parameter := models.WebCustomerParameter{
-		ID:             ctx.Query("customer_id"),
-		CustomerTypeId: ctx.Query("customer_type_id"),
-		UserId:         ctx.Query("admin_user_id"),
-		BranchId:       ctx.Query("branch_id"),
-		Search:         ctx.Query("search"),
-		Page:           str.StringToInt(ctx.Query("page")),
-		Limit:          str.StringToInt(ctx.Query("limit")),
-		By:             ctx.Query("by"),
-		Sort:           ctx.Query("sort"),
-		PhoneNumber:    ctx.Query("phone_number"),
-		ShowInApp:      ctx.Query("show_in_app"),
-		Active:         ctx.Query("active"),
-		IsDataComplete: ctx.Query("is_data_complete"),
-		AdminValidate:  ctx.Query("admin_validate"),
+		ID:              ctx.Query("customer_id"),
+		CustomerTypeId:  ctx.Query("customer_type_id"),
+		UserId:          ctx.Query("admin_user_id"),
+		BranchId:        ctx.Query("branch_id"),
+		Search:          ctx.Query("search"),
+		Page:            str.StringToInt(ctx.Query("page")),
+		Limit:           str.StringToInt(ctx.Query("limit")),
+		By:              ctx.Query("by"),
+		Sort:            ctx.Query("sort"),
+		PhoneNumber:     ctx.Query("phone_number"),
+		ShowInApp:       ctx.Query("show_in_app"),
+		Active:          ctx.Query("active"),
+		IsDataComplete:  ctx.Query("is_data_complete"),
+		AdminValidate:   ctx.Query("admin_validate"),
+		MonthlyMaxPoint: ctx.Query("monthly_max_point"),
 	}
 	uc := usecase.WebCustomerUC{ContractUC: h.ContractUC}
 	res, meta, err := uc.FindAll(c, parameter)
@@ -260,15 +261,14 @@ func (h *WebCustomerHandler) EditBulk(ctx *fiber.Ctx) error {
 func (h *WebCustomerHandler) EditMaxPoint(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
-	input := new([]requests.WebCustomerMaxPointRequest)
+	input := new(requests.WebCustomerMaxPointRequestHeader)
 	if err := ctx.BodyParser(input); err != nil {
 		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
 	}
-	for _, datum := range *input {
-		if err := h.Validator.Struct(datum); err != nil {
-			errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
-			return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
-		}
+
+	if err := h.Validator.Struct(input); err != nil {
+		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
+		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
 	}
 
 	uc := usecase.WebCustomerUC{ContractUC: h.ContractUC}

@@ -20,7 +20,7 @@ type IWebCustomerRepository interface {
 	FindByCodes(c context.Context, parameter models.WebCustomerParameter) (data []models.WebCustomer, err error)
 	Edit(c context.Context, model models.WebCustomer) (string, error)
 	EditBulk(c context.Context, in requests.WebCustomerBulkRequest) error
-	EditMaxPoint(c context.Context, in []requests.WebCustomerMaxPointRequest) error
+	EditMaxPoint(c context.Context, in requests.WebCustomerMaxPointRequestHeader) error
 	EditIndexPoint(c context.Context, in []viewmodel.PointRuleCustomerVM) error
 	Add(c context.Context, model models.WebCustomer) (string, error)
 	ReportSelect(c context.Context, parameter models.WebCustomerReportParameter) ([]models.WebCustomer, error)
@@ -424,6 +424,10 @@ func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter m
 		conditionString += `AND C.admin_validate = false`
 	}
 
+	if parameter.MonthlyMaxPoint != "" {
+		conditionString += ` AND C.MONTHLY_MAX_POINT IS NOT NULL`
+	}
+
 	query := models.WebCustomerSelectStatement + ` ` + whereStatement + ` ` + conditionString + `
 		AND (LOWER(c.customer_name) LIKE $` + strconv.Itoa(index) + ` or LOWER(c.customer_code) LIKE $` + strconv.Itoa(index) + `) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $` + strconv.Itoa(index+1) + ` LIMIT $` + strconv.Itoa(index+2)
 
@@ -576,10 +580,10 @@ func (repo WebCustomerRepository) EditBulk(c context.Context, in requests.WebCus
 }
 
 // EditMaxPoint ...
-func (repo WebCustomerRepository) EditMaxPoint(c context.Context, in []requests.WebCustomerMaxPointRequest) (err error) {
+func (repo WebCustomerRepository) EditMaxPoint(c context.Context, in requests.WebCustomerMaxPointRequestHeader) (err error) {
 	var customersCode string
 
-	for _, datum := range in {
+	for _, datum := range in.Detail {
 		if customersCode == "" {
 			customersCode += `('` + datum.CustomerCode + `', ` + datum.MonthlyMaxPoint + `)`
 		} else {

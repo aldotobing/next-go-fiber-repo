@@ -195,8 +195,8 @@ func (uc WebCustomerUC) SelectAll(c context.Context, parameter models.WebCustome
 func (uc WebCustomerUC) FindAll(c context.Context, parameter models.WebCustomerParameter) ([]viewmodel.CustomerVM, viewmodel.PaginationVM, error) {
 	var response viewmodel.PaginatedResponse
 
-	cacheKey := fmt.Sprintf("customer:admin_user_id:%s:page:%d:search:%s:branch_id:%s:phone_number:%s:show_in_app:%s:by:%s:sort:&%s:customer_type:%s:active:%s:is_data_completed:%s:admin_validate:%s",
-		parameter.UserId, parameter.Page, parameter.Search, parameter.BranchId, parameter.PhoneNumber, parameter.ShowInApp, parameter.By, parameter.Sort, parameter.CustomerTypeId, parameter.Active, parameter.IsDataComplete, parameter.AdminValidate)
+	cacheKey := fmt.Sprintf("customer:admin_user_id:%s:page:%d:search:%s:branch_id:%s:phone_number:%s:show_in_app:%s:by:%s:sort:&%s:customer_type:%s:active:%s:is_data_completed:%s:admin_validate:%s:monthly_max_point:%s",
+		parameter.UserId, parameter.Page, parameter.Search, parameter.BranchId, parameter.PhoneNumber, parameter.ShowInApp, parameter.By, parameter.Sort, parameter.CustomerTypeId, parameter.Active, parameter.IsDataComplete, parameter.AdminValidate, parameter.MonthlyMaxPoint)
 
 	// Try getting data from cache
 	cachedData, err := uc.RedisClient.Get(cacheKey)
@@ -681,7 +681,7 @@ func (uc WebCustomerUC) EditBulk(c context.Context, data requests.WebCustomerBul
 	return
 }
 
-func (uc WebCustomerUC) EditMaxPoint(c context.Context, data []requests.WebCustomerMaxPointRequest) (err error) {
+func (uc WebCustomerUC) EditMaxPoint(c context.Context, data requests.WebCustomerMaxPointRequestHeader) (err error) {
 	repo := repository.NewWebCustomerRepository(uc.DB)
 
 	err = repo.EditMaxPoint(c, data)

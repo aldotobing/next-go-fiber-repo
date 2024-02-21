@@ -197,6 +197,8 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 		"GlobalDiscAmount":     model.GlobalDiscAmount,
 		"InvoiceDate":          model.InvoiceDate,
 		"PaidDate":             model.PaidDate,
+		"PriceListCode":        model.PriceListCode,
+		"PriceListVersionCode": model.PriceListVersionCode,
 	}
 
 	for fieldName, fieldValue := range fields {
@@ -245,11 +247,12 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 		deletedHeaderRow.Close()
 
 	}
+
 	//oustanding amount = net amount
 	err = transaction.QueryRowContext(c, statement,
 		model.DocumentNo, model.DocumentTypeID, model.TransactionDate, model.TransactionTime, model.CustomerCode,
 		model.TaxCalcMethod, model.SalesmanCode, model.PaymentTermsID, model.SalesOrderID, model.CompanyID,
-		model.BranchID, str.EmptyString(*model.PriceListCode), str.EmptyString(*model.PriceListVersionCode), str.EmptyString(*model.Status), str.EmptyString(*model.GrossAmount),
+		model.BranchID, str.NullOrEmtyString(model.PriceListCode), str.NullOrEmtyString(model.PriceListVersionCode), str.EmptyString(*model.Status), str.EmptyString(*model.GrossAmount),
 		model.DiscAmount, model.TaxableAmount, model.TaxAmount, model.RoundingAmount, model.NetAmount,
 		str.EmptyString(*model.OutstandingAmount), str.EmptyString(*model.PaidAmount), model.DueDate, model.NoPPN, model.GlobalDiscAmount,
 		str.EmptyString(*model.TransactionPoint), str.NullString(model.SalesRequestCode), str.NullString(model.InvoiceDate), str.NullString(model.PaidDate),
