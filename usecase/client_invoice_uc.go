@@ -390,17 +390,17 @@ func (uc CilentInvoiceUC) GetRedisDataSync(c context.Context) (res []models.Cile
 				fmt.Println("from redis : ", key)
 				_, _, err := repo.InsertDataWithLine(c, invoiceObject)
 				if err != nil {
-					jsonDatas, errj := json.Marshal(invoiceObject)
-					if errj != nil {
-						logruslogger.Log(logruslogger.WarnLevel, errj.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
-						// return res, err
-					}
-					errrd := uc.RedisClient.Client.Set("error_data_inv_:"+*invoiceObject.DocumentNo, jsonDatas, time.Hour*24).Err()
-					if errrd != nil {
-						logruslogger.Log(logruslogger.WarnLevel, errrd.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
-						// return res, err
-					}
-					// return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
+					// jsonDatas, errj := json.Marshal(invoiceObject)
+					// if errj != nil {
+					// 	logruslogger.Log(logruslogger.WarnLevel, errj.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
+					// 	// return res, err
+					// }
+					// errrd := uc.RedisClient.Client.Set("error_data_inv_:"+*invoiceObject.DocumentNo, jsonDatas, time.Hour*24).Err()
+					// if errrd != nil {
+					// 	logruslogger.Log(logruslogger.WarnLevel, errrd.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
+					// 	// return res, err
+					// }
+					return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
 				}
 				if err == nil {
 					if invoiceObject.SalesRequestCode != nil && strings.Contains(*invoiceObject.SalesRequestCode, "CO") &&
