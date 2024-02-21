@@ -424,6 +424,10 @@ func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter m
 		conditionString += `AND C.admin_validate = false`
 	}
 
+	if parameter.MonthlyMaxPoint != "" {
+		conditionString += ` AND C.MONTHLY_MAX_POINT IS NOT NULL`
+	}
+
 	query := models.WebCustomerSelectStatement + ` ` + whereStatement + ` ` + conditionString + `
 		AND (LOWER(c.customer_name) LIKE $` + strconv.Itoa(index) + ` or LOWER(c.customer_code) LIKE $` + strconv.Itoa(index) + `) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $` + strconv.Itoa(index+1) + ` LIMIT $` + strconv.Itoa(index+2)
 
