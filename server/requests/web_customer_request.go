@@ -43,3 +43,7 @@ type WebCustomerMaxPointRequest struct {
 	CustomerCode    string `json:"customer_code"`
 	MonthlyMaxPoint string `json:"monthly_max_point"`
 }
+
+type WebCustomerMaxPointRequestHeader struct {
+	Detail []WebCustomerMaxPointRequest `json:"detail"`
+}

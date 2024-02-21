@@ -681,7 +681,7 @@ func (uc WebCustomerUC) EditBulk(c context.Context, data requests.WebCustomerBul
 	return
 }
 
-func (uc WebCustomerUC) EditMaxPoint(c context.Context, data []requests.WebCustomerMaxPointRequest) (err error) {
+func (uc WebCustomerUC) EditMaxPoint(c context.Context, data requests.WebCustomerMaxPointRequestHeader) (err error) {
 	repo := repository.NewWebCustomerRepository(uc.DB)
 
 	err = repo.EditMaxPoint(c, data)
