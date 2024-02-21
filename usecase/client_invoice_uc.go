@@ -393,58 +393,60 @@ func (uc CilentInvoiceUC) GetRedisDataSync(c context.Context) (res []models.Cile
 					return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
 				}
 
-				if invoiceObject.SalesRequestCode != nil && strings.Contains(*invoiceObject.SalesRequestCode, "CO") &&
-					invoiceObject.OutstandingAmount != nil && *invoiceObject.OutstandingAmount == "0.00" &&
-					invoiceObject.CustomerCode != nil && invoiceObject.NetAmount != nil &&
-					invoiceObject.DocumentNo != nil {
-					customer, _ := WebCustomerUC{ContractUC: uc.ContractUC}.FindByCodes(c, models.WebCustomerParameter{Code: `'` + *invoiceObject.CustomerCode + `'`})
-					if len(customer) == 1 {
-						if customer[0].IndexPoint == 1 {
-							pointRules, _ := PointRuleUC{ContractUC: uc.ContractUC}.SelectAll(c, models.PointRuleParameter{
-								Now:  time.Now().Format("2006-01-02"),
-								By:   "def.id",
-								Sort: "asc",
-							})
-							pointUC := PointUC{ContractUC: uc.ContractUC}
-							pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID)
-							for _, rules := range pointRules {
-								pointMonthly, _ := strconv.ParseFloat(pointThisMonth.Balance, 64)
+				// if invoiceObject.SalesRequestCode != nil && strings.Contains(*invoiceObject.SalesRequestCode, "CO") &&
+				// 	invoiceObject.OutstandingAmount != nil && *invoiceObject.OutstandingAmount == "0.00" &&
+				// 	invoiceObject.CustomerCode != nil && invoiceObject.NetAmount != nil &&
+				// 	invoiceObject.DocumentNo != nil {
+				// 	customer, _ := WebCustomerUC{ContractUC: uc.ContractUC}.FindByCodes(c, models.WebCustomerParameter{Code: `'` + *invoiceObject.CustomerCode + `'`})
+				// 	if len(customer) == 1 {
+				// 		if customer[0].IndexPoint == 1 {
+				// 			pointRules, _ := PointRuleUC{ContractUC: uc.ContractUC}.SelectAll(c, models.PointRuleParameter{
+				// 				Now:  time.Now().Format("2006-01-02"),
+				// 				By:   "def.id",
+				// 				Sort: "asc",
+				// 			})
+				// 			pointUC := PointUC{ContractUC: uc.ContractUC}
+				// 			pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID)
+				// 			for _, rules := range pointRules {
+				// 				pointMonthly, _ := strconv.ParseFloat(pointThisMonth.Balance, 64)
 
-								var maxMonthly float64
-								if customer[0].MonthlyMaxPoint != "" {
-									maxMonthly, _ = strconv.ParseFloat(customer[0].MonthlyMaxPoint, 64)
-								} else {
-									maxMonthly, _ = strconv.ParseFloat(rules.MonthlyMaxPoint, 64)
-								}
+				// 				var maxMonthly float64
+				// 				if customer[0].MonthlyMaxPoint != "" {
+				// 					maxMonthly, _ = strconv.ParseFloat(customer[0].MonthlyMaxPoint, 64)
+				// 				} else {
+				// 					maxMonthly, _ = strconv.ParseFloat(rules.MonthlyMaxPoint, 64)
+				// 				}
 
-								minOrder, _ := strconv.ParseFloat(rules.MinOrder, 64)
-								netOmount, _ := strconv.ParseFloat(*invoiceObject.NetAmount, 64)
+				// 				minOrder, _ := strconv.ParseFloat(rules.MinOrder, 64)
+				// 				netOmount, _ := strconv.ParseFloat(*invoiceObject.NetAmount, 64)
 
-								pointConversion, _ := strconv.ParseFloat(rules.PointConversion, 64)
-								getPoint := math.Floor(netOmount/minOrder) * pointConversion
+				// 				pointConversion, _ := strconv.ParseFloat(rules.PointConversion, 64)
+				// 				getPoint := math.Floor(netOmount/minOrder) * pointConversion
 
-								if pointMonthly+getPoint > maxMonthly {
-									getPoint = maxMonthly - pointMonthly
-								}
+				// 				if pointMonthly+getPoint > maxMonthly {
+				// 					getPoint = maxMonthly - pointMonthly
+				// 				}
 
-								if getPoint > 0 {
-									pointUC.Add(c, requests.PointRequest{
-										CustomerCodes: []requests.PointCustomerCode{
-											{CustomerCode: customer[0].Code},
-										},
-										InvoiceDocumentNo: *invoiceObject.DocumentNo,
-										Point:             strconv.FormatFloat(getPoint, 'f', 0, 64),
-										PointType:         "2",
-									})
-								}
-							}
-						}
-					}
-				}
+				// 				if getPoint > 0 {
+				// 					pointUC.Add(c, requests.PointRequest{
+				// 						CustomerCodes: []requests.PointCustomerCode{
+				// 							{CustomerCode: customer[0].Code},
+				// 						},
+				// 						InvoiceDocumentNo: *invoiceObject.DocumentNo,
+				// 						Point:             strconv.FormatFloat(getPoint, 'f', 0, 64),
+				// 						PointType:         "2",
+				// 					})
+				// 				}
+				// 			}
+				// 		}
+				// 	}
+				// }
+
+				res = append(res, *invoiceObject)
+				fmt.Println(key)
+				err = uc.RedisClient.Delete(key)
 			}
-			res = append(res, *invoiceObject)
-			fmt.Println(key)
-			err = uc.RedisClient.Delete(key)
+
 		}
 
 	}
