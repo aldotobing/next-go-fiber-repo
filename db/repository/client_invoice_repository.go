@@ -259,6 +259,7 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 	).Scan(&res)
 
 	if err != nil {
+		fmt.Println("insert header error ", err)
 		return res, finishFlag, err
 	}
 
@@ -297,6 +298,7 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 			).Scan(&resLine)
 
 			if err != nil {
+				fmt.Println("insert header line error ", err)
 				return res, finishFlag, err
 			}
 		}
