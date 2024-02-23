@@ -228,25 +228,35 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 		$26, $27, $28, $29 
 		)
 	RETURNING id`
+
+	if availableinvoice.ID != nil {
+
+		deltransaction, errdelt := repository.DB.BeginTx(c, nil)
+		if err != nil {
+			return res, finishFlag, errdelt
+		}
+		defer deltransaction.Rollback()
+
+		deletelinestatement := `delete from sales_invoice_line WHERE header_id = $1`
+
+		deletedRow, _ := deltransaction.QueryContext(c, deletelinestatement, availableinvoice.ID)
+		deletedRow.Close()
+
+		deleteheaderstatement := `delete from sales_invoice_header WHERE id = $1`
+
+		deletedHeaderRow, _ := deltransaction.QueryContext(c, deleteheaderstatement, availableinvoice.ID)
+		deletedHeaderRow.Close()
+		if errdelt = deltransaction.Commit(); errdelt != nil {
+			return res, finishFlag, errdelt
+		}
+
+	}
+
 	transaction, err := repository.DB.BeginTx(c, nil)
 	if err != nil {
 		return res, finishFlag, err
 	}
 	defer transaction.Rollback()
-
-	if availableinvoice.ID != nil {
-
-		deletelinestatement := `delete from sales_invoice_line WHERE header_id = $1`
-
-		deletedRow, _ := transaction.QueryContext(c, deletelinestatement, availableinvoice.ID)
-		deletedRow.Close()
-
-		deleteheaderstatement := `delete from sales_invoice_header WHERE id = $1`
-
-		deletedHeaderRow, _ := transaction.QueryContext(c, deleteheaderstatement, availableinvoice.ID)
-		deletedHeaderRow.Close()
-
-	}
 
 	//oustanding amount = net amount
 	err = transaction.QueryRowContext(c, statement,
@@ -262,8 +272,6 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 		fmt.Println("insert header error ", err)
 		return res, finishFlag, err
 	}
-
-	fmt.Printf("Successfully inserted invoice with DocumentNo: %s and generated ID: %s\n", *model.DocumentNo, res)
 
 	model.ID = &res
 
@@ -316,6 +324,7 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 	if err = transaction.Commit(); err != nil {
 		return res, finishFlag, err
 	}
+	fmt.Printf("Successfully inserted invoice with DocumentNo: %s and generated ID: %s\n", *model.DocumentNo, res)
 
 	return res, finishFlag, err
 }
