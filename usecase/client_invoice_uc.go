@@ -359,7 +359,7 @@ func (uc CilentInvoiceUC) PutRedisDataSync(c context.Context, parameter models.C
 			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
 			return res, err
 		}
-		err = uc.RedisClient.Client.Set(cacheKey, jsonData, time.Hour*24).Err()
+		err = uc.RedisClient.Client.Set(cacheKey, jsonData, time.Hour*168).Err()
 		if err != nil {
 			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
 			return res, err
@@ -394,14 +394,15 @@ func (uc CilentInvoiceUC) GetRedisDataSync(c context.Context) (res []models.Cile
 				_, _, err := repo.InsertDataWithLine(c, invoiceObject)
 				if err != nil {
 					errstr := err.Error()
-					if strings.Contains(errstr, "cust_bill_to_id") || strings.Contains(errstr, "uom_id") || strings.Contains(errstr, "item_id") {
+					if strings.Contains(errstr, "cust_bill_to_id") || strings.Contains(errstr, "uom_id") || strings.Contains(errstr, "item_id") ||
+						strings.Contains(errstr, "more than one row returned by a subquery used as an expression") {
 						cacheKeyerr := "err_cus_item_uom_inv:" + *invoiceObject.DocumentNo
 						errjsonData, err := json.Marshal(invoiceObject)
 						if err != nil {
 							logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
 							return res, err
 						}
-						err = uc.RedisClient.Client.Set(cacheKeyerr, errjsonData, time.Hour*24).Err()
+						err = uc.RedisClient.Client.Set(cacheKeyerr, errjsonData, time.Hour*168).Err()
 						if err != nil {
 							logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
 							return res, err
@@ -493,14 +494,15 @@ func (uc CilentInvoiceUC) GetRedisDataReserveSync(c context.Context) (res []mode
 				_, _, err := repo.InsertDataWithLine(c, invoiceObject)
 				if err != nil {
 					errstr := err.Error()
-					if strings.Contains(errstr, "cust_bill_to_id") || strings.Contains(errstr, "uom_id") || strings.Contains(errstr, "item_id") {
+					if strings.Contains(errstr, "cust_bill_to_id") || strings.Contains(errstr, "uom_id") || strings.Contains(errstr, "item_id") ||
+						strings.Contains(errstr, "more than one row returned by a subquery used as an expression") {
 						cacheKeyerr := "err_cus_item_uom_inv:" + *invoiceObject.DocumentNo
 						errjsonData, err := json.Marshal(invoiceObject)
 						if err != nil {
 							logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
 							return res, err
 						}
-						err = uc.RedisClient.Client.Set(cacheKeyerr, errjsonData, time.Hour*24).Err()
+						err = uc.RedisClient.Client.Set(cacheKeyerr, errjsonData, time.Hour*168).Err()
 						if err != nil {
 							logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
 							return res, err
