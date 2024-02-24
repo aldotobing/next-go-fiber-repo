@@ -393,17 +393,22 @@ func (uc CilentInvoiceUC) GetRedisDataSync(c context.Context) (res []models.Cile
 				fmt.Println("from redis : ", key)
 				_, _, err := repo.InsertDataWithLine(c, invoiceObject)
 				if err != nil {
-					// jsonDatas, errj := json.Marshal(invoiceObject)
-					// if errj != nil {
-					// 	logruslogger.Log(logruslogger.WarnLevel, errj.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
-					// 	// return res, err
-					// }
-					// errrd := uc.RedisClient.Client.Set("error_data_inv_:"+*invoiceObject.DocumentNo, jsonDatas, time.Hour*24).Err()
-					// if errrd != nil {
-					// 	logruslogger.Log(logruslogger.WarnLevel, errrd.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
-					// 	// return res, err
-					// }
-					return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
+					errstr := err.Error()
+					if strings.Contains(errstr, "cust_bill_to_id") || strings.Contains(errstr, "uom_id") || strings.Contains(errstr, "item_id") {
+						cacheKeyerr := "err_cus_item_uom_inv:" + *invoiceObject.DocumentNo
+						errjsonData, err := json.Marshal(invoiceObject)
+						if err != nil {
+							logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
+							return res, err
+						}
+						err = uc.RedisClient.Client.Set(cacheKeyerr, errjsonData, time.Hour*24).Err()
+						if err != nil {
+							logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
+							return res, err
+						}
+					} else {
+						return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
+					}
 				}
 				if err == nil {
 					if invoiceObject.SalesRequestCode != nil && strings.Contains(*invoiceObject.SalesRequestCode, "CO") &&
@@ -487,6 +492,22 @@ func (uc CilentInvoiceUC) GetRedisDataReserveSync(c context.Context) (res []mode
 				fmt.Println("from redis : ", key)
 				_, _, err := repo.InsertDataWithLine(c, invoiceObject)
 				if err != nil {
+					errstr := err.Error()
+					if strings.Contains(errstr, "cust_bill_to_id") || strings.Contains(errstr, "uom_id") || strings.Contains(errstr, "item_id") {
+						cacheKeyerr := "err_cus_item_uom_inv:" + *invoiceObject.DocumentNo
+						errjsonData, err := json.Marshal(invoiceObject)
+						if err != nil {
+							logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
+							return res, err
+						}
+						err = uc.RedisClient.Client.Set(cacheKeyerr, errjsonData, time.Hour*24).Err()
+						if err != nil {
+							logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
+							return res, err
+						}
+					} else {
+						return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
+					}
 					// jsonDatas, errj := json.Marshal(invoiceObject)
 					// if errj != nil {
 					// 	logruslogger.Log(logruslogger.WarnLevel, errj.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
@@ -497,7 +518,7 @@ func (uc CilentInvoiceUC) GetRedisDataReserveSync(c context.Context) (res []mode
 					// 	logruslogger.Log(logruslogger.WarnLevel, errrd.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
 					// 	// return res, err
 					// }
-					return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
+
 				}
 				if err == nil {
 					if invoiceObject.SalesRequestCode != nil && strings.Contains(*invoiceObject.SalesRequestCode, "CO") &&
