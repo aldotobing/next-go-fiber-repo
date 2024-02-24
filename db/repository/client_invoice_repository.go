@@ -246,9 +246,6 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 
 		deletedHeaderRow, _ := transaction.QueryContext(c, deleteheaderstatement, availableinvoice.ID)
 		deletedHeaderRow.Close()
-		if err = transaction.Commit(); err != nil {
-			return res, finishFlag, err
-		}
 
 	}
 
