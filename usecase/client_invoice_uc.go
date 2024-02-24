@@ -218,7 +218,7 @@ func (uc CilentInvoiceUC) DataSync(c context.Context, parameter models.CilentInv
 						pointMonthly, _ := strconv.ParseFloat(pointThisMonth.Balance, 64)
 
 						var maxMonthly float64
-						if customer[0].MonthlyMaxPoint != "" {
+						if customer[0].MonthlyMaxPoint != "" && customer[0].MonthlyMaxPoint != "0" {
 							maxMonthly, _ = strconv.ParseFloat(customer[0].MonthlyMaxPoint, 64)
 						} else {
 							maxMonthly, _ = strconv.ParseFloat(rules.MonthlyMaxPoint, 64)
