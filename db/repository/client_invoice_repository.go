@@ -228,6 +228,7 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 		$26, $27, $28, $29 
 		)
 	RETURNING id`
+
 	transaction, err := repository.DB.BeginTx(c, nil)
 	if err != nil {
 		return res, finishFlag, err
@@ -262,8 +263,6 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 		fmt.Println("insert header error ", err)
 		return res, finishFlag, err
 	}
-
-	fmt.Printf("Successfully inserted invoice with DocumentNo: %s and generated ID: %s\n", *model.DocumentNo, res)
 
 	model.ID = &res
 
@@ -316,6 +315,7 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 	if err = transaction.Commit(); err != nil {
 		return res, finishFlag, err
 	}
+	fmt.Printf("Successfully inserted invoice with DocumentNo: %s and generated ID: %s\n", *model.DocumentNo, res)
 
 	return res, finishFlag, err
 }
