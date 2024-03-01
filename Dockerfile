@@ -24,7 +24,8 @@ WORKDIR /app/server
 RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 
 # Start a new stage from scratch
-FROM debian:10-slim
+FROM debian:stable-slim
+
 # Install the ca-certificates and tzdata packages.
 RUN apt-get update && apt-get install -y \
     ca-certificates \
