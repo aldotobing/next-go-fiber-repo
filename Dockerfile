@@ -26,8 +26,10 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 # Start a new stage from a minimal Alpine base image
 FROM alpine:latest
 
-# Install CA certificates for HTTPS connections
-RUN apk --no-cache add ca-certificates
+# Install CA certificates for HTTPS connections and set the timezone to Indonesia/Jakarta
+RUN apk --no-cache add ca-certificates tzdata && \
+    cp /usr/share/zoneinfo/Asia/Jakarta /etc/localtime && \
+    echo "Asia/Jakarta" > /etc/timezone
 
 # Create a non-root user and group
 RUN addgroup -S appgroup && adduser -S -G appgroup appuser
