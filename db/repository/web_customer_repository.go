@@ -287,7 +287,14 @@ func (repository WebCustomerRepository) SelectAll(c context.Context, parameter m
 		conditionString += ` AND C.CUSTOMER_CODE IN (` + parameter.Code + `)`
 	}
 
-	statement := models.WebCustomerSelectStatement + ` ` + models.WebCustomerWhereStatement +
+	var whereStatement string
+	if parameter.ShowInApp == "" || parameter.ShowInApp == "1" {
+		whereStatement = models.WebCustomerWhereStatement
+	} else {
+		whereStatement = models.WebCustomerWhereStatementAll
+	}
+
+	statement := models.WebCustomerSelectStatement + ` ` + whereStatement +
 		` AND (LOWER(c.customer_name) LIKE $1 or LOWER(c.customer_code) LIKE $1 ) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 
