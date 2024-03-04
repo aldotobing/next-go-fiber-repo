@@ -267,9 +267,10 @@ func (uc PointUC) AddInject(c context.Context, in requests.PointRequest) (out []
 	}
 
 	customerData, err := WebCustomerUC{ContractUC: uc.ContractUC}.SelectAll(c, models.WebCustomerParameter{
-		Code: customerCodes,
-		By:   "c.id",
-		Sort: "asc",
+		Code:      customerCodes,
+		By:        "c.id",
+		Sort:      "asc",
+		ShowInApp: "0",
 	})
 
 	if len(customerData) < 1 {
