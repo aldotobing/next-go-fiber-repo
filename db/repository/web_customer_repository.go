@@ -425,7 +425,7 @@ func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter m
 	}
 
 	if parameter.MonthlyMaxPoint != "" {
-		conditionString += ` AND C.MONTHLY_MAX_POINT IS NOT NULL`
+		conditionString += ` AND C.MONTHLY_MAX_POINT IS NOT NULL AND C.MONTHLY_MAX_POINT != 0`
 	}
 
 	query := models.WebCustomerSelectStatement + ` ` + whereStatement + ` ` + conditionString + `
