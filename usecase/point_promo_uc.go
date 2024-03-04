@@ -22,9 +22,9 @@ type PointPromoUC struct {
 func (uc PointPromoUC) BuildBody(data *models.PointPromo, res *viewmodel.PointPromoVM) {
 	res.ID = data.ID
 	startDate, _ := time.Parse("2006-01-02T15:04:05.999999999Z", data.StartDate)
-	res.StartDate = startDate.Format(time.DateOnly)
+	res.StartDate = startDate.Format("2006-01-02")
 	endDate, _ := time.Parse("2006-01-02T15:04:05.999999999Z", data.EndDate)
-	res.EndDate = endDate.Format(time.DateOnly)
+	res.EndDate = endDate.Format("2006-01-02")
 	res.CreatedAt = data.CreatedAt
 	res.UpdatedAt = data.UpdatedAt.String
 	res.DeletedAt = data.DeletedAt.String
