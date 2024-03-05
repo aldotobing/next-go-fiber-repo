@@ -178,13 +178,13 @@ func (uc PointUC) GetBalanceAll(c context.Context, parameter models.PointParamet
 }
 
 // GetPointThisMonth ...
-func (uc PointUC) GetPointThisMonth(c context.Context, customerID string) (out viewmodel.PointBalanceVM, err error) {
+func (uc PointUC) GetPointThisMonth(c context.Context, customerID, month, year string) (out viewmodel.PointBalanceVM, err error) {
 
 	repo := repository.NewPointRepository(uc.DB)
 	data, err := repo.GetBalance(c, models.PointParameter{
 		CustomerID: customerID,
-		Month:      strconv.Itoa(int(time.Now().Month())),
-		Year:       strconv.Itoa(time.Now().Year()),
+		Month:      month,
+		Year:       year,
 	})
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
