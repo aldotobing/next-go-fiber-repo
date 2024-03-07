@@ -425,6 +425,7 @@ func (uc CilentInvoiceUC) GetRedisDataSync(c context.Context) (res []models.Cile
 									By:   "def.id",
 									Sort: "asc",
 								})
+								pointMaxCustomer, _ := PointMaxCustomerUC{ContractUC: uc.ContractUC}.FindByCustomerCode(c, customer[0].Code)
 								pointUC := PointUC{ContractUC: uc.ContractUC}
 								invoiceDate, _ := time.Parse("2006-01-02 15:04:05.999999999", *invoiceObject.InvoiceDate)
 								pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID, invoiceDate.Month().String(), strconv.Itoa(invoiceDate.Year()))
@@ -432,8 +433,8 @@ func (uc CilentInvoiceUC) GetRedisDataSync(c context.Context) (res []models.Cile
 									pointMonthly, _ := strconv.ParseFloat(pointThisMonth.Balance, 64)
 
 									var maxMonthly float64
-									if customer[0].MonthlyMaxPoint != "" && customer[0].MonthlyMaxPoint != "0" {
-										maxMonthly, _ = strconv.ParseFloat(customer[0].MonthlyMaxPoint, 64)
+									if pointMaxCustomer.ID != "" {
+										maxMonthly, _ = strconv.ParseFloat(pointMaxCustomer.MonthlyMaxPoint, 64)
 									} else {
 										maxMonthly, _ = strconv.ParseFloat(rules.MonthlyMaxPoint, 64)
 									}
@@ -540,8 +541,6 @@ func (uc CilentInvoiceUC) GetRedisDataReserveSync(c context.Context) (res []mode
 									Sort: "asc",
 								})
 								pointUC := PointUC{ContractUC: uc.ContractUC}
-
-								
 
 								pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID, invoiceDate.Month().String(), strconv.Itoa(invoiceDate.Year()))
 								for _, rules := range pointRules {
