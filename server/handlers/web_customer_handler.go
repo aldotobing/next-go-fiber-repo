@@ -162,6 +162,9 @@ func (h *WebCustomerHandler) FindByID(ctx *fiber.Ctx) error {
 		Code: res.Code,
 	})
 
+	pointData, _ := usecase.PointMaxCustomerUC{ContractUC: h.ContractUC}.FindByCustomerCode(c, res.Code)
+	objectData.ListObject.MonthlyMaxPoint = pointData.MonthlyMaxPoint
+
 	return h.SendResponse(ctx, objectData, nil, err, 0)
 }
 

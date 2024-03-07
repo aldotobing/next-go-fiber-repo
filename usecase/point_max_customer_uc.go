@@ -98,6 +98,20 @@ func (uc PointMaxCustomerUC) FindByID(c context.Context, parameter models.PointM
 	return
 }
 
+// FindByCustomerCode ...
+func (uc PointMaxCustomerUC) FindByCustomerCode(c context.Context, customerCode string) (out viewmodel.PointMaxCustomerVM, err error) {
+	repo := repository.NewPointMaxCustomerRepository(uc.DB)
+	data, err := repo.FindByCustomerCode(c, customerCode)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	uc.BuildBody(&data, &out)
+
+	return
+}
+
 // Add ...
 func (uc PointMaxCustomerUC) Add(c context.Context, in requests.PointMaxCustomerRequestHeader) (out []viewmodel.PointMaxCustomerVM, err error) {
 
