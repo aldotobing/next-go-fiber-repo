@@ -681,18 +681,6 @@ func (uc WebCustomerUC) EditBulk(c context.Context, data requests.WebCustomerBul
 	return
 }
 
-func (uc WebCustomerUC) EditMaxPoint(c context.Context, data requests.WebCustomerMaxPointRequestHeader) (err error) {
-	repo := repository.NewWebCustomerRepository(uc.DB)
-
-	err = repo.EditMaxPoint(c, data)
-	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
-		return
-	}
-
-	return
-}
-
 func (uc WebCustomerUC) EditIndexPoint(c context.Context, in []viewmodel.PointRuleCustomerVM) (err error) {
 	repo := repository.NewWebCustomerRepository(uc.DB)
 
