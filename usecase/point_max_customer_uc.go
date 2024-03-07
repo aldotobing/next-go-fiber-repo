@@ -30,6 +30,9 @@ func (uc PointMaxCustomerUC) BuildBody(data *models.PointMaxCustomer, res *viewm
 	res.CreatedAt = data.CreatedAt
 	res.UpdatedAt = data.UpdatedAt.String
 	res.DeletedAt = data.DeletedAt.String
+
+	res.BranchCode = data.BranchCode.String
+	res.BranchName = data.BranchName.String
 }
 
 // FindAll ...

@@ -26,6 +26,7 @@ func (h *PointMaxCustomerHandler) FindAll(ctx *fiber.Ctx) error {
 		ShowAll: ctx.Query("show_all"),
 		Page:    str.StringToInt(ctx.Query("page")),
 		Limit:   str.StringToInt(ctx.Query("limit")),
+		Search:  ctx.Query("search"),
 		By:      ctx.Query("by"),
 		Sort:    ctx.Query("sort"),
 	}
@@ -43,6 +44,7 @@ func (h *PointMaxCustomerHandler) SelectAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 	parameter := models.PointMaxCustomerParameter{
 		ShowAll: ctx.Query("show_all"),
+		Search:  ctx.Query("search"),
 		By:      ctx.Query("by"),
 		Sort:    ctx.Query("sort"),
 	}

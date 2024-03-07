@@ -13,6 +13,8 @@ type PointMaxCustomer struct {
 	CreatedAt       string
 	UpdatedAt       sql.NullString
 	DeletedAt       sql.NullString
+	BranchCode      sql.NullString
+	BranchName      sql.NullString
 }
 
 // PointMaxCustomerParameter ...
@@ -50,9 +52,12 @@ var (
 			DEF.MONTHLY_MAX_POINT,
 			DEF.CREATED_AT,
 			DEF.UPDATED_AT,
-			DEF.DELETED_AT
+			DEF.DELETED_AT,
+			B.BRANCH_CODE,
+			B._NAME
 		FROM POINT_MAX_CUSTOMER DEF
 		LEFT JOIN CUSTOMER C ON C.CUSTOMER_CODE = DEF.CUSTOMER_CODE
+		LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
 	`
 
 	PointMaxCustomerWhereStatement = `WHERE DEF.DELETED_AT IS NULL `
