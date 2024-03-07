@@ -14,6 +14,7 @@ type IPointRepository interface {
 	FindAll(ctx context.Context, parameter models.PointParameter) ([]models.Point, int, error)
 	FindByID(c context.Context, parameter models.PointParameter) (models.Point, error)
 	GetBalance(c context.Context, parameter models.PointParameter) (models.PointGetBalance, error)
+	GetBalanceUsingInvoiceDate(c context.Context, parameter models.PointParameter) (models.PointGetBalance, error)
 	Add(c context.Context, model viewmodel.PointVM) (string, error)
 	AddInject(c context.Context, model []viewmodel.PointVM) (string, error)
 	AddWithdraw(c context.Context, in viewmodel.PointVM) (res string, err error)
@@ -181,8 +182,37 @@ func (repository PointRepository) GetBalance(c context.Context, parameter models
 		coalesce(sum(case when pt."_name" = '` + models.PointTypeLoyalty + `' then DEF.point else 0 end),0) as loyalty,
 		coalesce(sum(case when pt."_name" = '` + models.PointTypePromo + `' then DEF.point else 0 end),0) as promo
 		from points DEF
-		left join point_type pt on pt.id = def.point_type ` +
-		`WHERE DEF.DELETED_AT IS NULL AND DEF.CUSTOMER_ID = ` + parameter.CustomerID
+		left join point_type pt on pt.id = def.point_type 
+		LEFT JOIN SALES_INVOICE_HEADER SIH ON SIH.DOCUMENT_NO = DEF.INVOICE_DOCUMENT_NO
+		WHERE DEF.DELETED_AT IS NULL AND DEF.CUSTOMER_ID = ` + parameter.CustomerID + whereStatement
+	row := repository.DB.QueryRowContext(c, statement)
+
+	err = row.Scan(
+		&data.Withdraw,
+		&data.Cashback,
+		&data.Loyalty,
+		&data.Promo,
+	)
+
+	return
+}
+
+// GetBalanceUsingInvoiceDate ...
+func (repository PointRepository) GetBalanceUsingInvoiceDate(c context.Context, parameter models.PointParameter) (data models.PointGetBalance, err error) {
+	var whereStatement string
+	if parameter.Month != "" && parameter.Year != "" {
+		whereStatement += ` AND extract(month from SIH.TRANSACTION_DATE) = '` + parameter.Month + `' 
+		and EXTRACT(YEAR from SIH.TRANSACTION_DATE) = '` + parameter.Year + `'`
+	}
+
+	statement := `select coalesce(sum(case when pt."_name" = '` + models.PointTypeWithdraw + `' then DEF.point else 0 end),0) as withdraw,
+		coalesce(sum(case when pt."_name" = '` + models.PointTypeCashback + `' then DEF.point else 0 end),0) as cashback,
+		coalesce(sum(case when pt."_name" = '` + models.PointTypeLoyalty + `' then DEF.point else 0 end),0) as loyalty,
+		coalesce(sum(case when pt."_name" = '` + models.PointTypePromo + `' then DEF.point else 0 end),0) as promo
+		from points DEF
+		left join point_type pt on pt.id = def.point_type 
+		LEFT JOIN SALES_INVOICE_HEADER SIH ON SIH.DOCUMENT_NO = DEF.INVOICE_DOCUMENT_NO
+		WHERE DEF.DELETED_AT IS NULL AND DEF.CUSTOMER_ID = ` + parameter.CustomerID + whereStatement
 	row := repository.DB.QueryRowContext(c, statement)
 
 	err = row.Scan(

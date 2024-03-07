@@ -181,7 +181,7 @@ func (uc PointUC) GetBalanceAll(c context.Context, parameter models.PointParamet
 func (uc PointUC) GetPointThisMonth(c context.Context, customerID, month, year string) (out viewmodel.PointBalanceVM, err error) {
 
 	repo := repository.NewPointRepository(uc.DB)
-	data, err := repo.GetBalance(c, models.PointParameter{
+	data, err := repo.GetBalanceUsingInvoiceDate(c, models.PointParameter{
 		CustomerID: customerID,
 		Month:      month,
 		Year:       year,
