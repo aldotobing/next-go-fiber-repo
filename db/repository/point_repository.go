@@ -52,6 +52,8 @@ func (repository PointRepository) scanRows(rows *sql.Rows) (res models.Point, er
 		&res.Customer.CustomerBranchCode,
 		&res.Customer.CustomerBranchName,
 		&res.Customer.CustomerRegionName,
+
+		&res.InvoiceDate,
 	)
 
 	return

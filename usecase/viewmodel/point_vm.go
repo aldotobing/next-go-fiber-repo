@@ -12,6 +12,7 @@ type PointVM struct {
 	UpdatedAt         string `json:"updated_at"`
 	DeletedAt         string `json:"deleted_at"`
 	ExpiredAt         string `json:"expired_at"`
+	InvoiceDate       string `json:"invoice_date"`
 
 	DetailCustomer CustomerVM `json:"customer_detail,omitempty"`
 	CustomerIDs    []string   `json:"customer_ids,omitempty"`

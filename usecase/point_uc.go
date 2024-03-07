@@ -34,6 +34,8 @@ func (uc PointUC) BuildBody(data *models.Point, res *viewmodel.PointVM) {
 	res.UpdatedAt = data.UpdatedAt.String
 	res.DeletedAt = data.DeletedAt.String
 	res.ExpiredAt = data.ExpiredAt.String
+	invoiceDate, _ := time.Parse("2006-01-02T15:04:05.999999999Z", data.InvoiceDate.String)
+	res.InvoiceDate = invoiceDate.Format("2006-01-02")
 
 	res.DetailCustomer = viewmodel.CustomerVM{
 		CustomerName:       data.Customer.CustomerName.String,
