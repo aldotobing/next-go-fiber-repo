@@ -104,7 +104,6 @@ func (repository WebCustomerRepository) scanRows(rows *sql.Rows) (res models.Web
 		&res.CustomerPhotoKtpDashboard,
 		&res.CustomerPhotoNpwp,
 		&res.CustomerPhotoNpwpDashboard,
-		&res.MonthlyMaxPoint,
 	)
 	if err != nil {
 
@@ -245,7 +244,6 @@ func (repository WebCustomerRepository) scanRow(row *sql.Row) (res models.WebCus
 		&res.CustomerPhotoKtpDashboard,
 		&res.CustomerPhotoNpwp,
 		&res.CustomerPhotoNpwpDashboard,
-		&res.MonthlyMaxPoint,
 	)
 	if err != nil {
 		return res, err
