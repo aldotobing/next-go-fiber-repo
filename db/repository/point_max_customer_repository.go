@@ -42,6 +42,8 @@ func (repository PointMaxCustomerRepository) scanRows(rows *sql.Rows) (res model
 		&res.CreatedAt,
 		&res.UpdatedAt,
 		&res.DeletedAt,
+		&res.BranchCode,
+		&res.BranchName,
 	)
 
 	return
@@ -59,6 +61,8 @@ func (repository PointMaxCustomerRepository) scanRow(row *sql.Row) (res models.P
 		&res.CreatedAt,
 		&res.UpdatedAt,
 		&res.DeletedAt,
+		&res.BranchCode,
+		&res.BranchName,
 	)
 
 	return
@@ -70,6 +74,13 @@ func (repository PointMaxCustomerRepository) SelectAll(c context.Context, parame
 
 	if parameter.ShowAll != "1" {
 		conditionString += `AND NOW() BETWEEN DEF.START_DATE AND DEF.END_DATE`
+	}
+
+	if parameter.Search != "" {
+		conditionString += ` AND (LOWER(DEF.CUSTOMER_CODE) LIKE LOWER('%` + parameter.Search + `%') OR
+		LOWER(C.CUSTOMER_NAME) LIKE LOWER('%` + parameter.Search + `%') OR
+		LOWER(B.BRANCH_CODE) LIKE LOWER('%` + parameter.Search + `%') OR
+		LOWER(B._NAME) LIKE LOWER('%` + parameter.Search + `%'))`
 	}
 
 	statement := models.PointMaxCustomerSelectStatement + models.PointMaxCustomerWhereStatement +
@@ -99,7 +110,14 @@ func (repository PointMaxCustomerRepository) FindAll(ctx context.Context, parame
 	var conditionString string
 
 	if parameter.ShowAll != "1" {
-		conditionString += `AND NOW() BETWEEN DEF.START_DATE AND DEF.END_DATE`
+		conditionString += ` AND NOW() BETWEEN DEF.START_DATE AND DEF.END_DATE`
+	}
+
+	if parameter.Search != "" {
+		conditionString += ` AND (LOWER(DEF.CUSTOMER_CODE) LIKE LOWER('%` + parameter.Search + `%') OR
+		LOWER(C.CUSTOMER_NAME) LIKE LOWER('%` + parameter.Search + `%') OR
+		LOWER(B.BRANCH_CODE) LIKE LOWER('%` + parameter.Search + `%') OR
+		LOWER(B._NAME) LIKE LOWER('%` + parameter.Search + `%'))`
 	}
 
 	statement := models.PointMaxCustomerSelectStatement + models.PointMaxCustomerWhereStatement +
@@ -123,7 +141,11 @@ func (repository PointMaxCustomerRepository) FindAll(ctx context.Context, parame
 		return data, count, err
 	}
 
-	countQuery := `SELECT COUNT(*) FROM POINT_MAX_CUSTOMER def ` + models.PointMaxCustomerWhereStatement +
+	countQuery := `SELECT COUNT(*) 
+		FROM POINT_MAX_CUSTOMER def
+		LEFT JOIN CUSTOMER C ON C.CUSTOMER_CODE = DEF.CUSTOMER_CODE
+		LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID ` +
+		models.PointMaxCustomerWhereStatement +
 		conditionString
 	err = repository.DB.QueryRow(countQuery).Scan(&count)
 
