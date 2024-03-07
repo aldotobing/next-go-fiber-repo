@@ -141,7 +141,12 @@ func (repository PointMaxCustomerRepository) FindByID(c context.Context, paramet
 
 // FindByCustomerCode ...
 func (repository PointMaxCustomerRepository) FindByCustomerCode(c context.Context, customerCode string) (data models.PointMaxCustomer, err error) {
-	statement := models.PointMaxCustomerSelectStatement + ` WHERE DEF.CUSTOMER_CODE = '` + customerCode + `'`
+	var conditionString string
+
+	conditionString += ` AND NOW() BETWEEN DEF.START_DATE AND DEF.END_DATE`
+
+	statement := models.PointMaxCustomerSelectStatement + ` WHERE DEF.CUSTOMER_CODE = '` + customerCode + `'` + conditionString +
+		` ORDER BY DEF.CREATED_AT DESC LIMIT 1`
 	row := repository.DB.QueryRowContext(c, statement)
 
 	data, err = repository.scanRow(row)
