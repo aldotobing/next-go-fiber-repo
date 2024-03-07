@@ -14,6 +14,7 @@ type IPointMaxCustomerRepository interface {
 	FindAll(ctx context.Context, parameter models.PointMaxCustomerParameter) ([]models.PointMaxCustomer, int, error)
 	FindByID(c context.Context, parameter models.PointMaxCustomerParameter) (models.PointMaxCustomer, error)
 	FindByCustomerCode(c context.Context, customerCode string) (models.PointMaxCustomer, error)
+	FindByCustomerCodeWithDateInvoice(c context.Context, customerCode, date string) (data models.PointMaxCustomer, err error)
 	Add(c context.Context, model []viewmodel.PointMaxCustomerVM) error
 	Update(c context.Context, model viewmodel.PointMaxCustomerVM) (string, error)
 	Delete(c context.Context, id string) (string, error)
@@ -144,6 +145,21 @@ func (repository PointMaxCustomerRepository) FindByCustomerCode(c context.Contex
 	var conditionString string
 
 	conditionString += ` AND NOW() BETWEEN DEF.START_DATE AND DEF.END_DATE`
+
+	statement := models.PointMaxCustomerSelectStatement + ` WHERE DEF.CUSTOMER_CODE = '` + customerCode + `'` + conditionString +
+		` ORDER BY DEF.CREATED_AT DESC LIMIT 1`
+	row := repository.DB.QueryRowContext(c, statement)
+
+	data, err = repository.scanRow(row)
+
+	return
+}
+
+// FindByCustomerCodeWithDateInvoice ...
+func (repository PointMaxCustomerRepository) FindByCustomerCodeWithDateInvoice(c context.Context, customerCode, date string) (data models.PointMaxCustomer, err error) {
+	var conditionString string
+
+	conditionString += ` AND '` + date + `' BETWEEN DEF.START_DATE AND DEF.END_DATE`
 
 	statement := models.PointMaxCustomerSelectStatement + ` WHERE DEF.CUSTOMER_CODE = '` + customerCode + `'` + conditionString +
 		` ORDER BY DEF.CREATED_AT DESC LIMIT 1`
