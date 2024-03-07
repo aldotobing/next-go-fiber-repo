@@ -532,13 +532,17 @@ func (uc CilentInvoiceUC) GetRedisDataReserveSync(c context.Context) (res []mode
 						customer, _ := WebCustomerUC{ContractUC: uc.ContractUC}.FindByCodes(c, models.WebCustomerParameter{Code: `'` + *invoiceObject.CustomerCode + `'`})
 						if len(customer) == 1 {
 							if customer[0].IndexPoint == 1 {
+								invoiceDate, _ := time.Parse("2006-01-02 15:04:05.999999999", *invoiceObject.InvoiceDate)
+
 								pointRules, _ := PointRuleUC{ContractUC: uc.ContractUC}.SelectAll(c, models.PointRuleParameter{
-									Now:  time.Now().Format("2006-01-02"),
+									Now:  invoiceDate.Format("2006-01-02"),
 									By:   "def.id",
 									Sort: "asc",
 								})
 								pointUC := PointUC{ContractUC: uc.ContractUC}
-								invoiceDate, _ := time.Parse("2006-01-02 15:04:05.999999999", *invoiceObject.InvoiceDate)
+
+								
+
 								pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID, invoiceDate.Month().String(), strconv.Itoa(invoiceDate.Year()))
 								for _, rules := range pointRules {
 									pointMonthly, _ := strconv.ParseFloat(pointThisMonth.Balance, 64)
