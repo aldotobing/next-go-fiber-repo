@@ -43,6 +43,7 @@ type CilentInvoice struct {
 	PaidDate             *string              `json:"paid_date"`
 	PriceListCode        *string              `json:"price_list_code"`
 	PriceListVersionCode *string              `json:"price_list_version_desc"`
+	OperationType        *string              `json:"operation_type"`
 }
 
 // CilentInvoiceParameter ...
