@@ -323,7 +323,7 @@ func (uc CilentInvoiceUC) PutRedisDataSync(c context.Context, parameter models.C
 	}
 
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "http://localhost:8098/NEXTbasis-service-agon/rest/salesInvoice/data/2", bytes.NewBuffer(jsonReq))
+	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrv/rest/salesInvoice/data/2", bytes.NewBuffer(jsonReq))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new request: %w", err)
 	}
