@@ -214,7 +214,7 @@ func (uc CilentInvoiceUC) DataSync(c context.Context, parameter models.CilentInv
 					})
 					pointUC := PointUC{ContractUC: uc.ContractUC}
 					invoiceDate, _ := time.Parse("2006-01-02 15:04:05.999999999", *invoiceObject.InvoiceDate)
-					pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID, invoiceDate.Month().String(), strconv.Itoa(invoiceDate.Year()))
+					pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID, strconv.Itoa(int(invoiceDate.Month())), strconv.Itoa(invoiceDate.Year()))
 					for _, rules := range pointRules {
 						pointMonthly, _ := strconv.ParseFloat(pointThisMonth.Balance, 64)
 
@@ -543,7 +543,7 @@ func (uc CilentInvoiceUC) GetRedisDataReserveSync(c context.Context) (res []mode
 								})
 								pointMaxCustomer, _ := PointMaxCustomerUC{ContractUC: uc.ContractUC}.FindByCustomerCode(c, customer[0].Code)
 								pointUC := PointUC{ContractUC: uc.ContractUC}
-								pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID, invoiceDate.Month().String(), strconv.Itoa(invoiceDate.Year()))
+								pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID, strconv.Itoa(int(invoiceDate.Month())), strconv.Itoa(invoiceDate.Year()))
 								for _, rules := range pointRules {
 									pointMonthly, _ := strconv.ParseFloat(pointThisMonth.Balance, 64)
 
@@ -649,7 +649,7 @@ func (uc CilentInvoiceUC) GetRedisDataSyncReplace(c context.Context) (res []mode
 								})
 								pointMaxCustomer, _ := PointMaxCustomerUC{ContractUC: uc.ContractUC}.FindByCustomerCodeWithDateInvoice(c, customer[0].Code, invoiceDate.Format("2006-01-02"))
 								pointUC := PointUC{ContractUC: uc.ContractUC}
-								pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID, invoiceDate.Month().String(), strconv.Itoa(invoiceDate.Year()))
+								pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID, strconv.Itoa(int(invoiceDate.Month())), strconv.Itoa(invoiceDate.Year()))
 								for _, rules := range pointRules {
 									pointMonthly, _ := strconv.ParseFloat(pointThisMonth.Balance, 64)
 
