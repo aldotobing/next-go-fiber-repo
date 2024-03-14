@@ -429,7 +429,7 @@ func (uc CilentInvoiceUC) GetRedisDataSync(c context.Context) (res []models.Cile
 								})
 								pointMaxCustomer, _ := PointMaxCustomerUC{ContractUC: uc.ContractUC}.FindByCustomerCodeWithDateInvoice(c, customer[0].Code, invoiceDate.Format("2006-01-02"))
 								pointUC := PointUC{ContractUC: uc.ContractUC}
-								pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID, invoiceDate.Month().String(), strconv.Itoa(invoiceDate.Year()))
+								pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID, strconv.Itoa(int(invoiceDate.Month())), strconv.Itoa(invoiceDate.Year()))
 								for _, rules := range pointRules {
 									pointMonthly, _ := strconv.ParseFloat(pointThisMonth.Balance, 64)
 
