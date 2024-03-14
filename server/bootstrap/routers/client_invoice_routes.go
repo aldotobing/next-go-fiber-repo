@@ -28,7 +28,7 @@ func (route CilentInvoiceRoutes) RegisterRoute() {
 	r.Get("/select/:customer_id", handler.SelectAll)
 	r.Get("/id/:id", handler.FindByID)
 	r.Get("/", handler.DataSync)
-	r.Get("/redis/data", handler.PutRedisDataSync)
+	r.Get("/redis/data", handler.SFAPullData)
 	r.Get("/redis/data/sync", handler.GetRedisDataSync)
 
 }
