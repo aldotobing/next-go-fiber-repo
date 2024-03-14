@@ -699,59 +699,59 @@ func (uc CilentInvoiceUC) SFASyncData(c context.Context) (res []models.CilentInv
 						return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
 					}
 				}
-				if err == nil {
-					if invoiceObject.SalesRequestCode != nil && strings.Contains(*invoiceObject.SalesRequestCode, "CO") &&
-						invoiceObject.OutstandingAmount != nil && *invoiceObject.OutstandingAmount == "0.00" &&
-						invoiceObject.CustomerCode != nil && invoiceObject.NetAmount != nil &&
-						invoiceObject.DocumentNo != nil {
-						customer, _ := WebCustomerUC{ContractUC: uc.ContractUC}.FindByCodes(c, models.WebCustomerParameter{Code: `'` + *invoiceObject.CustomerCode + `'`})
-						if len(customer) == 1 {
-							fmt.Println("tes sini")
-							if customer[0].IndexPoint == 1 {
-								invoiceDate, _ := time.Parse("2006-01-02 15:04:05.999999999", *invoiceObject.InvoiceDate)
-								pointRules, _ := PointRuleUC{ContractUC: uc.ContractUC}.SelectAll(c, models.PointRuleParameter{
-									Now:  invoiceDate.Format("2006-01-02"),
-									By:   "def.id",
-									Sort: "asc",
-								})
-								pointMaxCustomer, _ := PointMaxCustomerUC{ContractUC: uc.ContractUC}.FindByCustomerCodeWithDateInvoice(c, customer[0].Code, invoiceDate.Format("2006-01-02"))
-								pointUC := PointUC{ContractUC: uc.ContractUC}
-								pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID, strconv.Itoa(int(invoiceDate.Month())), strconv.Itoa(invoiceDate.Year()))
-								for _, rules := range pointRules {
-									pointMonthly, _ := strconv.ParseFloat(pointThisMonth.Balance, 64)
+				// if err == nil {
+				// 	if invoiceObject.SalesRequestCode != nil && strings.Contains(*invoiceObject.SalesRequestCode, "CO") &&
+				// 		invoiceObject.OutstandingAmount != nil && *invoiceObject.OutstandingAmount == "0.00" &&
+				// 		invoiceObject.CustomerCode != nil && invoiceObject.NetAmount != nil &&
+				// 		invoiceObject.DocumentNo != nil {
+				// 		customer, _ := WebCustomerUC{ContractUC: uc.ContractUC}.FindByCodes(c, models.WebCustomerParameter{Code: `'` + *invoiceObject.CustomerCode + `'`})
+				// 		if len(customer) == 1 {
+				// 			fmt.Println("tes sini")
+				// 			if customer[0].IndexPoint == 1 {
+				// 				invoiceDate, _ := time.Parse("2006-01-02 15:04:05.999999999", *invoiceObject.InvoiceDate)
+				// 				pointRules, _ := PointRuleUC{ContractUC: uc.ContractUC}.SelectAll(c, models.PointRuleParameter{
+				// 					Now:  invoiceDate.Format("2006-01-02"),
+				// 					By:   "def.id",
+				// 					Sort: "asc",
+				// 				})
+				// 				pointMaxCustomer, _ := PointMaxCustomerUC{ContractUC: uc.ContractUC}.FindByCustomerCodeWithDateInvoice(c, customer[0].Code, invoiceDate.Format("2006-01-02"))
+				// 				pointUC := PointUC{ContractUC: uc.ContractUC}
+				// 				pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID, strconv.Itoa(int(invoiceDate.Month())), strconv.Itoa(invoiceDate.Year()))
+				// 				for _, rules := range pointRules {
+				// 					pointMonthly, _ := strconv.ParseFloat(pointThisMonth.Balance, 64)
 
-									var maxMonthly float64
-									if pointMaxCustomer.ID != "" {
-										maxMonthly, _ = strconv.ParseFloat(pointMaxCustomer.MonthlyMaxPoint, 64)
-									} else {
-										maxMonthly, _ = strconv.ParseFloat(rules.MonthlyMaxPoint, 64)
-									}
+				// 					var maxMonthly float64
+				// 					if pointMaxCustomer.ID != "" {
+				// 						maxMonthly, _ = strconv.ParseFloat(pointMaxCustomer.MonthlyMaxPoint, 64)
+				// 					} else {
+				// 						maxMonthly, _ = strconv.ParseFloat(rules.MonthlyMaxPoint, 64)
+				// 					}
 
-									minOrder, _ := strconv.ParseFloat(rules.MinOrder, 64)
-									netOmount, _ := strconv.ParseFloat(*invoiceObject.NetAmount, 64)
+				// 					minOrder, _ := strconv.ParseFloat(rules.MinOrder, 64)
+				// 					netOmount, _ := strconv.ParseFloat(*invoiceObject.NetAmount, 64)
 
-									pointConversion, _ := strconv.ParseFloat(rules.PointConversion, 64)
-									getPoint := math.Floor(netOmount/minOrder) * pointConversion
+				// 					pointConversion, _ := strconv.ParseFloat(rules.PointConversion, 64)
+				// 					getPoint := math.Floor(netOmount/minOrder) * pointConversion
 
-									if pointMonthly+getPoint > maxMonthly {
-										getPoint = maxMonthly - pointMonthly
-									}
+				// 					if pointMonthly+getPoint > maxMonthly {
+				// 						getPoint = maxMonthly - pointMonthly
+				// 					}
 
-									if getPoint > 0 {
-										pointUC.Add(c, requests.PointRequest{
-											CustomerCodes: []requests.PointCustomerCode{
-												{CustomerCode: customer[0].Code},
-											},
-											InvoiceDocumentNo: *invoiceObject.DocumentNo,
-											Point:             strconv.FormatFloat(getPoint, 'f', 0, 64),
-											PointType:         "2",
-										})
-									}
-								}
-							}
-						}
-					}
-				}
+				// 					if getPoint > 0 {
+				// 						pointUC.Add(c, requests.PointRequest{
+				// 							CustomerCodes: []requests.PointCustomerCode{
+				// 								{CustomerCode: customer[0].Code},
+				// 							},
+				// 							InvoiceDocumentNo: *invoiceObject.DocumentNo,
+				// 							Point:             strconv.FormatFloat(getPoint, 'f', 0, 64),
+				// 							PointType:         "2",
+				// 						})
+				// 					}
+				// 				}
+				// 			}
+				// 		}
+				// 	}
+				// }
 
 				res = append(res, *invoiceObject)
 				fmt.Println(key)
