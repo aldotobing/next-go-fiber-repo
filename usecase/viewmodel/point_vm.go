@@ -8,6 +8,7 @@ type PointVM struct {
 	InvoiceDocumentNo string `json:"invoice_document_no"`
 	Point             string `json:"point"`
 	CustomerID        string `json:"customer_id"`
+	Note              string `json:"note"`
 	CreatedAt         string `json:"created_at"`
 	UpdatedAt         string `json:"updated_at"`
 	DeletedAt         string `json:"deleted_at"`

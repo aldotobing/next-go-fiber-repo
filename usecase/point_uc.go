@@ -44,6 +44,8 @@ func (uc PointUC) BuildBody(data *models.Point, res *viewmodel.PointVM) {
 		CustomerBranchName: data.Customer.CustomerBranchName.String,
 		CustomerRegionName: data.Customer.CustomerRegionName.String,
 	}
+
+	res.Note = data.Note.String
 }
 
 // FindAll ...
@@ -290,6 +292,7 @@ func (uc PointUC) AddInject(c context.Context, in requests.PointRequest) (out []
 					Point:             y.Point,
 					CustomerID:        datum.ID,
 					ExpiredAt:         expiredAt,
+					Note:              in.Note,
 				})
 			}
 		}
