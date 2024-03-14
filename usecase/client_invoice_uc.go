@@ -305,7 +305,7 @@ func (uc CilentInvoiceUC) UndoneDataSync(c context.Context, parameter models.Cil
 	return resBuilder, nil
 }
 
-func (uc CilentInvoiceUC) PutRedisDataSync(c context.Context, parameter models.CilentInvoiceParameter) ([]models.CilentInvoice, error) {
+func (uc CilentInvoiceUC) SFAPullData(c context.Context, parameter models.CilentInvoiceParameter) ([]models.CilentInvoice, error) {
 
 	// fmt.Println("put redis")
 	loc, err := time.LoadLocation("Asia/Jakarta")
@@ -323,7 +323,7 @@ func (uc CilentInvoiceUC) PutRedisDataSync(c context.Context, parameter models.C
 	}
 
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrv/rest/salesInvoice/data/2", bytes.NewBuffer(jsonReq))
+	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrv/rest/salesInvoice/data/sfa", bytes.NewBuffer(jsonReq))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new request: %w", err)
 	}
@@ -354,7 +354,74 @@ func (uc CilentInvoiceUC) PutRedisDataSync(c context.Context, parameter models.C
 
 	var resBuilder []models.CilentInvoice
 	for _, invoiceObject := range res {
-		cacheKey := "invoice_header_:" + *invoiceObject.DocumentNo
+		cacheKey := "sfa_invoice_:" + *invoiceObject.DocumentNo
+		jsonData, err := json.Marshal(invoiceObject)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
+			return res, err
+		}
+		err = uc.RedisClient.Client.Set(cacheKey, jsonData, time.Hour*168).Err()
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
+			return res, err
+		}
+		// &invoiceObject
+		resBuilder = append(resBuilder, invoiceObject)
+	}
+
+	return resBuilder, nil
+}
+
+func (uc CilentInvoiceUC) MYSMPullData(c context.Context, parameter models.CilentInvoiceParameter) ([]models.CilentInvoice, error) {
+
+	// fmt.Println("put redis")
+	loc, err := time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		return nil, fmt.Errorf("failed to load location: %w", err)
+	}
+
+	now := time.Now().In(loc).Add(time.Minute * time.Duration(-40))
+	strnow := now.Format(time.RFC3339)
+	parameter.DateParam = strnow
+
+	jsonReq, err := json.Marshal(parameter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal json: %w", err)
+	}
+
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrv/rest/salesInvoice/data/mysm", bytes.NewBuffer(jsonReq))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new request: %w", err)
+	}
+
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer C2A5CE6A2292E7745CE5A3F7E68A9")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute request: %w", err)
+	}
+
+	if resp == nil || resp.Body == nil {
+		return nil, errors.New("response or response body is nil")
+	}
+	defer resp.Body.Close()
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	var res []models.CilentInvoice
+	if err := json.Unmarshal([]byte(bodyBytes), &res); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
+	}
+
+	var resBuilder []models.CilentInvoice
+	for _, invoiceObject := range res {
+		cacheKey := "mysm_invoice_:" + *invoiceObject.DocumentNo
 		jsonData, err := json.Marshal(invoiceObject)
 		if err != nil {
 			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
@@ -592,7 +659,7 @@ func (uc CilentInvoiceUC) GetRedisDataReserveSync(c context.Context) (res []mode
 	return res, nil
 }
 
-func (uc CilentInvoiceUC) GetRedisDataSyncReplace(c context.Context) (res []models.CilentInvoice, err error) {
+func (uc CilentInvoiceUC) SFASyncData(c context.Context) (res []models.CilentInvoice, err error) {
 	cacheKey := "*invoice_header*"
 	repo := repository.NewCilentInvoiceRepository(uc.DB)
 
@@ -706,7 +773,7 @@ func (uc CilentInvoiceUC) GetRedisDataSyncPointOnly(c context.Context) (res []mo
 
 	if err == nil {
 		fmt.Println("list key ", strinvList)
-		for i := 0; i < 125; i++ {
+		for i := 0; i < 25; i++ {
 
 			key := strinvList[i]
 			fmt.Println("key", key)

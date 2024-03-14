@@ -93,7 +93,7 @@ func (h *CilentInvoiceHandler) DataSync(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
-func (h *CilentInvoiceHandler) PutRedisDataSync(ctx *fiber.Ctx) error {
+func (h *CilentInvoiceHandler) SFAPullData(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.CilentInvoiceParameter{
@@ -106,7 +106,7 @@ func (h *CilentInvoiceHandler) PutRedisDataSync(ctx *fiber.Ctx) error {
 		DateParam:  ctx.Query("date_param"),
 	}
 	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
-	res, err := uc.PutRedisDataSync(c, parameter)
+	res, err := uc.SFAPullData(c, parameter)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
