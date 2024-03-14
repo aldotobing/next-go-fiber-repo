@@ -649,7 +649,112 @@ func (uc CilentInvoiceUC) GetRedisDataSyncReplace(c context.Context) (res []mode
 								})
 								pointMaxCustomer, _ := PointMaxCustomerUC{ContractUC: uc.ContractUC}.FindByCustomerCodeWithDateInvoice(c, customer[0].Code, invoiceDate.Format("2006-01-02"))
 								pointUC := PointUC{ContractUC: uc.ContractUC}
-								pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID, invoiceDate.Month().String(), strconv.Itoa(invoiceDate.Year()))
+								pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID, strconv.Itoa(int(invoiceDate.Month())), strconv.Itoa(invoiceDate.Year()))
+								for _, rules := range pointRules {
+									pointMonthly, _ := strconv.ParseFloat(pointThisMonth.Balance, 64)
+
+									var maxMonthly float64
+									if pointMaxCustomer.ID != "" {
+										maxMonthly, _ = strconv.ParseFloat(pointMaxCustomer.MonthlyMaxPoint, 64)
+									} else {
+										maxMonthly, _ = strconv.ParseFloat(rules.MonthlyMaxPoint, 64)
+									}
+
+									minOrder, _ := strconv.ParseFloat(rules.MinOrder, 64)
+									netOmount, _ := strconv.ParseFloat(*invoiceObject.NetAmount, 64)
+
+									pointConversion, _ := strconv.ParseFloat(rules.PointConversion, 64)
+									getPoint := math.Floor(netOmount/minOrder) * pointConversion
+
+									if pointMonthly+getPoint > maxMonthly {
+										getPoint = maxMonthly - pointMonthly
+									}
+
+									if getPoint > 0 {
+										pointUC.Add(c, requests.PointRequest{
+											CustomerCodes: []requests.PointCustomerCode{
+												{CustomerCode: customer[0].Code},
+											},
+											InvoiceDocumentNo: *invoiceObject.DocumentNo,
+											Point:             strconv.FormatFloat(getPoint, 'f', 0, 64),
+											PointType:         "2",
+										})
+									}
+								}
+							}
+						}
+					}
+				}
+
+				res = append(res, *invoiceObject)
+				fmt.Println(key)
+				_ = uc.RedisClient.Delete(key)
+			}
+		}
+
+	}
+
+	return res, nil
+}
+
+func (uc CilentInvoiceUC) GetRedisDataSyncPointOnly(c context.Context) (res []models.CilentInvoice, err error) {
+	cacheKey := "*point_bonus_*"
+	repo := repository.NewCilentInvoiceRepository(uc.DB)
+
+	// Try to get data from Redis cache first
+	strinvList, err := uc.RedisClient.GetAllKeyFromRedis(cacheKey)
+
+	if err == nil {
+		fmt.Println("list key ", strinvList)
+		for i := 0; i < 125; i++ {
+
+			key := strinvList[i]
+			fmt.Println("key", key)
+			invoiceObject := new(models.CilentInvoice)
+			err = uc.RedisClient.GetFromRedis(key, &invoiceObject)
+			if err != nil {
+				fmt.Println(err)
+			}
+			if err == nil {
+				fmt.Println("from redis : ", key)
+				_, _, err := repo.MergeDataWithLine(c, invoiceObject)
+				if err != nil {
+					errstr := err.Error()
+					if strings.Contains(errstr, "cust_bill_to_id") || strings.Contains(errstr, "uom_id") || strings.Contains(errstr, "item_id") ||
+						strings.Contains(errstr, "more than one row returned by a subquery used as an expression") {
+						cacheKeyerr := "err_point_bonus_inv:" + *invoiceObject.DocumentNo
+						errjsonData, err := json.Marshal(invoiceObject)
+						if err != nil {
+							logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
+							return res, err
+						}
+						err = uc.RedisClient.Client.Set(cacheKeyerr, errjsonData, time.Hour*168).Err()
+						if err != nil {
+							logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
+							return res, err
+						}
+					} else {
+						return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
+					}
+				}
+				if err == nil {
+					if invoiceObject.SalesRequestCode != nil && strings.Contains(*invoiceObject.SalesRequestCode, "CO") &&
+						invoiceObject.OutstandingAmount != nil && *invoiceObject.OutstandingAmount == "0.00" &&
+						invoiceObject.CustomerCode != nil && invoiceObject.NetAmount != nil &&
+						invoiceObject.DocumentNo != nil {
+						customer, _ := WebCustomerUC{ContractUC: uc.ContractUC}.FindByCodes(c, models.WebCustomerParameter{Code: `'` + *invoiceObject.CustomerCode + `'`})
+						if len(customer) == 1 {
+							fmt.Println("tes sini")
+							if customer[0].IndexPoint == 1 {
+								invoiceDate, _ := time.Parse("2006-01-02 15:04:05.999999999", *invoiceObject.InvoiceDate)
+								pointRules, _ := PointRuleUC{ContractUC: uc.ContractUC}.SelectAll(c, models.PointRuleParameter{
+									Now:  invoiceDate.Format("2006-01-02"),
+									By:   "def.id",
+									Sort: "asc",
+								})
+								pointMaxCustomer, _ := PointMaxCustomerUC{ContractUC: uc.ContractUC}.FindByCustomerCodeWithDateInvoice(c, customer[0].Code, invoiceDate.Format("2006-01-02"))
+								pointUC := PointUC{ContractUC: uc.ContractUC}
+								pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID, strconv.Itoa(int(invoiceDate.Month())), strconv.Itoa(invoiceDate.Year()))
 								for _, rules := range pointRules {
 									pointMonthly, _ := strconv.ParseFloat(pointThisMonth.Balance, 64)
 
