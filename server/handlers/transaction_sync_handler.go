@@ -72,6 +72,15 @@ func (h *TransactionDataSyncHandler) InvoiceSyncGetRedisReplace(ctx *fiber.Ctx) 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
+func (h *TransactionDataSyncHandler) InvoiceSyncGetRedisPointOnly(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
+	res, err := uc.GetRedisDataSyncPointOnly(c)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
 func (h *TransactionDataSyncHandler) ReturnInvoiceSync(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
