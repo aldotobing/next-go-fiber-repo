@@ -54,6 +54,7 @@ func (repository PointRepository) scanRows(rows *sql.Rows) (res models.Point, er
 		&res.Customer.CustomerRegionName,
 
 		&res.InvoiceDate,
+		&res.Note,
 	)
 
 	return
@@ -78,6 +79,9 @@ func (repository PointRepository) scanRow(row *sql.Row) (res models.Point, err e
 		&res.Customer.CustomerBranchCode,
 		&res.Customer.CustomerBranchName,
 		&res.Customer.CustomerRegionName,
+
+		&res.InvoiceDate,
+		&res.Note,
 	)
 
 	return
@@ -261,9 +265,9 @@ func (repository PointRepository) AddInject(c context.Context, in []viewmodel.Po
 	if len(in) > 0 {
 		for _, datum := range in {
 			if statementInsert == "" {
-				statementInsert += `(` + datum.PointType + `, '` + datum.InvoiceDocumentNo + `', '` + datum.Point + `', ` + datum.CustomerID + `, NOW(), NOW(), '` + datum.ExpiredAt + `')`
+				statementInsert += `(` + datum.PointType + `, '` + datum.InvoiceDocumentNo + `', '` + datum.Point + `', ` + datum.CustomerID + `, NOW(), NOW(), '` + datum.ExpiredAt + `', '` + datum.Note + `')`
 			} else {
-				statementInsert += `, (` + datum.PointType + `, '` + datum.InvoiceDocumentNo + `', '` + datum.Point + `', ` + datum.CustomerID + `, NOW(), NOW(), '` + datum.ExpiredAt + `')`
+				statementInsert += `, (` + datum.PointType + `, '` + datum.InvoiceDocumentNo + `', '` + datum.Point + `', ` + datum.CustomerID + `, NOW(), NOW(), '` + datum.ExpiredAt + `', '` + datum.Note + `')`
 			}
 		}
 	}
@@ -274,7 +278,8 @@ func (repository PointRepository) AddInject(c context.Context, in []viewmodel.Po
 			CUSTOMER_ID,
 			CREATED_AT,
 			UPDATED_AT,
-			EXPIRED_AT
+			EXPIRED_AT, 
+			NOTE
 		)
 	VALUES ` + statementInsert
 
