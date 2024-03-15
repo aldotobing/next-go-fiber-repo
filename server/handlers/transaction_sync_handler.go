@@ -30,7 +30,7 @@ func (h *TransactionDataSyncHandler) CustomerOrderVoidDataSync(ctx *fiber.Ctx) e
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
-func (h *TransactionDataSyncHandler) InvoiceSyncPutToRedis(ctx *fiber.Ctx) error {
+func (h *TransactionDataSyncHandler) InvoiceSFAPull(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.CilentInvoiceParameter{
@@ -40,7 +40,22 @@ func (h *TransactionDataSyncHandler) InvoiceSyncPutToRedis(ctx *fiber.Ctx) error
 		Sort:       ctx.Query("sort"),
 	}
 	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
-	res, err := uc.PutRedisDataSync(c, parameter)
+	res, err := uc.SFAPullData(c, parameter)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *TransactionDataSyncHandler) InvoiceMYSMPull(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.CilentInvoiceParameter{
+		CustomerID: ctx.Params("customer_id"),
+		Search:     ctx.Query("search"),
+		By:         ctx.Query("by"),
+		Sort:       ctx.Query("sort"),
+	}
+	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
+	res, err := uc.MYSMPullData(c, parameter)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
@@ -63,11 +78,20 @@ func (h *TransactionDataSyncHandler) InvoiceReserveSyncGetRedis(ctx *fiber.Ctx) 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
-func (h *TransactionDataSyncHandler) InvoiceSyncGetRedisReplace(ctx *fiber.Ctx) error {
+func (h *TransactionDataSyncHandler) InvoiceSyncSFA(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
-	res, err := uc.GetRedisDataSyncReplace(c)
+	res, err := uc.SFASyncData(c)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *TransactionDataSyncHandler) InvoiceSyncGetRedisPointOnly(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
+	res, err := uc.GetRedisDataSyncPointOnly(c)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
@@ -106,7 +130,7 @@ func (h *TransactionDataSyncHandler) UndoneDataSync(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
-func (h *TransactionDataSyncHandler) SalesOrderCustomerSync(ctx *fiber.Ctx) error {
+func (h *TransactionDataSyncHandler) SalesOrderCustomerPullData(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.SalesOrderCustomerSyncParameter{
@@ -116,7 +140,7 @@ func (h *TransactionDataSyncHandler) SalesOrderCustomerSync(ctx *fiber.Ctx) erro
 		Sort:       ctx.Query("sort"),
 	}
 	uc := usecase.SalesOrderCustomerSyncUC{ContractUC: h.ContractUC}
-	res, err := uc.DataSync(c, parameter)
+	res, err := uc.PullDataSync(c, parameter)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }

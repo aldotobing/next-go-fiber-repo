@@ -194,6 +194,60 @@ func (uc SalesOrderCustomerSyncUC) DataSync(c context.Context, parameter models.
 	return resBuilder, err
 }
 
+// SelectAll ...
+func (uc SalesOrderCustomerSyncUC) PullDataSync(c context.Context, parameter models.SalesOrderCustomerSyncParameter) (res []models.SalesOrderCustomerSync, err error) {
+	loc, _ := time.LoadLocation("Asia/Jakarta")
+	now := time.Now().In(loc).Add(time.Minute * time.Duration(-15))
+	strnow := now.Format(time.RFC3339)
+	parameter.DateParam = strnow
+	parameter.Status = "submitted"
+	jsonReq, err := json.Marshal(parameter)
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrv/rest/salesOrder/data/online_store", bytes.NewBuffer(jsonReq))
+	if err != nil {
+		fmt.Println("client err")
+		fmt.Print(err.Error())
+	}
+
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer C2A5CE6A2292E7745CE5A3F7E68A9")
+
+	resp, err := client.Do(req)
+	if err != nil {
+
+		fmt.Print(err.Error())
+	}
+	defer resp.Body.Close()
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Print(err.Error())
+	}
+	// var responseObject http.Response
+	json.Unmarshal(bodyBytes, &res)
+	// fmt.Printf("API Response as struct %+v\n", &responseObject)
+
+	var resBuilder []models.SalesOrderCustomerSync
+	for _, invoiceObject := range res {
+		cacheKey := "submitted_so_data_:" + *invoiceObject.DocumentNo
+		jsonData, err := json.Marshal(invoiceObject)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
+			return res, err
+		}
+		err = uc.RedisClient.Client.Set(cacheKey, jsonData, time.Hour*168).Err()
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
+			return res, err
+		}
+
+		resBuilder = append(resBuilder, invoiceObject)
+
+	}
+
+	return resBuilder, err
+}
+
 func (uc SalesOrderCustomerSyncUC) RevisedSync(c context.Context, parameter models.SalesOrderCustomerSyncParameter) (res []models.SalesOrderCustomerSync, err error) {
 	repo := repository.NewSalesOrderCustomerSyncRepository(uc.DB)
 
