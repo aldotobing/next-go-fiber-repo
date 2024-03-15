@@ -22,6 +22,7 @@ type IPointRepository interface {
 	Update(c context.Context, model viewmodel.PointVM) (string, error)
 	Delete(c context.Context, id string) (string, error)
 	Report(c context.Context, parameter models.PointParameter) ([]models.Point, error)
+	SingleAdd(c context.Context, model viewmodel.PointVM) (string, error)
 }
 
 // PointRepository ...
@@ -253,6 +254,26 @@ func (repository PointRepository) Add(c context.Context, in viewmodel.PointVM) (
 	err = repository.DB.QueryRowContext(c, statement).Err()
 
 	return
+}
+
+func (repository PointRepository) SingleAdd(c context.Context, in viewmodel.PointVM) (res string, err error) {
+	var statementInsert string
+	statementInsert += `(` + in.PointType + `, '` + in.InvoiceDocumentNo + `', '` + in.Point + `', ` + in.CustomerID + `, NOW(), NOW(), '` + in.ExpiredAt + `')`
+
+	statement := `INSERT INTO POINTS (
+			POINT_TYPE, 
+			INVOICE_DOCUMENT_NO,
+			POINT,
+			CUSTOMER_ID,
+			CREATED_AT,
+			UPDATED_AT,
+			EXPIRED_AT
+		)
+	VALUES ` + statementInsert + ` returning id `
+
+	err = repository.DB.QueryRowContext(c, statement).Scan(&res)
+
+	return res, err
 }
 
 // AddInject ...

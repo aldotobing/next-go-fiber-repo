@@ -83,6 +83,7 @@ type WebCustomer struct {
 type WebCustomerParameter struct {
 	ID              string `json:"customer_id"`
 	Code            string `json:"customer_code"`
+	Codes           string `json:"customer_codes"`
 	Name            string `json:"customer_name"`
 	CustomerTypeId  string `json:"custome_type_id"`
 	SalesmanTypeID  string `json:"salesman_type_id"`
