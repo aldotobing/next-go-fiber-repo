@@ -220,7 +220,7 @@ func (uc PointUC) Add(c context.Context, in requests.PointRequest) (out viewmode
 	}
 
 	repo := repository.NewPointRepository(uc.DB)
-	out.ID, err = repo.Add(c, out)
+	out.ID, err = repo.SingleAdd(c, out)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return
