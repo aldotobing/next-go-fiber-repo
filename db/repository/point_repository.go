@@ -211,10 +211,7 @@ func (repository PointRepository) GetBalanceUsingInvoiceDate(c context.Context, 
 		and EXTRACT(YEAR from SIH.TRANSACTION_DATE) = '` + parameter.Year + `'`
 	}
 
-	statement := `select coalesce(sum(case when pt."_name" = '` + models.PointTypeWithdraw + `' then DEF.point else 0 end),0) as withdraw,
-		coalesce(sum(case when pt."_name" = '` + models.PointTypeCashback + `' then DEF.point else 0 end),0) as cashback,
-		coalesce(sum(case when pt."_name" = '` + models.PointTypeLoyalty + `' then DEF.point else 0 end),0) as loyalty,
-		coalesce(sum(case when pt."_name" = '` + models.PointTypePromo + `' then DEF.point else 0 end),0) as promo
+	statement := `select coalesce(sum(case when pt."_name" = '` + models.PointTypeCashback + `' then DEF.point else 0 end),0) as cashback
 		from points DEF
 		left join point_type pt on pt.id = def.point_type 
 		LEFT JOIN SALES_INVOICE_HEADER SIH ON SIH.DOCUMENT_NO = DEF.INVOICE_DOCUMENT_NO
@@ -222,10 +219,7 @@ func (repository PointRepository) GetBalanceUsingInvoiceDate(c context.Context, 
 	row := repository.DB.QueryRowContext(c, statement)
 
 	err = row.Scan(
-		&data.Withdraw,
 		&data.Cashback,
-		&data.Loyalty,
-		&data.Promo,
 	)
 
 	return
