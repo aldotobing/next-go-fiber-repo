@@ -130,7 +130,7 @@ func (h *TransactionDataSyncHandler) UndoneDataSync(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
-func (h *TransactionDataSyncHandler) SalesOrderCustomerSync(ctx *fiber.Ctx) error {
+func (h *TransactionDataSyncHandler) SalesOrderCustomerPullData(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.SalesOrderCustomerSyncParameter{
@@ -140,7 +140,7 @@ func (h *TransactionDataSyncHandler) SalesOrderCustomerSync(ctx *fiber.Ctx) erro
 		Sort:       ctx.Query("sort"),
 	}
 	uc := usecase.SalesOrderCustomerSyncUC{ContractUC: h.ContractUC}
-	res, err := uc.DataSync(c, parameter)
+	res, err := uc.PullDataSync(c, parameter)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }

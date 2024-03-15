@@ -43,7 +43,7 @@ func (route DataSyncRoutes) RegisterRoute() {
 	tr.Get("/invoice/redis/pointonly", transhandler.InvoiceSyncGetRedisPointOnly)
 	tr.Get("/return_invoicedata", transhandler.ReturnInvoiceSync)
 	tr.Get("/invoicedata/undone", transhandler.UndoneDataSync)
-	tr.Get("/sodata", transhandler.SalesOrderCustomerSync)
+	tr.Get("/sodata", transhandler.SalesOrderCustomerPullData)
 	tr.Get("/revisedsodata", transhandler.SalesOrderCustomerRevisedSync)
 
 }
