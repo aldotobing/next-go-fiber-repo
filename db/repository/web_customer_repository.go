@@ -474,7 +474,14 @@ func (repository WebCustomerRepository) FindByID(c context.Context, parameter mo
 
 // FindByCodes ...
 func (repository WebCustomerRepository) FindByCodes(c context.Context, parameter models.WebCustomerParameter) (data []models.WebCustomer, err error) {
-	statement := models.WebCustomerSelectStatement + ` WHERE c.customer_code in (` + parameter.Code + `)`
+	var whereStatement string
+	if parameter.Codes != "" {
+		whereStatement = ` WHERE c.customer_code in (` + parameter.Code + `)`
+	} else if parameter.Code != "" {
+		whereStatement = ` WHERE c.customer_code = ` + parameter.Code + ``
+	}
+
+	statement := models.WebCustomerSelectStatement + whereStatement
 	rows, err := repository.DB.QueryContext(c, statement)
 	if err != nil {
 		return

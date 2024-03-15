@@ -237,12 +237,10 @@ func (uc CilentInvoiceUC) DataSync(c context.Context, parameter models.CilentInv
 
 						if getPoint > 0 {
 							pointUC.Add(c, requests.PointRequest{
-								CustomerCodes: []requests.PointCustomerCode{
-									{CustomerCode: customer[0].Code},
-								},
 								InvoiceDocumentNo: *invoiceObject.DocumentNo,
 								Point:             strconv.FormatFloat(getPoint, 'f', 0, 64),
 								PointType:         "2",
+								CustomerID:        customer[0].ID,
 							})
 						}
 					}
@@ -519,12 +517,10 @@ func (uc CilentInvoiceUC) GetRedisDataSync(c context.Context) (res []models.Cile
 
 									if getPoint > 0 {
 										pointUC.Add(c, requests.PointRequest{
-											CustomerCodes: []requests.PointCustomerCode{
-												{CustomerCode: customer[0].Code},
-											},
 											InvoiceDocumentNo: *invoiceObject.DocumentNo,
 											Point:             strconv.FormatFloat(getPoint, 'f', 0, 64),
 											PointType:         "2",
+											CustomerID:        customer[0].ID,
 										})
 									}
 								}
@@ -633,12 +629,10 @@ func (uc CilentInvoiceUC) GetRedisDataReserveSync(c context.Context) (res []mode
 
 									if getPoint > 0 {
 										pointUC.Add(c, requests.PointRequest{
-											CustomerCodes: []requests.PointCustomerCode{
-												{CustomerCode: customer[0].Code},
-											},
 											InvoiceDocumentNo: *invoiceObject.DocumentNo,
 											Point:             strconv.FormatFloat(getPoint, 'f', 0, 64),
 											PointType:         "2",
+											CustomerID:        customer[0].ID,
 										})
 									}
 								}
@@ -738,14 +732,12 @@ func (uc CilentInvoiceUC) SFASyncData(c context.Context) (res []models.CilentInv
 				// 					}
 
 				// 					if getPoint > 0 {
-				// 						pointUC.Add(c, requests.PointRequest{
-				// 							CustomerCodes: []requests.PointCustomerCode{
-				// 								{CustomerCode: customer[0].Code},
-				// 							},
-				// 							InvoiceDocumentNo: *invoiceObject.DocumentNo,
-				// 							Point:             strconv.FormatFloat(getPoint, 'f', 0, 64),
-				// 							PointType:         "2",
-				// 						})
+				// 					pointUC.Add(c, requests.PointRequest{
+				//											InvoiceDocumentNo: *invoiceObject.DocumentNo,
+				//											Point:             strconv.FormatFloat(getPoint, 'f', 0, 64),
+				//											PointType:         "2",
+				//											CustomerID:        customer[0].ID,
+				//										})
 				// 					}
 				// 				}
 				// 			}
@@ -844,12 +836,10 @@ func (uc CilentInvoiceUC) GetRedisDataSyncPointOnly(c context.Context) (res []mo
 
 									if getPoint > 0 {
 										pointUC.Add(c, requests.PointRequest{
-											CustomerCodes: []requests.PointCustomerCode{
-												{CustomerCode: customer[0].Code},
-											},
 											InvoiceDocumentNo: *invoiceObject.DocumentNo,
 											Point:             strconv.FormatFloat(getPoint, 'f', 0, 64),
 											PointType:         "2",
+											CustomerID:        customer[0].ID,
 										})
 									}
 								}
