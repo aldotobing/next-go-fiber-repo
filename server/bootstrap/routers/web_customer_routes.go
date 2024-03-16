@@ -31,5 +31,5 @@ func (route WebCustomerRoutes) RegisterRoute() {
 	r.Put("/id/:customer_id", handler.Edit)
 	r.Put("/edit/bulk", handler.EditBulk)
 
-	// r.Get("/report", handler.ReportSelect)
+	r.Get("/report", handler.ReportSelect)
 }
