@@ -765,7 +765,7 @@ func (uc CilentInvoiceUC) GetRedisDataSyncPointOnly(c context.Context) (res []mo
 
 	if err == nil {
 		fmt.Println("list key ", strinvList)
-		for i := 0; i < 20; i++ {
+		for i := 0; i < 50; i++ {
 
 			key := strinvList[i]
 			fmt.Println("key", key)
