@@ -231,15 +231,9 @@ func (repository PointRepository) GetBalanceUsingInvoiceDate(c context.Context, 
 // Add ...
 func (repository PointRepository) Add(c context.Context, in viewmodel.PointVM) (res string, err error) {
 	var statementInsert string
-	if len(in.CustomerIDs) > 0 {
-		for _, datum := range in.CustomerIDs {
-			if statementInsert == "" {
-				statementInsert += `(` + in.PointType + `, '` + in.InvoiceDocumentNo + `', '` + in.Point + `', ` + datum + `, NOW(), NOW(), '` + in.ExpiredAt + `')`
-			} else {
-				statementInsert += `, (` + in.PointType + `, '` + in.InvoiceDocumentNo + `', '` + in.Point + `', ` + datum + `, NOW(), NOW(), '` + in.ExpiredAt + `')`
-			}
-		}
-	}
+
+	statementInsert += `(` + in.PointType + `, '` + in.InvoiceDocumentNo + `', '` + in.Point + `', ` + in.CustomerID + `, NOW(), NOW(), '` + in.ExpiredAt + `')`
+
 	statement := `INSERT INTO POINTS (
 			POINT_TYPE, 
 			INVOICE_DOCUMENT_NO,
