@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"fmt"
 
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/usecase/viewmodel"
@@ -220,7 +219,6 @@ func (repository PointRepository) GetBalanceUsingInvoiceDate(c context.Context, 
 		WHERE DEF.DELETED_AT IS NULL AND DEF.CUSTOMER_ID = ` + parameter.CustomerID + whereStatement
 	row := repository.DB.QueryRowContext(c, statement)
 
-	fmt.Println("query", statement)
 	err = row.Scan(
 		&data.Cashback,
 	)
