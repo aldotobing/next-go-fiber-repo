@@ -631,12 +631,12 @@ func (repository CilentInvoiceRepository) MergeDataWithLine(c context.Context, m
 			var cdata string
 			fmt.Println("operation 2 update")
 
-			updatestmt := ` update sales_invoice_header set outstanding_amount=$1, paid_amount=$2
+			updatestmt := ` update sales_invoice_header set outstanding_amount=$1, paid_amount=$2, paid_date= $3
 			
-			WHERE id = $3 returning id `
+			WHERE id = $4 returning id `
 
 			err = repository.DB.QueryRowContext(c, updatestmt, str.EmptyString(*model.OutstandingAmount),
-				str.EmptyString(*model.PaidAmount), availableinvoice.ID).Scan(&cdata)
+				str.EmptyString(*model.PaidAmount), str.NullOrEmtyString(model.PaidDate), availableinvoice.ID).Scan(&cdata)
 
 		} else {
 			fmt.Println("operation 2 insert")
