@@ -37,6 +37,7 @@ type SalesOrderCustomerSync struct {
 	ListLine             *[]SalesOrderCustomerLineSync `json:"list_line"`
 	ExpectedDeliveryDate *string                       `json:"expected_delivery_date"`
 	VoidReasonNotes      *string                       `json:"void_reason_notes"`
+	OperationType        *string                       `json:"operation_type"`
 }
 
 // SalesOrderCustomerSyncParameter ...
