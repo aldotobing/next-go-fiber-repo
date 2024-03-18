@@ -248,6 +248,140 @@ func (uc SalesOrderCustomerSyncUC) PullDataSync(c context.Context, parameter mod
 	return resBuilder, err
 }
 
+func (uc SalesOrderCustomerSyncUC) PushDataSync(c context.Context, parameter models.SalesOrderCustomerSyncParameter) (res []models.SalesOrderCustomerSync, err error) {
+	// repo := repository.NewSalesOrderCustomerSyncRepository(uc.DB)
+
+	cacheKey := "*submitted_so_data_*"
+
+	// Try to get data from Redis cache first
+	strsoList, err := uc.RedisClient.GetAllKeyFromRedis(cacheKey)
+
+	if err == nil {
+		var minLen = 10050
+		var keyLen = len(strsoList)
+
+		if keyLen < minLen {
+			minLen = keyLen
+		}
+		if minLen > 0 {
+			for i := 0; i < minLen; i++ {
+
+				key := strsoList[i]
+				soObject := new(models.SalesOrderCustomerSync)
+				err = uc.RedisClient.GetFromRedis(key, &soObject)
+				if err != nil {
+					fmt.Println(err)
+				}
+				if err == nil {
+					fmt.Println("from redis : ", key)
+					// _, errinsert := repo.InsertDataWithLine(c, soObject)
+
+					// if errinsert != nil {
+					// 	fmt.Print(errinsert)
+					// }
+
+					// if errinsert == nil {
+					// 	if soObject.Status != nil {
+					// 		userrepo := repository.NewCustomerRepository(uc.DB)
+					// 		salesorderHeaderrepo := repository.NewSalesOrderHeaderRepository(uc.DB)
+					// 		salesorderHeader, errheader := salesorderHeaderrepo.FindByCode(c, models.SalesOrderHeaderParameter{DocumentNo: *soObject.DocumentNo})
+					// 		if errheader == nil {
+					// 			useraccount, erruser := userrepo.FindByID(c, models.CustomerParameter{ID: *salesorderHeader.CustomerID})
+
+					// 			if erruser == nil && useraccount.CustomerFCMToken != nil && *useraccount.CustomerFCMToken != "" {
+
+					// 				if errheader == nil {
+					// 					orderlinerepo := repository.NewSalesOrderLineRepository(uc.DB)
+					// 					orderline, errline := orderlinerepo.SelectAll(c, models.SalesOrderLineParameter{
+					// 						HeaderID: *salesorderHeader.ID,
+					// 						By:       "def.created_date",
+					// 					})
+
+					// 					if errline == nil {
+					// 						messageTemplate := ""
+					// 						messageTitle := ""
+					// 						messageType := "2"
+					// 						if *soObject.Status == "submitted" {
+					// 							messageTemplate = helper.BuildProcessSalesOrderTransactionTemplate(salesorderHeader, orderline, useraccount, 1)
+					// 							messageTitle = "Transaksi " + *soObject.DocumentNo + " diproses."
+					// 						}
+
+					// 						if useraccount.CustomerFCMToken != nil && *useraccount.CustomerFCMToken != "" {
+					// 							FcmUc := FCMUC{ContractUC: uc.ContractUC}
+					// 							_, errfcm := FcmUc.SendFCMMessage(c, messageTitle, messageTemplate, *useraccount.CustomerFCMToken)
+					// 							if errfcm == nil {
+
+					// 							}
+
+					// 							userNotificationRepo := repository.NewUserNotificationRepository(uc.DB)
+					// 							_, errnotifinsert := userNotificationRepo.Add(c, &models.UserNotification{
+					// 								Title:  &messageTitle,
+					// 								Text:   &messageTemplate,
+					// 								Type:   &messageType,
+					// 								UserID: soObject.CustomerID,
+					// 								RowID:  soObject.ID,
+					// 							})
+					// 							if errnotifinsert == nil {
+
+					// 							}
+
+					// 						}
+
+					// 						if useraccount.CustomerPhone != nil && *useraccount.CustomerPhone != "" {
+					// 							// if messageTemplate != "" {
+					// 							// senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.CustomerPhone, messageTemplate)
+					// 							// if senDwaMessage != nil {
+					// 							// 	fmt.Println("sukses")
+					// 							// }
+
+					// 							// }
+
+					// 							if useraccount.CustomerSalesmanID != nil {
+					// 								salesmanmessageTemplate := ""
+					// 								salesmannRepo := repository.NewSalesmanRepository(uc.DB)
+					// 								customerSales, errcustsales := salesmannRepo.FindByID(c, models.SalesmanParameter{ID: *useraccount.CustomerSalesmanID})
+
+					// 								salesmanmessageTemplate = helper.BuildProcessSalesOrderTransactionTemplate(salesorderHeader, orderline, useraccount, 2)
+
+					// 								if errcustsales == nil {
+					// 									if customerSales.PhoneNo != nil {
+					// 										if salesmanmessageTemplate != "" {
+
+					// 											senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*customerSales.PhoneNo, salesmanmessageTemplate)
+					// 											if senDwaMessage != nil {
+					// 												fmt.Println("sukses")
+					// 											}
+					// 										}
+
+					// 									}
+					// 								}
+					// 							}
+
+					// 						}
+
+					// 						// if useraccount.CustomerBranchPicPhoneNo != nil && useraccount.CustomerBranchPicName != nil {
+					// 						// 	picMessageTemplate := helper.BuildProcessSalesOrderTransactionTemplate(salesorderHeader, orderline, useraccount, 3)
+					// 						// 	_ = uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.CustomerBranchPicPhoneNo, picMessageTemplate)
+					// 						// }
+					// 					}
+					// 				}
+
+					// 			}
+					// 		}
+					// 	}
+					// }
+
+					res = append(res, *soObject)
+					_ = uc.RedisClient.Delete(key)
+
+				}
+			}
+		}
+	}
+
+	return res, err
+}
+
 func (uc SalesOrderCustomerSyncUC) RevisedSync(c context.Context, parameter models.SalesOrderCustomerSyncParameter) (res []models.SalesOrderCustomerSync, err error) {
 	repo := repository.NewSalesOrderCustomerSyncRepository(uc.DB)
 
