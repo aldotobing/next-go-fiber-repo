@@ -45,6 +45,8 @@ func (route DataSyncRoutes) RegisterRoute() {
 	tr.Get("/invoicedata/undone", transhandler.UndoneDataSync)
 	tr.Get("/sodata/pull", transhandler.SalesOrderCustomerPullData)
 	tr.Get("/sodata/push", transhandler.SalesOrderCustomerPushData)
+	tr.Get("/sodata/sendfcmmessage", transhandler.SalesOrderCustomerSendFcmMessage)
+	tr.Get("/sodata/sendsamesmanwa", transhandler.SalesOrderCustomerSendSalesmanWa)
 	tr.Get("/revisedsodata", transhandler.SalesOrderCustomerRevisedSync)
 
 }
