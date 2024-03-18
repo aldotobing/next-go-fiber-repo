@@ -40,6 +40,17 @@ type SalesOrderCustomerSync struct {
 	OperationType        *string                       `json:"operation_type"`
 }
 
+type FcmSo struct {
+	Title    *string `json:"title"`
+	Template *string `json:"template"`
+	FcmToken *string `json:"fcm_token"`
+}
+
+type WaSo struct {
+	Phone    *string `json:"phone"`
+	Template *string `json:"template"`
+}
+
 // SalesOrderCustomerSyncParameter ...
 type SalesOrderCustomerSyncParameter struct {
 	ID         string `json:"id_customer_order_header"`

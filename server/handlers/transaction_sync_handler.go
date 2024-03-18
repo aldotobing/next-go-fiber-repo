@@ -160,6 +160,36 @@ func (h *TransactionDataSyncHandler) SalesOrderCustomerPushData(ctx *fiber.Ctx) 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
+func (h *TransactionDataSyncHandler) SalesOrderCustomerSendFcmMessage(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.SalesOrderCustomerSyncParameter{
+		CustomerID: ctx.Params("customer_id"),
+		Search:     ctx.Query("search"),
+		By:         ctx.Query("by"),
+		Sort:       ctx.Query("sort"),
+	}
+	uc := usecase.SalesOrderCustomerSyncUC{ContractUC: h.ContractUC}
+	res, err := uc.SendSubmittedSOFCMNotification(c, parameter)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *TransactionDataSyncHandler) SalesOrderCustomerSendSalesmanWa(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.SalesOrderCustomerSyncParameter{
+		CustomerID: ctx.Params("customer_id"),
+		Search:     ctx.Query("search"),
+		By:         ctx.Query("by"),
+		Sort:       ctx.Query("sort"),
+	}
+	uc := usecase.SalesOrderCustomerSyncUC{ContractUC: h.ContractUC}
+	res, err := uc.SendSubmittedSOSalesmanWa(c, parameter)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
 func (h *TransactionDataSyncHandler) SalesOrderCustomerRevisedSync(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
