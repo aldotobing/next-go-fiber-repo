@@ -203,7 +203,7 @@ func (repository SalesOrderCustomerSyncRepository) InsertWithLine(c context.Cont
 		)values(
 		$1, $2, $3, $4, (select id from customer where customer_code = $5),
 		$6, (select id from salesman where partner_id =(select id from partner where code = $7)), $8, $9, $10,
-		$11 ,$12, $13, $14, $15,
+		(select id from price_list where code = $11), (select id from price_list_version where description = $12 and price_list_id = (select id from price_list where code = $11 ) ), $13, $14, $15,
 		$16, $17, $18, $19, $20,
 		(select id from customer where customer_code = $21),
 		$22, $23, now(),now(),$24
@@ -218,7 +218,7 @@ func (repository SalesOrderCustomerSyncRepository) InsertWithLine(c context.Cont
 	err = transaction.QueryRowContext(c, statement,
 		model.DocumentNo, model.DocumentTypeID, model.TransactionDate, model.TransactionTime, model.CustomerCode,
 		model.TaxCalcMethod, model.SalesmanCode, model.PaymentTermsID, model.CompanyID,
-		model.BranchID, model.PriceLIstID, model.PriceLIstVersionID, str.EmptyString(*model.Status), str.EmptyString(*model.GrossAmount),
+		model.BranchID, str.NullOrEmtyString(model.PriceListCode), str.NullOrEmtyString(model.PriceListVersionCode), str.EmptyString(*model.Status), str.EmptyString(*model.GrossAmount),
 		model.DiscAmount, model.TaxableAmount, model.TaxAmount, model.RoundingAmount, model.NetAmount,
 		model.GlobalDiscAmount, model.CustomerCode, model.ExpectedDeliveryDate, model.VoidReasonNotes, model.SalesRequestCode,
 	).Scan(&res)
@@ -296,7 +296,7 @@ func (repository SalesOrderCustomerSyncRepository) ReInsertWithLine(c context.Co
 		)values(
 		$1, $2, $3, $4, (select id from customer where customer_code = $5),
 		$6, (select id from salesman where partner_id =(select id from partner where code = $7)), $8, $9, $10,
-		$11 ,$12, $13, $14, $15,
+		(select id from price_list where code = $11), (select id from price_list_version where description = $12 and price_list_id = (select id from price_list where code = $11 ) ), $13, $14, $15,
 		$16, $17, $18, $19, $20,
 		(select id from customer where customer_code = $21),
 		$22, $23, now(),now(),$24
@@ -325,7 +325,7 @@ func (repository SalesOrderCustomerSyncRepository) ReInsertWithLine(c context.Co
 	err = transaction.QueryRowContext(c, statement,
 		model.DocumentNo, model.DocumentTypeID, model.TransactionDate, model.TransactionTime, model.CustomerCode,
 		model.TaxCalcMethod, model.SalesmanCode, model.PaymentTermsID, model.CompanyID,
-		model.BranchID, model.PriceLIstID, model.PriceLIstVersionID, str.EmptyString(*model.Status), str.EmptyString(*model.GrossAmount),
+		model.BranchID, str.NullOrEmtyString(model.PriceListCode), str.NullOrEmtyString(model.PriceListVersionCode), str.EmptyString(*model.Status), str.EmptyString(*model.GrossAmount),
 		model.DiscAmount, model.TaxableAmount, model.TaxAmount, model.RoundingAmount, model.NetAmount,
 		model.GlobalDiscAmount, model.CustomerCode, model.ExpectedDeliveryDate, model.VoidReasonNotes, model.SalesRequestCode,
 	).Scan(&res)
@@ -392,6 +392,18 @@ func (repository SalesOrderCustomerSyncRepository) ReInsertWithLine(c context.Co
 
 func (repository SalesOrderCustomerSyncRepository) MergeData(c context.Context, model *models.SalesOrderCustomerSync) (res string, modifyOnly int, err error) {
 
+	fields := map[string]*string{
+		"ID":            model.ID,
+		"OperationType": model.OperationType,
+	}
+
+	for fieldName, fieldValue := range fields {
+		if fieldValue != nil {
+			fmt.Printf("%s: %s\n", fieldName, *fieldValue)
+		} else {
+			fmt.Printf("%s: nil\n", fieldName)
+		}
+	}
 	availableso, _ := repository.FindByDocumentNo(c, models.SalesOrderCustomerSyncParameter{DocumentNo: *model.DocumentNo})
 
 	if availableso.ID != nil {
