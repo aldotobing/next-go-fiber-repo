@@ -3,7 +3,7 @@ package requests
 // PointRequest ...
 type PointRequest struct {
 	PointType         string              `json:"point_type" validate:"required"`
-	InvoiceDocumentNo string              `json:"InvoiceDocumentNo"`
+	InvoiceDocumentNo string              `json:"invoice_document_no"`
 	UserID            string              `json:"user_id"`
 	Point             string              `json:"point"`
 	CustomerID        string              `json:"customer_id"`
