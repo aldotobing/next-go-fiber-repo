@@ -258,16 +258,18 @@ func (uc SalesOrderCustomerSyncUC) PushDataSync(c context.Context, parameter mod
 	strsoList, err := uc.RedisClient.GetAllKeyFromRedis(cacheKey)
 
 	if err == nil {
-		var minLen = 125
+		var minLen = 85
 		var keyLen = len(strsoList)
 
 		if keyLen < minLen {
 			minLen = keyLen
 		}
 		if minLen > 0 {
+
 			for i := 0; i < minLen; i++ {
 
 				key := strsoList[i]
+
 				soObject := new(models.SalesOrderCustomerSync)
 				err = uc.RedisClient.GetFromRedis(key, &soObject)
 				if err != nil {
@@ -279,9 +281,10 @@ func (uc SalesOrderCustomerSyncUC) PushDataSync(c context.Context, parameter mod
 
 					if errinsert != nil {
 						errstr := errinsert.Error()
-						fmt.Println("error insert header on new insert", errinsert.Error())
+
 						if strings.Contains(errstr, "cust_bill_to_id") || strings.Contains(errstr, "uom_id") || strings.Contains(errstr, "item_id") ||
-							strings.Contains(errstr, "more than one row returned by a subquery used as an expression") {
+							strings.Contains(errstr, "more than one row returned by a subquery used as an expression") ||
+							strings.Contains(errstr, "item_stock_location_id_fkey") {
 							cacheKeyerr := "err_so_data:" + *soObject.DocumentNo
 							errjsonData, err := json.Marshal(soObject)
 							if err != nil {
@@ -299,6 +302,7 @@ func (uc SalesOrderCustomerSyncUC) PushDataSync(c context.Context, parameter mod
 					}
 
 					if errinsert == nil {
+
 						if soObject.Status != nil && modifyOnly == 0 {
 							userrepo := repository.NewCustomerRepository(uc.DB)
 							salesorderHeaderrepo := repository.NewSalesOrderHeaderRepository(uc.DB)
@@ -412,11 +416,12 @@ func (uc SalesOrderCustomerSyncUC) PushDataSync(c context.Context, parameter mod
 								}
 							}
 						}
-						res = append(res, *soObject)
-						_ = uc.RedisClient.Delete(key)
-					}
 
+					}
+					res = append(res, *soObject)
+					_ = uc.RedisClient.Delete(key)
 				}
+
 			}
 		}
 	}
@@ -432,7 +437,7 @@ func (uc SalesOrderCustomerSyncUC) SendSubmittedSOFCMNotification(c context.Cont
 	strsoList, err := uc.RedisClient.GetAllKeyFromRedis(cacheKey)
 
 	if err == nil {
-		var minLen = 10050
+		var minLen = 50
 		var keyLen = len(strsoList)
 
 		if keyLen < minLen {
@@ -465,7 +470,7 @@ func (uc SalesOrderCustomerSyncUC) SendSubmittedSOFCMNotification(c context.Cont
 					_, errfcm := FcmUc.SendFCMMessage(c, *soObject.Title, *soObject.Template, *soObject.FcmToken)
 					if errfcm == nil {
 						res = append(res, *soObject)
-						// _ = uc.RedisClient.Delete(key)
+						_ = uc.RedisClient.Delete(key)
 					}
 
 				}
@@ -484,7 +489,7 @@ func (uc SalesOrderCustomerSyncUC) SendSubmittedSOSalesmanWa(c context.Context, 
 	strsoList, err := uc.RedisClient.GetAllKeyFromRedis(cacheKey)
 
 	if err == nil {
-		var minLen = 10050
+		var minLen = 25
 		var keyLen = len(strsoList)
 
 		if keyLen < minLen {
@@ -503,8 +508,8 @@ func (uc SalesOrderCustomerSyncUC) SendSubmittedSOSalesmanWa(c context.Context, 
 					fmt.Println("from redis : ", key)
 					senDwaMessage := uc.ContractUC.WhatsApp.SendTransactionWA(*soObject.Phone, *soObject.Template)
 					if senDwaMessage == nil {
-						// res = append(res, *soObject)
-						// _ = uc.RedisClient.Delete(key)
+						res = append(res, *soObject)
+						_ = uc.RedisClient.Delete(key)
 					}
 
 				}

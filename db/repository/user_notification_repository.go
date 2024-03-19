@@ -136,8 +136,6 @@ func (repository UserNotificationRepository) Add(c context.Context, model *model
 		created_date, created_by,notification_title,notification_status)
 	VALUES ($1, $2, $3, $4, $5, $6,$7,'unread') RETURNING id`
 
-	println(statement)
-
 	err = repository.DB.QueryRowContext(c, statement, model.UserID, model.RowID, model.Type,
 		model.Text, model.CreatedAt, model.CreatedBy, model.Title).Scan(&res)
 
