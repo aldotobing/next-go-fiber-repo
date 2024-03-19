@@ -224,7 +224,7 @@ func (repository SalesOrderCustomerSyncRepository) InsertWithLine(c context.Cont
 	).Scan(&res)
 
 	if err != nil {
-		fmt.Println("error insert header")
+
 		return res, err
 	}
 
@@ -415,7 +415,6 @@ func (repository SalesOrderCustomerSyncRepository) MergeData(c context.Context, 
 		res, err = repository.InsertWithLine(c, model)
 		modifyOnly = 0
 	}
-
 	return res, modifyOnly, err
 }
 
