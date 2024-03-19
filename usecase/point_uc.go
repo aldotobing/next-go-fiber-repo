@@ -312,6 +312,7 @@ func (uc PointUC) Update(c context.Context, id string, in requests.PointRequest)
 		InvoiceDocumentNo: in.InvoiceDocumentNo,
 		Point:             in.Point,
 		CustomerID:        in.CustomerID,
+		Note:              in.Note,
 	}
 
 	repo := repository.NewPointRepository(uc.DB)

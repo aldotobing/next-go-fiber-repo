@@ -322,8 +322,9 @@ func (repository PointRepository) Update(c context.Context, in viewmodel.PointVM
 		INVOICE_DOCUMENT_NO = $2, 
 		POINT = $3, 
 		CUSTOMER_ID = $4,
+		NOTE = $5,
 		UPDATED_AT = now()
-	WHERE id = $5
+	WHERE id = $6
 	RETURNING id`
 
 	err = repository.DB.QueryRowContext(c, statement,
@@ -331,6 +332,7 @@ func (repository PointRepository) Update(c context.Context, in viewmodel.PointVM
 		in.InvoiceDocumentNo,
 		in.Point,
 		in.CustomerID,
+		in.Note,
 		in.ID).Scan(&res)
 
 	return
