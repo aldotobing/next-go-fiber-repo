@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	"nextbasis-service-v-0.1/db/repository"
@@ -251,13 +252,13 @@ func (uc SalesOrderCustomerSyncUC) PullDataSync(c context.Context, parameter mod
 func (uc SalesOrderCustomerSyncUC) PushDataSync(c context.Context, parameter models.SalesOrderCustomerSyncParameter) (res []models.SalesOrderCustomerSync, err error) {
 	repo := repository.NewSalesOrderCustomerSyncRepository(uc.DB)
 
-	cacheKey := "*submitted_so_data_:SSO9203240300001*"
+	cacheKey := "*submitted_so_data*"
 
 	// Try to get data from Redis cache first
 	strsoList, err := uc.RedisClient.GetAllKeyFromRedis(cacheKey)
 
 	if err == nil {
-		var minLen = 10050
+		var minLen = 125
 		var keyLen = len(strsoList)
 
 		if keyLen < minLen {
@@ -272,12 +273,29 @@ func (uc SalesOrderCustomerSyncUC) PushDataSync(c context.Context, parameter mod
 				if err != nil {
 					fmt.Println(err)
 				}
-				if err == nil && *soObject.DocumentNo == "SSO9203240300001" {
+				if err == nil {
 					fmt.Println("from redis : ", key)
 					_, modifyOnly, errinsert := repo.MergeData(c, soObject)
 
 					if errinsert != nil {
-						fmt.Print(errinsert)
+						errstr := errinsert.Error()
+						fmt.Println("error insert header on new insert", errinsert.Error())
+						if strings.Contains(errstr, "cust_bill_to_id") || strings.Contains(errstr, "uom_id") || strings.Contains(errstr, "item_id") ||
+							strings.Contains(errstr, "more than one row returned by a subquery used as an expression") {
+							cacheKeyerr := "err_so_data:" + *soObject.DocumentNo
+							errjsonData, err := json.Marshal(soObject)
+							if err != nil {
+								logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
+								return res, err
+							}
+							err = uc.RedisClient.Client.Set(cacheKeyerr, errjsonData, time.Hour*168).Err()
+							if err != nil {
+								logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
+								return res, err
+							}
+						} else {
+							return nil, fmt.Errorf("failed to insert data for order %+v: %w", soObject, errinsert)
+						}
 					}
 
 					if errinsert == nil {
