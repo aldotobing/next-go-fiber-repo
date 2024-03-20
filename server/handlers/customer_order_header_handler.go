@@ -174,6 +174,7 @@ func (h *CustomerOrderHeaderHandler) FindAllForWeb(ctx *fiber.Ctx) error {
 	parameter := models.CustomerOrderHeaderParameter{
 		UserID:    ctx.Query("admin_user_id"),
 		Search:    ctx.Query("search"),
+		Status:    ctx.Query("status"),
 		Page:      str.StringToInt(ctx.Query("page")),
 		Limit:     str.StringToInt(ctx.Query("limit")),
 		By:        ctx.Query("by"),

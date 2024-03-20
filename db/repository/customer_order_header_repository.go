@@ -244,6 +244,13 @@ func (repository CustomerOrderHeaderRepository) FindAll(ctx context.Context, par
 		index++
 	}
 
+	if parameter.Status != "" {
+		conditionString += ` AND lower(def.status) like lower($` + strconv.Itoa(index) + `)`
+		args = append(args, parameter.Status)
+		argsCount = append(argsCount, parameter.Status)
+		index++
+	}
+
 	query := models.CustomerOrderHeaderSelectStatement + ` ` + models.CustomerOrderHeaderWhereStatement + ` ` + conditionString + `
 		AND (LOWER(cus."customer_name") LIKE $` + strconv.Itoa(index) + ` OR LOWER(def."document_no") LIKE $` + strconv.Itoa(index) + `) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $` + strconv.Itoa(index+1) + ` LIMIT $` + strconv.Itoa(index+2)
 
