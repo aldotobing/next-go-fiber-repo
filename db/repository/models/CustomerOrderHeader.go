@@ -45,6 +45,7 @@ type CustomerOrderHeader struct {
 type CustomerOrderHeaderParameter struct {
 	ID         string `json:"id_customer_order_header"`
 	DocumentNo string `json:"document_no"`
+	Status     string `json:"status"`
 	UserID     string `json:"admin_user_id"`
 	CustomerID string `json:"id_customer"`
 	Search     string `json:"search"`
