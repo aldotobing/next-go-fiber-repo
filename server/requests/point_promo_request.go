@@ -13,6 +13,7 @@ type PointPromoRequest struct {
 	QuantityConversion string                    `json:"quantity_conversion"`
 	PromoType          string                    `json:"promo_type"`
 	Strata             []PointPromoStrataRequest `json:"strata"`
+	Items              []string                  `json:"items"`
 }
 
 type PointPromoStrataRequest struct {
