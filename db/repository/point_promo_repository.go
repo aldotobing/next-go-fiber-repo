@@ -45,6 +45,7 @@ func (repository PointPromoRepository) scanRows(rows *sql.Rows) (res models.Poin
 		&res.QuantityConversion,
 		&res.PromoType,
 		&res.Strata,
+		&res.Items,
 	)
 
 	return
@@ -64,6 +65,7 @@ func (repository PointPromoRepository) scanRow(row *sql.Row) (res models.PointPr
 		&res.QuantityConversion,
 		&res.PromoType,
 		&res.Strata,
+		&res.Items,
 	)
 
 	return
@@ -75,7 +77,7 @@ func (repository PointPromoRepository) SelectAll(c context.Context, parameter mo
 
 	statement := models.PointPromoSelectStatement + models.PointPromoWhereStatement +
 		conditionString +
-		` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+		` GROUP BY DEF.ID ORDER BY ` + parameter.By + ` ` + parameter.Sort
 
 	rows, err := repository.DB.QueryContext(c, statement)
 
@@ -105,7 +107,9 @@ func (repository PointPromoRepository) FindAll(ctx context.Context, parameter mo
 
 	statement := models.PointPromoSelectStatement + models.PointPromoWhereStatement +
 		conditionString +
-		` ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $1 LIMIT $2`
+		` GROUP BY DEF.ID ORDER BY ` + parameter.By + ` ` + parameter.Sort +
+		` OFFSET $1 LIMIT $2`
+
 	rows, err := repository.DB.QueryContext(ctx, statement, parameter.Offset, parameter.Limit)
 	if err != nil {
 		return data, count, err
@@ -133,7 +137,7 @@ func (repository PointPromoRepository) FindAll(ctx context.Context, parameter mo
 
 // FindByID ...
 func (repository PointPromoRepository) FindByID(c context.Context, parameter models.PointPromoParameter) (data models.PointPromo, err error) {
-	statement := models.PointPromoSelectStatement + ` WHERE DEF.ID = ` + parameter.ID
+	statement := models.PointPromoSelectStatement + ` WHERE DEF.ID = ` + parameter.ID + `GROUP BY DEF.ID`
 	row := repository.DB.QueryRowContext(c, statement)
 
 	data, err = repository.scanRow(row)

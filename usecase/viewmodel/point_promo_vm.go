@@ -13,6 +13,7 @@ type PointPromoVM struct {
 	QuantityConversion string               `json:"quantity_conversion"`
 	PromoType          string               `json:"promo_type"`
 	Strata             []PointPromoStrataVM `json:"strata"`
+	Items              []PointPromoItemVM   `json:"items"`
 }
 
 // PointPromoStrataVM ...

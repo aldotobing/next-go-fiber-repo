@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"time"
 
 	"nextbasis-service-v-0.1/db/repository"
@@ -38,6 +39,23 @@ func (uc PointPromoUC) BuildBody(data *models.PointPromo, res *viewmodel.PointPr
 	if res.Strata == nil {
 		res.Strata = make([]viewmodel.PointPromoStrataVM, 0)
 	}
+
+	var items []viewmodel.PointPromoItemVM
+	additional := strings.Split(data.Items, "|")
+	if len(additional) > 0 && additional[0] != "" {
+		// Find Lowest Price and lowest conversion
+		for _, addDatum := range additional {
+			perAddDatum := strings.Split(addDatum, "#sep#")
+			items = append(items, viewmodel.PointPromoItemVM{
+				ID:       perAddDatum[0],
+				ItemName: perAddDatum[1],
+			})
+		}
+	}
+	if items == nil {
+		items = make([]viewmodel.PointPromoItemVM, 0)
+	}
+	res.Items = items
 }
 
 // FindAll ...
@@ -112,6 +130,17 @@ func (uc PointPromoUC) Add(c context.Context, in requests.PointPromoRequest) (ou
 	for _, datum := range in.Strata {
 		strata = append(strata, viewmodel.PointPromoStrataVM(datum))
 	}
+
+	var items []viewmodel.PointPromoItemVM
+	for _, datum := range in.Items {
+		items = append(items, viewmodel.PointPromoItemVM{
+			ID:        datum,
+			ItemName:  "",
+			CreatedAt: "",
+			UpdatedAt: "",
+			DeletedAt: "",
+		})
+	}
 	out = viewmodel.PointPromoVM{
 		StartDate:          in.StartDate,
 		EndDate:            in.EndDate,
@@ -120,12 +149,19 @@ func (uc PointPromoUC) Add(c context.Context, in requests.PointPromoRequest) (ou
 		QuantityConversion: in.QuantityConversion,
 		PromoType:          in.PromoType,
 		Strata:             strata,
+		Items:              items,
 	}
 
 	repo := repository.NewPointPromoRepository(uc.DB)
 	out.ID, err = repo.Add(c, out)
 	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query add", c.Value("requestid"))
+		return
+	}
+
+	err = PointPromoItemUC{uc.ContractUC}.AddBulk(c, out.ID, in.Items)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "add point_promo_item", c.Value("requestid"))
 		return
 	}
 
@@ -138,6 +174,16 @@ func (uc PointPromoUC) Update(c context.Context, id string, in requests.PointPro
 	for _, datum := range in.Strata {
 		strata = append(strata, viewmodel.PointPromoStrataVM(datum))
 	}
+	var items []viewmodel.PointPromoItemVM
+	for _, datum := range in.Items {
+		items = append(items, viewmodel.PointPromoItemVM{
+			ID:        datum,
+			ItemName:  "",
+			CreatedAt: "",
+			UpdatedAt: "",
+			DeletedAt: "",
+		})
+	}
 	out = viewmodel.PointPromoVM{
 		ID:                 id,
 		StartDate:          in.StartDate,
@@ -147,12 +193,25 @@ func (uc PointPromoUC) Update(c context.Context, id string, in requests.PointPro
 		QuantityConversion: in.QuantityConversion,
 		PromoType:          in.PromoType,
 		Strata:             strata,
+		Items:              items,
 	}
 
 	repo := repository.NewPointPromoRepository(uc.DB)
 	out.ID, err = repo.Update(c, out)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	err = PointPromoItemUC{uc.ContractUC}.Delete(c, out.ID)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "add point_promo_item", c.Value("requestid"))
+		return
+	}
+
+	err = PointPromoItemUC{uc.ContractUC}.AddBulk(c, out.ID, in.Items)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "add point_promo_item", c.Value("requestid"))
 		return
 	}
 
@@ -165,6 +224,12 @@ func (uc PointPromoUC) Delete(c context.Context, in string) (err error) {
 	_, err = repo.Delete(c, in)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	err = PointPromoItemUC{uc.ContractUC}.Delete(c, in)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "add point_promo_item", c.Value("requestid"))
 		return
 	}
 
