@@ -19,6 +19,7 @@ type CouponRedeem struct {
 	UpdatedAt             sql.NullString `json:"updated_at"`
 	DeletedAt             sql.NullString `json:"deleted_at"`
 	ExpiredAt             sql.NullString `json:"expired_at"`
+	CouponCode            sql.NullString
 }
 
 // CouponRedeemReport ...
@@ -43,6 +44,7 @@ type CouponRedeemReport struct {
 	RegionName            string         `json:"region_name"`
 	RegionGroupName       string         `json:"region_group_name"`
 	CustomerLevelName     sql.NullString `json:"customer_level_name"`
+	CouponCode            sql.NullString
 }
 
 // CouponRedeemParameter ...
@@ -85,7 +87,8 @@ var (
 			CP.DESCRIPTION,
 			CP.POINT_CONVERSION,
 			CP.PHOTO_URL,
-			C.CUSTOMER_NAME
+			C.CUSTOMER_NAME,
+			DEF.COUPON_CODE
 		FROM COUPON_REDEEM DEF
 		LEFT JOIN COUPONS CP ON CP.ID = DEF.COUPON_ID
 		LEFT JOIN CUSTOMER C ON C.ID = DEF.CUSTOMER_ID

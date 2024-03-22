@@ -46,6 +46,7 @@ func (repository CouponRedeemRepository) scanRows(rows *sql.Rows) (res models.Co
 		&res.CouponPointConversion,
 		&res.CouponPhotoURL,
 		&res.CustomerName,
+		&res.CouponCode,
 	)
 
 	return
@@ -69,6 +70,7 @@ func (repository CouponRedeemRepository) scanRow(row *sql.Row) (res models.Coupo
 		&res.CouponPointConversion,
 		&res.CouponPhotoURL,
 		&res.CustomerName,
+		&res.CouponCode,
 	)
 
 	return
@@ -159,14 +161,16 @@ func (repository CouponRedeemRepository) Add(c context.Context, in viewmodel.Cou
 			CUSTOMER_ID,
 			CREATED_AT,
 			UPDATED_AT,
-			EXPIRED_AT
+			EXPIRED_AT,
+            COUPON_CODE
 		)
-	VALUES ($1, $2, NOW(), NOW(), $3) RETURNING id`
+	VALUES ($1, $2, NOW(), NOW(), $3, $4) RETURNING id`
 
 	err = repository.DB.QueryRowContext(c, statement,
 		in.CouponID,
 		in.CustomerID,
 		in.ExpiredAt,
+		in.CouponCode,
 	).Scan(&res)
 
 	return
@@ -241,7 +245,8 @@ func (repository CouponRedeemRepository) SelectReport(c context.Context, paramet
 			B.BRANCH_CODE,
 			R._NAME,
 			R.GROUP_NAME,
-			CL._NAME
+			CL._NAME,
+			DEF.COUPON_CODE
 		FROM COUPON_REDEEM DEF
 		LEFT JOIN COUPONS CP ON CP.ID = DEF.COUPON_ID
 		LEFT JOIN CUSTOMER C ON C.ID = DEF.CUSTOMER_ID
@@ -281,6 +286,7 @@ func (repository CouponRedeemRepository) SelectReport(c context.Context, paramet
 			&temp.RegionName,
 			&temp.RegionGroupName,
 			&temp.CustomerLevelName,
+			&temp.CouponCode,
 		)
 		if err != nil {
 			return data, err

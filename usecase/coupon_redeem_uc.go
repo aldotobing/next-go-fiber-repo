@@ -39,6 +39,7 @@ func (uc CouponRedeemUC) BuildBody(data *models.CouponRedeem, res *viewmodel.Cou
 	res.UpdatedAt = data.UpdatedAt.String
 	res.DeletedAt = data.DeletedAt.String
 	res.ExpiredAt = data.ExpiredAt.String
+	res.CouponCode = data.CouponCode.String
 }
 
 // FindAll ...
@@ -134,10 +135,13 @@ func (uc CouponRedeemUC) Add(c context.Context, in requests.CouponRedeemRequest)
 		return
 	}
 
+	customerData, _ := WebCustomerUC{ContractUC: uc.ContractUC}.FindByID(c, models.WebCustomerParameter{ID: in.CustomerID})
+	now := time.Now()
 	out = viewmodel.CouponRedeemVM{
 		CouponID:   in.CouponID,
 		CustomerID: in.CustomerID,
 		ExpiredAt:  helper.GetExpiredWithInterval(time.Now(), couponData.Interval),
+		CouponCode: customerData.CustomerBranchCode + strconv.Itoa(now.Year()) + helper.StringWithCharset(6),
 	}
 
 	repo := repository.NewCouponRedeemRepository(uc.DB)
@@ -220,6 +224,7 @@ func (uc CouponRedeemUC) SelectReport(c context.Context, parameter models.Coupon
 			RegionName:            datum.RegionName,
 			RegionGroupName:       datum.RegionGroupName,
 			CustomerLevelName:     datum.CustomerLevelName.String,
+			CouponCode:            datum.CouponCode.String,
 		})
 	}
 
