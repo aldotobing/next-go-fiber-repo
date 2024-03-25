@@ -275,7 +275,7 @@ func (uc SalesOrderCustomerSyncUC) PushDataSync(c context.Context, parameter mod
 				if err != nil {
 					fmt.Println(err)
 				}
-				if err == nil {
+				if err == nil && *soObject.DocumentNo == "SSO3205240300875" {
 					fmt.Println("from redis : ", key)
 					_, modifyOnly, errinsert := repo.MergeData(c, soObject)
 
@@ -310,7 +310,7 @@ func (uc SalesOrderCustomerSyncUC) PushDataSync(c context.Context, parameter mod
 							if errheader == nil {
 								useraccount, erruser := userrepo.FindByID(c, models.CustomerParameter{ID: *salesorderHeader.CustomerID})
 
-								if erruser == nil && useraccount.CustomerFCMToken != nil && *useraccount.CustomerFCMToken != "" {
+								if erruser == nil && useraccount.CustomerFCMToken != nil && *useraccount.CustomerFCMToken != "" && useraccount.CustomerSalesmanID != nil {
 
 									if errheader == nil {
 										orderlinerepo := repository.NewSalesOrderLineRepository(uc.DB)
