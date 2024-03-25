@@ -275,7 +275,7 @@ func (uc SalesOrderCustomerSyncUC) PushDataSync(c context.Context, parameter mod
 				if err != nil {
 					fmt.Println(err)
 				}
-				if err == nil && *soObject.DocumentNo == "SSO3205240300875" {
+				if err == nil {
 					fmt.Println("from redis : ", key)
 					_, modifyOnly, errinsert := repo.MergeData(c, soObject)
 
