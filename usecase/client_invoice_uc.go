@@ -661,7 +661,7 @@ func (uc CilentInvoiceUC) SFASyncData(c context.Context) (res []models.CilentInv
 	strinvList, err := uc.RedisClient.GetAllKeyFromRedis(cacheKey)
 
 	if err == nil {
-		var minLen = 125
+		var minLen = 250
 		var keyLen = len(strinvList)
 
 		if keyLen < minLen {
