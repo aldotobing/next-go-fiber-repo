@@ -204,3 +204,29 @@ func (h *TransactionDataSyncHandler) SalesOrderCustomerRevisedSync(ctx *fiber.Ct
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
+
+//undone sfa sync
+
+func (h *TransactionDataSyncHandler) UndoneInvoiceSFAPull(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.CilentInvoiceParameter{
+		CustomerID: ctx.Params("customer_id"),
+		Search:     ctx.Query("search"),
+		By:         ctx.Query("by"),
+		Sort:       ctx.Query("sort"),
+	}
+	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
+	res, err := uc.UndoneSFAPullData(c, parameter)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *TransactionDataSyncHandler) UndoneInvoiceSyncSFA(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
+	res, err := uc.UndoneSFASyncData(c)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
