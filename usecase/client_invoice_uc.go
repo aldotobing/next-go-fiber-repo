@@ -834,7 +834,7 @@ func (uc CilentInvoiceUC) UndoneSFAPullData(c context.Context, parameter models.
 		return nil, fmt.Errorf("failed to load location: %w", err)
 	}
 
-	now := time.Now().In(loc).Add(time.Minute * time.Duration(-30))
+	now := time.Now().In(loc).Add(time.Minute * time.Duration(-15))
 	strnow := now.Format(time.RFC3339)
 	parameter.DateParam = strnow
 
@@ -887,7 +887,7 @@ func (uc CilentInvoiceUC) UndoneSFAPullData(c context.Context, parameter models.
 			return res, err
 		}
 		// &invoiceObject
-		resBuilder = append(resBuilder, invoiceObject)
+		// resBuilder = append(resBuilder, invoiceObject)
 	}
 
 	return resBuilder, nil
