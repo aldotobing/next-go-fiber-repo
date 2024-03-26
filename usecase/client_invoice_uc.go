@@ -687,6 +687,7 @@ func (uc CilentInvoiceUC) SFASyncData(c context.Context) (res []models.CilentInv
 						if strings.Contains(errstr, "cust_bill_to_id") || strings.Contains(errstr, "uom_id") || strings.Contains(errstr, "item_id") ||
 							strings.Contains(errstr, "more than one row returned by a subquery used as an expression") {
 							cacheKeyerr := "err_cus_item_uom_inv:" + *invoiceObject.DocumentNo
+							invoiceObject.ErrorMessage = &errstr
 							errjsonData, err := json.Marshal(invoiceObject)
 							if err != nil {
 								logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
@@ -745,6 +746,7 @@ func (uc CilentInvoiceUC) GetRedisDataSyncPointOnly(c context.Context) (res []mo
 						if strings.Contains(errstr, "cust_bill_to_id") || strings.Contains(errstr, "uom_id") || strings.Contains(errstr, "item_id") ||
 							strings.Contains(errstr, "more than one row returned by a subquery used as an expression") {
 							cacheKeyerr := "err_point_bonus_inv:" + *invoiceObject.DocumentNo
+							invoiceObject.ErrorMessage = &errstr
 							errjsonData, err := json.Marshal(invoiceObject)
 							if err != nil {
 								logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
@@ -926,7 +928,8 @@ func (uc CilentInvoiceUC) UndoneSFASyncData(c context.Context) (res []models.Cil
 						errstr := err.Error()
 						if strings.Contains(errstr, "cust_bill_to_id") || strings.Contains(errstr, "uom_id") || strings.Contains(errstr, "item_id") ||
 							strings.Contains(errstr, "more than one row returned by a subquery used as an expression") {
-							cacheKeyerr := "err_undone_inv_:" + *invoiceObject.DocumentNo
+							cacheKeyerr := "err_msg_undone_inv_:" + *invoiceObject.DocumentNo
+							invoiceObject.ErrorMessage = &errstr
 							errjsonData, err := json.Marshal(invoiceObject)
 							if err != nil {
 								logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
