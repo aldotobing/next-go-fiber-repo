@@ -44,6 +44,7 @@ type CilentInvoice struct {
 	PriceListCode        *string              `json:"price_list_code"`
 	PriceListVersionCode *string              `json:"price_list_version_desc"`
 	OperationType        *string              `json:"operation_type"`
+	ErrorMessage         *string              `json:"error_message"`
 }
 
 // CilentInvoiceParameter ...
