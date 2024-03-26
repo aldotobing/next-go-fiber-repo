@@ -3,9 +3,11 @@ package usecase
 import (
 	"context"
 	"encoding/json"
+	"mime/multipart"
 	"strings"
 	"time"
 
+	"nextbasis-service-v-0.1/config"
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/pkg/functioncaller"
@@ -47,8 +49,11 @@ func (uc PointPromoUC) BuildBody(data *models.PointPromo, res *viewmodel.PointPr
 		for _, addDatum := range additional {
 			perAddDatum := strings.Split(addDatum, "#sep#")
 			items = append(items, viewmodel.PointPromoItemVM{
-				ID:       perAddDatum[0],
-				ItemName: perAddDatum[1],
+				ID:         perAddDatum[0],
+				ItemName:   perAddDatum[1],
+				UomID:      perAddDatum[2],
+				UomName:    perAddDatum[3],
+				Convertion: perAddDatum[4],
 			})
 		}
 	}
@@ -56,6 +61,8 @@ func (uc PointPromoUC) BuildBody(data *models.PointPromo, res *viewmodel.PointPr
 		items = make([]viewmodel.PointPromoItemVM, 0)
 	}
 	res.Items = items
+	res.Image = data.Image.String
+	res.Description = data.Description.String
 }
 
 // FindAll ...
@@ -134,11 +141,14 @@ func (uc PointPromoUC) Add(c context.Context, in requests.PointPromoRequest) (ou
 	var items []viewmodel.PointPromoItemVM
 	for _, datum := range in.Items {
 		items = append(items, viewmodel.PointPromoItemVM{
-			ID:        datum,
-			ItemName:  "",
-			CreatedAt: "",
-			UpdatedAt: "",
-			DeletedAt: "",
+			ID:         datum.ItemID,
+			ItemName:   "",
+			UomID:      datum.UomID,
+			UomName:    datum.UomName,
+			Convertion: datum.Convertion,
+			CreatedAt:  "",
+			UpdatedAt:  "",
+			DeletedAt:  "",
 		})
 	}
 	out = viewmodel.PointPromoVM{
@@ -150,6 +160,8 @@ func (uc PointPromoUC) Add(c context.Context, in requests.PointPromoRequest) (ou
 		PromoType:          in.PromoType,
 		Strata:             strata,
 		Items:              items,
+		Image:              in.Image,
+		Description:        in.Description,
 	}
 
 	repo := repository.NewPointPromoRepository(uc.DB)
@@ -159,11 +171,25 @@ func (uc PointPromoUC) Add(c context.Context, in requests.PointPromoRequest) (ou
 		return
 	}
 
-	err = PointPromoItemUC{uc.ContractUC}.AddBulk(c, out.ID, in.Items)
+	err = PointPromoItemUC{uc.ContractUC}.AddBulk(c, out.ID, out.Items)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "add point_promo_item", c.Value("requestid"))
 		return
 	}
+
+	return
+}
+
+// AddPhoto ...
+func (uc PointPromoUC) AddPhoto(c context.Context, image *multipart.FileHeader) (out string, err error) {
+	awsUc := AwsUC{ContractUC: uc.ContractUC}
+	awsUc.AWSS3.Directory = "image/point_promo"
+	imgBannerFile, err := awsUc.Upload("image/point_promo", image)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "upload_file", c.Value("requestid"))
+		return
+	}
+	out = config.ImagePath + imgBannerFile.FilePath
 
 	return
 }
@@ -177,11 +203,14 @@ func (uc PointPromoUC) Update(c context.Context, id string, in requests.PointPro
 	var items []viewmodel.PointPromoItemVM
 	for _, datum := range in.Items {
 		items = append(items, viewmodel.PointPromoItemVM{
-			ID:        datum,
-			ItemName:  "",
-			CreatedAt: "",
-			UpdatedAt: "",
-			DeletedAt: "",
+			ID:         datum.ItemID,
+			ItemName:   "",
+			UomID:      datum.UomID,
+			UomName:    datum.UomName,
+			Convertion: datum.Convertion,
+			CreatedAt:  "",
+			UpdatedAt:  "",
+			DeletedAt:  "",
 		})
 	}
 	out = viewmodel.PointPromoVM{
@@ -194,6 +223,8 @@ func (uc PointPromoUC) Update(c context.Context, id string, in requests.PointPro
 		PromoType:          in.PromoType,
 		Strata:             strata,
 		Items:              items,
+		Image:              in.Image,
+		Description:        in.Description,
 	}
 
 	repo := repository.NewPointPromoRepository(uc.DB)
@@ -209,7 +240,7 @@ func (uc PointPromoUC) Update(c context.Context, id string, in requests.PointPro
 		return
 	}
 
-	err = PointPromoItemUC{uc.ContractUC}.AddBulk(c, out.ID, in.Items)
+	err = PointPromoItemUC{uc.ContractUC}.AddBulk(c, out.ID, out.Items)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "add point_promo_item", c.Value("requestid"))
 		return
