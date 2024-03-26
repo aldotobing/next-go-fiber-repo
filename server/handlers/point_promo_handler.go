@@ -96,6 +96,21 @@ func (h *PointPromoHandler) Add(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
+// Photo ...
+func (h *PointPromoHandler) Photo(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	image, _ := ctx.FormFile("image")
+
+	uc := usecase.PointPromoUC{ContractUC: h.ContractUC}
+	res, err := uc.AddPhoto(c, image)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
 // Update ...
 func (h *PointPromoHandler) Update(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)

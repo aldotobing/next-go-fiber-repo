@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/pkg/functioncaller"
@@ -19,7 +20,7 @@ func (uc PointPromoItemUC) BuildBody(data *models.PointPromo, res *viewmodel.Poi
 }
 
 // AddBulk ...
-func (uc PointPromoItemUC) AddBulk(c context.Context, pointPromoID string, items []string) (err error) {
+func (uc PointPromoItemUC) AddBulk(c context.Context, pointPromoID string, items []viewmodel.PointPromoItemVM) (err error) {
 	repo := repository.NewPointPromoItemRepository(uc.DB)
 	err = repo.AddBulk(c, pointPromoID, items)
 	if err != nil {

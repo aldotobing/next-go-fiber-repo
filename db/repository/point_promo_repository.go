@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"strconv"
 
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -46,6 +45,8 @@ func (repository PointPromoRepository) scanRows(rows *sql.Rows) (res models.Poin
 		&res.PromoType,
 		&res.Strata,
 		&res.Items,
+		&res.Image,
+		&res.Description,
 	)
 
 	return
@@ -66,6 +67,8 @@ func (repository PointPromoRepository) scanRow(row *sql.Row) (res models.PointPr
 		&res.PromoType,
 		&res.Strata,
 		&res.Items,
+		&res.Image,
+		&res.Description,
 	)
 
 	return
@@ -80,7 +83,6 @@ func (repository PointPromoRepository) SelectAll(c context.Context, parameter mo
 		` GROUP BY DEF.ID ORDER BY ` + parameter.By + ` ` + parameter.Sort
 
 	rows, err := repository.DB.QueryContext(c, statement)
-
 	if err != nil {
 		return data, err
 	}
@@ -152,7 +154,7 @@ func (repository PointPromoRepository) Add(c context.Context, in viewmodel.Point
 	j, _ := json.Marshal(in.Strata)
 	statementInsert += `('` + in.StartDate + `', '` + in.EndDate + `', NOW(), NOW(), '` +
 		strconv.FormatBool(in.Multiplicator) + `', '` + in.PointConversion + `', '` + string(j) + `', '` + in.QuantityConversion + `', '` +
-		in.PromoType + `')`
+		in.PromoType + `', '` + in.Image + `', '` + in.Description + `')`
 
 	statement := `INSERT INTO POINT_PROMO (
 			START_DATE, 
@@ -163,12 +165,13 @@ func (repository PointPromoRepository) Add(c context.Context, in viewmodel.Point
 			POINT_CONVERSION,
 			STRATA,
 			QUANTITY_CONVERSION,
-			PROMO_TYPE
+			PROMO_TYPE,
+			IMAGE_URL,
+			DESCRIPTION
 		)
-	VALUES ` + statementInsert
+	VALUES ` + statementInsert + `RETURNING ID`
 
-	fmt.Println(statement)
-	err = repository.DB.QueryRowContext(c, statement).Err()
+	err = repository.DB.QueryRowContext(c, statement).Scan(&res)
 
 	return
 }
@@ -183,8 +186,10 @@ func (repository PointPromoRepository) Update(c context.Context, in viewmodel.Po
 		POINT_CONVERSION = $4,
 		STRATA = $5,
 		QUANTITY_CONVERSION = $6,
-		PROMO_TYPE = $7
-	WHERE ID = $8
+		PROMO_TYPE = $7,
+		IMAGE_URL = $8,
+		DESCRIPTION = $9
+	WHERE ID = $10
 	RETURNING ID`
 
 	j, _ := json.Marshal(in.Strata)
@@ -196,6 +201,8 @@ func (repository PointPromoRepository) Update(c context.Context, in viewmodel.Po
 		string(j),
 		in.QuantityConversion,
 		in.PromoType,
+		in.Image,
+		in.Description,
 		in.ID).Scan(&res)
 
 	return
