@@ -51,9 +51,10 @@ func (uc PointPromoUC) BuildBody(data *models.PointPromo, res *viewmodel.PointPr
 			items = append(items, viewmodel.PointPromoItemVM{
 				ID:         perAddDatum[0],
 				ItemName:   perAddDatum[1],
-				UomID:      perAddDatum[2],
-				UomName:    perAddDatum[3],
-				Convertion: perAddDatum[4],
+				Image:      models.ItemImagePath + perAddDatum[2],
+				UomID:      perAddDatum[3],
+				UomName:    perAddDatum[4],
+				Convertion: perAddDatum[5],
 			})
 		}
 	}
@@ -62,6 +63,7 @@ func (uc PointPromoUC) BuildBody(data *models.PointPromo, res *viewmodel.PointPr
 	}
 	res.Items = items
 	res.Image = data.Image.String
+	res.Title = data.Title.String
 	res.Description = data.Description.String
 }
 
@@ -161,6 +163,7 @@ func (uc PointPromoUC) Add(c context.Context, in requests.PointPromoRequest) (ou
 		Strata:             strata,
 		Items:              items,
 		Image:              in.Image,
+		Title:              in.Title,
 		Description:        in.Description,
 	}
 
@@ -224,6 +227,7 @@ func (uc PointPromoUC) Update(c context.Context, id string, in requests.PointPro
 		Strata:             strata,
 		Items:              items,
 		Image:              in.Image,
+		Title:              in.Title,
 		Description:        in.Description,
 	}
 

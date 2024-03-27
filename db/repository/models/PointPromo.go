@@ -22,6 +22,7 @@ type PointPromo struct {
 	Strata             sql.NullString `json:"strata"`
 	Items              string
 	Image              sql.NullString
+	Title              sql.NullString
 	Description        sql.NullString
 }
 
@@ -65,8 +66,9 @@ var (
 			DEF.QUANTITY_CONVERSION,
 			DEF.PROMO_TYPE,
 			DEF.STRATA,
-			array_to_string((array_agg(I.ID || '#sep#' || I._NAME || '#sep#' || PPI.UOM_ID || '#sep#' || PPI.UOM_NAME || '#sep#' || PPI.CONVERTION  order by PPI.ID asc)),'|') AS Items,
+			array_to_string((array_agg(I.ID || '#sep#' || I._NAME || '#sep#' || I.ITEM_PICTURE || '#sep#' || PPI.UOM_ID || '#sep#' || PPI.UOM_NAME || '#sep#' || PPI.CONVERTION  order by PPI.ID asc)),'|') AS Items,
 			DEF.IMAGE_URL,
+			DEF.TITLE,
 			DEF.DESCRIPTION
 		FROM POINT_PROMO DEF
 		LEFT JOIN POINT_PROMO_ITEM PPI ON PPI.PROMO_ID = DEF.ID and PPI.DELETED_AT IS NULL

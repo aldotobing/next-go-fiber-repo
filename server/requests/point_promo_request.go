@@ -15,6 +15,7 @@ type PointPromoRequest struct {
 	Strata             []PointPromoStrataRequest `json:"strata"`
 	Items              []PointPromoItemRequest   `json:"items"`
 	Image              string                    `json:"image"`
+	Title              string                    `json:"title"`
 	Description        string                    `json:"description"`
 }
 
