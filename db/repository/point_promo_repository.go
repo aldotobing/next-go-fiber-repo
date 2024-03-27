@@ -46,6 +46,7 @@ func (repository PointPromoRepository) scanRows(rows *sql.Rows) (res models.Poin
 		&res.Strata,
 		&res.Items,
 		&res.Image,
+		&res.Title,
 		&res.Description,
 	)
 
@@ -68,6 +69,7 @@ func (repository PointPromoRepository) scanRow(row *sql.Row) (res models.PointPr
 		&res.Strata,
 		&res.Items,
 		&res.Image,
+		&res.Title,
 		&res.Description,
 	)
 
@@ -154,7 +156,7 @@ func (repository PointPromoRepository) Add(c context.Context, in viewmodel.Point
 	j, _ := json.Marshal(in.Strata)
 	statementInsert += `('` + in.StartDate + `', '` + in.EndDate + `', NOW(), NOW(), '` +
 		strconv.FormatBool(in.Multiplicator) + `', '` + in.PointConversion + `', '` + string(j) + `', '` + in.QuantityConversion + `', '` +
-		in.PromoType + `', '` + in.Image + `', '` + in.Description + `')`
+		in.PromoType + `', '` + in.Image + `', '` + in.Title + `', '` + in.Description + `')`
 
 	statement := `INSERT INTO POINT_PROMO (
 			START_DATE, 
@@ -167,6 +169,7 @@ func (repository PointPromoRepository) Add(c context.Context, in viewmodel.Point
 			QUANTITY_CONVERSION,
 			PROMO_TYPE,
 			IMAGE_URL,
+			TITLE,
 			DESCRIPTION
 		)
 	VALUES ` + statementInsert + `RETURNING ID`
@@ -188,8 +191,9 @@ func (repository PointPromoRepository) Update(c context.Context, in viewmodel.Po
 		QUANTITY_CONVERSION = $6,
 		PROMO_TYPE = $7,
 		IMAGE_URL = $8,
-		DESCRIPTION = $9
-	WHERE ID = $10
+		TITLE = $9
+		DESCRIPTION = $10
+	WHERE ID = $11
 	RETURNING ID`
 
 	j, _ := json.Marshal(in.Strata)
@@ -202,6 +206,7 @@ func (repository PointPromoRepository) Update(c context.Context, in viewmodel.Po
 		in.QuantityConversion,
 		in.PromoType,
 		in.Image,
+		in.Title,
 		in.Description,
 		in.ID).Scan(&res)
 

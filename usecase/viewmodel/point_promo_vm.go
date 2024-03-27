@@ -15,6 +15,7 @@ type PointPromoVM struct {
 	Strata             []PointPromoStrataVM `json:"strata"`
 	Items              []PointPromoItemVM   `json:"items"`
 	Image              string               `json:"image"`
+	Title              string               `json:"title"`
 	Description        string               `json:"description"`
 }
 
