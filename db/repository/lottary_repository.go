@@ -92,6 +92,12 @@ func (repository LottaryRepository) SelectAll(c context.Context, parameter model
 	if parameter.Year != "" {
 		conditionString += ` AND def._year = ` + parameter.Year
 	}
+	if parameter.BranchID != "" {
+		conditionString += ` AND c.branch_id in (` + parameter.BranchID + `)`
+	}
+	if parameter.RegionID != "" {
+		conditionString += ` AND b.region_id in (` + parameter.RegionID + `)`
+	}
 
 	if parameter.Search != "" {
 		conditionString += ` AND (LOWER(DEF.CUSTOMER_CODE) LIKE LOWER('%` + parameter.Search + `%') OR
@@ -131,6 +137,12 @@ func (repository LottaryRepository) FindAll(ctx context.Context, parameter model
 	}
 	if parameter.Year != "" {
 		conditionString += ` AND def._year = ` + parameter.Year
+	}
+	if parameter.BranchID != "" {
+		conditionString += ` AND c.branch_id in (` + parameter.BranchID + `)`
+	}
+	if parameter.RegionID != "" {
+		conditionString += ` AND b.region_id in (` + parameter.RegionID + `)`
 	}
 
 	if parameter.Search != "" {

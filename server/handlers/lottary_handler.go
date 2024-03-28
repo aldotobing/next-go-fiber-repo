@@ -23,13 +23,15 @@ type LottaryHandler struct {
 func (h *LottaryHandler) FindAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 	parameter := models.LottaryParameter{
-		Quartal: ctx.Query("quartal"),
-		Year:    ctx.Query("year"),
-		Page:    str.StringToInt(ctx.Query("page")),
-		Limit:   str.StringToInt(ctx.Query("limit")),
-		Search:  ctx.Query("search"),
-		By:      ctx.Query("by"),
-		Sort:    ctx.Query("sort"),
+		Quartal:  ctx.Query("quartal"),
+		Year:     ctx.Query("year"),
+		Page:     str.StringToInt(ctx.Query("page")),
+		Limit:    str.StringToInt(ctx.Query("limit")),
+		Search:   ctx.Query("search"),
+		By:       ctx.Query("by"),
+		Sort:     ctx.Query("sort"),
+		BranchID: ctx.Query("branch_id"),
+		RegionID: ctx.Query("region_id"),
 	}
 	uc := usecase.LottaryUC{ContractUC: h.ContractUC}
 	res, meta, err := uc.FindAll(c, parameter)
@@ -44,11 +46,13 @@ func (h *LottaryHandler) FindAll(ctx *fiber.Ctx) error {
 func (h *LottaryHandler) SelectAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 	parameter := models.LottaryParameter{
-		Quartal: ctx.Query("quartal"),
-		Year:    ctx.Query("year"),
-		Search:  ctx.Query("search"),
-		By:      ctx.Query("by"),
-		Sort:    ctx.Query("sort"),
+		Quartal:  ctx.Query("quartal"),
+		Year:     ctx.Query("year"),
+		Search:   ctx.Query("search"),
+		By:       ctx.Query("by"),
+		Sort:     ctx.Query("sort"),
+		BranchID: ctx.Query("branch_id"),
+		RegionID: ctx.Query("region_id"),
 	}
 	uc := usecase.LottaryUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectAll(c, parameter)
@@ -63,11 +67,13 @@ func (h *LottaryHandler) SelectAll(ctx *fiber.Ctx) error {
 func (h *LottaryHandler) ReportData(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 	parameter := models.LottaryParameter{
-		Quartal: ctx.Query("quartal"),
-		Year:    ctx.Query("year"),
-		Search:  ctx.Query("search"),
-		By:      ctx.Query("by"),
-		Sort:    ctx.Query("sort"),
+		Quartal:  ctx.Query("quartal"),
+		Year:     ctx.Query("year"),
+		Search:   ctx.Query("search"),
+		By:       ctx.Query("by"),
+		Sort:     ctx.Query("sort"),
+		BranchID: ctx.Query("branch_id"),
+		RegionID: ctx.Query("region_id"),
 	}
 	uc := usecase.LottaryUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectAll(c, parameter)
