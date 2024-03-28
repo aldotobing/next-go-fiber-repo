@@ -2,8 +2,10 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
 	"strconv"
 	"strings"
+	"time"
 
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -129,24 +131,40 @@ func (uc LottaryUC) Import(c context.Context, in requests.LottaryRequestHeader) 
 
 		cusrepo := repository.NewWebCustomerRepository(uc.DB)
 		cus, errcus := cusrepo.FindByCodes(c, models.WebCustomerParameter{Code: `'` + datum.CustomerCode + `'`})
-		if errcus == nil {
-			customer := cus[0]
-			for i := 0; i < datum.Jumlah; i++ {
 
-				SerailNo := uc.GenerateRandNo(c, models.LottaryParameter{CustomerID: customer.ID.String, Quartal: in.Quartal, Year: in.Year})
-				sequence := i + 1
-				repo := repository.NewLottaryRepository(uc.DB)
-				datamodel := new(viewmodel.LottaryVM)
-				datamodel.CustomerID = customer.ID.String
-				datamodel.SerialNo = SerailNo
-				datamodel.Quartal = in.Quartal
-				datamodel.Year = in.Year
-				datamodel.Sequence = strconv.Itoa(sequence)
-				err = repo.Add(c, *datamodel)
-				if err != nil {
-					logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
-					return
+		if errcus == nil {
+			if len(cus) > 0 {
+
+				customer := cus[0]
+				for i := 0; i < datum.Jumlah; i++ {
+
+					SerailNo := uc.GenerateRandNo(c, models.LottaryParameter{CustomerID: customer.ID.String, Quartal: in.Quartal, Year: in.Year})
+					sequence := i + 1
+					repo := repository.NewLottaryRepository(uc.DB)
+					datamodel := new(viewmodel.LottaryVM)
+					datamodel.CustomerID = customer.ID.String
+					datamodel.SerialNo = SerailNo
+					datamodel.Quartal = in.Quartal
+					datamodel.Year = in.Year
+					datamodel.Sequence = strconv.Itoa(sequence)
+					err = repo.Add(c, *datamodel)
+					if err != nil {
+						logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+						return
+					}
 				}
+			} else {
+				cacheKeyerr := "err_import_lottary: " + *&datum.CustomerCode + " jumlah : " + strconv.Itoa(datum.Jumlah)
+				datamodel := new(viewmodel.LottaryVM)
+				datamodel.CustomerCode = datum.CustomerCode
+				datamodel.Year = in.Year
+				datamodel.Quartal = in.Quartal
+
+				errjsonData, errmars := json.Marshal(datamodel)
+				if errmars == nil {
+					uc.RedisClient.Client.Set(cacheKeyerr, errjsonData, time.Hour*168).Err()
+				}
+
 			}
 		}
 	}
