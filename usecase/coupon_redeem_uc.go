@@ -141,7 +141,7 @@ func (uc CouponRedeemUC) Add(c context.Context, in requests.CouponRedeemRequest)
 		CouponID:   in.CouponID,
 		CustomerID: in.CustomerID,
 		ExpiredAt:  helper.GetExpiredWithInterval(time.Now(), couponData.Interval),
-		CouponCode: customerData.CustomerBranchCode + strconv.Itoa(now.Year()) + helper.StringWithCharset(6),
+		CouponCode: customerData.CustomerBranchCode + strconv.Itoa(int(now.Month())) + strconv.Itoa(now.Year()) + helper.StringWithCharset(6),
 	}
 
 	repo := repository.NewCouponRedeemRepository(uc.DB)

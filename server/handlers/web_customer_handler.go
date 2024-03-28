@@ -163,6 +163,16 @@ func (h *WebCustomerHandler) FindByID(ctx *fiber.Ctx) error {
 	})
 
 	pointData, _ := usecase.PointMaxCustomerUC{ContractUC: h.ContractUC}.FindByCustomerCode(c, res.Code)
+	if pointData.MonthlyMaxPoint == "" {
+		pointRules, _ := usecase.PointRuleUC{ContractUC: uc.ContractUC}.SelectAll(c, models.PointRuleParameter{
+			By:   "def.id",
+			Sort: "asc",
+			Now:  "1",
+		})
+		if len(pointRules) > 0 {
+			pointData.MonthlyMaxPoint = pointRules[0].MonthlyMaxPoint
+		}
+	}
 	objectData.ListObject.MonthlyMaxPoint = pointData.MonthlyMaxPoint
 
 	return h.SendResponse(ctx, objectData, nil, err, 0)
@@ -183,7 +193,6 @@ func (h *WebCustomerHandler) FetchVisitDay(params models.WebCustomerParameter) s
 
 	resp, err := client.Do(req)
 	if err != nil {
-
 		fmt.Print(err.Error())
 	}
 	defer resp.Body.Close()
