@@ -20,6 +20,12 @@ func RandAlphanumericString(length int) string {
 	return StringWithCharset(length, charset)
 }
 
+// RandAllAlphanumericString ...
+func RandAllAlphanumericString(length int) string {
+	charset := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	return StringWithCharset(length, charset)
+}
+
 func RandNumericString(length int) string {
 	charset := "0123456789"
 	return StringWithCharset(length, charset)
