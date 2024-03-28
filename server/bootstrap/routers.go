@@ -310,4 +310,7 @@ func (boot Bootstrap) RegisterRouters() {
 
 	couponRedeemRoute := routers.CouponRedeemRoutes{RouterGroup: apiV1, Handler: handler}
 	couponRedeemRoute.RegisterRoute()
+
+	lottaryRoute := routers.LottaryRoutes{RouterGroup: apiV1, Handler: handler}
+	lottaryRoute.RegisterRoute()
 }
