@@ -3,7 +3,7 @@ package viewmodel
 // PointPromoItemVM ....
 type PointPromoItemVM struct {
 	ID         string `json:"id"`
-	ItemName   string `json:"start_date"`
+	ItemName   string `json:"item_name"`
 	UomID      string `json:"uom_id"`
 	UomName    string `json:"uom_name"`
 	Image      string `json:"image"`
