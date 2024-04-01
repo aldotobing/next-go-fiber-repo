@@ -5,7 +5,7 @@ import (
 )
 
 func GetExpiredPoint(in time.Time) (res string) {
-	in = in.AddDate(1, 6, 0)
+	in = in.AddDate(1, 0, 0)
 
 	var date time.Time
 	if in.Month() < time.July {
