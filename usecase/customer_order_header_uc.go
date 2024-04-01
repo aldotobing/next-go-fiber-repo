@@ -38,7 +38,6 @@ func (uc CustomerOrderHeaderUC) SelectAll(c context.Context, parameter models.Cu
 
 	repo := repository.NewCustomerOrderHeaderRepository(uc.DB)
 	res, err = repo.SelectAll(c, parameter)
-
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
@@ -86,7 +85,6 @@ func (uc CustomerOrderHeaderUC) FindByID(c context.Context, parameter models.Cus
 
 // Add ...
 func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.CustomerOrderHeaderRequest) (res models.CustomerOrderHeader, err error) {
-
 	repo := repository.NewCustomerOrderHeaderRepository(uc.DB)
 	couponUC := CouponRedeemUC{ContractUC: uc.ContractUC}
 	chekablerepo := repository.NewShoppingCartRepository(uc.DB)
@@ -193,6 +191,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 		LineList:             &data.LineList,
 		GlobalDiscAmount:     &global_disc_amount,
 		OldPriceData:         string(oldPriceJson),
+		PointPromo:           data.PointPromo,
 	}
 
 	res.ID, err = repo.CheckOut(c, &res)
@@ -281,7 +280,6 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 				msgcustomer := msgcustomerheader + msgbody
 				_, errfcm := FcmUc.SendFCMMessage(c, msgtitle, msgcustomer, *useraccount.CustomerFCMToken)
 				if errfcm == nil {
-
 				}
 
 				userNotificationRepo := repository.NewUserNotificationRepository(uc.DB)
@@ -293,7 +291,6 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 					RowID:  order.ID,
 				})
 				if errnotifinsert == nil {
-
 				}
 
 			}
@@ -364,7 +361,6 @@ func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter mode
 
 	resp, err := client.Do(req)
 	if err != nil {
-
 		fmt.Print(err.Error())
 	}
 	defer resp.Body.Close()
@@ -389,7 +385,6 @@ func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter mode
 			fmt.Print(errinsert)
 		}
 		if errcurrent == nil {
-
 			if currentOrder.Status != nil && *currentOrder.Status != *invoiceObject.Status {
 				userrepo := repository.NewCustomerRepository(uc.DB)
 
@@ -418,7 +413,6 @@ func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter mode
 							FcmUc := FCMUC{ContractUC: uc.ContractUC}
 							_, errfcm := FcmUc.SendFCMMessage(c, messageTitle, messageTemplate, *useraccount.CustomerFCMToken)
 							if errfcm == nil {
-
 							}
 
 							userNotificationRepo := repository.NewUserNotificationRepository(uc.DB)
@@ -430,7 +424,6 @@ func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter mode
 								RowID:  currentOrder.ID,
 							})
 							if errnotifinsert == nil {
-
 							}
 
 						}
@@ -461,11 +454,9 @@ func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter mode
 												fmt.Println("sukses")
 											}
 										}
-
 									}
 								}
 							}
-
 						}
 						if useraccount.CustomerBranchPicPhoneNo != nil && useraccount.CustomerBranchPicName != nil {
 							picMessageTemplate := helper.BuildTransactionTemplateForPIC(currentOrder, orderline, useraccount, *invoiceObject.Status)
@@ -496,7 +487,6 @@ func (uc CustomerOrderHeaderUC) AppsSelectAll(c context.Context, parameter model
 
 	repo := repository.NewCustomerOrderHeaderRepository(uc.DB)
 	res, err = repo.AppsSelectAll(c, parameter)
-
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
