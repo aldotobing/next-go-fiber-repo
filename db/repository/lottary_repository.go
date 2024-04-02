@@ -226,6 +226,7 @@ func (repository LottaryRepository) FindByCustomerCode(c context.Context, custom
 // Add ...
 func (repository LottaryRepository) Add(c context.Context, model viewmodel.LottaryVM) (err error) {
 
+	var id string
 	statement := `INSERT INTO lottary (
 		serial_no, 
 		status,
@@ -236,10 +237,10 @@ func (repository LottaryRepository) Add(c context.Context, model viewmodel.Lotta
 			MODIFIED_DATE,
 			_sequence
 		)
-	VALUES ($1, 1, $2, $3, $4, now(),now(), $5 )`
+	VALUES ($1, 1, $2, $3, $4, now(),now(), $5 ) RETURNING id `
 	// + statementInsert
 
-	err = repository.DB.QueryRowContext(c, statement, model.SerialNo, model.CustomerID, model.Year, model.Quartal, model.Sequence).Err()
+	err = repository.DB.QueryRowContext(c, statement, model.SerialNo, model.CustomerID, model.Year, model.Quartal, model.Sequence).Scan(&id)
 
 	return
 }
