@@ -27,6 +27,7 @@ func (route PointPromoRoutes) RegisterRoute() {
 	r.Get("/", handler.FindAll)
 	r.Get("/select", handler.SelectAll)
 	r.Get("/id/:id", handler.FindByID)
+	r.Get("/eligible_point", handler.EligiblePoint)
 	r.Post("/", handler.Add)
 	r.Post("/photo", handler.Photo)
 	r.Put("/:id", handler.Update)

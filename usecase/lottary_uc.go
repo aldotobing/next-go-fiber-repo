@@ -126,7 +126,6 @@ func (uc LottaryUC) FindByCustomerCode(c context.Context, customerCode string) (
 
 // Add ...
 func (uc LottaryUC) Import(c context.Context, in requests.LottaryRequestHeader) (out viewmodel.LottaryVM, err error) {
-
 	for _, datum := range in.Detail {
 
 		cusrepo := repository.NewWebCustomerRepository(uc.DB)
@@ -213,5 +212,4 @@ func (uc LottaryUC) GenerateRandNo(c context.Context, parameter models.LottaryPa
 		}
 	}
 	return code
-
 }

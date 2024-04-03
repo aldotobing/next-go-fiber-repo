@@ -80,6 +80,9 @@ func (repository PointPromoRepository) scanRow(row *sql.Row) (res models.PointPr
 func (repository PointPromoRepository) SelectAll(c context.Context, parameter models.PointPromoParameter) (data []models.PointPromo, err error) {
 	var conditionString string
 
+	if parameter.Now {
+		conditionString += ` AND NOW() BETWEEN DEF.START_DATE AND END_DATE`
+	}
 	statement := models.PointPromoSelectStatement + models.PointPromoWhereStatement +
 		conditionString +
 		` GROUP BY DEF.ID ORDER BY ` + parameter.By + ` ` + parameter.Sort
