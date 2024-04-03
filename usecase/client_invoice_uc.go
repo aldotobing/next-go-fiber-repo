@@ -36,7 +36,6 @@ func (uc CilentInvoiceUC) SelectAll(c context.Context, parameter models.CilentIn
 
 	repo := repository.NewCilentInvoiceRepository(uc.DB)
 	res, err = repo.SelectAll(c, parameter)
-
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
@@ -304,7 +303,6 @@ func (uc CilentInvoiceUC) UndoneDataSync(c context.Context, parameter models.Cil
 }
 
 func (uc CilentInvoiceUC) SFAPullData(c context.Context, parameter models.CilentInvoiceParameter) ([]models.CilentInvoice, error) {
-
 	// fmt.Println("put redis")
 	loc, err := time.LoadLocation("Asia/Jakarta")
 	if err != nil {
@@ -371,7 +369,6 @@ func (uc CilentInvoiceUC) SFAPullData(c context.Context, parameter models.Cilent
 }
 
 func (uc CilentInvoiceUC) MYSMPullData(c context.Context, parameter models.CilentInvoiceParameter) ([]models.CilentInvoice, error) {
-
 	// fmt.Println("put redis")
 	loc, err := time.LoadLocation("Asia/Jakarta")
 	if err != nil {
@@ -482,6 +479,7 @@ func (uc CilentInvoiceUC) GetRedisDataSync(c context.Context) (res []models.Cile
 						invoiceObject.OutstandingAmount != nil && *invoiceObject.OutstandingAmount == "0.00" &&
 						invoiceObject.CustomerCode != nil && invoiceObject.NetAmount != nil &&
 						invoiceObject.DocumentNo != nil {
+						pointUC := PointUC{ContractUC: uc.ContractUC}
 						customer, _ := WebCustomerUC{ContractUC: uc.ContractUC}.FindByCodes(c, models.WebCustomerParameter{Code: `'` + *invoiceObject.CustomerCode + `'`})
 						if len(customer) == 1 {
 							fmt.Println("tes sini")
@@ -493,7 +491,6 @@ func (uc CilentInvoiceUC) GetRedisDataSync(c context.Context) (res []models.Cile
 									Sort: "asc",
 								})
 								pointMaxCustomer, _ := PointMaxCustomerUC{ContractUC: uc.ContractUC}.FindByCustomerCodeWithDateInvoice(c, customer[0].Code, invoiceDate.Format("2006-01-02"))
-								pointUC := PointUC{ContractUC: uc.ContractUC}
 								pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID, strconv.Itoa(int(invoiceDate.Month())), strconv.Itoa(invoiceDate.Year()))
 								for _, rules := range pointRules {
 									pointMonthly, _ := strconv.ParseFloat(pointThisMonth.Balance, 64)
@@ -525,6 +522,15 @@ func (uc CilentInvoiceUC) GetRedisDataSync(c context.Context) (res []models.Cile
 									}
 								}
 							}
+						}
+						customerOrder, _ := CustomerOrderHeaderUC{ContractUC: uc.ContractUC}.FindByDocumentNo(c, *invoiceObject.SalesRequestCode)
+						if customerOrder.PointPromo != "" {
+							pointUC.Add(c, requests.PointRequest{
+								InvoiceDocumentNo: *invoiceObject.DocumentNo,
+								Point:             customerOrder.PointPromo,
+								PointType:         "4",
+								CustomerID:        customer[0].ID,
+							})
 						}
 					}
 				}
@@ -661,8 +667,8 @@ func (uc CilentInvoiceUC) SFASyncData(c context.Context) (res []models.CilentInv
 	strinvList, err := uc.RedisClient.GetAllKeyFromRedis(cacheKey)
 
 	if err == nil {
-		var minLen = 250
-		var keyLen = len(strinvList)
+		minLen := 250
+		keyLen := len(strinvList)
 
 		if keyLen < minLen {
 			minLen = keyLen
@@ -723,8 +729,8 @@ func (uc CilentInvoiceUC) GetRedisDataSyncPointOnly(c context.Context) (res []mo
 	strinvList, err := uc.RedisClient.GetAllKeyFromRedis(cacheKey)
 
 	if err == nil {
-		var minLen = 50
-		var keyLen = len(strinvList)
+		minLen := 50
+		keyLen := len(strinvList)
 
 		if keyLen < minLen {
 			minLen = keyLen
@@ -826,10 +832,8 @@ func (uc CilentInvoiceUC) GetRedisDataSyncPointOnly(c context.Context) (res []mo
 	return res, nil
 }
 
-//undone sfa data
-
+// undone sfa data
 func (uc CilentInvoiceUC) UndoneSFAPullData(c context.Context, parameter models.CilentInvoiceParameter) ([]models.CilentInvoice, error) {
-
 	// fmt.Println("put redis")
 	loc, err := time.LoadLocation("Asia/Jakarta")
 	if err != nil {
@@ -903,8 +907,8 @@ func (uc CilentInvoiceUC) UndoneSFASyncData(c context.Context) (res []models.Cil
 	strinvList, err := uc.RedisClient.GetAllKeyFromRedis(cacheKey)
 
 	if err == nil {
-		var minLen = 250
-		var keyLen = len(strinvList)
+		minLen := 250
+		keyLen := len(strinvList)
 
 		if keyLen < minLen {
 			minLen = keyLen

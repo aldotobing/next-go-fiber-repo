@@ -83,6 +83,19 @@ func (uc CustomerOrderHeaderUC) FindByID(c context.Context, parameter models.Cus
 	return res, err
 }
 
+// FindByDocumentNo ...
+func (uc CustomerOrderHeaderUC) FindByDocumentNo(c context.Context, documentNo string) (res models.CustomerOrderHeader, err error) {
+	repo := repository.NewCustomerOrderHeaderRepository(uc.DB)
+	res, err = repo.FindByDocumentNo(c, documentNo)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+	uc.BuildBody(&res)
+
+	return res, err
+}
+
 // Add ...
 func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.CustomerOrderHeaderRequest) (res models.CustomerOrderHeader, err error) {
 	repo := repository.NewCustomerOrderHeaderRepository(uc.DB)
