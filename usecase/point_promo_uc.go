@@ -3,7 +3,9 @@ package usecase
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"mime/multipart"
+	"strconv"
 	"strings"
 	"time"
 
@@ -129,6 +131,78 @@ func (uc PointPromoUC) FindByID(c context.Context, parameter models.PointPromoPa
 	}
 
 	uc.BuildBody(&data, &out)
+
+	return
+}
+
+// EligiblePoint ...
+func (uc PointPromoUC) EligiblePoint(c context.Context, cartList string) (out string, err error) {
+	var cartListQuery string
+	cartListSplit := strings.Split(cartList, ",")
+	if len(cartListSplit) > 0 {
+		for _, datum := range cartListSplit {
+			if cartListQuery != "" {
+				cartListQuery += `,'` + datum + `'`
+			} else {
+				cartListQuery += `'` + datum + `'`
+			}
+		}
+	}
+
+	cart, err := ShoppingCartUC{ContractUC: uc.ContractUC}.SelectAll(c, models.ShoppingCartParameter{
+		ListID: cartListQuery,
+		Sort:   "asc",
+		By:     "def.id",
+	})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "select_shopping_cart", c.Value("requestid"))
+		return
+	}
+
+	pointPromo, err := uc.SelectAll(c, models.PointPromoParameter{
+		Now:  true,
+		Sort: "asc",
+		By:   "def.id",
+	})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "select_point_promo", c.Value("requestid"))
+		return
+	}
+
+	var pointEligible float64
+	for _, pointPromoData := range pointPromo {
+		var multiplicator bool
+		for _, itemPromo := range pointPromoData.Items {
+			for _, itemCart := range cart {
+				if multiplicator {
+					continue
+				}
+				if itemCart.ItemID != nil && itemPromo.ID == *itemCart.ItemID {
+					cartStock, _ := strconv.ParseFloat(*itemCart.StockQty, 64)
+					cartQty, _ := strconv.ParseFloat(*itemCart.Qty, 64)
+					itemCartTotalQty := cartStock * cartQty
+
+					itemPromoQty, _ := strconv.ParseFloat(itemPromo.Convertion, 64)
+
+					fmt.Println(itemCartTotalQty, "/", itemPromoQty)
+					eligibleMultiply := itemCartTotalQty / itemPromoQty
+					if eligibleMultiply >= 1 {
+						if !pointPromoData.Multiplicator {
+							eligibleMultiply = 1
+							multiplicator = true
+						}
+						pointConvertion, _ := strconv.ParseFloat(pointPromoData.PointConversion, 64)
+						fmt.Println(pointConvertion, "*", float64(int(eligibleMultiply)))
+						pointGet := pointConvertion * float64(int(eligibleMultiply))
+						pointEligible += pointGet
+					}
+
+				}
+			}
+		}
+	}
+
+	out = strconv.FormatFloat(pointEligible, 'f', 0, 64)
 
 	return
 }

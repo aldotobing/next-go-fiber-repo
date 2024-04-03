@@ -36,6 +36,7 @@ type PointPromoParameter struct {
 	StartDate     string `json:"start_date"`
 	EndDate       string `json:"end_date"`
 	Renewal       string `json:"renewal"`
+	Now           bool
 	Search        string `json:"search"`
 	ShowAll       string `json:"show_all"`
 	RegionID      string `json:"region_id"`

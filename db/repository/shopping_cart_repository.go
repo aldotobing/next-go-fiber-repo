@@ -41,7 +41,6 @@ func (repository ShoppingCartRepository) scanRows(rows *sql.Rows) (res models.Sh
 		&res.TotalPrice, &res.OldPriceID,
 	)
 	if err != nil {
-
 		return res, err
 	}
 
@@ -77,7 +76,6 @@ func (repository ShoppingCartRepository) scanGroupedRows(rows *sql.Rows) (res mo
 		&res.CategoryID, &res.CategoryName,
 	)
 	if err != nil {
-
 		return res, err
 	}
 
@@ -101,7 +99,6 @@ func (repository ShoppingCartRepository) scanBonusRows(rows *sql.Rows) (res mode
 		&res.ItemID, &res.ItemName, &res.ItemCode, &res.Qty, &res.UomName, &res.ItemPicture,
 	)
 	if err != nil {
-
 		return res, err
 	}
 
@@ -120,10 +117,13 @@ func (repository ShoppingCartRepository) SelectAll(c context.Context, parameter 
 		conditionString += ` and it.item_category_id = ` + parameter.ItemCategoryID
 	}
 
+	if parameter.ListID != "" {
+		conditionString += ` AND def.id in (` + parameter.ListID + `)`
+	}
+
 	statement := models.ShoppingCartSelectStatement + ` ` + models.ShoppingCartWhereStatement +
 		` AND (LOWER(it."_name") LIKE $1 ) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
-
 	if err != nil {
 		return data, err
 	}
@@ -253,7 +253,6 @@ func (repository ShoppingCartRepository) Delete(c context.Context, id string) (r
 	statement := ` delete from  cart WHERE id = $1 RETURNING id`
 
 	err = repository.DB.QueryRowContext(c, statement, id).Scan(&res)
-
 	if err != nil {
 		return res, err
 	}
@@ -270,7 +269,6 @@ func (repository ShoppingCartRepository) SelectAllForGroup(c context.Context, pa
 	statement := models.GroupedShoppingCartSelectStatement + ` ` + models.ShoppingCartWhereStatement +
 		` AND (LOWER(it."_name") LIKE $1 ) ` + conditionString + ` group by it.item_category_id,ic._name  `
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
-
 	if err != nil {
 		return data, err
 	}
@@ -316,7 +314,6 @@ func (repository ShoppingCartRepository) GetTotal(c context.Context, parameter m
 
 // SelectAll ...
 func (repository ShoppingCartRepository) SelectAllBonus(c context.Context, parameter models.ShoppingCartParameter) (data []models.ShoppingCartItemBonus, err error) {
-
 	statement := models.ShoppingCartBonusSelectStatement
 
 	fmt.Println(statement, parameter.ListID)
