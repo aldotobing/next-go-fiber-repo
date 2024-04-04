@@ -18,6 +18,7 @@ type ILottaryRepository interface {
 	Add(c context.Context, model viewmodel.LottaryVM) error
 	Update(c context.Context, model viewmodel.LottaryVM) (string, error)
 	Delete(c context.Context, id string) (string, error)
+	DeleteAll(c context.Context) error
 }
 
 // LottaryRepository ...
@@ -99,8 +100,12 @@ func (repository LottaryRepository) SelectAll(c context.Context, parameter model
 		conditionString += ` AND b.region_id in (` + parameter.RegionID + `)`
 	}
 
+	if parameter.CustomerID != "" {
+		conditionString += ` AND def.customer_id = (` + parameter.CustomerID + `)`
+	}
+
 	if parameter.Search != "" {
-		conditionString += ` AND (LOWER(DEF.CUSTOMER_CODE) LIKE LOWER('%` + parameter.Search + `%') OR
+		conditionString += ` AND (LOWER(C.CUSTOMER_CODE) LIKE LOWER('%` + parameter.Search + `%') OR
 		LOWER(C.CUSTOMER_NAME) LIKE LOWER('%` + parameter.Search + `%') OR
 		LOWER(B.BRANCH_CODE) LIKE LOWER('%` + parameter.Search + `%') OR
 		LOWER(B._NAME) LIKE LOWER('%` + parameter.Search + `%'))`
@@ -273,6 +278,20 @@ func (repository LottaryRepository) Delete(c context.Context, id string) (res st
 	WHERE id = ` + id + `
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement).Scan(&res)
+
+	return
+}
+
+// Delete ...
+func (repository LottaryRepository) DeleteAll(c context.Context) (err error) {
+	statement := `delete from lottary returning id `
+	err = repository.DB.QueryRowContext(c, statement).Err()
+
+	// defer rows.Close()
+	// for rows.Next() {
+
+	// }
+	// err = rows.Err()
 
 	return
 }
