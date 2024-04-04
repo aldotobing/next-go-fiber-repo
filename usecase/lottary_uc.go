@@ -201,6 +201,18 @@ func (uc LottaryUC) Delete(c context.Context, in string) (err error) {
 	return
 }
 
+// Delete ...
+func (uc LottaryUC) DeleteAll(c context.Context) (err error) {
+	repo := repository.NewLottaryRepository(uc.DB)
+	err = repo.DeleteAll(c)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	return
+}
+
 func (uc LottaryUC) GenerateRandNo(c context.Context, parameter models.LottaryParameter) string {
 	var code string
 	repo := repository.NewLottaryRepository(uc.DB)

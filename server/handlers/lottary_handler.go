@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -46,13 +47,14 @@ func (h *LottaryHandler) FindAll(ctx *fiber.Ctx) error {
 func (h *LottaryHandler) SelectAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 	parameter := models.LottaryParameter{
-		Quartal:  ctx.Query("quartal"),
-		Year:     ctx.Query("year"),
-		Search:   ctx.Query("search"),
-		By:       ctx.Query("by"),
-		Sort:     ctx.Query("sort"),
-		BranchID: ctx.Query("branch_id"),
-		RegionID: ctx.Query("region_id"),
+		Quartal:    ctx.Query("quartal"),
+		Year:       ctx.Query("year"),
+		Search:     ctx.Query("search"),
+		By:         ctx.Query("by"),
+		Sort:       ctx.Query("sort"),
+		BranchID:   ctx.Query("branch_id"),
+		RegionID:   ctx.Query("region_id"),
+		CustomerID: ctx.Query("customer_id"),
 	}
 	uc := usecase.LottaryUC{ContractUC: h.ContractUC}
 	res, err := uc.SelectAll(c, parameter)
@@ -159,6 +161,20 @@ func (h *LottaryHandler) Delete(ctx *fiber.Ctx) error {
 
 	uc := usecase.LottaryUC{ContractUC: h.ContractUC}
 	err := uc.Delete(c, id)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+
+	return h.SendResponse(ctx, nil, nil, err, 0)
+}
+
+// Delete ...
+func (h *LottaryHandler) DeleteAll(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	fmt.Println("dleete all")
+	uc := usecase.LottaryUC{ContractUC: h.ContractUC}
+	err := uc.DeleteAll(c)
 	if err != nil {
 		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
 	}

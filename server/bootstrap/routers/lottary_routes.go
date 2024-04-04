@@ -30,5 +30,11 @@ func (route LottaryRoutes) RegisterRoute() {
 	r.Get("/reportdata", handler.ReportData)
 	r.Post("/import", handler.Import)
 	r.Put("/:id", handler.Update)
-	r.Delete("/:id", handler.Delete)
+	r.Delete("/id/:id", handler.Delete)
+	r.Delete("/all", handler.DeleteAll)
+
+	r2 := route.RouterGroup.Group("/api/apps/lottary")
+	// r.Use(jwtMiddleware.VerifyUser)
+	r2.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
+	r2.Get("/select", handler.SelectAll)
 }
