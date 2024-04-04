@@ -253,7 +253,10 @@ func (repository CustomerOrderHeaderRepository) CheckOut(c context.Context, mode
 	}
 	defer transaction.Rollback()
 
-	fmt.Println(statement)
+	if model.PointPromo == "" {
+		model.PointPromo = "0"
+	}
+
 	err = transaction.QueryRowContext(c, statement, model.TransactionDate, model.TransactionTime, model.CustomerID, model.CustomerID,
 		model.PaymentTermsID, model.ExpectedDeliveryDate, model.GrossAmount, model.DiscAmount,
 		model.TaxableAmount, model.TaxAmount, model.RoundingAmount, model.NetAmount,
