@@ -29,7 +29,7 @@ func (repository PointPromoItemRepository) AddBulk(c context.Context, promoID st
 
 	for _, datum := range items {
 		if statementInsert == "" {
-			statementInsert += `('` + promoID + `', '` + datum.ID + `', '` + datum.UomID + `', '` + datum.UomName + `', '` + datum.Convertion + `', NOW(), NOW())`
+			statementInsert += `('` + promoID + `', '` + datum.ID + `', '` + datum.UomID + `', '` + datum.UomName + `', '` + datum.Convertion + `', '` + datum.Quantity + `', NOW(), NOW())`
 		} else {
 			statementInsert += `,('` + promoID + `', '` + datum.ID + `', '` + datum.UomID + `', '` + datum.UomName + `', '` + datum.Convertion + `', '` + datum.Quantity + `', NOW(), NOW())`
 		}

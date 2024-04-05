@@ -251,7 +251,7 @@ func (uc PointPromoUC) Add(c context.Context, in requests.PointPromoRequest) (ou
 
 	err = PointPromoItemUC{uc.ContractUC}.AddBulk(c, out.ID, out.Items)
 	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "add point_promo_item", c.Value("requestid"))
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "add_point_promo_item", c.Value("requestid"))
 		return
 	}
 
