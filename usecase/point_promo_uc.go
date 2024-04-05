@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"mime/multipart"
 	"strconv"
 	"strings"
@@ -57,6 +56,7 @@ func (uc PointPromoUC) BuildBody(data *models.PointPromo, res *viewmodel.PointPr
 				UomID:      perAddDatum[3],
 				UomName:    perAddDatum[4],
 				Convertion: perAddDatum[5],
+				Quantity:   perAddDatum[6],
 			})
 		}
 	}
@@ -182,17 +182,17 @@ func (uc PointPromoUC) EligiblePoint(c context.Context, cartList string) (out st
 					cartQty, _ := strconv.ParseFloat(*itemCart.Qty, 64)
 					itemCartTotalQty := cartStock * cartQty
 
-					itemPromoQty, _ := strconv.ParseFloat(itemPromo.Convertion, 64)
+					itemPromoConvertion, _ := strconv.ParseFloat(itemPromo.Convertion, 64)
+					itemPromoQty, _ := strconv.ParseFloat(itemPromo.Quantity, 64)
+					itemPromoTotalQty := itemPromoConvertion * itemPromoQty
 
-					fmt.Println(itemCartTotalQty, "/", itemPromoQty)
-					eligibleMultiply := itemCartTotalQty / itemPromoQty
+					eligibleMultiply := itemCartTotalQty / itemPromoTotalQty
 					if eligibleMultiply >= 1 {
 						if !pointPromoData.Multiplicator {
 							eligibleMultiply = 1
 							multiplicator = true
 						}
 						pointConvertion, _ := strconv.ParseFloat(pointPromoData.PointConversion, 64)
-						fmt.Println(pointConvertion, "*", float64(int(eligibleMultiply)))
 						pointGet := pointConvertion * float64(int(eligibleMultiply))
 						pointEligible += pointGet
 					}
@@ -222,6 +222,7 @@ func (uc PointPromoUC) Add(c context.Context, in requests.PointPromoRequest) (ou
 			UomID:      datum.UomID,
 			UomName:    datum.UomName,
 			Convertion: datum.Convertion,
+			Quantity:   datum.Quantity,
 			CreatedAt:  "",
 			UpdatedAt:  "",
 			DeletedAt:  "",
@@ -285,6 +286,7 @@ func (uc PointPromoUC) Update(c context.Context, id string, in requests.PointPro
 			UomID:      datum.UomID,
 			UomName:    datum.UomName,
 			Convertion: datum.Convertion,
+			Quantity:   datum.Quantity,
 			CreatedAt:  "",
 			UpdatedAt:  "",
 			DeletedAt:  "",

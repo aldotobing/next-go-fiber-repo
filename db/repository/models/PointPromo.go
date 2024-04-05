@@ -67,7 +67,7 @@ var (
 			DEF.QUANTITY_CONVERSION,
 			DEF.PROMO_TYPE,
 			DEF.STRATA,
-			array_to_string((array_agg(I.ID || '#sep#' || I._NAME || '#sep#' || I.ITEM_PICTURE || '#sep#' || PPI.UOM_ID || '#sep#' || PPI.UOM_NAME || '#sep#' || PPI.CONVERTION  order by PPI.ID asc)),'|') AS Items,
+			array_to_string((array_agg(I.ID || '#sep#' || I._NAME || '#sep#' || I.ITEM_PICTURE || '#sep#' || PPI.UOM_ID || '#sep#' || PPI.UOM_NAME || '#sep#' || PPI.CONVERTION || '#sep#' || PPI.QTY order by PPI.ID asc)),'|') AS Items,
 			DEF.IMAGE_URL,
 			DEF.TITLE,
 			DEF.DESCRIPTION
