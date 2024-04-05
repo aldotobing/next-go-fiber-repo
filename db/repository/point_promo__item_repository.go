@@ -31,7 +31,7 @@ func (repository PointPromoItemRepository) AddBulk(c context.Context, promoID st
 		if statementInsert == "" {
 			statementInsert += `('` + promoID + `', '` + datum.ID + `', '` + datum.UomID + `', '` + datum.UomName + `', '` + datum.Convertion + `', NOW(), NOW())`
 		} else {
-			statementInsert += `,('` + promoID + `', '` + datum.ID + `', '` + datum.UomID + `', '` + datum.UomName + `','` + datum.Convertion + `', NOW(), NOW())`
+			statementInsert += `,('` + promoID + `', '` + datum.ID + `', '` + datum.UomID + `', '` + datum.UomName + `', '` + datum.Convertion + `', '` + datum.Quantity + `', NOW(), NOW())`
 		}
 	}
 
@@ -41,6 +41,7 @@ func (repository PointPromoItemRepository) AddBulk(c context.Context, promoID st
 			UOM_ID,
 			UOM_NAME,
 			CONVERTION,
+			QTY,
 			CREATED_AT,
 			UPDATED_AT
 		)

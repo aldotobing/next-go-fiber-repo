@@ -30,4 +30,5 @@ type PointPromoItemRequest struct {
 	UomID      string `json:"uom_id"`
 	UomName    string `json:"uom_name"`
 	Convertion string `json:"convertion"`
+	Quantity   string `json:"quantity"`
 }
