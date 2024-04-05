@@ -27,7 +27,7 @@ type PointPromoStrataRequest struct {
 
 type PointPromoItemRequest struct {
 	ItemID     string `json:"item_id"`
-	UomID      string `json:"uom_id"`
+	UomID      string `json:"item_uom_id"`
 	UomName    string `json:"item_uom_name"`
 	Convertion string `json:"item_uom_conversion"`
 	Quantity   string `json:"quantity"`
