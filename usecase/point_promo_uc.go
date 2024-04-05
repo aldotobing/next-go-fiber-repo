@@ -56,6 +56,7 @@ func (uc PointPromoUC) BuildBody(data *models.PointPromo, res *viewmodel.PointPr
 				UomID:      perAddDatum[3],
 				UomName:    perAddDatum[4],
 				Convertion: perAddDatum[5],
+				Quantity:   perAddDatum[6],
 			})
 		}
 	}
