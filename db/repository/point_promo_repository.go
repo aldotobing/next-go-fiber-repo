@@ -194,7 +194,7 @@ func (repository PointPromoRepository) Update(c context.Context, in viewmodel.Po
 		QUANTITY_CONVERSION = $6,
 		PROMO_TYPE = $7,
 		IMAGE_URL = $8,
-		TITLE = $9
+		TITLE = $9,
 		DESCRIPTION = $10
 	WHERE ID = $11
 	RETURNING ID`
