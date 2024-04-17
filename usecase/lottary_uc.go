@@ -42,6 +42,7 @@ func (uc LottaryUC) BuildBody(data *models.Lottary, res *viewmodel.LottaryVM) {
 	res.CustomerCpName = data.CustomerCpName.String
 	res.CustomerLevel = data.CustomerLevel.String
 	res.CustomerType = data.CustomerType.String
+	res.CustomerAddress = data.CustomerAddress.String
 }
 
 // FindAll ...

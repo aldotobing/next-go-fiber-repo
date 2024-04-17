@@ -68,7 +68,8 @@ var (
 			r.group_name as r_g_name,
 			c.customer_cp_name,
 			cl._name as cus_level_name,
-			ctp._name as ctp_name
+			ctp._name as ctp_name,
+			c.customer_address
 		FROM lottary DEF
 		LEFT JOIN CUSTOMER C ON C.ID = DEF.CUSTOMER_ID
 		LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
