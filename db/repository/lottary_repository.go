@@ -52,6 +52,7 @@ func (repository LottaryRepository) scanRows(rows *sql.Rows) (res models.Lottary
 		&res.CustomerCpName,
 		&res.CustomerLevel,
 		&res.CustomerType,
+		&res.CustomerAddress,
 	)
 
 	return
@@ -78,6 +79,7 @@ func (repository LottaryRepository) scanRow(row *sql.Row) (res models.Lottary, e
 		&res.CustomerCpName,
 		&res.CustomerLevel,
 		&res.CustomerType,
+		&res.CustomerAddress,
 	)
 
 	return
