@@ -4,10 +4,12 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/helper"
 	"nextbasis-service-v-0.1/pkg/str"
+	"nextbasis-service-v-0.1/server/requests"
 	"nextbasis-service-v-0.1/usecase"
 	"nextbasis-service-v-0.1/usecase/viewmodel"
 )
@@ -124,4 +126,26 @@ func (h *ItemProductFocusHandler) SelectAllV2(ctx *fiber.Ctx) error {
 	}
 
 	return h.SendResponse(ctx, ObjcetData, nil, err, 0)
+}
+
+// Add ...
+func (h *ItemProductFocusHandler) Add(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	input := new(requests.ProductFocusRequest)
+	if err := ctx.BodyParser(input); err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+	if err := h.Validator.Struct(input); err != nil {
+		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
+		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+	}
+
+	uc := usecase.ItemProductFocusUC{ContractUC: h.ContractUC}
+	_, err := uc.Add(c, *input)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+
+	return h.SendResponse(ctx, nil, nil, err, 200)
 }

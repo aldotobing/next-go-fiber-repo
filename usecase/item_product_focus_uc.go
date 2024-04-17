@@ -10,6 +10,7 @@ import (
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/pkg/functioncaller"
 	"nextbasis-service-v-0.1/pkg/logruslogger"
+	"nextbasis-service-v-0.1/server/requests"
 	"nextbasis-service-v-0.1/usecase/viewmodel"
 )
 
@@ -28,7 +29,6 @@ func (uc ItemProductFocusUC) SelectAll(c context.Context, parameter models.ItemP
 
 	repo := repository.NewItemProductFocusRepository(uc.DB)
 	res, err = repo.SelectAll(c, parameter)
-
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
@@ -176,6 +176,18 @@ func (uc ItemProductFocusUC) SelectAllV2(c context.Context, parameter models.Ite
 func (uc ItemProductFocusUC) CountByBranchID(c context.Context, customerBranchID string) (res int, err error) {
 	repo := repository.NewItemProductFocusRepository(uc.DB)
 	res, err = repo.CountByBranchID(c, customerBranchID)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	return res, err
+}
+
+// Add ...
+func (uc ItemProductFocusUC) Add(c context.Context, in requests.ProductFocusRequest) (res []viewmodel.ItemVM, err error) {
+	repo := repository.NewItemProductFocusRepository(uc.DB)
+	err = repo.Add(c, in)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
+	"nextbasis-service-v-0.1/server/requests"
 )
 
 // IItemProductFocusRepository ...
@@ -16,7 +17,7 @@ type IItemProductFocusRepository interface {
 	CountByBranchID(c context.Context, branchID string) (int, error)
 	FindAll(ctx context.Context, parameter models.ItemProductFocusParameter) ([]models.ItemProductFocus, int, error)
 	FindByID(c context.Context, parameter models.ItemProductFocusParameter) (models.ItemProductFocus, error)
-	// Add(c context.Context, model *models.ItemProductFocus) (*string, error)
+	Add(c context.Context, in requests.ProductFocusRequest) error
 	// Edit(c context.Context, model *models.ItemProductFocus) (*string, error)
 	// Delete(c context.Context, id string, now time.Time) (string, error)
 }
@@ -37,7 +38,6 @@ func (repository ItemProductFocusRepository) scanRowsV2(rows *sql.Rows) (res mod
 		&res.ID, &res.Code, &res.Name, &res.Description, &res.ItemPicture, &res.ItemCategory, &res.AdditionalData, &res.MultiplyData,
 	)
 	if err != nil {
-
 		return res, err
 	}
 
@@ -51,7 +51,6 @@ func (repository ItemProductFocusRepository) scanRows(rows *sql.Rows) (res model
 		&res.UomID, &res.UomName, &res.UomLineConversion, &res.ItemPrice, &res.PriceListVersionId,
 	)
 	if err != nil {
-
 		return res, err
 	}
 
@@ -97,7 +96,6 @@ func (repository ItemProductFocusRepository) SelectAll(c context.Context, parame
 		` AND (LOWER(i."_name") LIKE $1)  AND IUL.CONVERSION > 1 ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	fmt.Println(statement)
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
-
 	if err != nil {
 		return data, err
 	}
@@ -142,7 +140,6 @@ func (repository ItemProductFocusRepository) SelectAllV2(c context.Context, para
 		` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	fmt.Println(statement)
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
-
 	if err != nil {
 		return data, err
 	}
@@ -233,4 +230,23 @@ func (repository ItemProductFocusRepository) FindByID(c context.Context, paramet
 	}
 
 	return data, nil
+}
+
+// Add ...
+func (repo ItemProductFocusRepository) Add(c context.Context, in requests.ProductFocusRequest) (err error) {
+	var values string
+	for _, datumCode := range in.ItemCodes {
+		for _, datumBranchID := range in.BranchIDs {
+			if values == "" {
+				values += `((select i.id from item i where i.code = '` + datumCode + `'), 1, '` + datumBranchID + `')`
+			} else {
+				values += `, ((select i.id from item i where i.code = '` + datumCode + `'), 1, '` + datumBranchID + `')`
+			}
+		}
+	}
+	statement := `insert into product_focus (item_id, active, branch_id)
+	Values ` + values
+
+	err = repo.DB.QueryRowContext(c, statement).Err()
+	return
 }
