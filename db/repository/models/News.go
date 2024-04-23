@@ -9,6 +9,7 @@ type News struct {
 	EndDate     *string `json:"end_date"`
 	Active      *string `json:"active"`
 	ImageUrl    *string `json:"image_url"`
+	Priority    string  `json:"priority"`
 }
 
 // NewsParameter ...
@@ -28,7 +29,7 @@ type NewsParameter struct {
 
 var (
 	// NewsOrderBy ...
-	NewsOrderBy = []string{"def.id", "def.title"}
+	NewsOrderBy = []string{"def.id", "def.title", "def.priority"}
 	// NewsOrderByrByString ...
 	NewsOrderByrByString = []string{
 		"def.title",
@@ -42,7 +43,8 @@ var (
 		DEF.START_DATE AS NEWS_START_DATE,
 		DEF.END_DATE AS NEWS_END_DATE,
 		DEF.IMAGE_URL,
-		DEF.ACTIVE
+		DEF.ACTIVE,
+		DEF.PRIORITY
 	FROM NEWS DEF`
 
 	// NewsWhereStatement ...
