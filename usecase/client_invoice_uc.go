@@ -475,14 +475,13 @@ func (uc CilentInvoiceUC) GetRedisDataSync(c context.Context) (res []models.Cile
 					}
 				}
 				if err == nil {
+					pointUC := PointUC{ContractUC: uc.ContractUC}
 					if invoiceObject.SalesRequestCode != nil && strings.Contains(*invoiceObject.SalesRequestCode, "CO") &&
 						invoiceObject.OutstandingAmount != nil && *invoiceObject.OutstandingAmount == "0.00" &&
 						invoiceObject.CustomerCode != nil && invoiceObject.NetAmount != nil &&
 						invoiceObject.DocumentNo != nil {
-						pointUC := PointUC{ContractUC: uc.ContractUC}
 						customer, _ := WebCustomerUC{ContractUC: uc.ContractUC}.FindByCodes(c, models.WebCustomerParameter{Code: `'` + *invoiceObject.CustomerCode + `'`})
 						if len(customer) == 1 {
-							fmt.Println("tes sini")
 							if customer[0].IndexPoint == 1 {
 								invoiceDate, _ := time.Parse("2006-01-02 15:04:05.999999999", *invoiceObject.InvoiceDate)
 								pointRules, _ := PointRuleUC{ContractUC: uc.ContractUC}.SelectAll(c, models.PointRuleParameter{
@@ -531,6 +530,65 @@ func (uc CilentInvoiceUC) GetRedisDataSync(c context.Context) (res []models.Cile
 								PointType:         "4",
 								CustomerID:        customer[0].ID,
 							})
+						}
+					} else if invoiceObject.OutstandingAmount != nil && *invoiceObject.OutstandingAmount == "0.00" &&
+						invoiceObject.CustomerCode != nil && invoiceObject.DocumentNo != nil && invoiceObject.ListLine != nil {
+						customer, _ := WebCustomerUC{ContractUC: uc.ContractUC}.FindByCodes(c, models.WebCustomerParameter{Code: `'` + *invoiceObject.CustomerCode + `'`})
+						if len(customer) == 1 {
+							if customer[0].CustomerStatusInstall {
+								pointPromoUC := PointPromoUC{ContractUC: uc.ContractUC}
+								pointPromo, err := pointPromoUC.SelectAll(c, models.PointPromoParameter{
+									Now:  true,
+									Sort: "asc",
+									By:   "def.id",
+								})
+								if err != nil {
+									logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "select_point_promo", c.Value("requestid"))
+									continue
+								}
+
+								var pointEligible float64
+								for _, pointPromoData := range pointPromo {
+									var multiplicator bool
+									for _, itemPromo := range pointPromoData.Items {
+										for _, itemCart := range *invoiceObject.ListLine {
+											if multiplicator {
+												continue
+											}
+											if itemCart.ItemID != nil && itemPromo.ID == *itemCart.ItemID {
+												cartStock, _ := strconv.ParseFloat(*itemCart.StockQty, 64)
+												cartQty, _ := strconv.ParseFloat(*itemCart.Qty, 64)
+												itemCartTotalQty := cartStock * cartQty
+
+												itemPromoConvertion, _ := strconv.ParseFloat(itemPromo.Convertion, 64)
+												itemPromoQty, _ := strconv.ParseFloat(itemPromo.Quantity, 64)
+												itemPromoTotalQty := itemPromoConvertion * itemPromoQty
+
+												eligibleMultiply := itemCartTotalQty / itemPromoTotalQty
+												if eligibleMultiply >= 1 {
+													if !pointPromoData.Multiplicator {
+														eligibleMultiply = 1
+														multiplicator = true
+													}
+													pointConvertion, _ := strconv.ParseFloat(pointPromoData.PointConversion, 64)
+													pointGet := pointConvertion * float64(int(eligibleMultiply))
+													pointEligible += pointGet
+												}
+
+											}
+										}
+									}
+								}
+
+								if pointEligible != 0 {
+									pointUC.Add(c, requests.PointRequest{
+										InvoiceDocumentNo: *invoiceObject.DocumentNo,
+										Point:             strconv.FormatFloat(pointEligible, 'f', 0, 64),
+										PointType:         "4",
+										CustomerID:        customer[0].ID,
+									})
+								}
+							}
 						}
 					}
 				}

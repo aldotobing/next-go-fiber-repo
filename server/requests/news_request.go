@@ -9,6 +9,7 @@ type NewsRequest struct {
 	Description string `json:"description"`
 	Active      string `json:"active"`
 	ImageUrl    string `json:"image_url"`
+	Priority    string `json:"priority"`
 }
 
 type NewsBulkRequest struct {

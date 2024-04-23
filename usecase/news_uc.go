@@ -28,7 +28,6 @@ func (uc NewsUC) SelectAll(c context.Context, parameter models.NewsParameter) (r
 
 	repo := repository.NewNewsRepository(uc.DB)
 	res, err = repo.SelectAll(c, parameter)
-
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
@@ -63,7 +62,6 @@ func (uc NewsUC) FindAll(c context.Context, parameter models.NewsParameter) (res
 
 // Add ...
 func (uc NewsUC) Add(c context.Context, data *requests.NewsRequest) (res models.News, err error) {
-
 	repo := repository.NewNewsRepository(uc.DB)
 	// now := time.Now().UTC()
 	// strnow := now.Format(time.RFC3339)
@@ -86,7 +84,6 @@ func (uc NewsUC) Add(c context.Context, data *requests.NewsRequest) (res models.
 
 // AddBulk ...
 func (uc NewsUC) AddBulk(c context.Context, data requests.NewsBulkRequest) (err error) {
-
 	repo := repository.NewNewsRepository(uc.DB)
 	// now := time.Now().UTC()
 	// strnow := now.Format(time.RFC3339)
@@ -99,6 +96,7 @@ func (uc NewsUC) AddBulk(c context.Context, data requests.NewsBulkRequest) (err 
 			EndDate:     &data.News[i].EndDate,
 			Active:      &data.News[i].Active,
 			ImageUrl:    &data.News[i].ImageUrl,
+			Priority:    data.News[i].Priority,
 		})
 	}
 
@@ -135,7 +133,6 @@ func (uc NewsUC) Delete(c context.Context, id string) (res viewmodel.CommonDelet
 	}
 
 	return res, err
-
 }
 
 func (uc NewsUC) Edit(c context.Context, id string, data *requests.NewsRequest) (res models.News, err error) {
@@ -150,6 +147,7 @@ func (uc NewsUC) Edit(c context.Context, id string, data *requests.NewsRequest) 
 		EndDate:     &data.EndDate,
 		Active:      &data.Active,
 		ImageUrl:    &data.ImageUrl,
+		Priority:    data.Priority,
 	}
 
 	res.ID, err = repo.Edit(c, &res)
