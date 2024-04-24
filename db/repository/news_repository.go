@@ -168,7 +168,7 @@ func (repository NewsRepository) Edit(c context.Context, model *models.News) (re
 		title = $3, 
 		description = $4, 
 		active = $5,
-		image_url = $6
+		image_url = $6,
 		priority = $7
 	WHERE id = $8 RETURNING id`
 
