@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -167,7 +168,7 @@ func (h *WebCustomerHandler) FindByID(ctx *fiber.Ctx) error {
 		pointRules, _ := usecase.PointRuleUC{ContractUC: uc.ContractUC}.SelectAll(c, models.PointRuleParameter{
 			By:   "def.id",
 			Sort: "asc",
-			Now:  "1",
+			Now:  time.Now().Format("2006-01-02"),
 		})
 		if len(pointRules) > 0 {
 			pointData.MonthlyMaxPoint = pointRules[0].MonthlyMaxPoint
