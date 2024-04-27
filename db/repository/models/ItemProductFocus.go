@@ -115,5 +115,5 @@ AND IP.ITEM_ID = IUL.ITEM_ID`
 	FROM PRODUCT_FOCUS DEF`
 
 	// ItemProductFocusWhereStatement ...
-	ItemProductFocusV2WhereStatement = ` WHERE def.created_date IS not NULL AND I.HIDE = 0`
+	ItemProductFocusV2WhereStatement = ` WHERE def.created_date IS not NULL AND I.HIDE = 0 and def.active = 1 `
 )

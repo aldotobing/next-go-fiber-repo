@@ -52,6 +52,9 @@ type WebCustomer struct {
 	CustomerSalesmanID         sql.NullString `json:"customer_salesman_id"`
 	CustomerNik                sql.NullString `json:"customer_nik"`
 	CustomerPhotoKtp           sql.NullString `json:"customer_photo_ktp"`
+	CustomerPhotoKtpDashboard  sql.NullString `json:"customer_photo_ktp_dashboard"`
+	CustomerPhotoNpwp          sql.NullString `json:"customer_photo_npwp"`
+	CustomerPhotoNpwpDashboard sql.NullString `json:"customer_photo_npwp_dashboard"`
 	CustomerLevelID            sql.NullInt64  `json:"customer_level_id"`
 	CustomerLevel              sql.NullString `json:"customer_level_name"`
 	CustomerUserID             sql.NullString `json:"customer_user_id"`
@@ -73,30 +76,33 @@ type WebCustomer struct {
 	SalesmanTypeCode           sql.NullString `json:"salesman_type_code"`
 	SalesmanTypeName           sql.NullString `json:"salesman_type_name"`
 	CustomerAdminValidate      bool           `json:"customer_admin_validate"`
+	IndexPoint                 int            `json:"index_point"`
 }
 
 // CustomerParameter ...
 type WebCustomerParameter struct {
-	ID             string `json:"customer_id"`
-	Code           string `json:"customer_code"`
-	Name           string `json:"customer_name"`
-	CustomerTypeId string `json:"custome_type_id"`
-	SalesmanTypeID string `json:"salesman_type_id"`
-	UserId         string `json:"admin_user_id"`
-	BranchId       string `json:"branch_id"`
-	Search         string `json:"search"`
-	Page           int    `json:"page"`
-	Offset         int    `json:"offset"`
-	Limit          int    `json:"limit"`
-	By             string `json:"by"`
-	Sort           string `json:"sort"`
-	PhoneNumber    string `json:"phone_number"`
-	StartDate      string `json:"start_date"`
-	EndDate        string `json:"end_date"`
-	ShowInApp      string `json:"show_in_app"`
-	Active         string `json:"active"`
-	IsDataComplete string `json:"is_data_complete"`
-	AdminValidate  string `json:"admin_validate"`
+	ID              string `json:"customer_id"`
+	Code            string `json:"customer_code"`
+	Codes           string `json:"customer_codes"`
+	Name            string `json:"customer_name"`
+	CustomerTypeId  string `json:"custome_type_id"`
+	SalesmanTypeID  string `json:"salesman_type_id"`
+	UserId          string `json:"admin_user_id"`
+	BranchId        string `json:"branch_id"`
+	Search          string `json:"search"`
+	Page            int    `json:"page"`
+	Offset          int    `json:"offset"`
+	Limit           int    `json:"limit"`
+	By              string `json:"by"`
+	Sort            string `json:"sort"`
+	PhoneNumber     string `json:"phone_number"`
+	StartDate       string `json:"start_date"`
+	EndDate         string `json:"end_date"`
+	ShowInApp       string `json:"show_in_app"`
+	Active          string `json:"active"`
+	IsDataComplete  string `json:"is_data_complete"`
+	AdminValidate   string `json:"admin_validate"`
+	MonthlyMaxPoint string `json:"monthly_max_point"`
 }
 
 // WebCustomerReportParameter ...
@@ -194,7 +200,11 @@ var (
 		coalesce(C.is_data_completed,false),
 		ST.CODE,
 		ST._NAME,
-		c.admin_validate
+		c.admin_validate,
+		c.index_point,
+		C.customer_photo_ktp_dashboard,
+		C.customer_photo_npwp,
+		C.customer_photo_npwp_dashboard
 	FROM CUSTOMER C
 	LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
 	LEFT JOIN REGION REG ON REG.ID = B.REGION_ID

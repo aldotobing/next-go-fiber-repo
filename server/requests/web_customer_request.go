@@ -37,3 +37,5 @@ type WebCustomerBulkRequest struct {
 	ShowInApp string               `json:"show_in_app"`
 	Customers []WebCustomerRequest `json:"customers"`
 }
+
+

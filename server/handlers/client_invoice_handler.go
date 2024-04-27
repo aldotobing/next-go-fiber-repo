@@ -92,3 +92,30 @@ func (h *CilentInvoiceHandler) DataSync(ctx *fiber.Ctx) error {
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
+
+func (h *CilentInvoiceHandler) SFAPullData(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.CilentInvoiceParameter{
+		CustomerID: ctx.Params("customer_id"),
+		Search:     ctx.Query("search"),
+		By:         ctx.Query("by"),
+		Sort:       ctx.Query("sort"),
+		Page:       str.StringToInt(ctx.Query("page")),
+		Limit:      str.StringToInt(ctx.Query("limit")),
+		DateParam:  ctx.Query("date_param"),
+	}
+	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
+	res, err := uc.SFAPullData(c, parameter)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *CilentInvoiceHandler) GetRedisDataSync(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
+	res, err := uc.GetRedisDataSync(c)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}

@@ -3,12 +3,12 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"strconv"
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/server/requests"
+	"nextbasis-service-v-0.1/usecase/viewmodel"
 )
 
 // ICustomerRepository ...
@@ -20,6 +20,7 @@ type IWebCustomerRepository interface {
 	FindByCodes(c context.Context, parameter models.WebCustomerParameter) (data []models.WebCustomer, err error)
 	Edit(c context.Context, model models.WebCustomer) (string, error)
 	EditBulk(c context.Context, in requests.WebCustomerBulkRequest) error
+	EditIndexPoint(c context.Context, in []viewmodel.PointRuleCustomerVM) error
 	Add(c context.Context, model models.WebCustomer) (string, error)
 	ReportSelect(c context.Context, parameter models.WebCustomerReportParameter) ([]models.WebCustomer, error)
 }
@@ -99,6 +100,10 @@ func (repository WebCustomerRepository) scanRows(rows *sql.Rows) (res models.Web
 		&res.SalesmanTypeCode,
 		&res.SalesmanTypeName,
 		&res.CustomerAdminValidate,
+		&res.IndexPoint,
+		&res.CustomerPhotoKtpDashboard,
+		&res.CustomerPhotoNpwp,
+		&res.CustomerPhotoNpwpDashboard,
 	)
 	if err != nil {
 
@@ -235,6 +240,10 @@ func (repository WebCustomerRepository) scanRow(row *sql.Row) (res models.WebCus
 		&res.SalesmanTypeCode,
 		&res.SalesmanTypeName,
 		&res.CustomerAdminValidate,
+		&res.IndexPoint,
+		&res.CustomerPhotoKtpDashboard,
+		&res.CustomerPhotoNpwp,
+		&res.CustomerPhotoNpwpDashboard,
 	)
 	if err != nil {
 		return res, err
@@ -275,12 +284,16 @@ func (repository WebCustomerRepository) SelectAll(c context.Context, parameter m
 		conditionString += ` AND C.CUSTOMER_CODE IN (` + parameter.Code + `)`
 	}
 
-	statement := models.WebCustomerSelectStatement + ` ` + models.WebCustomerWhereStatement +
+	var whereStatement string
+	if parameter.ShowInApp == "" || parameter.ShowInApp == "1" {
+		whereStatement = models.WebCustomerWhereStatement
+	} else {
+		whereStatement = models.WebCustomerWhereStatementAll
+	}
+
+	statement := models.WebCustomerSelectStatement + ` ` + whereStatement +
 		` AND (LOWER(c.customer_name) LIKE $1 or LOWER(c.customer_code) LIKE $1 ) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
-
-	//print
-	// fmt.Println(statement)
 
 	if err != nil {
 		return data, err
@@ -415,6 +428,10 @@ func (repository WebCustomerRepository) FindAll(ctx context.Context, parameter m
 		conditionString += `AND C.admin_validate = false`
 	}
 
+	if parameter.MonthlyMaxPoint != "" {
+		conditionString += ` AND C.MONTHLY_MAX_POINT IS NOT NULL AND C.MONTHLY_MAX_POINT != 0`
+	}
+
 	query := models.WebCustomerSelectStatement + ` ` + whereStatement + ` ` + conditionString + `
 		AND (LOWER(c.customer_name) LIKE $` + strconv.Itoa(index) + ` or LOWER(c.customer_code) LIKE $` + strconv.Itoa(index) + `) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $` + strconv.Itoa(index+1) + ` LIMIT $` + strconv.Itoa(index+2)
 
@@ -447,8 +464,6 @@ func (repository WebCustomerRepository) FindByID(c context.Context, parameter mo
 	statement := models.WebCustomerSelectStatement + ` WHERE c.id = $1`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
 
-	fmt.Println(statement)
-
 	data, err = repository.scanRow(row)
 	if err != nil {
 		return data, err
@@ -459,7 +474,14 @@ func (repository WebCustomerRepository) FindByID(c context.Context, parameter mo
 
 // FindByCodes ...
 func (repository WebCustomerRepository) FindByCodes(c context.Context, parameter models.WebCustomerParameter) (data []models.WebCustomer, err error) {
-	statement := models.WebCustomerSelectStatement + ` WHERE c.customer_code in (` + parameter.Code + `)`
+	var whereStatement string
+	if parameter.Codes != "" {
+		whereStatement = ` WHERE c.customer_code in (` + parameter.Code + `)`
+	} else if parameter.Code != "" {
+		whereStatement = ` WHERE c.customer_code = ` + parameter.Code + ``
+	}
+
+	statement := models.WebCustomerSelectStatement + whereStatement
 	rows, err := repository.DB.QueryContext(c, statement)
 	if err != nil {
 		return
@@ -481,8 +503,6 @@ func (repository WebCustomerRepository) FindByCodes(c context.Context, parameter
 func (repository WebCustomerRepository) FindByIDNoCache(c context.Context, parameter models.WebCustomerParameter) (data models.WebCustomer, err error) {
 	statement := models.WebCustomerSelectStatement + ` WHERE c.id = $1`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
-
-	// fmt.Println(statement)
 
 	data, err = repository.scanRow(row)
 	if err != nil {
@@ -512,8 +532,11 @@ func (repository WebCustomerRepository) Edit(c context.Context, model models.Web
 		modified_date = now(),
 		modified_by = $15,
 		show_in_apps = $16,
-		admin_validate = $17
-	WHERE id = $18
+		admin_validate = $17,
+		customer_photo_ktp_dashboard = $18,
+		customer_photo_npwp = $19,
+		customer_photo_npwp_dashboard = $20
+	WHERE id = $21
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		model.CustomerName.String,
@@ -533,6 +556,9 @@ func (repository WebCustomerRepository) Edit(c context.Context, model models.Web
 		model.UserID.Int64,
 		model.ShowInApp.String,
 		model.CustomerAdminValidate,
+		model.CustomerPhotoKtpDashboard.String,
+		model.CustomerPhotoNpwp.String,
+		model.CustomerPhotoNpwpDashboard.String,
 		model.ID.String).Scan(&res)
 
 	if err != nil {
@@ -560,6 +586,29 @@ func (repo WebCustomerRepository) EditBulk(c context.Context, in requests.WebCus
 		in.ShowInApp,
 		in.Active,
 		in.UserID).Err()
+
+	return
+}
+
+func (repo WebCustomerRepository) EditIndexPoint(c context.Context, in []viewmodel.PointRuleCustomerVM) (err error) {
+	var customersCode string
+
+	for _, datum := range in {
+		if customersCode == "" {
+			customersCode += `('` + datum.CustomerCode + `', ` + datum.Value + `)`
+		} else {
+			customersCode += `, ('` + datum.CustomerCode + `', ` + datum.Value + `)`
+		}
+	}
+
+	statement := `update customer as c set
+		index_point = val.column_a
+	from (values
+		` + customersCode + `
+	) as val(column_b, column_a) 
+	where c.customer_code = val.column_b;`
+
+	err = repo.DB.QueryRowContext(c, statement).Err()
 
 	return
 }

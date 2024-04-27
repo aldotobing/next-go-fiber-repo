@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -59,20 +60,21 @@ func (h *WebCustomerHandler) SelectAll(ctx *fiber.Ctx) error {
 func (h *WebCustomerHandler) FindAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 	parameter := models.WebCustomerParameter{
-		ID:             ctx.Query("customer_id"),
-		CustomerTypeId: ctx.Query("customer_type_id"),
-		UserId:         ctx.Query("admin_user_id"),
-		BranchId:       ctx.Query("branch_id"),
-		Search:         ctx.Query("search"),
-		Page:           str.StringToInt(ctx.Query("page")),
-		Limit:          str.StringToInt(ctx.Query("limit")),
-		By:             ctx.Query("by"),
-		Sort:           ctx.Query("sort"),
-		PhoneNumber:    ctx.Query("phone_number"),
-		ShowInApp:      ctx.Query("show_in_app"),
-		Active:         ctx.Query("active"),
-		IsDataComplete: ctx.Query("is_data_complete"),
-		AdminValidate:  ctx.Query("admin_validate"),
+		ID:              ctx.Query("customer_id"),
+		CustomerTypeId:  ctx.Query("customer_type_id"),
+		UserId:          ctx.Query("admin_user_id"),
+		BranchId:        ctx.Query("branch_id"),
+		Search:          ctx.Query("search"),
+		Page:            str.StringToInt(ctx.Query("page")),
+		Limit:           str.StringToInt(ctx.Query("limit")),
+		By:              ctx.Query("by"),
+		Sort:            ctx.Query("sort"),
+		PhoneNumber:     ctx.Query("phone_number"),
+		ShowInApp:       ctx.Query("show_in_app"),
+		Active:          ctx.Query("active"),
+		IsDataComplete:  ctx.Query("is_data_complete"),
+		AdminValidate:   ctx.Query("admin_validate"),
+		MonthlyMaxPoint: ctx.Query("monthly_max_point"),
 	}
 	uc := usecase.WebCustomerUC{ContractUC: h.ContractUC}
 	res, meta, err := uc.FindAll(c, parameter)
@@ -161,6 +163,19 @@ func (h *WebCustomerHandler) FindByID(ctx *fiber.Ctx) error {
 		Code: res.Code,
 	})
 
+	pointData, _ := usecase.PointMaxCustomerUC{ContractUC: h.ContractUC}.FindByCustomerCode(c, res.Code)
+	if pointData.MonthlyMaxPoint == "" {
+		pointRules, _ := usecase.PointRuleUC{ContractUC: uc.ContractUC}.SelectAll(c, models.PointRuleParameter{
+			By:   "def.id",
+			Sort: "asc",
+			Now:  time.Now().Format("2006-01-02"),
+		})
+		if len(pointRules) > 0 {
+			pointData.MonthlyMaxPoint = pointRules[0].MonthlyMaxPoint
+		}
+	}
+	objectData.ListObject.MonthlyMaxPoint = pointData.MonthlyMaxPoint
+
 	return h.SendResponse(ctx, objectData, nil, err, 0)
 }
 
@@ -179,7 +194,6 @@ func (h *WebCustomerHandler) FetchVisitDay(params models.WebCustomerParameter) s
 
 	resp, err := client.Do(req)
 	if err != nil {
-
 		fmt.Print(err.Error())
 	}
 	defer resp.Body.Close()
@@ -225,8 +239,11 @@ func (h *WebCustomerHandler) Edit(ctx *fiber.Ctx) error {
 
 	imgProfile, _ := ctx.FormFile("img_profile")
 	imgKtp, _ := ctx.FormFile("img_ktp")
+	imgKtpDasboard, _ := ctx.FormFile("img_ktp_dasboard")
+	imgNpwp, _ := ctx.FormFile("img_npwp")
+	imgNpwpDashboard, _ := ctx.FormFile("img_npwp_dashboard")
 	uc := usecase.WebCustomerUC{ContractUC: h.ContractUC}
-	res, err := uc.Edit(c, id, input, imgProfile, imgKtp)
+	res, err := uc.Edit(c, id, input, imgProfile, imgKtp, imgKtpDasboard, imgNpwp, imgNpwpDashboard)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }

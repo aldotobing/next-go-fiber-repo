@@ -8,11 +8,16 @@ type PointRuleRequest struct {
 	PointConversion string              `json:"point_conversion" validate:"required"`
 	MonthlyMaxPoint string              `json:"monthly_max_point" validate:"required"`
 	Customers       []PointRuleCustomer `json:"customers"`
+	Eligible        []Eligible          `json:"eligible"`
 }
 
 type PointRuleCustomer struct {
 	CustomerCode string `json:"customer_code"`
-	RegionID     string `json:"region_id"`
-	Area         string `json:"area"`
-	BranchID     string `json:"branch_id"`
+	Value        string `json:"value"`
+}
+
+type Eligible struct {
+	BranchID      string `json:"branch_id"`
+	RegionID      string `json:"region_id"`
+	RegionGroupID string `json:"region_group_id"`
 }

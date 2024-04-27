@@ -296,6 +296,21 @@ func (boot Bootstrap) RegisterRouters() {
 	pointRoute := routers.PointRoutes{RouterGroup: apiV1, Handler: handler}
 	pointRoute.RegisterRoute()
 
+	pointMaxCustomerRoute := routers.PointMaxCustomerRoutes{RouterGroup: apiV1, Handler: handler}
+	pointMaxCustomerRoute.RegisterRoute()
+
 	pointRulesRoute := routers.PointRulesRoutes{RouterGroup: apiV1, Handler: handler}
 	pointRulesRoute.RegisterRoute()
+
+	pointPromoRoute := routers.PointPromoRoutes{RouterGroup: apiV1, Handler: handler}
+	pointPromoRoute.RegisterRoute()
+
+	couponRoute := routers.CouponRoutes{RouterGroup: apiV1, Handler: handler}
+	couponRoute.RegisterRoute()
+
+	couponRedeemRoute := routers.CouponRedeemRoutes{RouterGroup: apiV1, Handler: handler}
+	couponRedeemRoute.RegisterRoute()
+
+	lottaryRoute := routers.LottaryRoutes{RouterGroup: apiV1, Handler: handler}
+	lottaryRoute.RegisterRoute()
 }

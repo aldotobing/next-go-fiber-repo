@@ -30,4 +30,6 @@ type CustomerOrderHeaderRequest struct {
 	VoucherRedeemID      string `json:"voucher_redeem_id"`
 	OldPriceID           string `json:"old_price_id"`
 	OldPriceQuantity     string `json:"old_price_qty"`
+	CouponRedeemID       string `json:"coupon_redeem_id"`
+	PointPromo           string `json:"point_promo"`
 }

@@ -11,19 +11,24 @@ const (
 
 // Point ...
 type Point struct {
-	ID            string         `json:"id"`
-	PointType     string         `json:"point_type"`
-	PointTypeName string         `json:"point_type_name"`
-	InvoiceID     sql.NullString `json:"invoice_id"`
-	Point         string         `json:"point"`
-	CustomerID    string         `json:"customer_id"`
-	CreatedAt     string         `json:"created_at"`
-	UpdatedAt     sql.NullString `json:"updated_at"`
-	DeletedAt     sql.NullString `json:"deleted_at"`
-	ExpiredAt     sql.NullString `json:"expired_at"`
-
-	Customer          WebCustomer    `json:"customer"`
+	ID                string         `json:"id"`
+	PointType         string         `json:"point_type"`
+	PointTypeName     string         `json:"point_type_name"`
 	InvoiceDocumentNo sql.NullString `json:"invoice_document_no"`
+	Point             string         `json:"point"`
+	CustomerID        string         `json:"customer_id"`
+	CreatedAt         string         `json:"created_at"`
+	UpdatedAt         sql.NullString `json:"updated_at"`
+	DeletedAt         sql.NullString `json:"deleted_at"`
+	ExpiredAt         sql.NullString `json:"expired_at"`
+	InvoiceDate       sql.NullString `json:"invoice_date"`
+	Note              sql.NullString `json:"note"`
+
+	Customer     WebCustomer   `json:"customer"`
+	Branch       Branch        `json:"branch"`
+	Region       WebRegionArea `json:"region"`
+	Partner      WebPartner    `json:"partner"`
+	SalesInvoice SalesInvoice  `json:"sales_invoice"`
 }
 
 // PointGetBalance ...
@@ -36,19 +41,24 @@ type PointGetBalance struct {
 
 // PointParameter ...
 type PointParameter struct {
-	ID         string `json:"id"`
-	CustomerID string `json:"customer_id"`
-	PointType  string `json:"point_type"`
-	StartDate  string `json:"start_date"`
-	EndDate    string `json:"end_date"`
-	Renewal    string `json:"renewal"`
-	Search     string `json:"search"`
-	ShowAll    string `json:"show_all"`
-	Page       int    `json:"page"`
-	Offset     int    `json:"offset"`
-	Limit      int    `json:"limit"`
-	By         string `json:"by"`
-	Sort       string `json:"sort"`
+	ID            string `json:"id"`
+	Month         string `json:"month"`
+	Year          string `json:"year"`
+	CustomerID    string `json:"customer_id"`
+	PointType     string `json:"point_type"`
+	StartDate     string `json:"start_date"`
+	EndDate       string `json:"end_date"`
+	Renewal       string `json:"renewal"`
+	Search        string `json:"search"`
+	ShowAll       string `json:"show_all"`
+	RegionID      string `json:"region_id"`
+	RegionGroupID string `json:"region_group_id"`
+	BranchID      string `json:"branch_id"`
+	Page          int    `json:"page"`
+	Offset        int    `json:"offset"`
+	Limit         int    `json:"limit"`
+	By            string `json:"by"`
+	Sort          string `json:"sort"`
 }
 
 var (
@@ -61,7 +71,7 @@ var (
 			DEF.ID, 
 			DEF.POINT_TYPE, 
 			PT._NAME,
-			DEF.INVOICE_ID,
+			DEF.INVOICE_DOCUMENT_NO,
 			DEF.POINT,
 			DEF.CUSTOMER_ID,
 			DEF.CREATED_AT,
@@ -73,13 +83,14 @@ var (
 			B.BRANCH_CODE,
 			B._NAME,
 			R._NAME,
-			SIH.DOCUMENT_NO
+			SIH.TRANSACTION_DATE,
+			DEF.NOTE
 		FROM POINTS DEF
 		LEFT JOIN POINT_TYPE PT ON PT.ID = DEF.POINT_TYPE
 		LEFT JOIN CUSTOMER C ON C.ID = DEF.CUSTOMER_ID
 		LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
 		LEFT JOIN REGION R ON R.ID = B.REGION_ID
-		LEFT JOIN SALES_INVOICE_HEADER SIH ON SIH.ID = DEF.INVOICE_ID
+		LEFT JOIN SALES_INVOICE_HEADER SIH ON SIH.DOCUMENT_NO = DEF.INVOICE_DOCUMENT_NO
 	`
 
 	PointWhereStatement = `WHERE DEF.DELETED_AT IS NULL `

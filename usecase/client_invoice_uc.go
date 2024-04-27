@@ -7,13 +7,17 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"nextbasis-service-v-0.1/db/repository"
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/pkg/functioncaller"
 	"nextbasis-service-v-0.1/pkg/logruslogger"
+	"nextbasis-service-v-0.1/server/requests"
 	"nextbasis-service-v-0.1/usecase/viewmodel"
 )
 
@@ -32,7 +36,6 @@ func (uc CilentInvoiceUC) SelectAll(c context.Context, parameter models.CilentIn
 
 	repo := repository.NewCilentInvoiceRepository(uc.DB)
 	res, err = repo.SelectAll(c, parameter)
-
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
@@ -154,8 +157,6 @@ func (uc CilentInvoiceUC) DataSync(c context.Context, parameter models.CilentInv
 	strnow := now.Format(time.RFC3339)
 	parameter.DateParam = strnow
 
-	fmt.Println("Get Date" + parameter.DateParam)
-
 	jsonReq, err := json.Marshal(parameter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal json: %w", err)
@@ -186,18 +187,64 @@ func (uc CilentInvoiceUC) DataSync(c context.Context, parameter models.CilentInv
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	fmt.Println("Response Body:", string(bodyBytes))
-
 	var res []models.CilentInvoice
-	if err := json.Unmarshal(bodyBytes, &res); err != nil {
+	if err := json.Unmarshal([]byte(bodyBytes), &res); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
 	}
 
 	var resBuilder []models.CilentInvoice
 	for _, invoiceObject := range res {
-		_, err := repo.InsertDataWithLine(c, &invoiceObject)
+		_, _, err := repo.InsertDataWithLine(c, &invoiceObject)
 		if err != nil {
-			// return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
+			return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
+		}
+
+		if invoiceObject.SalesRequestCode != nil && strings.Contains(*invoiceObject.SalesRequestCode, "CO") &&
+			invoiceObject.OutstandingAmount != nil && *invoiceObject.OutstandingAmount == "0.00" &&
+			invoiceObject.CustomerCode != nil && invoiceObject.NetAmount != nil &&
+			invoiceObject.DocumentNo != nil {
+			customer, _ := WebCustomerUC{ContractUC: uc.ContractUC}.FindByCodes(c, models.WebCustomerParameter{Code: `'` + *invoiceObject.CustomerCode + `'`})
+			if len(customer) == 1 {
+				if customer[0].IndexPoint == 1 {
+					pointRules, _ := PointRuleUC{ContractUC: uc.ContractUC}.SelectAll(c, models.PointRuleParameter{
+						Now:  time.Now().Format("2006-01-02"),
+						By:   "def.id",
+						Sort: "asc",
+					})
+					pointUC := PointUC{ContractUC: uc.ContractUC}
+					invoiceDate, _ := time.Parse("2006-01-02 15:04:05.999999999", *invoiceObject.InvoiceDate)
+					pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID, strconv.Itoa(int(invoiceDate.Month())), strconv.Itoa(invoiceDate.Year()))
+					for _, rules := range pointRules {
+						pointMonthly, _ := strconv.ParseFloat(pointThisMonth.Balance, 64)
+
+						var maxMonthly float64
+						if customer[0].MonthlyMaxPoint != "" && customer[0].MonthlyMaxPoint != "0" {
+							maxMonthly, _ = strconv.ParseFloat(customer[0].MonthlyMaxPoint, 64)
+						} else {
+							maxMonthly, _ = strconv.ParseFloat(rules.MonthlyMaxPoint, 64)
+						}
+
+						minOrder, _ := strconv.ParseFloat(rules.MinOrder, 64)
+						netOmount, _ := strconv.ParseFloat(*invoiceObject.NetAmount, 64)
+
+						pointConversion, _ := strconv.ParseFloat(rules.PointConversion, 64)
+						getPoint := math.Floor(netOmount/minOrder) * pointConversion
+
+						if pointMonthly+getPoint > maxMonthly {
+							getPoint = maxMonthly - pointMonthly
+						}
+
+						if getPoint > 0 {
+							pointUC.Add(c, requests.PointRequest{
+								InvoiceDocumentNo: *invoiceObject.DocumentNo,
+								Point:             strconv.FormatFloat(getPoint, 'f', 0, 64),
+								PointType:         "2",
+								CustomerID:        customer[0].ID,
+							})
+						}
+					}
+				}
+			}
 		}
 		resBuilder = append(resBuilder, invoiceObject)
 	}
@@ -244,12 +291,730 @@ func (uc CilentInvoiceUC) UndoneDataSync(c context.Context, parameter models.Cil
 
 	var resBuilder []models.CilentInvoice
 	for _, invoiceObject := range res {
-		_, err := repo.InsertDataWithLine(c, &invoiceObject)
+		_, _, err := repo.InsertDataWithLine(c, &invoiceObject)
 		if err != nil {
 			// return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
 		}
+
 		resBuilder = append(resBuilder, invoiceObject)
 	}
 
 	return resBuilder, nil
+}
+
+func (uc CilentInvoiceUC) SFAPullData(c context.Context, parameter models.CilentInvoiceParameter) ([]models.CilentInvoice, error) {
+	// fmt.Println("put redis")
+	loc, err := time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		return nil, fmt.Errorf("failed to load location: %w", err)
+	}
+
+	now := time.Now().In(loc).Add(time.Minute * time.Duration(-30))
+	strnow := now.Format(time.RFC3339)
+	parameter.DateParam = strnow
+
+	jsonReq, err := json.Marshal(parameter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal json: %w", err)
+	}
+
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrv/rest/salesInvoice/data/sfa", bytes.NewBuffer(jsonReq))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new request: %w", err)
+	}
+
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer C2A5CE6A2292E7745CE5A3F7E68A9")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute request: %w", err)
+	}
+
+	if resp == nil || resp.Body == nil {
+		return nil, errors.New("response or response body is nil")
+	}
+	defer resp.Body.Close()
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	var res []models.CilentInvoice
+	if err := json.Unmarshal([]byte(bodyBytes), &res); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
+	}
+
+	var resBuilder []models.CilentInvoice
+	for _, invoiceObject := range res {
+		cacheKey := "sfa_invoice_:" + *invoiceObject.DocumentNo
+		jsonData, err := json.Marshal(invoiceObject)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
+			return res, err
+		}
+		err = uc.RedisClient.Client.Set(cacheKey, jsonData, time.Hour*168).Err()
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
+			return res, err
+		}
+		// &invoiceObject
+		resBuilder = append(resBuilder, invoiceObject)
+	}
+
+	return resBuilder, nil
+}
+
+func (uc CilentInvoiceUC) MYSMPullData(c context.Context, parameter models.CilentInvoiceParameter) ([]models.CilentInvoice, error) {
+	// fmt.Println("put redis")
+	loc, err := time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		return nil, fmt.Errorf("failed to load location: %w", err)
+	}
+
+	now := time.Now().In(loc).Add(time.Minute * time.Duration(-40))
+	strnow := now.Format(time.RFC3339)
+	parameter.DateParam = strnow
+
+	jsonReq, err := json.Marshal(parameter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal json: %w", err)
+	}
+
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrv/rest/salesInvoice/data/mysm", bytes.NewBuffer(jsonReq))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new request: %w", err)
+	}
+
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer C2A5CE6A2292E7745CE5A3F7E68A9")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute request: %w", err)
+	}
+
+	if resp == nil || resp.Body == nil {
+		return nil, errors.New("response or response body is nil")
+	}
+	defer resp.Body.Close()
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	var res []models.CilentInvoice
+	if err := json.Unmarshal([]byte(bodyBytes), &res); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
+	}
+
+	var resBuilder []models.CilentInvoice
+	for _, invoiceObject := range res {
+		cacheKey := "mysm_invoice_:" + *invoiceObject.DocumentNo
+		jsonData, err := json.Marshal(invoiceObject)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
+			return res, err
+		}
+		err = uc.RedisClient.Client.Set(cacheKey, jsonData, time.Hour*168).Err()
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
+			return res, err
+		}
+		// &invoiceObject
+		resBuilder = append(resBuilder, invoiceObject)
+	}
+
+	return resBuilder, nil
+}
+
+func (uc CilentInvoiceUC) GetRedisDataSync(c context.Context) (res []models.CilentInvoice, err error) {
+	cacheKey := "*invoice_header*"
+	repo := repository.NewCilentInvoiceRepository(uc.DB)
+
+	// Try to get data from Redis cache first
+	strinvList, err := uc.RedisClient.GetAllKeyFromRedis(cacheKey)
+
+	if err == nil {
+		fmt.Println("list key ", strinvList)
+		for i := 0; i < 125; i++ {
+
+			key := strinvList[i]
+			fmt.Println("key", key)
+			invoiceObject := new(models.CilentInvoice)
+			err = uc.RedisClient.GetFromRedis(key, &invoiceObject)
+			if err != nil {
+				fmt.Println(err)
+			}
+			if err == nil {
+				fmt.Println("from redis : ", key)
+				_, _, err := repo.InsertDataWithLine(c, invoiceObject)
+				if err != nil {
+					errstr := err.Error()
+					if strings.Contains(errstr, "cust_bill_to_id") || strings.Contains(errstr, "uom_id") || strings.Contains(errstr, "item_id") ||
+						strings.Contains(errstr, "more than one row returned by a subquery used as an expression") {
+						cacheKeyerr := "err_cus_item_uom_inv:" + *invoiceObject.DocumentNo
+						errjsonData, err := json.Marshal(invoiceObject)
+						if err != nil {
+							logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
+							return res, err
+						}
+						err = uc.RedisClient.Client.Set(cacheKeyerr, errjsonData, time.Hour*168).Err()
+						if err != nil {
+							logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
+							return res, err
+						}
+					} else {
+						return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
+					}
+				}
+				if err == nil {
+					pointUC := PointUC{ContractUC: uc.ContractUC}
+					if invoiceObject.SalesRequestCode != nil && strings.Contains(*invoiceObject.SalesRequestCode, "CO") &&
+						invoiceObject.OutstandingAmount != nil && *invoiceObject.OutstandingAmount == "0.00" &&
+						invoiceObject.CustomerCode != nil && invoiceObject.NetAmount != nil &&
+						invoiceObject.DocumentNo != nil {
+						customer, _ := WebCustomerUC{ContractUC: uc.ContractUC}.FindByCodes(c, models.WebCustomerParameter{Code: `'` + *invoiceObject.CustomerCode + `'`})
+						if len(customer) == 1 {
+							if customer[0].IndexPoint == 1 {
+								invoiceDate, _ := time.Parse("2006-01-02 15:04:05.999999999", *invoiceObject.InvoiceDate)
+								pointRules, _ := PointRuleUC{ContractUC: uc.ContractUC}.SelectAll(c, models.PointRuleParameter{
+									Now:  invoiceDate.Format("2006-01-02"),
+									By:   "def.id",
+									Sort: "asc",
+								})
+								pointMaxCustomer, _ := PointMaxCustomerUC{ContractUC: uc.ContractUC}.FindByCustomerCodeWithDateInvoice(c, customer[0].Code, invoiceDate.Format("2006-01-02"))
+								pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID, strconv.Itoa(int(invoiceDate.Month())), strconv.Itoa(invoiceDate.Year()))
+								for _, rules := range pointRules {
+									pointMonthly, _ := strconv.ParseFloat(pointThisMonth.Balance, 64)
+
+									var maxMonthly float64
+									if pointMaxCustomer.ID != "" {
+										maxMonthly, _ = strconv.ParseFloat(pointMaxCustomer.MonthlyMaxPoint, 64)
+									} else {
+										maxMonthly, _ = strconv.ParseFloat(rules.MonthlyMaxPoint, 64)
+									}
+
+									minOrder, _ := strconv.ParseFloat(rules.MinOrder, 64)
+									netOmount, _ := strconv.ParseFloat(*invoiceObject.NetAmount, 64)
+
+									pointConversion, _ := strconv.ParseFloat(rules.PointConversion, 64)
+									getPoint := math.Floor(netOmount/minOrder) * pointConversion
+
+									if pointMonthly+getPoint > maxMonthly {
+										getPoint = maxMonthly - pointMonthly
+									}
+
+									if getPoint > 0 {
+										pointUC.Add(c, requests.PointRequest{
+											InvoiceDocumentNo: *invoiceObject.DocumentNo,
+											Point:             strconv.FormatFloat(getPoint, 'f', 0, 64),
+											PointType:         "2",
+											CustomerID:        customer[0].ID,
+										})
+									}
+								}
+							}
+						}
+						customerOrder, _ := CustomerOrderHeaderUC{ContractUC: uc.ContractUC}.FindByDocumentNo(c, *invoiceObject.SalesRequestCode)
+						if customerOrder.PointPromo != "" {
+							pointUC.Add(c, requests.PointRequest{
+								InvoiceDocumentNo: *invoiceObject.DocumentNo,
+								Point:             customerOrder.PointPromo,
+								PointType:         "4",
+								CustomerID:        customer[0].ID,
+							})
+						}
+					} else if invoiceObject.OutstandingAmount != nil && *invoiceObject.OutstandingAmount == "0.00" &&
+						invoiceObject.CustomerCode != nil && invoiceObject.DocumentNo != nil && invoiceObject.ListLine != nil {
+						customer, _ := WebCustomerUC{ContractUC: uc.ContractUC}.FindByCodes(c, models.WebCustomerParameter{Code: `'` + *invoiceObject.CustomerCode + `'`})
+						if len(customer) == 1 {
+							if customer[0].CustomerStatusInstall {
+								pointPromoUC := PointPromoUC{ContractUC: uc.ContractUC}
+								pointPromo, err := pointPromoUC.SelectAll(c, models.PointPromoParameter{
+									Now:  true,
+									Sort: "asc",
+									By:   "def.id",
+								})
+								if err != nil {
+									logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "select_point_promo", c.Value("requestid"))
+									continue
+								}
+
+								var pointEligible float64
+								for _, pointPromoData := range pointPromo {
+									var multiplicator bool
+									for _, itemPromo := range pointPromoData.Items {
+										for _, itemCart := range *invoiceObject.ListLine {
+											if multiplicator {
+												continue
+											}
+											if itemCart.ItemID != nil && itemPromo.ID == *itemCart.ItemID {
+												cartStock, _ := strconv.ParseFloat(*itemCart.StockQty, 64)
+												cartQty, _ := strconv.ParseFloat(*itemCart.Qty, 64)
+												itemCartTotalQty := cartStock * cartQty
+
+												itemPromoConvertion, _ := strconv.ParseFloat(itemPromo.Convertion, 64)
+												itemPromoQty, _ := strconv.ParseFloat(itemPromo.Quantity, 64)
+												itemPromoTotalQty := itemPromoConvertion * itemPromoQty
+
+												eligibleMultiply := itemCartTotalQty / itemPromoTotalQty
+												if eligibleMultiply >= 1 {
+													if !pointPromoData.Multiplicator {
+														eligibleMultiply = 1
+														multiplicator = true
+													}
+													pointConvertion, _ := strconv.ParseFloat(pointPromoData.PointConversion, 64)
+													pointGet := pointConvertion * float64(int(eligibleMultiply))
+													pointEligible += pointGet
+												}
+
+											}
+										}
+									}
+								}
+
+								if pointEligible != 0 {
+									pointUC.Add(c, requests.PointRequest{
+										InvoiceDocumentNo: *invoiceObject.DocumentNo,
+										Point:             strconv.FormatFloat(pointEligible, 'f', 0, 64),
+										PointType:         "4",
+										CustomerID:        customer[0].ID,
+									})
+								}
+							}
+						}
+					}
+				}
+
+				res = append(res, *invoiceObject)
+				fmt.Println(key)
+				_ = uc.RedisClient.Delete(key)
+			}
+		}
+
+	}
+
+	return res, nil
+}
+
+func (uc CilentInvoiceUC) GetRedisDataReserveSync(c context.Context) (res []models.CilentInvoice, err error) {
+	cacheKey := "*invoice_header*"
+	repo := repository.NewCilentInvoiceRepository(uc.DB)
+
+	// Try to get data from Redis cache first
+	strinvList, err := uc.RedisClient.GetAllKeyFromRedis(cacheKey)
+
+	if err == nil {
+		fmt.Println("list key ", strinvList)
+		for i := range strinvList {
+			key := strinvList[len(strinvList)-1-i]
+			invoiceObject := new(models.CilentInvoice)
+			err = uc.RedisClient.GetFromRedis(key, &invoiceObject)
+			if err != nil {
+				fmt.Println(err)
+			}
+			if err == nil {
+				fmt.Println("from redis : ", key)
+				_, _, err := repo.InsertDataWithLine(c, invoiceObject)
+				if err != nil {
+					errstr := err.Error()
+					if strings.Contains(errstr, "cust_bill_to_id") || strings.Contains(errstr, "uom_id") || strings.Contains(errstr, "item_id") ||
+						strings.Contains(errstr, "more than one row returned by a subquery used as an expression") {
+						cacheKeyerr := "err_cus_item_uom_inv:" + *invoiceObject.DocumentNo
+						errjsonData, err := json.Marshal(invoiceObject)
+						if err != nil {
+							logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
+							return res, err
+						}
+						err = uc.RedisClient.Client.Set(cacheKeyerr, errjsonData, time.Hour*168).Err()
+						if err != nil {
+							logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
+							return res, err
+						}
+					} else {
+						return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
+					}
+					// jsonDatas, errj := json.Marshal(invoiceObject)
+					// if errj != nil {
+					// 	logruslogger.Log(logruslogger.WarnLevel, errj.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
+					// 	// return res, err
+					// }
+					// errrd := uc.RedisClient.Client.Set("error_data_inv_:"+*invoiceObject.DocumentNo, jsonDatas, time.Hour*24).Err()
+					// if errrd != nil {
+					// 	logruslogger.Log(logruslogger.WarnLevel, errrd.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
+					// 	// return res, err
+					// }
+
+				}
+				if err == nil {
+					if invoiceObject.SalesRequestCode != nil && strings.Contains(*invoiceObject.SalesRequestCode, "CO") &&
+						invoiceObject.OutstandingAmount != nil && *invoiceObject.OutstandingAmount == "0.00" &&
+						invoiceObject.CustomerCode != nil && invoiceObject.NetAmount != nil &&
+						invoiceObject.DocumentNo != nil {
+						customer, _ := WebCustomerUC{ContractUC: uc.ContractUC}.FindByCodes(c, models.WebCustomerParameter{Code: `'` + *invoiceObject.CustomerCode + `'`})
+						if len(customer) == 1 {
+							if customer[0].IndexPoint == 1 {
+								invoiceDate, _ := time.Parse("2006-01-02 15:04:05.999999999", *invoiceObject.InvoiceDate)
+
+								pointRules, _ := PointRuleUC{ContractUC: uc.ContractUC}.SelectAll(c, models.PointRuleParameter{
+									Now:  invoiceDate.Format("2006-01-02"),
+									By:   "def.id",
+									Sort: "asc",
+								})
+								pointMaxCustomer, _ := PointMaxCustomerUC{ContractUC: uc.ContractUC}.FindByCustomerCode(c, customer[0].Code)
+								pointUC := PointUC{ContractUC: uc.ContractUC}
+								pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID, strconv.Itoa(int(invoiceDate.Month())), strconv.Itoa(invoiceDate.Year()))
+								for _, rules := range pointRules {
+									pointMonthly, _ := strconv.ParseFloat(pointThisMonth.Balance, 64)
+
+									var maxMonthly float64
+									if pointMaxCustomer.ID != "" {
+										maxMonthly, _ = strconv.ParseFloat(pointMaxCustomer.MonthlyMaxPoint, 64)
+									} else {
+										maxMonthly, _ = strconv.ParseFloat(rules.MonthlyMaxPoint, 64)
+									}
+
+									minOrder, _ := strconv.ParseFloat(rules.MinOrder, 64)
+									netOmount, _ := strconv.ParseFloat(*invoiceObject.NetAmount, 64)
+
+									pointConversion, _ := strconv.ParseFloat(rules.PointConversion, 64)
+									getPoint := math.Floor(netOmount/minOrder) * pointConversion
+
+									if pointMonthly+getPoint > maxMonthly {
+										getPoint = maxMonthly - pointMonthly
+									}
+
+									if getPoint > 0 {
+										pointUC.Add(c, requests.PointRequest{
+											InvoiceDocumentNo: *invoiceObject.DocumentNo,
+											Point:             strconv.FormatFloat(getPoint, 'f', 0, 64),
+											PointType:         "2",
+											CustomerID:        customer[0].ID,
+										})
+									}
+								}
+							}
+						}
+					}
+				}
+
+				res = append(res, *invoiceObject)
+				fmt.Println(key)
+				err = uc.RedisClient.Delete(key)
+			}
+
+		}
+
+	}
+
+	return res, nil
+}
+
+func (uc CilentInvoiceUC) SFASyncData(c context.Context) (res []models.CilentInvoice, err error) {
+	cacheKey := "*sfa_invoice_*"
+	repo := repository.NewCilentInvoiceRepository(uc.DB)
+
+	// Try to get data from Redis cache first
+	strinvList, err := uc.RedisClient.GetAllKeyFromRedis(cacheKey)
+
+	if err == nil {
+		minLen := 250
+		keyLen := len(strinvList)
+
+		if keyLen < minLen {
+			minLen = keyLen
+		}
+
+		if minLen > 0 {
+			// fmt.Println("list key ", strinvList)
+			for i := 0; i < minLen; i++ {
+
+				key := strinvList[i]
+				fmt.Println("key", key)
+				invoiceObject := new(models.CilentInvoice)
+				err = uc.RedisClient.GetFromRedis(key, &invoiceObject)
+				if err != nil {
+					fmt.Println(err)
+				}
+				if err == nil {
+					fmt.Println("from redis : ", key)
+					_, _, err := repo.MergeDataWithLine(c, invoiceObject)
+					if err != nil {
+						errstr := err.Error()
+						if strings.Contains(errstr, "cust_bill_to_id") || strings.Contains(errstr, "uom_id") || strings.Contains(errstr, "item_id") ||
+							strings.Contains(errstr, "more than one row returned by a subquery used as an expression") {
+							cacheKeyerr := "err_cus_item_uom_inv:" + *invoiceObject.DocumentNo
+							invoiceObject.ErrorMessage = &errstr
+							errjsonData, err := json.Marshal(invoiceObject)
+							if err != nil {
+								logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
+								return res, err
+							}
+							err = uc.RedisClient.Client.Set(cacheKeyerr, errjsonData, time.Hour*168).Err()
+							if err != nil {
+								logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
+								return res, err
+							}
+						} else {
+							return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
+						}
+					}
+
+					res = append(res, *invoiceObject)
+					fmt.Println(key)
+					_ = uc.RedisClient.Delete(key)
+				}
+			}
+		}
+
+	}
+
+	return res, nil
+}
+
+func (uc CilentInvoiceUC) GetRedisDataSyncPointOnly(c context.Context) (res []models.CilentInvoice, err error) {
+	cacheKey := "*mysm_invoice_*"
+	repo := repository.NewCilentInvoiceRepository(uc.DB)
+
+	// Try to get data from Redis cache first
+	strinvList, err := uc.RedisClient.GetAllKeyFromRedis(cacheKey)
+
+	if err == nil {
+		minLen := 50
+		keyLen := len(strinvList)
+
+		if keyLen < minLen {
+			minLen = keyLen
+		}
+		if minLen > 0 {
+			for i := 0; i < minLen; i++ {
+
+				key := strinvList[i]
+				invoiceObject := new(models.CilentInvoice)
+				err = uc.RedisClient.GetFromRedis(key, &invoiceObject)
+				if err != nil {
+					fmt.Println(err)
+				}
+				if err == nil {
+					fmt.Println("from redis : ", key)
+					_, _, err := repo.MergeDataWithLine(c, invoiceObject)
+					if err != nil {
+						errstr := err.Error()
+						if strings.Contains(errstr, "cust_bill_to_id") || strings.Contains(errstr, "uom_id") || strings.Contains(errstr, "item_id") ||
+							strings.Contains(errstr, "more than one row returned by a subquery used as an expression") {
+							cacheKeyerr := "err_point_bonus_inv:" + *invoiceObject.DocumentNo
+							invoiceObject.ErrorMessage = &errstr
+							errjsonData, err := json.Marshal(invoiceObject)
+							if err != nil {
+								logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
+								return res, err
+							}
+							err = uc.RedisClient.Client.Set(cacheKeyerr, errjsonData, time.Hour*168).Err()
+							if err != nil {
+								logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
+								return res, err
+							}
+						} else {
+							return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
+						}
+					}
+					if err == nil {
+						if invoiceObject.SalesRequestCode != nil && strings.Contains(*invoiceObject.SalesRequestCode, "CO") &&
+							invoiceObject.OutstandingAmount != nil && *invoiceObject.OutstandingAmount == "0.00" &&
+							invoiceObject.CustomerCode != nil && invoiceObject.NetAmount != nil &&
+							invoiceObject.DocumentNo != nil {
+							customer, _ := WebCustomerUC{ContractUC: uc.ContractUC}.FindByCodes(c, models.WebCustomerParameter{Code: `'` + *invoiceObject.CustomerCode + `'`})
+							if len(customer) == 1 {
+								fmt.Println("tes sini")
+								if customer[0].IndexPoint == 1 {
+									invoiceDate, _ := time.Parse("2006-01-02 15:04:05.999999999", *invoiceObject.TransactionDate+" "+*invoiceObject.TransactionTime)
+									pointRules, _ := PointRuleUC{ContractUC: uc.ContractUC}.SelectAll(c, models.PointRuleParameter{
+										Now:  invoiceDate.Format("2006-01-02"),
+										By:   "def.id",
+										Sort: "asc",
+									})
+
+									pointMaxCustomer, _ := PointMaxCustomerUC{ContractUC: uc.ContractUC}.FindByCustomerCodeWithDateInvoice(c, customer[0].Code, invoiceDate.Format("2006-01-02"))
+									pointUC := PointUC{ContractUC: uc.ContractUC}
+									pointThisMonth, _ := pointUC.GetPointThisMonth(c, customer[0].ID, strconv.Itoa(int(invoiceDate.Month())), strconv.Itoa(invoiceDate.Year()))
+									for _, rules := range pointRules {
+										pointMonthly, _ := strconv.ParseFloat(pointThisMonth.Balance, 64)
+
+										var maxMonthly float64
+										if pointMaxCustomer.ID != "" {
+											maxMonthly, _ = strconv.ParseFloat(pointMaxCustomer.MonthlyMaxPoint, 64)
+										} else {
+											maxMonthly, _ = strconv.ParseFloat(rules.MonthlyMaxPoint, 64)
+										}
+
+										minOrder, _ := strconv.ParseFloat(rules.MinOrder, 64)
+										netOmount, _ := strconv.ParseFloat(*invoiceObject.NetAmount, 64)
+
+										pointConversion, _ := strconv.ParseFloat(rules.PointConversion, 64)
+										getPoint := math.Floor(netOmount/minOrder) * pointConversion
+
+										if pointMonthly+getPoint > maxMonthly {
+											getPoint = maxMonthly - pointMonthly
+										}
+
+										if getPoint > 0 {
+											pointUC.Add(c, requests.PointRequest{
+												InvoiceDocumentNo: *invoiceObject.DocumentNo,
+												Point:             strconv.FormatFloat(getPoint, 'f', 0, 64),
+												PointType:         "2",
+												CustomerID:        customer[0].ID,
+											})
+										}
+									}
+								}
+							}
+						}
+					}
+
+					res = append(res, *invoiceObject)
+					fmt.Println(key)
+					_ = uc.RedisClient.Delete(key)
+				}
+			}
+		}
+
+	}
+
+	return res, nil
+}
+
+// undone sfa data
+func (uc CilentInvoiceUC) UndoneSFAPullData(c context.Context, parameter models.CilentInvoiceParameter) ([]models.CilentInvoice, error) {
+	// fmt.Println("put redis")
+	loc, err := time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		return nil, fmt.Errorf("failed to load location: %w", err)
+	}
+
+	now := time.Now().In(loc).Add(time.Minute * time.Duration(-15))
+	strnow := now.Format(time.RFC3339)
+	parameter.DateParam = strnow
+
+	jsonReq, err := json.Marshal(parameter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal json: %w", err)
+	}
+
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrv/rest/salesInvoice/data/sfa", bytes.NewBuffer(jsonReq))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new request: %w", err)
+	}
+
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer C2A5CE6A2292E7745CE5A3F7E68A9")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute request: %w", err)
+	}
+
+	if resp == nil || resp.Body == nil {
+		return nil, errors.New("response or response body is nil")
+	}
+	defer resp.Body.Close()
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	var res []models.CilentInvoice
+	if err := json.Unmarshal([]byte(bodyBytes), &res); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
+	}
+
+	var resBuilder []models.CilentInvoice
+	for _, invoiceObject := range res {
+		cacheKey := "undone_invoice_:" + *invoiceObject.DocumentNo
+		jsonData, err := json.Marshal(invoiceObject)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
+			return res, err
+		}
+		err = uc.RedisClient.Client.Set(cacheKey, jsonData, time.Hour*168).Err()
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
+			return res, err
+		}
+		// &invoiceObject
+		// resBuilder = append(resBuilder, invoiceObject)
+	}
+
+	return resBuilder, nil
+}
+
+func (uc CilentInvoiceUC) UndoneSFASyncData(c context.Context) (res []models.CilentInvoice, err error) {
+	cacheKey := "*undone_invoice_*"
+	repo := repository.NewCilentInvoiceRepository(uc.DB)
+
+	// Try to get data from Redis cache first
+	strinvList, err := uc.RedisClient.GetAllKeyFromRedis(cacheKey)
+
+	if err == nil {
+		minLen := 250
+		keyLen := len(strinvList)
+
+		if keyLen < minLen {
+			minLen = keyLen
+		}
+
+		if minLen > 0 {
+			// fmt.Println("list key ", strinvList)
+			for i := 0; i < minLen; i++ {
+
+				key := strinvList[i]
+				fmt.Println("key", key)
+				invoiceObject := new(models.CilentInvoice)
+				err = uc.RedisClient.GetFromRedis(key, &invoiceObject)
+				if err != nil {
+					fmt.Println(err)
+				}
+				if err == nil {
+					fmt.Println("from redis : ", key)
+					_, _, err := repo.MergeDataWithLine(c, invoiceObject)
+					if err != nil {
+						errstr := err.Error()
+						if strings.Contains(errstr, "cust_bill_to_id") || strings.Contains(errstr, "uom_id") || strings.Contains(errstr, "item_id") ||
+							strings.Contains(errstr, "more than one row returned by a subquery used as an expression") {
+							cacheKeyerr := "err_msg_undone_inv_:" + *invoiceObject.DocumentNo
+							invoiceObject.ErrorMessage = &errstr
+							errjsonData, err := json.Marshal(invoiceObject)
+							if err != nil {
+								logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "json_marshal", uc.ReqID)
+								return res, err
+							}
+							err = uc.RedisClient.Client.Set(cacheKeyerr, errjsonData, time.Hour*168).Err()
+							if err != nil {
+								logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "redis_set", uc.ReqID)
+								return res, err
+							}
+						} else {
+							return nil, fmt.Errorf("failed to insert data for invoice %+v: %w", invoiceObject, err)
+						}
+					}
+
+					res = append(res, *invoiceObject)
+					fmt.Println(key)
+					_ = uc.RedisClient.Delete(key)
+				}
+			}
+		}
+
+	}
+
+	return res, nil
 }

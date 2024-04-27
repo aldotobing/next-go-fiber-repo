@@ -49,6 +49,9 @@ type CustomerVM struct {
 	CustomerSalesmanID         string `json:"customer_salesman_id"`
 	CustomerNik                string `json:"customer_nik"`
 	CustomerPhotoKtp           string `json:"customer_photo_ktp"`
+	CustomerPhotoKtpDashboard  string `json:"customer_photo_ktp_dashboard"`
+	CustomerPhotoNpwp          string `json:"customer_photo_npwp"`
+	CustomerPhotoNpwpDashboard string `json:"customer_photo_npwp_dashboard"`
 	CustomerLevelID            int    `json:"customer_level_id"`
 	CustomerLevel              string `json:"customer_level_name"`
 	CustomerUserID             string `json:"customer_user_id"`
@@ -66,6 +69,8 @@ type CustomerVM struct {
 	SalesmanTypeCode           string `json:"salesman_type_code"`
 	SalesmanTypeName           string `json:"salesman_type_name"`
 	CustomerAdminValidate      bool   `json:"customer_admin_validate"`
+	IndexPoint                 int    `json:"index_point"`
+	MonthlyMaxPoint            string `json:"monthly_max_point"`
 }
 
 type CustomerData struct {

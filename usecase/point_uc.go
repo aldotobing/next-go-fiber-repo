@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -26,7 +27,6 @@ func (uc PointUC) BuildBody(data *models.Point, res *viewmodel.PointVM) {
 	res.ID = data.ID
 	res.PointType = data.PointType
 	res.PointTypeName = data.PointTypeName
-	res.InvoiceID = data.InvoiceID.String
 	res.InvoiceDocumentNo = data.InvoiceDocumentNo.String
 	res.Point = data.Point
 	res.CustomerID = data.CustomerID
@@ -34,6 +34,8 @@ func (uc PointUC) BuildBody(data *models.Point, res *viewmodel.PointVM) {
 	res.UpdatedAt = data.UpdatedAt.String
 	res.DeletedAt = data.DeletedAt.String
 	res.ExpiredAt = data.ExpiredAt.String
+	invoiceDate, _ := time.Parse("2006-01-02T15:04:05.999999999Z", data.InvoiceDate.String)
+	res.InvoiceDate = invoiceDate.Format("2006-01-02")
 
 	res.DetailCustomer = viewmodel.CustomerVM{
 		CustomerName:       data.Customer.CustomerName.String,
@@ -42,6 +44,8 @@ func (uc PointUC) BuildBody(data *models.Point, res *viewmodel.PointVM) {
 		CustomerBranchName: data.Customer.CustomerBranchName.String,
 		CustomerRegionName: data.Customer.CustomerRegionName.String,
 	}
+
+	res.Note = data.Note.String
 }
 
 // FindAll ...
@@ -152,8 +156,81 @@ func (uc PointUC) GetBalance(c context.Context, parameter models.PointParameter)
 	return
 }
 
+// GetBalanceAll ...
+func (uc PointUC) GetBalanceAll(c context.Context, parameter models.PointParameter) (out viewmodel.PointBalanceVM, err error) {
+
+	repo := repository.NewPointRepository(uc.DB)
+	data, err := repo.GetBalance(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	var totalPoint float64
+	point, _ := strconv.ParseFloat(data.Cashback, 64)
+	totalPoint += point
+	point, _ = strconv.ParseFloat(data.Loyalty, 64)
+	totalPoint += point
+	point, _ = strconv.ParseFloat(data.Promo, 64)
+	totalPoint += point
+
+	out = viewmodel.PointBalanceVM{
+		Balance: strconv.FormatFloat(totalPoint, 'f', 2, 64),
+	}
+
+	return
+}
+
+// GetPointThisMonth ...
+func (uc PointUC) GetPointThisMonth(c context.Context, customerID, month, year string) (out viewmodel.PointBalanceVM, err error) {
+
+	repo := repository.NewPointRepository(uc.DB)
+	data, err := repo.GetBalanceUsingInvoiceDate(c, models.PointParameter{
+		CustomerID: customerID,
+		Month:      month,
+		Year:       year,
+	})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	var totalPoint float64
+	point, _ := strconv.ParseFloat(data.Cashback, 64)
+	totalPoint += point
+
+	out = viewmodel.PointBalanceVM{
+		Balance: strconv.FormatFloat(totalPoint, 'f', 2, 64),
+	}
+
+	return
+}
+
 // Add ...
 func (uc PointUC) Add(c context.Context, in requests.PointRequest) (out viewmodel.PointVM, err error) {
+	now := time.Now()
+	expiredAt := helper.GetExpiredPoint(now)
+
+	out = viewmodel.PointVM{
+		PointType:         in.PointType,
+		InvoiceDocumentNo: in.InvoiceDocumentNo,
+		Point:             in.Point,
+		CustomerID:        in.CustomerID,
+		ExpiredAt:         expiredAt,
+	}
+
+	repo := repository.NewPointRepository(uc.DB)
+	out.ID, err = repo.SingleAdd(c, out)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	return
+}
+
+// AddInject ...
+func (uc PointUC) AddInject(c context.Context, in requests.PointRequest) (out []viewmodel.PointVM, err error) {
 	now := time.Now()
 	expiredAt := helper.GetExpiredPoint(now)
 
@@ -167,27 +244,35 @@ func (uc PointUC) Add(c context.Context, in requests.PointRequest) (out viewmode
 	}
 
 	customerData, err := WebCustomerUC{ContractUC: uc.ContractUC}.SelectAll(c, models.WebCustomerParameter{
-		Code: customerCodes,
-		By:   "c.id",
-		Sort: "asc",
+		Code:      customerCodes,
+		By:        "c.id",
+		Sort:      "asc",
+		ShowInApp: "0",
 	})
 
-	var customerIDs []string
-	for _, datum := range customerData {
-		customerIDs = append(customerIDs, datum.ID)
+	if len(customerData) < 1 {
+		err = errors.New(customerCodes + "not found / show_in_app = 0 ")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
 	}
 
-	out = viewmodel.PointVM{
-		PointType:   in.PointType,
-		InvoiceID:   in.InvoiceID,
-		Point:       in.Point,
-		CustomerID:  in.CustomerID,
-		ExpiredAt:   expiredAt,
-		CustomerIDs: customerIDs,
+	for _, datum := range customerData {
+		for _, y := range in.CustomerCodes {
+			if y.CustomerCode == datum.Code {
+				out = append(out, viewmodel.PointVM{
+					PointType:         in.PointType,
+					InvoiceDocumentNo: "INJECT-" + in.UserID + "-" + y.CustomerCode + "-" + now.Format("2006-01-02 15:04:05"),
+					Point:             y.Point,
+					CustomerID:        datum.ID,
+					ExpiredAt:         expiredAt,
+					Note:              in.Note,
+				})
+			}
+		}
 	}
 
 	repo := repository.NewPointRepository(uc.DB)
-	out.ID, err = repo.Add(c, out)
+	_, err = repo.AddInject(c, out)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return
@@ -196,14 +281,38 @@ func (uc PointUC) Add(c context.Context, in requests.PointRequest) (out viewmode
 	return
 }
 
+// AddWithdraw ...
+func (uc PointUC) AddWithdraw(c context.Context, in requests.PointRequest) (out viewmodel.PointVM, err error) {
+	out = viewmodel.PointVM{
+		PointType:  "3",
+		Point:      in.Point,
+		CustomerID: in.CustomerID,
+	}
+
+	repo := repository.NewPointRepository(uc.DB)
+	out.ID, err = repo.AddWithdraw(c, out)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	uc.GetBalance(c, models.PointParameter{
+		CustomerID: in.CustomerID,
+		Renewal:    "1",
+	})
+
+	return
+}
+
 // Update ...
 func (uc PointUC) Update(c context.Context, id string, in requests.PointRequest) (out viewmodel.PointVM, err error) {
 	out = viewmodel.PointVM{
-		ID:         id,
-		PointType:  in.PointType,
-		InvoiceID:  in.InvoiceID,
-		Point:      in.Point,
-		CustomerID: in.CustomerID,
+		ID:                id,
+		PointType:         in.PointType,
+		InvoiceDocumentNo: in.InvoiceDocumentNo,
+		Point:             in.Point,
+		CustomerID:        in.CustomerID,
+		Note:              in.Note,
 	}
 
 	repo := repository.NewPointRepository(uc.DB)
@@ -223,6 +332,41 @@ func (uc PointUC) Delete(c context.Context, in string) (err error) {
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return
+	}
+
+	return
+}
+
+// Report ...
+func (uc PointUC) Report(c context.Context, parameter models.PointParameter) (out []viewmodel.PointReportVM, err error) {
+	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(parameter.Page, parameter.Limit, parameter.By, parameter.Sort, models.VoucherOrderBy, models.VoucherOrderByrByString)
+
+	repo := repository.NewPointRepository(uc.DB)
+	data, err := repo.Report(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	for _, datum := range data {
+		temp := viewmodel.PointReportVM{
+			BranchCode:        *datum.Branch.Code,
+			BranchName:        *datum.Branch.Name,
+			RegionName:        *datum.Region.Name,
+			RegionGroupName:   *datum.Region.GroupName,
+			PartnerCode:       *datum.Partner.Code,
+			PartnerName:       *datum.Partner.PartnerName,
+			InvoiceDocumentNo: datum.InvoiceDocumentNo.String,
+			NetAmount:         *datum.SalesInvoice.NetAmount,
+			Point:             datum.Point,
+			TrasactionDate:    *datum.SalesInvoice.TrasactionDate,
+		}
+
+		out = append(out, temp)
+	}
+
+	if out == nil {
+		out = make([]viewmodel.PointReportVM, 0)
 	}
 
 	return

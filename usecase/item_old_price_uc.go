@@ -180,7 +180,7 @@ func (uc ItemOldPriceUC) Add(c context.Context, in requests.ItemOldPriceBulkRequ
 			itemCodes += `'` + datum.ItemCode + `'`
 		}
 	}
-	customerData, err := WebCustomerUC{ContractUC: uc.ContractUC}.FindByCodes(c, models.WebCustomerParameter{Code: customerCodes})
+	customerData, err := WebCustomerUC{ContractUC: uc.ContractUC}.FindByCodes(c, models.WebCustomerParameter{Codes: customerCodes})
 	for _, datum := range in.OldPrice {
 		var customerID, customerPriceListID string
 		for _, customerDatum := range customerData {

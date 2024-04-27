@@ -11,6 +11,7 @@ type WebItemUomLine struct {
 	ItemUomID         *string `json:"item_uom_id"`
 	ItemUomName       *string `json:"item_uom_name"`
 	ItemUomConversion *string `json:"item_uom_conversion"`
+	Visibility        string  `json:"visibility"`
 }
 
 // WebItemUomLineParameter ...
@@ -30,7 +31,7 @@ type WebItemUomLineParameter struct {
 
 var (
 	// WebItemUomLineOrderBy ...
-	WebItemUomLineOrderBy = []string{"def.id", "def._name", "def.created_date", "iul.conversion"}
+	WebItemUomLineOrderBy = []string{"def.id", "def._name", "def.created_date", "def.conversion"}
 	// WebItemUomLineOrderByrByString ...
 	WebItemUomLineOrderByrByString = []string{
 		"def._name",
@@ -45,7 +46,8 @@ var (
 	WebItemUomLineSelectStatement = `
 	SELECT def.id as item__uom_line_id, i.id as item_id, u.id as uom_id, ic.id as category_id,
 	i.code as item_code,i._name as item_name,ic._name as category_name,
-	u._name as uom_name, def.conversion as uom_conv
+	u._name as uom_name, def.conversion as uom_conv,
+	def.visibility
 	FROM ITEM_UOM_LINE def
 	left join item i on i.id = def.item_id
 	left join uom u on u.id = def.uom_id

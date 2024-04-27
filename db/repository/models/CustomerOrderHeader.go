@@ -39,12 +39,14 @@ type CustomerOrderHeader struct {
 	OrderSource          *string             `json:"order_source"`
 	GlobalDiscAmount     *string             `json:"global_disc_amount"`
 	OldPriceData         string              `json:"old_price_data"`
+	PointPromo           string              `json:"point_promo"`
 }
 
 // CustomerOrderHeaderParameter ...
 type CustomerOrderHeaderParameter struct {
 	ID         string `json:"id_customer_order_header"`
 	DocumentNo string `json:"document_no"`
+	Status     string `json:"status"`
 	UserID     string `json:"admin_user_id"`
 	CustomerID string `json:"id_customer"`
 	Search     string `json:"search"`

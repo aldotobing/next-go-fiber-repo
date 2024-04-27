@@ -16,7 +16,10 @@ type ICilentInvoiceRepository interface {
 	FindAll(ctx context.Context, parameter models.CilentInvoiceParameter) ([]models.CilentInvoice, int, error)
 	FindByID(c context.Context, parameter models.CilentInvoiceParameter) (models.CilentInvoice, error)
 	FindByDocumentNo(c context.Context, parameter models.CilentInvoiceParameter) (models.CilentInvoice, error)
-	InsertDataWithLine(c context.Context, model *models.CilentInvoice) (res string, err error)
+	InsertDataWithLine(c context.Context, model *models.CilentInvoice) (res string, finishFlag bool, err error)
+	MergeDataWithLine(c context.Context, model *models.CilentInvoice) (res string, finishFlag bool, err error)
+	InsertWithLineData(c context.Context, model *models.CilentInvoice) (res string, finishFlag bool, err error)
+	ReInsertDataWithLine(c context.Context, model *models.CilentInvoice) (res string, finishFlag bool, err error)
 }
 
 // CilentInvoiceRepository ...
@@ -155,57 +158,60 @@ func (repository CilentInvoiceRepository) FindByDocumentNo(c context.Context, pa
 	return data, nil
 }
 
-func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, model *models.CilentInvoice) (res string, err error) {
+func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, model *models.CilentInvoice) (res string, finishFlag bool, err error) {
 
+	fmt.Println("go to InsertDataWithLine")
 	// Using a map to organize the print logic
-	fields := map[string]*string{
-		"ID":                   model.ID,
-		"DocumentNo":           model.DocumentNo,
-		"DocumentTypeID":       model.DocumentTypeID,
-		"TransactionDate":      model.TransactionDate,
-		"TransactionTime":      model.TransactionTime,
-		"CustomerID":           model.CustomerID,
-		"CustomerCode":         model.CustomerCode,
-		"CustomerName":         model.CustomerName,
-		"TaxCalcMethod":        model.TaxCalcMethod,
-		"SalesmanID":           model.SalesmanID,
-		"SalesmanCode":         model.SalesmanCode,
-		"SalesRequestCode":     model.SalesRequestCode,
-		"TransactionPoint":     model.TransactionPoint,
-		"SalesmanName":         model.SalesmanName,
-		"PaymentTermsID":       model.PaymentTermsID,
-		"PaymentTermsName":     model.PaymentTermsName,
-		"SalesOrderID":         model.SalesOrderID,
-		"CompanyID":            model.CompanyID,
-		"BranchID":             model.BranchID,
-		"BranchName":           model.BranchName,
-		"PriceListID":          model.PriceLIstID,
-		"PriceListName":        model.PriceLIstName,
-		"PriceListVersionID":   model.PriceLIstVersionID,
-		"PriceListVersionName": model.PriceLIstVersionName,
-		"Status":               model.Status,
-		"GrossAmount":          model.GrossAmount,
-		"TaxableAmount":        model.TaxableAmount,
-		"TaxAmount":            model.TaxAmount,
-		"RoundingAmount":       model.RoundingAmount,
-		"OutstandingAmount":    model.OutstandingAmount,
-		"NetAmount":            model.NetAmount,
-		"DueDate":              model.DueDate,
-		"DiscAmount":           model.DiscAmount,
-		"PaidAmount":           model.PaidAmount,
-		"NoPPN":                model.NoPPN,
-		"GlobalDiscAmount":     model.GlobalDiscAmount,
-		"InvoiceDate":          model.InvoiceDate,
-		"PaidDate":             model.PaidDate,
-	}
+	// fields := map[string]*string{
+	// 	"ID":                   model.ID,
+	// 	"DocumentNo":           model.DocumentNo,
+	// 	"DocumentTypeID":       model.DocumentTypeID,
+	// 	"TransactionDate":      model.TransactionDate,
+	// 	"TransactionTime":      model.TransactionTime,
+	// 	"CustomerID":           model.CustomerID,
+	// 	"CustomerCode":         model.CustomerCode,
+	// 	"CustomerName":         model.CustomerName,
+	// 	"TaxCalcMethod":        model.TaxCalcMethod,
+	// 	"SalesmanID":           model.SalesmanID,
+	// 	"SalesmanCode":         model.SalesmanCode,
+	// 	"SalesRequestCode":     model.SalesRequestCode,
+	// 	"TransactionPoint":     model.TransactionPoint,
+	// 	"SalesmanName":         model.SalesmanName,
+	// 	"PaymentTermsID":       model.PaymentTermsID,
+	// 	"PaymentTermsName":     model.PaymentTermsName,
+	// 	"SalesOrderID":         model.SalesOrderID,
+	// 	"CompanyID":            model.CompanyID,
+	// 	"BranchID":             model.BranchID,
+	// 	"BranchName":           model.BranchName,
+	// 	"PriceListID":          model.PriceLIstID,
+	// 	"PriceListName":        model.PriceLIstName,
+	// 	"PriceListVersionID":   model.PriceLIstVersionID,
+	// 	"PriceListVersionName": model.PriceLIstVersionName,
+	// 	"Status":               model.Status,
+	// 	"GrossAmount":          model.GrossAmount,
+	// 	"TaxableAmount":        model.TaxableAmount,
+	// 	"TaxAmount":            model.TaxAmount,
+	// 	"RoundingAmount":       model.RoundingAmount,
+	// 	"OutstandingAmount":    model.OutstandingAmount,
+	// 	"NetAmount":            model.NetAmount,
+	// 	"DueDate":              model.DueDate,
+	// 	"DiscAmount":           model.DiscAmount,
+	// 	"PaidAmount":           model.PaidAmount,
+	// 	"NoPPN":                model.NoPPN,
+	// 	"GlobalDiscAmount":     model.GlobalDiscAmount,
+	// 	"InvoiceDate":          model.InvoiceDate,
+	// 	"PaidDate":             model.PaidDate,
+	// 	"PriceListCode":        model.PriceListCode,
+	// 	"PriceListVersionCode": model.PriceListVersionCode,
+	// }
 
-	for fieldName, fieldValue := range fields {
-		if fieldValue != nil {
-			fmt.Printf("%s: %s\n", fieldName, *fieldValue)
-		} else {
-			fmt.Printf("%s: nil\n", fieldName)
-		}
-	}
+	// for fieldName, fieldValue := range fields {
+	// 	if fieldValue != nil {
+	// 		fmt.Printf("%s: %s\n", fieldName, *fieldValue)
+	// 	} else {
+	// 		fmt.Printf("%s: nil\n", fieldName)
+	// 	}
+	// }
 
 	availableinvoice, _ := repository.FindByDocumentNo(c, models.CilentInvoiceParameter{DocumentNo: *model.DocumentNo})
 
@@ -220,15 +226,16 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 		)values(
 		$1, $2, $3, $4, (select id from customer where customer_code = $5),
 		$6, (select id from salesman where partner_id =(select id from partner where code = $7)), $8, $9, $10,
-		$11 ,$12, $13, $14, $15,
+		$11 ,(select id from price_list where code = $12), (select id from price_list_version where description = $13 and price_list_id = (select id from price_list where code = $12 ) ) , $14, $15,
 		$16, $17, $18, $19, $20,
 		$21, $22, $23, $24, $25,
 		$26, $27, $28, $29 
 		)
 	RETURNING id`
+
 	transaction, err := repository.DB.BeginTx(c, nil)
 	if err != nil {
-		return res, err
+		return res, finishFlag, err
 	}
 	defer transaction.Rollback()
 
@@ -245,21 +252,21 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 		deletedHeaderRow.Close()
 
 	}
+
 	//oustanding amount = net amount
 	err = transaction.QueryRowContext(c, statement,
 		model.DocumentNo, model.DocumentTypeID, model.TransactionDate, model.TransactionTime, model.CustomerCode,
 		model.TaxCalcMethod, model.SalesmanCode, model.PaymentTermsID, model.SalesOrderID, model.CompanyID,
-		model.BranchID, model.PriceLIstID, model.PriceLIstVersionID, str.EmptyString(*model.Status), str.EmptyString(*model.GrossAmount),
+		model.BranchID, str.NullOrEmtyString(model.PriceListCode), str.NullOrEmtyString(model.PriceListVersionCode), str.EmptyString(*model.Status), str.EmptyString(*model.GrossAmount),
 		model.DiscAmount, model.TaxableAmount, model.TaxAmount, model.RoundingAmount, model.NetAmount,
-		str.EmptyString(*model.NetAmount), str.EmptyString(*model.PaidAmount), model.DueDate, model.NoPPN, model.GlobalDiscAmount,
+		str.EmptyString(*model.OutstandingAmount), str.EmptyString(*model.PaidAmount), model.DueDate, model.NoPPN, model.GlobalDiscAmount,
 		str.EmptyString(*model.TransactionPoint), str.NullString(model.SalesRequestCode), str.NullString(model.InvoiceDate), str.NullString(model.PaidDate),
 	).Scan(&res)
 
 	if err != nil {
-		return res, err
+		fmt.Println("insert header error ", err)
+		return res, finishFlag, err
 	}
-
-	fmt.Printf("Successfully inserted invoice with DocumentNo: %s and generated ID: %s\n", *model.DocumentNo, res)
 
 	model.ID = &res
 
@@ -294,7 +301,8 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 			).Scan(&resLine)
 
 			if err != nil {
-				return res, err
+				fmt.Println("insert header line error ", err)
+				return res, finishFlag, err
 			}
 		}
 	}
@@ -305,13 +313,342 @@ func (repository CilentInvoiceRepository) InsertDataWithLine(c context.Context, 
 		updateCOStatusRow, _ := transaction.QueryContext(c, updatechecoutstatus, model.SalesRequestCode)
 		updateCOStatusRow.Close()
 
+		finishFlag = true
 	}
 
 	if err = transaction.Commit(); err != nil {
-		return res, err
+		return res, finishFlag, err
+	}
+	fmt.Printf("Successfully inserted invoice with DocumentNo: %s and generated ID: %s\n", *model.DocumentNo, res)
+
+	return res, finishFlag, err
+}
+
+func (repository CilentInvoiceRepository) InsertWithLineData(c context.Context, model *models.CilentInvoice) (res string, finishFlag bool, err error) {
+
+	statement := `
+	insert into sales_invoice_header (
+		document_no, document_type_id, transaction_date, transaction_time, cust_bill_to_id,
+		tax_calc_method ,salesman_id ,payment_terms_id ,sales_order_id ,company_id ,
+		branch_id ,price_list_id ,price_list_version_id ,status ,gross_amount ,
+		disc_amount ,taxable_amount ,tax_amount ,rounding_amount ,net_amount ,
+		outstanding_amount ,paid_amount ,due_date ,no_ppn ,global_disc_amount,
+		transaction_point ,transaction_source_document_no, invoice_date,paid_date
+		)values(
+		$1, $2, $3, $4, (select id from customer where customer_code = $5),
+		$6, (select id from salesman where partner_id =(select id from partner where code = $7)), $8, $9, $10,
+		$11 ,(select id from price_list where code = $12), (select id from price_list_version where description = $13 and price_list_id = (select id from price_list where code = $12 ) ) , $14, $15,
+		$16, $17, $18, $19, $20,
+		$21, $22, $23, $24, $25,
+		$26, $27, $28, $29 
+		)
+	RETURNING id`
+
+	transaction, err := repository.DB.BeginTx(c, nil)
+	if err != nil {
+		return res, finishFlag, err
+	}
+	defer transaction.Rollback()
+
+	//oustanding amount = net amount
+	err = transaction.QueryRowContext(c, statement,
+		model.DocumentNo, model.DocumentTypeID, model.TransactionDate, model.TransactionTime, model.CustomerCode,
+		model.TaxCalcMethod, model.SalesmanCode, model.PaymentTermsID, model.SalesOrderID, model.CompanyID,
+		model.BranchID, str.NullOrEmtyString(model.PriceListCode), str.NullOrEmtyString(model.PriceListVersionCode), str.EmptyString(*model.Status), str.EmptyString(*model.GrossAmount),
+		model.DiscAmount, model.TaxableAmount, model.TaxAmount, model.RoundingAmount, model.NetAmount,
+		str.EmptyString(*model.OutstandingAmount), str.EmptyString(*model.PaidAmount), model.DueDate, model.NoPPN, model.GlobalDiscAmount,
+		str.EmptyString(*model.TransactionPoint), str.NullString(model.SalesRequestCode), str.NullString(model.InvoiceDate), str.NullString(model.PaidDate),
+	).Scan(&res)
+
+	if err != nil {
+		fmt.Println("insert header error ", err)
+		return res, finishFlag, err
 	}
 
-	return res, err
+	model.ID = &res
+
+	if model.ListLine != nil && len(*model.ListLine) > 0 {
+		for _, lineObject := range *model.ListLine {
+			line_statement := `
+			insert into sales_invoice_line( 
+				header_id ,line_no ,category_id ,item_id ,qty ,
+				uom_id ,stock_qty ,unit_price ,gross_amount ,use_disc_percent ,
+				disc_percent1 ,disc_percent2 ,disc_percent3 ,disc_percent4 ,disc_percent5 ,
+				disc_amount ,taxable_amount ,tax_amount ,rounding_amount ,net_amount ,
+				sales_order_line_id ,debt ,paid 
+				)values(
+				$1 ,$2 ,$3 ,( select id from item where code = $4 ) ,$5 ,
+				( select id from uom where code =$6 ) ,$7 ,$8 ,$9 ,$10 ,
+				$11 ,$12 ,$13 ,$14 ,$15 ,
+				$16 ,$17 ,$18 ,$19 ,$20 ,
+				$21 ,$22 ,$23
+				) returning id
+			`
+			var resLine string
+			err = transaction.QueryRowContext(c, line_statement,
+				model.ID, lineObject.LineNo, lineObject.CategoryID, lineObject.ItemCode, lineObject.Qty,
+				lineObject.UomCode, lineObject.StockQty, lineObject.UnitPrice, str.EmptyStringToZero(*lineObject.GrossAmount), str.EmptyStringToZero(*lineObject.UseDiscAmount),
+				str.EmptyStringToZero(*lineObject.DiscPercent1), str.EmptyStringToZero(*lineObject.DiscPercent2), str.EmptyStringToZero(*lineObject.DiscPercent3), str.EmptyStringToZero(*lineObject.DiscPercent4), str.EmptyStringToZero(*lineObject.DiscPercent5),
+				str.EmptyStringToZero(*lineObject.DiscountAmount), str.EmptyStringToZero(*lineObject.TaxableAmount), str.EmptyStringToZero(*lineObject.TaxAmount), str.EmptyStringToZero(*lineObject.RoundingAmount), str.EmptyStringToZero(*lineObject.NetAmount),
+				str.NullString(lineObject.SalesOrderLineID), str.NullString(lineObject.Debt), str.NullString(lineObject.Paid),
+				// 1, 1, 1, 1, 1,
+				// 1, 1, 1, 1, 1,
+				// 1, 1, 1, 1, 1,
+				// 1, 1, 1,
+			).Scan(&resLine)
+
+			if err != nil {
+				fmt.Println("insert header line error ", err)
+				return res, finishFlag, err
+			}
+		}
+	}
+
+	if model.SalesRequestCode != nil {
+
+		updatechecoutstatus := ` update customer_order_header set status= 'finish' where document_no = $1 `
+		updateCOStatusRow, _ := transaction.QueryContext(c, updatechecoutstatus, model.SalesRequestCode)
+		updateCOStatusRow.Close()
+
+		finishFlag = true
+	}
+
+	if err = transaction.Commit(); err != nil {
+		return res, finishFlag, err
+	}
+	fmt.Printf("Successfully inserted invoice with DocumentNo: %s and generated ID: %s\n", *model.DocumentNo, res)
+
+	return res, finishFlag, err
+}
+
+func (repository CilentInvoiceRepository) ReInsertDataWithLine(c context.Context, model *models.CilentInvoice) (res string, finishFlag bool, err error) {
+
+	fmt.Println("go to ReInsertDataWithLine")
+	// Using a map to organize the print logic
+	// fields := map[string]*string{
+	// 	"ID":                   model.ID,
+	// 	"DocumentNo":           model.DocumentNo,
+	// 	"DocumentTypeID":       model.DocumentTypeID,
+	// 	"TransactionDate":      model.TransactionDate,
+	// 	"TransactionTime":      model.TransactionTime,
+	// 	"CustomerID":           model.CustomerID,
+	// 	"CustomerCode":         model.CustomerCode,
+	// 	"CustomerName":         model.CustomerName,
+	// 	"TaxCalcMethod":        model.TaxCalcMethod,
+	// 	"SalesmanID":           model.SalesmanID,
+	// 	"SalesmanCode":         model.SalesmanCode,
+	// 	"SalesRequestCode":     model.SalesRequestCode,
+	// 	"TransactionPoint":     model.TransactionPoint,
+	// 	"SalesmanName":         model.SalesmanName,
+	// 	"PaymentTermsID":       model.PaymentTermsID,
+	// 	"PaymentTermsName":     model.PaymentTermsName,
+	// 	"SalesOrderID":         model.SalesOrderID,
+	// 	"CompanyID":            model.CompanyID,
+	// 	"BranchID":             model.BranchID,
+	// 	"BranchName":           model.BranchName,
+	// 	"PriceListID":          model.PriceLIstID,
+	// 	"PriceListName":        model.PriceLIstName,
+	// 	"PriceListVersionID":   model.PriceLIstVersionID,
+	// 	"PriceListVersionName": model.PriceLIstVersionName,
+	// 	"Status":               model.Status,
+	// 	"GrossAmount":          model.GrossAmount,
+	// 	"TaxableAmount":        model.TaxableAmount,
+	// 	"TaxAmount":            model.TaxAmount,
+	// 	"RoundingAmount":       model.RoundingAmount,
+	// 	"OutstandingAmount":    model.OutstandingAmount,
+	// 	"NetAmount":            model.NetAmount,
+	// 	"DueDate":              model.DueDate,
+	// 	"DiscAmount":           model.DiscAmount,
+	// 	"PaidAmount":           model.PaidAmount,
+	// 	"NoPPN":                model.NoPPN,
+	// 	"GlobalDiscAmount":     model.GlobalDiscAmount,
+	// 	"InvoiceDate":          model.InvoiceDate,
+	// 	"PaidDate":             model.PaidDate,
+	// 	"PriceListCode":        model.PriceListCode,
+	// 	"PriceListVersionCode": model.PriceListVersionCode,
+	// }
+
+	// for fieldName, fieldValue := range fields {
+	// 	if fieldValue != nil {
+	// 		fmt.Printf("%s: %s\n", fieldName, *fieldValue)
+	// 	} else {
+	// 		fmt.Printf("%s: nil\n", fieldName)
+	// 	}
+	// }
+
+	// availableinvoice, _ := repository.FindByDocumentNo(c, models.CilentInvoiceParameter{DocumentNo: *model.DocumentNo})
+
+	statement := `
+	insert into sales_invoice_header (
+		document_no, document_type_id, transaction_date, transaction_time, cust_bill_to_id,
+		tax_calc_method ,salesman_id ,payment_terms_id ,sales_order_id ,company_id ,
+		branch_id ,price_list_id ,price_list_version_id ,status ,gross_amount ,
+		disc_amount ,taxable_amount ,tax_amount ,rounding_amount ,net_amount ,
+		outstanding_amount ,paid_amount ,due_date ,no_ppn ,global_disc_amount,
+		transaction_point ,transaction_source_document_no, invoice_date,paid_date
+		)values(
+		$1, $2, $3, $4, (select id from customer where customer_code = $5),
+		$6, (select id from salesman where partner_id =(select id from partner where code = $7)), $8, $9, $10,
+		$11 ,(select id from price_list where code = $12), (select id from price_list_version where description = $13 and price_list_id = (select id from price_list where code = $12 ) ) , $14, $15,
+		$16, $17, $18, $19, $20,
+		$21, $22, $23, $24, $25,
+		$26, $27, $28, $29 
+		)
+	RETURNING id`
+
+	transaction, err := repository.DB.BeginTx(c, nil)
+	if err != nil {
+		return res, finishFlag, err
+	}
+	defer transaction.Rollback()
+
+	if model.ID != nil && *model.ID != "" {
+
+		deletelinestatement := `delete from sales_invoice_line WHERE header_id = $1`
+
+		deletedRow, _ := transaction.QueryContext(c, deletelinestatement, model.ID)
+		deletedRow.Close()
+
+		deleteheaderstatement := `delete from sales_invoice_header WHERE id = $1`
+
+		deletedHeaderRow, _ := transaction.QueryContext(c, deleteheaderstatement, model.ID)
+		deletedHeaderRow.Close()
+
+	}
+
+	//oustanding amount = net amount
+	err = transaction.QueryRowContext(c, statement,
+		model.DocumentNo, model.DocumentTypeID, model.TransactionDate, model.TransactionTime, model.CustomerCode,
+		model.TaxCalcMethod, model.SalesmanCode, model.PaymentTermsID, model.SalesOrderID, model.CompanyID,
+		model.BranchID, str.NullOrEmtyString(model.PriceListCode), str.NullOrEmtyString(model.PriceListVersionCode), str.EmptyString(*model.Status), str.EmptyString(*model.GrossAmount),
+		model.DiscAmount, model.TaxableAmount, model.TaxAmount, model.RoundingAmount, model.NetAmount,
+		str.EmptyString(*model.OutstandingAmount), str.EmptyString(*model.PaidAmount), model.DueDate, model.NoPPN, model.GlobalDiscAmount,
+		str.EmptyString(*model.TransactionPoint), str.NullString(model.SalesRequestCode), str.NullString(model.InvoiceDate), str.NullString(model.PaidDate),
+	).Scan(&res)
+
+	if err != nil {
+		fmt.Println("insert header error ", err)
+		return res, finishFlag, err
+	}
+
+	model.ID = &res
+
+	if model.ListLine != nil && len(*model.ListLine) > 0 {
+		for _, lineObject := range *model.ListLine {
+			line_statement := `
+			insert into sales_invoice_line( 
+				header_id ,line_no ,category_id ,item_id ,qty ,
+				uom_id ,stock_qty ,unit_price ,gross_amount ,use_disc_percent ,
+				disc_percent1 ,disc_percent2 ,disc_percent3 ,disc_percent4 ,disc_percent5 ,
+				disc_amount ,taxable_amount ,tax_amount ,rounding_amount ,net_amount ,
+				sales_order_line_id ,debt ,paid 
+				)values(
+				$1 ,$2 ,$3 ,( select id from item where code = $4 ) ,$5 ,
+				( select id from uom where code =$6 ) ,$7 ,$8 ,$9 ,$10 ,
+				$11 ,$12 ,$13 ,$14 ,$15 ,
+				$16 ,$17 ,$18 ,$19 ,$20 ,
+				$21 ,$22 ,$23
+				) returning id
+			`
+			var resLine string
+			err = transaction.QueryRowContext(c, line_statement,
+				model.ID, lineObject.LineNo, lineObject.CategoryID, lineObject.ItemCode, lineObject.Qty,
+				lineObject.UomCode, lineObject.StockQty, lineObject.UnitPrice, str.EmptyStringToZero(*lineObject.GrossAmount), str.EmptyStringToZero(*lineObject.UseDiscAmount),
+				str.EmptyStringToZero(*lineObject.DiscPercent1), str.EmptyStringToZero(*lineObject.DiscPercent2), str.EmptyStringToZero(*lineObject.DiscPercent3), str.EmptyStringToZero(*lineObject.DiscPercent4), str.EmptyStringToZero(*lineObject.DiscPercent5),
+				str.EmptyStringToZero(*lineObject.DiscountAmount), str.EmptyStringToZero(*lineObject.TaxableAmount), str.EmptyStringToZero(*lineObject.TaxAmount), str.EmptyStringToZero(*lineObject.RoundingAmount), str.EmptyStringToZero(*lineObject.NetAmount),
+				str.NullString(lineObject.SalesOrderLineID), str.NullString(lineObject.Debt), str.NullString(lineObject.Paid),
+				// 1, 1, 1, 1, 1,
+				// 1, 1, 1, 1, 1,
+				// 1, 1, 1, 1, 1,
+				// 1, 1, 1,
+			).Scan(&resLine)
+
+			if err != nil {
+				fmt.Println("insert header line error ", err)
+				return res, finishFlag, err
+			}
+		}
+	}
+
+	if model.SalesRequestCode != nil {
+
+		updatechecoutstatus := ` update customer_order_header set status= 'finish' where document_no = $1 `
+		updateCOStatusRow, _ := transaction.QueryContext(c, updatechecoutstatus, model.SalesRequestCode)
+		updateCOStatusRow.Close()
+
+		finishFlag = true
+	}
+
+	if err = transaction.Commit(); err != nil {
+		return res, finishFlag, err
+	}
+	fmt.Printf("Successfully inserted invoice with DocumentNo: %s and generated ID: %s\n", *model.DocumentNo, res)
+
+	return res, finishFlag, err
+}
+
+func (repository CilentInvoiceRepository) MergeDataWithLine(c context.Context, model *models.CilentInvoice) (res string, finishFlag bool, err error) {
+	fmt.Println("start merge")
+	// Using a map to organize the print logic
+	fields := map[string]*string{
+		"ID":                   model.ID,
+		"DocumentNo":           model.DocumentNo,
+		"TransactionDate":      model.TransactionDate,
+		"CustomerID":           model.CustomerID,
+		"CustomerCode":         model.CustomerCode,
+		"CustomerName":         model.CustomerName,
+		"SalesmanCode":         model.SalesmanCode,
+		"SalesRequestCode":     model.SalesRequestCode,
+		"SalesOrderID":         model.SalesOrderID,
+		"CompanyID":            model.CompanyID,
+		"BranchID":             model.BranchID,
+		"BranchName":           model.BranchName,
+		"PriceListID":          model.PriceLIstID,
+		"PriceListName":        model.PriceLIstName,
+		"PriceListVersionID":   model.PriceLIstVersionID,
+		"PriceListVersionName": model.PriceLIstVersionName,
+		"Status":               model.Status,
+		"InvoiceDate":          model.InvoiceDate,
+		"PaidDate":             model.PaidDate,
+		"PriceListCode":        model.PriceListCode,
+		"PriceListVersionCode": model.PriceListVersionCode,
+		"OperationType":        model.OperationType,
+	}
+
+	for fieldName, fieldValue := range fields {
+		if fieldValue != nil {
+			fmt.Printf("%s: %s\n", fieldName, *fieldValue)
+		} else {
+			fmt.Printf("%s: nil\n", fieldName)
+		}
+	}
+
+	availableinvoice, _ := repository.FindByDocumentNo(c, models.CilentInvoiceParameter{DocumentNo: *model.DocumentNo})
+
+	if availableinvoice.ID != nil {
+		model.ID = availableinvoice.ID
+		if *model.OperationType == "2" {
+			var cdata string
+			fmt.Println("operation 2 update")
+
+			updatestmt := ` update sales_invoice_header set outstanding_amount=$1, paid_amount=$2, paid_date= $3
+			
+			WHERE id = $4 returning id `
+
+			err = repository.DB.QueryRowContext(c, updatestmt, str.EmptyString(*model.OutstandingAmount),
+				str.EmptyString(*model.PaidAmount), str.NullOrEmtyString(model.PaidDate), availableinvoice.ID).Scan(&cdata)
+
+		} else {
+			fmt.Println("operation 2 insert")
+			res, finishFlag, err = repository.ReInsertDataWithLine(c, model)
+		}
+
+	} else {
+		fmt.Println("operation 1 insert")
+		res, finishFlag, err = repository.InsertWithLineData(c, model)
+	}
+
+	return res, finishFlag, err
 }
 
 // insert into sales_invoice_header (

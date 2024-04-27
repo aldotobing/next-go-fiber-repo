@@ -29,7 +29,6 @@ func (redisClient *RedisClient) StoreToRedistWithExpired(key string, val interfa
 	return err
 }
 
-
 func (redisClient *RedisClient) StoreToRedis(key string, val interface{}) error {
 	b, err := json.Marshal(val)
 	if err != nil {
@@ -65,26 +64,38 @@ func (redisClient *RedisClient) RemoveFromRedis(key string) error {
 }
 
 func (redisClient *RedisClient) Get(key string) ([]byte, error) {
-    res, err := redisClient.Client.Get(key).Result()
-    if err != nil {
-        return nil, err
-    }
-    return []byte(res), nil
+	res, err := redisClient.Client.Get(key).Result()
+	if err != nil {
+		return nil, err
+	}
+	return []byte(res), nil
 }
 
 func (redisClient *RedisClient) Set(key string, value []byte, expiration time.Duration) error {
-    return redisClient.Client.Set(key, string(value), expiration).Err()
+	return redisClient.Client.Set(key, string(value), expiration).Err()
 }
 
-
 func (redisClient *RedisClient) Reset() error {
-    return redisClient.Client.FlushDB().Err()
+	return redisClient.Client.FlushDB().Err()
 }
 
 func (redisClient *RedisClient) Close() error {
-    return redisClient.Client.Close()
+	return redisClient.Client.Close()
 }
 
 func (redisClient *RedisClient) Delete(key string) error {
-    return redisClient.Client.Del(key).Err()
+	return redisClient.Client.Del(key).Err()
+}
+
+func (redisClient *RedisClient) GetAllKeyFromRedis(key string) (keys []string, err error) {
+
+	keys, err = redisClient.Client.Keys(key).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	if keys == nil {
+		return nil, errors.New("[Redis] Value of " + key + " is empty.")
+	}
+	return keys, err
 }

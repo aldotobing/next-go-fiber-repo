@@ -32,14 +32,15 @@ type CustomerOrderLine struct {
 
 // CustomerOrderLineParameter ...
 type CustomerOrderLineParameter struct {
-	ID       string `json:"id_customer_order_line"`
-	HeaderID string `json:"header_id"`
-	Search   string `json:"search"`
-	Page     int    `json:"page"`
-	Offset   int    `json:"offset"`
-	Limit    int    `json:"limit"`
-	By       string `json:"by"`
-	Sort     string `json:"sort"`
+	ID             string `json:"id_customer_order_line"`
+	HeaderID       string `json:"header_id"`
+	Search         string `json:"search"`
+	Page           int    `json:"page"`
+	Offset         int    `json:"offset"`
+	Limit          int    `json:"limit"`
+	By             string `json:"by"`
+	Sort           string `json:"sort"`
+	ExcludeBonuses string `json:"excluded_bonuses"`
 }
 
 var (

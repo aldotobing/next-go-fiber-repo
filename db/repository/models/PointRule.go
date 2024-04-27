@@ -20,6 +20,7 @@ type PointRule struct {
 // PointRuleParameter ...
 type PointRuleParameter struct {
 	ID      string `json:"id"`
+	Now     string `json:"now"`
 	Search  string `json:"search"`
 	ShowAll string `json:"show_all"`
 	Page    int    `json:"page"`
