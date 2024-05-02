@@ -18,6 +18,7 @@ type CouponRedeemVM struct {
 	CouponPhotoURL        string `json:"coupon_photo_url"`
 	CustomerName          string `json:"customer_name"`
 	CouponCode            string `json:"coupon_code"`
+	InvoiceNo             string `json:"invoice_no"`
 }
 
 type CouponRedeemReportVM struct {
@@ -42,4 +43,5 @@ type CouponRedeemReportVM struct {
 	RegionGroupName       string `json:"region_group_name"`
 	CustomerLevelName     string `json:"customer_level_name"`
 	CouponCode            string `json:"coupon_code"`
+	InvoiceNo             string `json:"invoice_no"`
 }
