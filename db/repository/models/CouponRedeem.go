@@ -57,6 +57,7 @@ type CouponRedeemParameter struct {
 	ShowAll              string `json:"show_all"`
 	CustomerID           string `json:"customer_id"`
 	RedeemedToDocumentNo string `json:"redeem_to_doc_no"`
+	CouponStatus         string
 	StartDate            string `json:"start_date"`
 	EndDate              string `json:"end_date"`
 	BranchID             string `json:"branch_id"`

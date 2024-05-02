@@ -226,6 +226,10 @@ func (repository CouponRedeemRepository) SelectReport(c context.Context, paramet
 		conditionString += ` AND C.CUSTOMER_LEVEL_ID IN (` + parameter.CustomerLevelID + `)`
 	}
 
+	if parameter.CouponStatus != "" {
+		conditionString += ` AND DEF.REDEEMED = '` + parameter.CouponStatus + `'`
+	}
+
 	statement := `SELECT 
 			DEF.ID, 
 			DEF.COUPON_ID,
