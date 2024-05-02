@@ -23,6 +23,7 @@ type Point struct {
 	ExpiredAt         sql.NullString `json:"expired_at"`
 	InvoiceDate       sql.NullString `json:"invoice_date"`
 	Note              sql.NullString `json:"note"`
+	SourceDocumentNo  sql.NullString
 
 	Customer     WebCustomer   `json:"customer"`
 	Branch       Branch        `json:"branch"`
@@ -78,13 +79,15 @@ var (
 			DEF.UPDATED_AT,
 			DEF.DELETED_AT,
 			DEF.EXPIRED_AT,
+			C.ID,
 			C.CUSTOMER_NAME,
 			C.CUSTOMER_CODE,
 			B.BRANCH_CODE,
 			B._NAME,
 			R._NAME,
 			SIH.TRANSACTION_DATE,
-			DEF.NOTE
+			DEF.NOTE,
+			SIH.transaction_source_document_no
 		FROM POINTS DEF
 		LEFT JOIN POINT_TYPE PT ON PT.ID = DEF.POINT_TYPE
 		LEFT JOIN CUSTOMER C ON C.ID = DEF.CUSTOMER_ID

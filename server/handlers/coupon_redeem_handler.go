@@ -118,6 +118,7 @@ func (h *CouponRedeemHandler) ReportSelect(ctx *fiber.Ctx) error {
 		ShowAll:         ctx.Query("show_all"),
 		CustomerID:      ctx.Query("customer_id"),
 		CustomerLevelID: ctx.Query("customer_level_id"),
+		CouponStatus:    ctx.Query("coupon_status"),
 		StartDate:       ctx.Query("start_date"),
 		EndDate:         ctx.Query("end_date"),
 		BranchID:        ctx.Query("branch_id"),

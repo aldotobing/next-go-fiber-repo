@@ -47,6 +47,7 @@ func (repository CouponRedeemRepository) scanRows(rows *sql.Rows) (res models.Co
 		&res.CouponPhotoURL,
 		&res.CustomerName,
 		&res.CouponCode,
+		&res.InvoiceNo,
 	)
 
 	return
@@ -71,6 +72,7 @@ func (repository CouponRedeemRepository) scanRow(row *sql.Row) (res models.Coupo
 		&res.CouponPhotoURL,
 		&res.CustomerName,
 		&res.CouponCode,
+		&res.InvoiceNo,
 	)
 
 	return
@@ -90,7 +92,6 @@ func (repository CouponRedeemRepository) SelectAll(c context.Context, parameter 
 		conditionString +
 		` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement)
-
 	if err != nil {
 		return data, err
 	}
@@ -225,6 +226,10 @@ func (repository CouponRedeemRepository) SelectReport(c context.Context, paramet
 		conditionString += ` AND C.CUSTOMER_LEVEL_ID IN (` + parameter.CustomerLevelID + `)`
 	}
 
+	if parameter.CouponStatus != "" {
+		conditionString += ` AND DEF.REDEEMED = '` + parameter.CouponStatus + `'`
+	}
+
 	statement := `SELECT 
 			DEF.ID, 
 			DEF.COUPON_ID,
@@ -246,8 +251,10 @@ func (repository CouponRedeemRepository) SelectReport(c context.Context, paramet
 			R._NAME,
 			R.GROUP_NAME,
 			CL._NAME,
-			DEF.COUPON_CODE
+			DEF.COUPON_CODE,
+			SIH.DOCUMENT_NO
 		FROM COUPON_REDEEM DEF
+		LEFT JOIN SALES_INVOICE_HEADER SIH ON SIH.transaction_source_document_no = DEF.REDEEM_TO_DOC_NO
 		LEFT JOIN COUPONS CP ON CP.ID = DEF.COUPON_ID
 		LEFT JOIN CUSTOMER C ON C.ID = DEF.CUSTOMER_ID
 		LEFT JOIN CUSTOMER_LEVEL CL ON CL.ID = C.CUSTOMER_LEVEL_ID
@@ -255,8 +262,8 @@ func (repository CouponRedeemRepository) SelectReport(c context.Context, paramet
 		LEFT JOIN REGION R ON R.ID = B.REGION_ID
 		WHERE DEF.DELETED_AT IS NULL ` + conditionString +
 		` ORDER BY ` + parameter.By + ` ` + parameter.Sort
-	rows, err := repository.DB.QueryContext(c, statement)
 
+	rows, err := repository.DB.QueryContext(c, statement)
 	if err != nil {
 		return data, err
 	}
@@ -287,6 +294,7 @@ func (repository CouponRedeemRepository) SelectReport(c context.Context, paramet
 			&temp.RegionGroupName,
 			&temp.CustomerLevelName,
 			&temp.CouponCode,
+			&temp.InvoiceNo,
 		)
 		if err != nil {
 			return data, err

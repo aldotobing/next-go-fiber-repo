@@ -40,6 +40,7 @@ func (uc CouponRedeemUC) BuildBody(data *models.CouponRedeem, res *viewmodel.Cou
 	res.DeletedAt = data.DeletedAt.String
 	res.ExpiredAt = data.ExpiredAt.String
 	res.CouponCode = data.CouponCode.String
+	res.InvoiceNo = data.InvoiceNo.String
 }
 
 // FindAll ...
@@ -225,6 +226,7 @@ func (uc CouponRedeemUC) SelectReport(c context.Context, parameter models.Coupon
 			RegionGroupName:       datum.RegionGroupName,
 			CustomerLevelName:     datum.CustomerLevelName.String,
 			CouponCode:            datum.CouponCode.String,
+			InvoiceNo:             datum.InvoiceNo.String,
 		})
 	}
 

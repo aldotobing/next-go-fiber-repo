@@ -48,6 +48,7 @@ func (repository PointRepository) scanRows(rows *sql.Rows) (res models.Point, er
 		&res.DeletedAt,
 		&res.ExpiredAt,
 
+		&res.Customer.ID,
 		&res.Customer.CustomerName,
 		&res.Customer.Code,
 		&res.Customer.CustomerBranchCode,
@@ -56,6 +57,7 @@ func (repository PointRepository) scanRows(rows *sql.Rows) (res models.Point, er
 
 		&res.InvoiceDate,
 		&res.Note,
+		&res.SourceDocumentNo,
 	)
 
 	return
@@ -75,6 +77,7 @@ func (repository PointRepository) scanRow(row *sql.Row) (res models.Point, err e
 		&res.DeletedAt,
 		&res.ExpiredAt,
 
+		&res.Customer.ID,
 		&res.Customer.CustomerName,
 		&res.Customer.Code,
 		&res.Customer.CustomerBranchCode,
@@ -83,6 +86,7 @@ func (repository PointRepository) scanRow(row *sql.Row) (res models.Point, err e
 
 		&res.InvoiceDate,
 		&res.Note,
+		&res.SourceDocumentNo,
 	)
 
 	return
@@ -105,7 +109,6 @@ func (repository PointRepository) SelectAll(c context.Context, parameter models.
 		` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 
 	rows, err := repository.DB.QueryContext(c, statement)
-
 	if err != nil {
 		return data, err
 	}
@@ -138,9 +141,17 @@ func (repository PointRepository) FindAll(ctx context.Context, parameter models.
 		conditionString += `AND DEF.POINT_TYPE = ` + parameter.PointType
 	}
 
+	if parameter.Search != "" {
+		conditionString += ` AND (lower(C.CUSTOMER_NAME) like lower('%` + parameter.Search + `%')
+			OR lower(C.CUSTOMER_CODE) like lower('%` + parameter.Search + `%')
+			OR lower(B._NAME) like lower('%` + parameter.Search + `%')
+			OR lower(B.BRANCH_CODE) like lower('%` + parameter.Search + `%'))`
+	}
+
 	statement := models.PointSelectStatement + models.PointWhereStatement +
 		conditionString +
 		` ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $1 LIMIT $2`
+
 	rows, err := repository.DB.QueryContext(ctx, statement, parameter.Offset, parameter.Limit)
 	if err != nil {
 		return data, count, err
@@ -159,7 +170,12 @@ func (repository PointRepository) FindAll(ctx context.Context, parameter models.
 		return data, count, err
 	}
 
-	countQuery := `SELECT COUNT(*) FROM POINTS def ` + models.PointWhereStatement +
+	countQuery := `SELECT COUNT(*) FROM POINTS def
+		LEFT JOIN POINT_TYPE PT ON PT.ID = DEF.POINT_TYPE
+		LEFT JOIN CUSTOMER C ON C.ID = DEF.CUSTOMER_ID
+		LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
+		LEFT JOIN REGION R ON R.ID = B.REGION_ID
+		LEFT JOIN SALES_INVOICE_HEADER SIH ON SIH.DOCUMENT_NO = DEF.INVOICE_DOCUMENT_NO ` + models.PointWhereStatement +
 		conditionString
 	err = repository.DB.QueryRow(countQuery).Scan(&count)
 
@@ -380,7 +396,6 @@ func (repository PointRepository) Report(c context.Context, parameter models.Poi
 		order by branch_code asc;`
 
 	rows, err := repository.DB.QueryContext(c, statement)
-
 	if err != nil {
 		return data, err
 	}
@@ -393,7 +408,6 @@ func (repository PointRepository) Report(c context.Context, parameter models.Poi
 			&temp.Partner.Code, &temp.Partner.PartnerName,
 			&temp.InvoiceDocumentNo, &temp.SalesInvoice.NetAmount, &temp.Point, &temp.SalesInvoice.TrasactionDate,
 		)
-
 		if err != nil {
 			return data, err
 		}

@@ -36,8 +36,10 @@ func (uc PointUC) BuildBody(data *models.Point, res *viewmodel.PointVM) {
 	res.ExpiredAt = data.ExpiredAt.String
 	invoiceDate, _ := time.Parse("2006-01-02T15:04:05.999999999Z", data.InvoiceDate.String)
 	res.InvoiceDate = invoiceDate.Format("2006-01-02")
+	res.SourceDocumentNo = data.SourceDocumentNo.String
 
 	res.DetailCustomer = viewmodel.CustomerVM{
+		ID:                 data.Customer.ID.String,
 		CustomerName:       data.Customer.CustomerName.String,
 		Code:               data.Customer.Code.String,
 		CustomerBranchCode: data.Customer.CustomerBranchCode.String,
@@ -158,7 +160,6 @@ func (uc PointUC) GetBalance(c context.Context, parameter models.PointParameter)
 
 // GetBalanceAll ...
 func (uc PointUC) GetBalanceAll(c context.Context, parameter models.PointParameter) (out viewmodel.PointBalanceVM, err error) {
-
 	repo := repository.NewPointRepository(uc.DB)
 	data, err := repo.GetBalance(c, parameter)
 	if err != nil {
@@ -183,7 +184,6 @@ func (uc PointUC) GetBalanceAll(c context.Context, parameter models.PointParamet
 
 // GetPointThisMonth ...
 func (uc PointUC) GetPointThisMonth(c context.Context, customerID, month, year string) (out viewmodel.PointBalanceVM, err error) {
-
 	repo := repository.NewPointRepository(uc.DB)
 	data, err := repo.GetBalanceUsingInvoiceDate(c, models.PointParameter{
 		CustomerID: customerID,
