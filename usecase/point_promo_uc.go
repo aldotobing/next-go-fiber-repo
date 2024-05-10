@@ -171,32 +171,54 @@ func (uc PointPromoUC) EligiblePoint(c context.Context, cartList string) (out st
 
 	var pointEligible float64
 	for _, pointPromoData := range pointPromo {
-		var multiplicator bool
-		for _, itemPromo := range pointPromoData.Items {
-			for _, itemCart := range cart {
-				if multiplicator {
-					continue
-				}
-				if itemCart.ItemID != nil && itemPromo.ID == *itemCart.ItemID {
-					cartStock, _ := strconv.ParseFloat(*itemCart.StockQty, 64)
-					cartQty, _ := strconv.ParseFloat(*itemCart.Qty, 64)
-					itemCartTotalQty := cartStock * cartQty
-
-					itemPromoConvertion, _ := strconv.ParseFloat(itemPromo.Convertion, 64)
-					itemPromoQty, _ := strconv.ParseFloat(itemPromo.Quantity, 64)
-					itemPromoTotalQty := itemPromoConvertion * itemPromoQty
-
-					eligibleMultiply := itemCartTotalQty / itemPromoTotalQty
-					if eligibleMultiply >= 1 {
-						if !pointPromoData.Multiplicator {
-							eligibleMultiply = 1
-							multiplicator = true
-						}
-						pointConvertion, _ := strconv.ParseFloat(pointPromoData.PointConversion, 64)
-						pointGet := pointConvertion * float64(int(eligibleMultiply))
-						pointEligible += pointGet
+		switch pointPromoData.PromoType {
+		case models.PromoTypePoint:
+			var multiplicator bool
+			for _, itemPromo := range pointPromoData.Items {
+				for _, itemCart := range cart {
+					if multiplicator {
+						continue
 					}
+					if itemCart.ItemID != nil && itemPromo.ID == *itemCart.ItemID {
+						cartStock, _ := strconv.ParseFloat(*itemCart.StockQty, 64)
+						cartQty, _ := strconv.ParseFloat(*itemCart.Qty, 64)
+						itemCartTotalQty := cartStock * cartQty
 
+						itemPromoConvertion, _ := strconv.ParseFloat(itemPromo.Convertion, 64)
+						itemPromoQty, _ := strconv.ParseFloat(itemPromo.Quantity, 64)
+						itemPromoTotalQty := itemPromoConvertion * itemPromoQty
+
+						eligibleMultiply := itemCartTotalQty / itemPromoTotalQty
+						if eligibleMultiply >= 1 {
+							if !pointPromoData.Multiplicator {
+								eligibleMultiply = 1
+								multiplicator = true
+							}
+							pointConvertion, _ := strconv.ParseFloat(pointPromoData.PointConversion, 64)
+							pointGet := pointConvertion * float64(int(eligibleMultiply))
+							pointEligible += pointGet
+						}
+
+					}
+				}
+			}
+		case models.PromoTypeStrata:
+			var totalPrice float64
+			for _, itemPromo := range pointPromoData.Items {
+				for _, itemCart := range cart {
+					if itemCart.ItemID != nil && itemPromo.ID == *itemCart.ItemID {
+						price, _ := strconv.ParseFloat(*itemCart.TotalPrice, 64)
+						totalPrice += price
+					}
+				}
+			}
+			for _, strata := range pointPromoData.Strata {
+				from, _ := strconv.ParseFloat(strata.From, 64)
+				to, _ := strconv.ParseFloat(strata.To, 64)
+				if totalPrice >= from && totalPrice <= to {
+					getPoint, _ := strconv.ParseFloat(strata.Point, 64)
+
+					pointEligible += getPoint
 				}
 			}
 		}

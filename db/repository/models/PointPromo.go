@@ -3,8 +3,10 @@ package models
 import "database/sql"
 
 const (
-	PromoTypeStrata = "Strata"
-	PromoTypePoint  = "Point"
+	PromoTypeStrata       = "Strata"        // Promo point ketika total price pembelian
+	PromoTypeStrataTotal  = "Strata-Total"  // Promo point ketika total uom
+	PromoTypeStrataPerUOM = "Strata-PerUom" // Promo point ketika pembelian per uom
+	PromoTypePoint        = "Point"         // Promo point ketika pembelian kelipatan
 )
 
 // PointPromo ...
