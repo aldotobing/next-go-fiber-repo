@@ -388,7 +388,7 @@ func (repository PointRepository) Report(c context.Context, parameter models.Poi
 		p.invoice_document_no, sih.net_amount, p.point, sih.transaction_date
 		from points p
 		left join sales_invoice_header sih on sih.document_no = p.invoice_document_no 
-		left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
+		left join customer_order_header coh on sih.transaction_source_document_no like CONCAT('%', coh.document_no, '%')
 		left join customer c on c.id = p.customer_id 
 		left join branch b on b.id = c.branch_id 
 		left join region r on r.id = b.region_id
