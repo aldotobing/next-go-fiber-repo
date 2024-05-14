@@ -720,11 +720,10 @@ func (repo DashboardWebRepository) GetOmzetValue(ctx context.Context, parameter 
 		from sales_invoice_header sih 
 			left join sales_invoice_line sil on sil.header_id = sih.id 
 			left join item i on i.id = sil.item_id
-			left join customer_order_header coh on sih.transaction_source_document_no like CONCAT('%', coh.document_no, '%')
 			left join branch b on b.id = sih.branch_id  
 			left join region r on r.id = b.region_id
 		WHERE sih.transaction_date is not null 
-			and coh.id is not null` + whereStatement + `
+			and sih.transaction_source_document_no is not null` + whereStatement + `
 			group by r.group_id
 			order by r.group_id desc`
 
@@ -780,11 +779,10 @@ func (repo DashboardWebRepository) GetOmzetValueByGroupID(ctx context.Context, p
 		from sales_invoice_header sih 
 			left join sales_invoice_line sil on sil.header_id = sih.id 
 			left join item i on i.id = sil.item_id
-			left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
 			left join branch b on b.id = sih.branch_id  
 			left join region r on r.id = b.region_id
 		WHERE sih.transaction_date is not null
-			and coh.id is not null` + whereStatement + `
+			and sih.transaction_source_document_no is not null` + whereStatement + `
 			group by r.id
 			order by r.id asc`
 
@@ -841,11 +839,10 @@ func (repo DashboardWebRepository) GetOmzetValueByRegionID(ctx context.Context, 
 		from sales_invoice_header sih 
 			left join sales_invoice_line sil on sil.header_id = sih.id 
 			left join item i on i.id = sil.item_id
-			left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
 			left join branch b on b.id = sih.branch_id  
 			left join region r on r.id = b.region_id
 		WHERE sih.transaction_date is not null
-			and coh.id is not null` + whereStatement + `
+			and sih.transaction_source_document_no is not null` + whereStatement + `
 			group by sih.branch_id, r.id
 			order by sih.branch_id asc`
 
@@ -913,8 +910,7 @@ func (repo DashboardWebRepository) GetOmzetValueByBranchID(ctx context.Context, 
 			CTY._NAME AS CUSTomer_CITY_NAME,
 		  	cl._name as customer_level_name
 		from customer c
-			left join customer_order_header coh on coh.cust_bill_to_id = c.id
-			left join sales_invoice_header sih on sih.transaction_source_document_no = coh.document_no
+			left join sales_invoice_header sih on sih.cust_bill_to_id = c.id
 			left join branch b on b.id = c.branch_id
 			LEFT JOIN REGION REG ON REG.ID = B.REGION_ID
 			left JOIN CITY CTY ON CTY.ID = C.CUSTOMER_CITY_ID
@@ -922,8 +918,8 @@ func (repo DashboardWebRepository) GetOmzetValueByBranchID(ctx context.Context, 
 	  		left join customer_level cl on cl.id = c.customer_level_id
 	  		LEFT JOIN CUSTOMER_TYPE CT ON CT.ID = C.CUSTOMER_TYPE_ID
 		where c.show_in_apps = 1  
-			and coh.status in ('finish', 'submitted') 
-			and sih.id is not null ` + withWhereStatement + `
+			and sih.status in ('finish', 'submitted') 
+			and sih.transaction_source_document_no is not null ` + withWhereStatement + `
 		group by c.id, b.id, cty.id, dist.id, cl.id, ct.id, reg.id
 	)
 	select c.id, cs.region_name, cs.region_group_name, cs.branch_name, cs.branch_code, c.customer_name, c.customer_code, cs.customer_type_name, cs.customer_district_name, 
@@ -934,13 +930,12 @@ func (repo DashboardWebRepository) GetOmzetValueByBranchID(ctx context.Context, 
     from sales_invoice_header sih 
 		left join sales_invoice_line sil on sil.header_id = sih.id 
 		left join item i on i.id = sil.item_id
-		left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
-		left join customer c on c.id = coh.cust_bill_to_id
+		left join customer c on c.id = sih.cust_bill_to_id
 		left join branch b on b.id = sih.branch_id  
 		left join region r on r.id = b.region_id
 		left join customerSelected CS on cs.customer_id = c.id
 	WHERE sih.transaction_date is not null 
-		and coh.id is not null ` + whereStatement + `
+		and sih.transaction_source_document_no is not null ` + whereStatement + `
 	group by c.id, cs.region_name,cs.region_group_name, cs.branch_name, cs.branch_code, cs.customer_type_name, cs.customer_district_name, 
 		cs.customer_city_name, customer_level_name
 	order by c.id asc`
@@ -1009,13 +1004,12 @@ func (repo DashboardWebRepository) GetOmzetValueByCustomerID(ctx context.Context
 		coalesce(sum(sil.qty),0) as total_volume
 	from sales_invoice_header sih 
 		left join sales_invoice_line sil on sil.header_id = sih.id 
-		left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
 		left join item i on i.id = sil.item_id
-		left join customer c on c.id = coh.cust_bill_to_id
+		left join customer c on c.id = sih.cust_bill_to_id
 		left join branch b on b.id = sih.branch_id  
 		left join region r on r.id = b.region_id
 	WHERE sih.transaction_date is not null 
-		and coh.id is not null 
+		and sih.transaction_source_document_no is not null 
 		` + whereStatement + `
 	group by i.id
 	order by i.id asc`
@@ -1092,11 +1086,10 @@ func (repo DashboardWebRepository) GetOmzetValueGraph(ctx context.Context, param
 		from sales_invoice_header sih 
 			left join sales_invoice_line sil on sil.header_id = sih.id 
 			left join item i on i.id = sil.item_id
-			left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
 			left join branch b on b.id = sih.branch_id  
 			left join region r on r.id = b.region_id
 		WHERE sih.transaction_date is not null 
-			and coh.id is not null` + whereStatement + `
+			and sih.transaction_source_document_no is not null` + whereStatement + `
 			group by transaction_year_month, transaction_year, transaction_month_name
 			order by transaction_year_month asc`
 
