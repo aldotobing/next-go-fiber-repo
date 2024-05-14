@@ -66,7 +66,6 @@ func (repository DashboardWebRepository) scanRows(rows *sql.Rows) (res models.Da
 		&res.TotalInvoice,
 		&res.TotalCompleteCustomer)
 	if err != nil {
-
 		return res, err
 	}
 
@@ -83,7 +82,6 @@ func (repository DashboardWebRepository) scanByRegionIDRows(rows *sql.Rows) (res
 		&res.TotalInvoice, &res.TotalCompleteCustomer,
 	)
 	if err != nil {
-
 		return res, err
 	}
 
@@ -101,7 +99,6 @@ func (repository DashboardWebRepository) scanRegionDetailRows(rows *sql.Rows) (r
 		&res.TotalOutlet, &res.TotalCompleteCustomer,
 	)
 	if err != nil {
-
 		return res, err
 	}
 
@@ -120,7 +117,6 @@ func (repository DashboardWebRepository) scanBranchCustomerDetailRows(rows *sql.
 		&res.StatusComplete,
 	)
 	if err != nil {
-
 		return res, err
 	}
 
@@ -137,7 +133,6 @@ func (repository DashboardWebRepository) scanGroupDetailWithUserIDRows(rows *sql
 		&res.TotalRegisteredUser, &res.CompleteCustomer,
 	)
 	if err != nil {
-
 		return res, err
 	}
 
@@ -155,7 +150,6 @@ func (repository DashboardWebRepository) scanCustomerDetailWithUserIDRows(rows *
 		&res.TotalInvoice, &res.TotalCheckin, &res.TotalAktifOutlet, &res.CompleteCustomer,
 	)
 	if err != nil {
-
 		return res, err
 	}
 
@@ -177,7 +171,6 @@ func (repository DashboardWebRepository) scanBranchCustomerDetailReportRows(rows
 		&res.CustomerFirstLogin,
 	)
 	if err != nil {
-
 		return res, err
 	}
 
@@ -229,7 +222,6 @@ func (repository DashboardWebRepository) GetData(c context.Context, parameter mo
 	statement = strings.ReplaceAll(statement, "{START_DATE}", startDate)
 	statement = strings.ReplaceAll(statement, "{END_DATE}", endDate)
 	rows, err := repository.DB.QueryContext(c, statement)
-
 	if err != nil {
 		return data, err
 	}
@@ -262,7 +254,6 @@ func (repository DashboardWebRepository) GetDataByGroupID(c context.Context, par
 	statement = strings.ReplaceAll(statement, "{WHERE_STATEMENT}", whereStatement)
 
 	rows, err := repository.DB.QueryContext(c, statement)
-
 	if err != nil {
 		return data, err
 	}
@@ -323,7 +314,6 @@ func (repository DashboardWebRepository) GetRegionDetailData(c context.Context, 
 		str.NullOrEmtyString(&parameter.GroupID),
 		str.NullOrEmtyString(&parameter.CustomerLevelID),
 		str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
-
 	if err != nil {
 		return data, err
 	}
@@ -361,7 +351,6 @@ func (repository DashboardWebRepository) GetUserByRegionDetailData(c context.Con
 }
 
 func (repository DashboardWebRepository) GetBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) (data []models.DashboardWebBranchDetail, count int, err error) {
-
 	query := models.DashboardWebBranchDetailSelectStatement + ` OFFSET $4 LIMIT $5`
 	rows, err := repository.DB.Query(query, str.NullOrEmtyString(&parameter.BranchID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate),
 		parameter.Offset, parameter.Limit)
@@ -388,7 +377,6 @@ func (repository DashboardWebRepository) GetBranchDetailCustomerData(ctx context
 }
 
 func (repository DashboardWebRepository) GetAllBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) (data []models.DashboardWebBranchDetail, err error) {
-
 	query := models.DashboardWebBranchDetailSelectStatement
 	rows, err := repository.DB.Query(query, str.NullOrEmtyString(&parameter.BranchID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
 	if err != nil {
@@ -412,7 +400,6 @@ func (repository DashboardWebRepository) GetAllBranchDetailCustomerData(ctx cont
 }
 
 func (repository DashboardWebRepository) GetAllReportBranchDetailCustomerData(ctx context.Context, parameter models.DashboardWebBranchParameter) (data []models.DashboardWebBranchDetail, err error) {
-
 	query := models.DashboardWebReportBranchDetailSelectStatement
 	rows, err := repository.DB.Query(query, str.NullOrEmtyString(&parameter.BranchID), str.NullOrEmtyString(&parameter.UserID), str.NullOrEmtyString(&parameter.CustomerLevelID), str.NullOrEmtyString(&parameter.StartDate), str.NullOrEmtyString(&parameter.EndDate))
 	if err != nil {
@@ -733,7 +720,7 @@ func (repo DashboardWebRepository) GetOmzetValue(ctx context.Context, parameter 
 		from sales_invoice_header sih 
 			left join sales_invoice_line sil on sil.header_id = sih.id 
 			left join item i on i.id = sil.item_id
-			left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
+			left join customer_order_header coh on sih.transaction_source_document_no like CONCAT('%', coh.document_no, '%')
 			left join branch b on b.id = sih.branch_id  
 			left join region r on r.id = b.region_id
 		WHERE sih.transaction_date is not null 
