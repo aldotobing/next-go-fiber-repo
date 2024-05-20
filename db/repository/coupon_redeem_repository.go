@@ -15,6 +15,7 @@ type ICouponRedeemRepository interface {
 	FindByID(c context.Context, parameter models.CouponRedeemParameter) (models.CouponRedeem, error)
 	Add(c context.Context, model viewmodel.CouponRedeemVM) (string, error)
 	Redeem(c context.Context, model viewmodel.CouponRedeemVM) (string, error)
+	Revert(c context.Context, model viewmodel.CouponRedeemVM) (string, error)
 	SelectReport(c context.Context, parameter models.CouponRedeemParameter) ([]models.CouponRedeemReport, error)
 }
 
@@ -191,6 +192,23 @@ func (repository CouponRedeemRepository) Redeem(c context.Context, in viewmodel.
 		in.Redeem,
 		in.RedeemedToDocumentNo,
 		in.ID).Scan(&res)
+
+	return
+}
+
+// Revert ...
+func (repository CouponRedeemRepository) Revert(c context.Context, in viewmodel.CouponRedeemVM) (res string, err error) {
+	statement := `UPDATE COUPON_REDEEM SET 
+		REDEEMED = $1, 
+		REDEEMED_AT = NULL,
+		REDEEM_TO_DOC_NO = NULL,
+		UPDATED_AT = now()
+	WHERE LEFT(REDEEM_TO_DOC_NO,15) = LEFT($2,15)
+	RETURNING id`
+
+	err = repository.DB.QueryRowContext(c, statement,
+		in.Redeem,
+		in.RedeemedToDocumentNo).Scan(&res)
 
 	return
 }

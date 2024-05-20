@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"nextbasis-service-v-0.1/db/repository/models"
+	"nextbasis-service-v-0.1/helper"
 	"nextbasis-service-v-0.1/pkg/str"
 	"nextbasis-service-v-0.1/server/requests"
 	"nextbasis-service-v-0.1/usecase"
@@ -88,6 +89,24 @@ func (h *CouponRedeemHandler) Add(ctx *fiber.Ctx) error {
 
 	uc := usecase.CouponRedeemUC{ContractUC: h.ContractUC}
 	res, err := uc.Add(c, *input)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err, 0)
+	}
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+// Revert ...
+func (h *CouponRedeemHandler) Revert(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	invoiceNo := ctx.Params("invoice_no")
+	if invoiceNo == "" {
+		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
+	}
+
+	uc := usecase.CouponRedeemUC{ContractUC: h.ContractUC}
+	res, err := uc.Revert(c, invoiceNo)
 	if err != nil {
 		return h.SendResponse(ctx, nil, nil, err, 0)
 	}
