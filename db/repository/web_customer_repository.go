@@ -106,7 +106,6 @@ func (repository WebCustomerRepository) scanRows(rows *sql.Rows) (res models.Web
 		&res.CustomerPhotoNpwpDashboard,
 	)
 	if err != nil {
-
 		return res, err
 	}
 
@@ -166,9 +165,10 @@ func (repository WebCustomerRepository) scanRowsReport(rows *sql.Rows) (res mode
 		&res.CustomerUserToken,
 		&res.CustomerUserFirstLoginTime,
 		&res.CustomerAdminValidate,
+		&res.CustomerPhotoKtpDashboard,
+		&res.CustomerPhotoNpwpDashboard,
 	)
 	if err != nil {
-
 		return res, err
 	}
 
@@ -294,7 +294,6 @@ func (repository WebCustomerRepository) SelectAll(c context.Context, parameter m
 	statement := models.WebCustomerSelectStatement + ` ` + whereStatement +
 		` AND (LOWER(c.customer_name) LIKE $1 or LOWER(c.customer_code) LIKE $1 ) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
-
 	if err != nil {
 		return data, err
 	}
@@ -560,7 +559,6 @@ func (repository WebCustomerRepository) Edit(c context.Context, model models.Web
 		model.CustomerPhotoNpwp.String,
 		model.CustomerPhotoNpwpDashboard.String,
 		model.ID.String).Scan(&res)
-
 	if err != nil {
 		return res, err
 	}
@@ -639,7 +637,6 @@ func (repository WebCustomerRepository) Add(c context.Context, model models.WebC
 		model.CustomerSalesmanID.String, customerUserID, model.CustomerReligion.String, model.CustomerNik.String,
 		int(model.CustomerLevelID.Int64), model.CustomerGender.String, model.CustomerBirthDate.String,
 	).Scan(&res)
-
 	if err != nil {
 		return res, err
 	}
@@ -702,7 +699,6 @@ func (repository WebCustomerRepository) ReportSelect(c context.Context, paramete
 
 	statement := `SELECT * FROM v_customer_report WHERE customer_created_date IS NOT NULL ` + conditionString
 	rows, err := repository.DB.QueryContext(c, statement, args...)
-
 	if err != nil {
 		return data, err
 	}
