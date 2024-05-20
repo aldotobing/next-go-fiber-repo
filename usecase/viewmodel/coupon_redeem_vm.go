@@ -44,4 +44,5 @@ type CouponRedeemReportVM struct {
 	CustomerLevelName     string `json:"customer_level_name"`
 	CouponCode            string `json:"coupon_code"`
 	InvoiceNo             string `json:"invoice_no"`
+	SalesOrderDocumentNo  string `json:"sales_order_document_no"`
 }

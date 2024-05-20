@@ -47,6 +47,7 @@ type CouponRedeemReport struct {
 	CustomerLevelName     sql.NullString `json:"customer_level_name"`
 	CouponCode            sql.NullString
 	InvoiceNo             sql.NullString
+	SalesOrderDocumentNo  sql.NullString
 }
 
 // CouponRedeemParameter ...

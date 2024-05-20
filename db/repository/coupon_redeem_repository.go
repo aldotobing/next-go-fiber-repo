@@ -252,9 +252,11 @@ func (repository CouponRedeemRepository) SelectReport(c context.Context, paramet
 			R.GROUP_NAME,
 			CL._NAME,
 			DEF.COUPON_CODE,
-			SIH.DOCUMENT_NO
+			SIH.DOCUMENT_NO,
+			SOH.DOCUMENT_NO
 		FROM COUPON_REDEEM DEF
 		LEFT JOIN SALES_INVOICE_HEADER SIH ON left(SIH.transaction_source_document_no,15) = left(DEF.REDEEM_TO_DOC_NO, 15)
+		LEFT JOIN SALES_ORDER_HEADER SOH ON left(SOH.request_document_no,15) = left(DEF.REDEEM_TO_DOC_NO, 15)
 		LEFT JOIN COUPONS CP ON CP.ID = DEF.COUPON_ID
 		LEFT JOIN CUSTOMER C ON C.ID = DEF.CUSTOMER_ID
 		LEFT JOIN CUSTOMER_LEVEL CL ON CL.ID = C.CUSTOMER_LEVEL_ID
@@ -295,6 +297,7 @@ func (repository CouponRedeemRepository) SelectReport(c context.Context, paramet
 			&temp.CustomerLevelName,
 			&temp.CouponCode,
 			&temp.InvoiceNo,
+			&temp.SalesOrderDocumentNo,
 		)
 		if err != nil {
 			return data, err

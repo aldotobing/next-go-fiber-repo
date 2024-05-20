@@ -227,6 +227,7 @@ func (uc CouponRedeemUC) SelectReport(c context.Context, parameter models.Coupon
 			CustomerLevelName:     datum.CustomerLevelName.String,
 			CouponCode:            datum.CouponCode.String,
 			InvoiceNo:             datum.InvoiceNo.String,
+			SalesOrderDocumentNo:  datum.SalesOrderDocumentNo.String,
 		})
 	}
 
