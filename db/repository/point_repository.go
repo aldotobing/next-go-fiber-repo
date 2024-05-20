@@ -385,14 +385,16 @@ func (repository PointRepository) Report(c context.Context, parameter models.Poi
 
 	statement := `select b.branch_code, b."_name", r._name, r.group_name, 
 		pt.code, pt."_name", 
-		p.invoice_document_no, sih.net_amount, p.point, sih.transaction_date
+		p.invoice_document_no, sih.net_amount, p.point, sih.transaction_date,
+		ptt._NAME
 		from points p
+		left join point_type ptt on ptt.id = p.point_type
 		left join sales_invoice_header sih on sih.document_no = p.invoice_document_no 
 		left join customer c on c.id = p.customer_id 
 		left join branch b on b.id = c.branch_id 
 		left join region r on r.id = b.region_id
 		left join partner pt on pt.id = c.partner_id
-		WHERE P.DELETED_AT IS NULL AND P.POINT_TYPE = 2 
+		WHERE P.DELETED_AT IS NULL 
 			AND sih.transaction_source_document_no IS NOT NULL` + conditionString + `
 		order by branch_code asc;`
 
@@ -408,6 +410,7 @@ func (repository PointRepository) Report(c context.Context, parameter models.Poi
 			&temp.Branch.Code, &temp.Branch.Name, &temp.Region.Name, &temp.Region.GroupName,
 			&temp.Partner.Code, &temp.Partner.PartnerName,
 			&temp.InvoiceDocumentNo, &temp.SalesInvoice.NetAmount, &temp.Point, &temp.SalesInvoice.TrasactionDate,
+			&temp.PointTypeName,
 		)
 		if err != nil {
 			return data, err

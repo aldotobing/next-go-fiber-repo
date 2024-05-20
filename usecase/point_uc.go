@@ -360,6 +360,7 @@ func (uc PointUC) Report(c context.Context, parameter models.PointParameter) (ou
 			NetAmount:         *datum.SalesInvoice.NetAmount,
 			Point:             datum.Point,
 			TrasactionDate:    *datum.SalesInvoice.TrasactionDate,
+			PointTypeName:     datum.PointTypeName,
 		}
 
 		out = append(out, temp)
