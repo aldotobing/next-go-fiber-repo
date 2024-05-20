@@ -36,4 +36,5 @@ type PointReportVM struct {
 	NetAmount         string `json:"net_amount"`
 	Point             string `json:"point"`
 	TrasactionDate    string `json:"transaction_date"`
+	PointTypeName     string `json:"point_type_name"`
 }

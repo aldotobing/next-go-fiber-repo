@@ -15,6 +15,7 @@ type ICouponRedeemRepository interface {
 	FindByID(c context.Context, parameter models.CouponRedeemParameter) (models.CouponRedeem, error)
 	Add(c context.Context, model viewmodel.CouponRedeemVM) (string, error)
 	Redeem(c context.Context, model viewmodel.CouponRedeemVM) (string, error)
+	Revert(c context.Context, model viewmodel.CouponRedeemVM) (string, error)
 	SelectReport(c context.Context, parameter models.CouponRedeemParameter) ([]models.CouponRedeemReport, error)
 }
 
@@ -195,6 +196,23 @@ func (repository CouponRedeemRepository) Redeem(c context.Context, in viewmodel.
 	return
 }
 
+// Revert ...
+func (repository CouponRedeemRepository) Revert(c context.Context, in viewmodel.CouponRedeemVM) (res string, err error) {
+	statement := `UPDATE COUPON_REDEEM SET 
+		REDEEMED = $1, 
+		REDEEMED_AT = NULL,
+		REDEEM_TO_DOC_NO = NULL,
+		UPDATED_AT = now()
+	WHERE LEFT(REDEEM_TO_DOC_NO,15) = LEFT($2,15)
+	RETURNING id`
+
+	err = repository.DB.QueryRowContext(c, statement,
+		in.Redeem,
+		in.RedeemedToDocumentNo).Scan(&res)
+
+	return
+}
+
 // SelectReport ...
 func (repository CouponRedeemRepository) SelectReport(c context.Context, parameter models.CouponRedeemParameter) (data []models.CouponRedeemReport, err error) {
 	var conditionString string
@@ -207,9 +225,9 @@ func (repository CouponRedeemRepository) SelectReport(c context.Context, paramet
 	}
 
 	if parameter.StartDate != "" && parameter.EndDate != "" {
-		conditionString += ` AND DEF.CREATED_AT::DATE BETWEEN '` + parameter.StartDate + `' AND '` + parameter.EndDate + `'`
+		conditionString += ` AND DEF.REDEEMED_AT::DATE BETWEEN '` + parameter.StartDate + `' AND '` + parameter.EndDate + `'`
 	} else {
-		conditionString += ` AND DEF.CREATED_AT::DATE BETWEEN date_trunc('MONTH',now())::DATE AND now()::date`
+		conditionString += ` AND DEF.REDEEMED_AT::DATE BETWEEN date_trunc('MONTH',now())::DATE AND now()::date`
 	}
 
 	if parameter.BranchID != "" {
@@ -252,9 +270,11 @@ func (repository CouponRedeemRepository) SelectReport(c context.Context, paramet
 			R.GROUP_NAME,
 			CL._NAME,
 			DEF.COUPON_CODE,
-			SIH.DOCUMENT_NO
+			SIH.DOCUMENT_NO,
+			SOH.DOCUMENT_NO
 		FROM COUPON_REDEEM DEF
 		LEFT JOIN SALES_INVOICE_HEADER SIH ON left(SIH.transaction_source_document_no,15) = left(DEF.REDEEM_TO_DOC_NO, 15)
+		LEFT JOIN SALES_ORDER_HEADER SOH ON left(SOH.request_document_no,15) = left(DEF.REDEEM_TO_DOC_NO, 15)
 		LEFT JOIN COUPONS CP ON CP.ID = DEF.COUPON_ID
 		LEFT JOIN CUSTOMER C ON C.ID = DEF.CUSTOMER_ID
 		LEFT JOIN CUSTOMER_LEVEL CL ON CL.ID = C.CUSTOMER_LEVEL_ID
@@ -295,6 +315,7 @@ func (repository CouponRedeemRepository) SelectReport(c context.Context, paramet
 			&temp.CustomerLevelName,
 			&temp.CouponCode,
 			&temp.InvoiceNo,
+			&temp.SalesOrderDocumentNo,
 		)
 		if err != nil {
 			return data, err

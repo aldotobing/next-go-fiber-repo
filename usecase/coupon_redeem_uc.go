@@ -178,6 +178,23 @@ func (uc CouponRedeemUC) Redeem(c context.Context, in models.CouponRedeemParamet
 	return
 }
 
+// Revert ...
+func (uc CouponRedeemUC) Revert(c context.Context, invoiceNo string) (out viewmodel.CouponRedeemVM, err error) {
+	out = viewmodel.CouponRedeemVM{
+		Redeem:               "0",
+		RedeemedToDocumentNo: invoiceNo,
+	}
+
+	repo := repository.NewCouponRedeemRepository(uc.DB)
+	out.ID, err = repo.Revert(c, out)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	return
+}
+
 // AddPhoto ...
 func (uc CouponRedeemUC) AddPhoto(c context.Context, image *multipart.FileHeader) (out string, err error) {
 	awsUc := AwsUC{ContractUC: uc.ContractUC}
@@ -227,6 +244,7 @@ func (uc CouponRedeemUC) SelectReport(c context.Context, parameter models.Coupon
 			CustomerLevelName:     datum.CustomerLevelName.String,
 			CouponCode:            datum.CouponCode.String,
 			InvoiceNo:             datum.InvoiceNo.String,
+			SalesOrderDocumentNo:  datum.SalesOrderDocumentNo.String,
 		})
 	}
 

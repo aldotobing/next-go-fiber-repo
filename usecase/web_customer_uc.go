@@ -99,25 +99,25 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 	res.CustomerNik = data.CustomerNik.String
 
 	var photoktpURL string
-	if data.CustomerPhotoKtp.Valid {
+	if data.CustomerPhotoKtp.Valid && data.CustomerPhotoKtp.String != "" {
 		photoktpURL = models.CustomerImagePath + data.CustomerPhotoKtp.String
 	}
 	res.CustomerPhotoKtp = photoktpURL
 
 	var photoktpDashboardURL string
-	if data.CustomerPhotoKtpDashboard.Valid {
+	if data.CustomerPhotoKtpDashboard.Valid && data.CustomerPhotoKtpDashboard.String != "" {
 		photoktpDashboardURL = models.CustomerImagePath + data.CustomerPhotoKtpDashboard.String
 	}
 	res.CustomerPhotoKtpDashboard = photoktpDashboardURL
 
 	var photoNPWPURL string
-	if data.CustomerPhotoNpwp.Valid {
+	if data.CustomerPhotoNpwp.Valid && data.CustomerPhotoNpwp.String != "" {
 		photoNPWPURL = models.CustomerImagePath + data.CustomerPhotoNpwp.String
 	}
 	res.CustomerPhotoNpwp = photoNPWPURL
 
 	var photoNPWPDashboardURL string
-	if data.CustomerPhotoNpwpDashboard.Valid {
+	if data.CustomerPhotoNpwpDashboard.Valid && data.CustomerPhotoNpwpDashboard.String != "" {
 		photoNPWPDashboardURL = models.CustomerImagePath + data.CustomerPhotoNpwpDashboard.String
 	}
 	res.CustomerPhotoNpwpDashboard = photoNPWPDashboardURL
@@ -441,8 +441,8 @@ func (uc WebCustomerUC) FindByCodes(c context.Context, parameter models.WebCusto
 
 func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCustomerRequest,
 	imgProfile, imgKtp,
-	imgKtpDashboard, imgNPWP, imgNPWPDashboard *multipart.FileHeader) (res viewmodel.CustomerVM, err error) {
-
+	imgKtpDashboard, imgNPWP, imgNPWPDashboard *multipart.FileHeader,
+) (res viewmodel.CustomerVM, err error) {
 	cacheKey := CustomerCacheKey + id
 
 	// // Invalidate the cache before update
@@ -489,7 +489,7 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 	ctx := "FileUC.Upload"
 	awsUc := AwsUC{ContractUC: uc.ContractUC}
 
-	var strImgprofile = ""
+	strImgprofile := ""
 	if currentObjectUc.CustomerProfilePicture != "" {
 		strImgprofile = strings.ReplaceAll(currentObjectUc.CustomerProfilePicture, models.CustomerImagePath, "")
 	}
@@ -798,7 +798,6 @@ func (uc WebCustomerUC) EditIndexPoint(c context.Context, in []viewmodel.PointRu
 // }
 
 func (uc WebCustomerUC) Add(c context.Context, data *requests.WebCustomerRequest, imgProfile *multipart.FileHeader) (res viewmodel.CustomerVM, err error) {
-
 	// currentObjectUc, err := uc.FindByID(c, models.MpBankParameter{ID: id})
 	ctx := "FileUC.Upload"
 	awsUc := AwsUC{ContractUC: uc.ContractUC}
@@ -813,7 +812,7 @@ func (uc WebCustomerUC) Add(c context.Context, data *requests.WebCustomerRequest
 		return
 	}
 
-	var strImgprofile = ""
+	strImgprofile := ""
 
 	if imgProfile != nil {
 		awsUc.AWSS3.Directory = "image/customer"
