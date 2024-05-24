@@ -14,10 +14,11 @@ type ItemDetailsVM struct {
 }
 
 type Uom struct {
-	ID               *string `json:"uom_id"`
-	Name             *string `json:"uom_name"`
-	Conversion       *string `json:"uom_line_conversion"`
-	ItemDetailsPrice *string `json:"item_price"`
-	LimitQuantity    *string `json:"limit_quantity,omitempty"`
-	Visibility       string  `json:"visibility,omitempty"`
+	ID                   *string `json:"uom_id"`
+	Name                 *string `json:"uom_name"`
+	Conversion           *string `json:"uom_line_conversion"`
+	ItemDetailsPrice     *string `json:"item_price"`
+	CartItemDetailsPrice *string `json:"cart_item_price"`
+	LimitQuantity        *string `json:"limit_quantity,omitempty"`
+	Visibility           string  `json:"visibility,omitempty"`
 }
