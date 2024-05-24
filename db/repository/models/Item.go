@@ -52,6 +52,7 @@ type ItemParameter struct {
 	By                 string `json:"by"`
 	Sort               string `json:"sort"`
 	ExceptId           string `json:"except_id"`
+	CustomerID         string `json:"customer_id"`
 }
 
 var (

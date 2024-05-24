@@ -30,4 +30,6 @@ func (route ItemRoutes) RegisterRoute() {
 	r.Get("/except", handler.SelectAll)
 
 	r.Get("/v2/select", handler.SelectAllV2)
+	r.Get("/v2/multiitem", handler.SelectAllMultyItem)
+	r.Get("/v2/cartitem", handler.SelectAllMultyItemWithCart)
 }
