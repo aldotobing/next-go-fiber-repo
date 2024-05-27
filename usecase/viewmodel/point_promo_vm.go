@@ -21,7 +21,8 @@ type PointPromoVM struct {
 
 // PointPromoStrataVM ...
 type PointPromoStrataVM struct {
-	From  string `json:"from"`
-	To    string `json:"to"`
-	Point string `json:"point"`
+	From     string `json:"from"`
+	To       string `json:"to"`
+	StockQty string `json:"stock_qty"`
+	Point    string `json:"point"`
 }
