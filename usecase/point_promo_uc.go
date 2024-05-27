@@ -212,6 +212,8 @@ func (uc PointPromoUC) EligiblePoint(c context.Context, cartList string) (out st
 					}
 				}
 			}
+
+			var flag bool
 			for x, strata := range pointPromoData.Strata {
 				from, _ := strconv.ParseFloat(strata.From, 64)
 				to, _ := strconv.ParseFloat(strata.To, 64)
@@ -219,7 +221,8 @@ func (uc PointPromoUC) EligiblePoint(c context.Context, cartList string) (out st
 					getPoint, _ := strconv.ParseFloat(strata.Point, 64)
 
 					pointEligible += getPoint
-				} else if len(pointPromoData.Strata)-1 == x {
+					flag = true
+				} else if len(pointPromoData.Strata)-1 == x && !flag {
 					getPoint, _ := strconv.ParseFloat(strata.Point, 64)
 
 					pointEligible += getPoint
@@ -236,6 +239,8 @@ func (uc PointPromoUC) EligiblePoint(c context.Context, cartList string) (out st
 						totalItem += qty * stockQty
 					}
 				}
+
+				var flag bool
 				for x, strata := range pointPromoData.Strata {
 					stockQty, _ := strconv.ParseFloat(strata.StockQty, 64)
 					from, _ := strconv.ParseFloat(strata.From, 64)
@@ -244,7 +249,8 @@ func (uc PointPromoUC) EligiblePoint(c context.Context, cartList string) (out st
 						getPoint, _ := strconv.ParseFloat(strata.Point, 64)
 
 						pointEligible += getPoint
-					} else if len(pointPromoData.Strata)-1 == x {
+						flag = true
+					} else if len(pointPromoData.Strata)-1 == x && !flag {
 						getPoint, _ := strconv.ParseFloat(strata.Point, 64)
 
 						pointEligible += getPoint
@@ -263,6 +269,7 @@ func (uc PointPromoUC) EligiblePoint(c context.Context, cartList string) (out st
 					}
 				}
 			}
+			var flag bool
 			for x, strata := range pointPromoData.Strata {
 				stockQty, _ := strconv.ParseFloat(strata.StockQty, 64)
 				from, _ := strconv.ParseFloat(strata.From, 64)
@@ -271,7 +278,8 @@ func (uc PointPromoUC) EligiblePoint(c context.Context, cartList string) (out st
 					getPoint, _ := strconv.ParseFloat(strata.Point, 64)
 
 					pointEligible += getPoint * (totalItem / stockQty)
-				} else if len(pointPromoData.Strata)-1 == x {
+					flag = true
+				} else if len(pointPromoData.Strata)-1 == x && !flag {
 					getPoint, _ := strconv.ParseFloat(strata.Point, 64)
 
 					pointEligible += getPoint * (totalItem / stockQty)
