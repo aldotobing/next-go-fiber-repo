@@ -79,7 +79,8 @@ var (
 	def.rounding_amount, def.net_amount,def.disc_amount,
 	cus.customer_code as c_code, s.salesman_code as s_code, cus.customer_address,to_char(def.modified_date,'YYYY-MM-DD') as modified_date,
 	mtp._name as void_reason, 1 as order_source,
-	coalesce(def.global_disc_amount,0)
+	coalesce(def.global_disc_amount,0),
+	cus.CUSTOMER_CODE
 	from customer_order_header def
 	join customer cus on cus.id = def.cust_ship_to_id
 	left join salesman s on s.id = cus.salesman_id

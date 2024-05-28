@@ -37,10 +37,9 @@ func (repository CustomerOrderLineRepository) scanRows(rows *sql.Rows) (res mode
 		&res.UseDiscPercent, &res.DisPercent1, &res.DisPercent2, &res.DisPercent3,
 		&res.DisPercent4, &res.DisPercent5, &res.TaxableAmount, &res.TaxAmount,
 		&res.RoundingAmount, &res.NetAmount, &res.SalesmanName, &res.SalesmanCode, &res.ItemPicture,
-		&res.FromPromo,
+		&res.FromPromo, &res.CustomerCode,
 	)
 	if err != nil {
-
 		return res, err
 	}
 
@@ -56,7 +55,7 @@ func (repository CustomerOrderLineRepository) scanRow(row *sql.Row) (res models.
 		&res.UseDiscPercent, &res.DisPercent1, &res.DisPercent2, &res.DisPercent3,
 		&res.DisPercent4, &res.DisPercent5, &res.TaxableAmount, &res.TaxAmount,
 		&res.RoundingAmount, &res.NetAmount, &res.SalesmanName, &res.SalesmanCode, &res.ItemPicture,
-		&res.FromPromo,
+		&res.FromPromo, &res.CustomerCode,
 	)
 	if err != nil {
 		return res, err
@@ -76,7 +75,6 @@ func (repository CustomerOrderLineRepository) SelectAll(c context.Context, param
 	statement := models.CustomerOrderLineSelectStatement + ` ` + models.CustomerOrderLineWhereStatement +
 		` AND (LOWER(cus."customer_name") LIKE $1 ) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
-
 	if err != nil {
 		return data, err
 	}
@@ -160,7 +158,6 @@ func (repository CustomerOrderLineRepository) SFASelectAll(c context.Context, pa
 	statement := models.SFACustomerOrderLineSelectStatement + ` ` + models.CustomerOrderLineWhereStatement +
 		` AND (LOWER(cus."customer_name") LIKE $1 ) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
-
 	if err != nil {
 		return data, err
 	}
@@ -192,7 +189,6 @@ func (repository CustomerOrderLineRepository) RestSelectAll(c context.Context, p
 	statement := models.RestCustomerOrderLineSelectStatement + ` ` + models.CustomerOrderLineWhereStatement +
 		` AND (LOWER(cus."customer_name") LIKE $1 ) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
-
 	if err != nil {
 		return data, err
 	}

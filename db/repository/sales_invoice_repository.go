@@ -36,7 +36,7 @@ func (repository SalesInvoiceRepository) scanRows(rows *sql.Rows) (res models.Sa
 	err = rows.Scan(
 		&res.ID, &res.CustomerName, &res.NoInvoice, &res.NoOrder, &res.TrasactionDate, &res.ModifiedDate, &res.JatuhTempo, &res.Status, &res.NetAmount, &res.OutStandingAmount, &res.InvoiceLine,
 		&res.TotalPaid, &res.PaymentMethod,
-		&res.SourceDocumentNo,
+		&res.SourceDocumentNo, &res.CustomerCode,
 	)
 
 	return
@@ -47,7 +47,7 @@ func (repository SalesInvoiceRepository) scanRow(row *sql.Row) (res models.Sales
 	err = row.Scan(
 		&res.ID, &res.CustomerName, &res.NoInvoice, &res.NoOrder, &res.TrasactionDate, &res.ModifiedDate, &res.JatuhTempo, &res.Status, &res.NetAmount, &res.OutStandingAmount, &res.InvoiceLine,
 		&res.TotalPaid, &res.PaymentMethod,
-		&res.SourceDocumentNo,
+		&res.SourceDocumentNo, &res.CustomerCode,
 	)
 
 	return
@@ -82,7 +82,6 @@ func (repository SalesInvoiceRepository) SelectAll(c context.Context, parameter 
 	args = append(args, "%"+strings.ToLower(parameter.NoInvoice)+"%")
 
 	rows, err := repository.DB.QueryContext(c, statement, args...)
-
 	if err != nil {
 		return data, err
 	}
