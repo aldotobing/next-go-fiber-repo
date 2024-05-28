@@ -71,6 +71,7 @@ func (repository CustomerOrderHeaderRepository) scanRow(row *sql.Row) (res model
 		&res.RoundingAmount, &res.NetAmount, &res.DiscAmount,
 		&res.CustomerCode, &res.SalesmanCode, &res.CustomerAddress, &res.ModifiedDate,
 		&res.VoidReasonText, &res.OrderSource, &res.GlobalDiscAmount,
+		&res.CustomerCode,
 	)
 	if err != nil {
 		return res, err
@@ -153,7 +154,7 @@ func (repository CustomerOrderHeaderRepository) FindAll(ctx context.Context, par
 	}
 
 	query := models.CustomerOrderHeaderSelectStatement + ` ` + models.CustomerOrderHeaderWhereStatement + ` ` + conditionString + `
-		AND (LOWER(cus."customer_name") LIKE $` + strconv.Itoa(index) + ` OR LOWER(def."document_no") LIKE $` + strconv.Itoa(index) + `) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $` + strconv.Itoa(index+1) + ` LIMIT $` + strconv.Itoa(index+2)
+		AND (LOWER(cus."customer_name") LIKE $` + strconv.Itoa(index) + ` OR LOWER(def."document_no") LIKE $` + strconv.Itoa(index) + ` OR LOWER(cus."customer_code") LIKE $` + strconv.Itoa(index) + `) ORDER BY ` + parameter.By + ` ` + parameter.Sort + ` OFFSET $` + strconv.Itoa(index+1) + ` LIMIT $` + strconv.Itoa(index+2)
 
 	args = append(args, "%"+strings.ToLower(parameter.Search)+"%", parameter.Offset, parameter.Limit)
 	argsCount = append(argsCount, "%"+strings.ToLower(parameter.Search)+"%")
@@ -184,7 +185,7 @@ func (repository CustomerOrderHeaderRepository) FindAll(ctx context.Context, par
 			left join branch b on b.id = def.branch_id
 			left join price_list pl on pl.id = def.price_list_id
 			left join price_list_version plv on plv.id = def.price_list_version_id ` + models.CustomerOrderHeaderWhereStatement + ` ` +
-		conditionString + ` AND (LOWER(cus."customer_name") LIKE $` + strconv.Itoa(index) + ` OR LOWER(def."document_no") LIKE $` + strconv.Itoa(index) + `)`
+		conditionString + ` AND (LOWER(cus."customer_name") LIKE $` + strconv.Itoa(index) + ` OR LOWER(def."document_no") LIKE $` + strconv.Itoa(index) + ` OR LOWER(cus."customer_code") LIKE $` + strconv.Itoa(index) + `)`
 	err = repository.DB.QueryRowContext(ctx, query, argsCount...).Scan(&count)
 	return data, count, err
 }
