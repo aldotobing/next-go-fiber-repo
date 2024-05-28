@@ -51,6 +51,7 @@ func (repository CustomerOrderHeaderRepository) scanRows(rows *sql.Rows) (res mo
 		&res.RoundingAmount, &res.NetAmount, &res.DiscAmount,
 		&res.CustomerCode, &res.SalesmanCode, &res.CustomerAddress, &res.ModifiedDate,
 		&res.VoidReasonText, &res.OrderSource, &res.GlobalDiscAmount,
+		&res.CustomerCode,
 	)
 	if err != nil {
 		return res, err
