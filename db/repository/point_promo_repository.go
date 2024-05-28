@@ -82,6 +82,8 @@ func (repository PointPromoRepository) SelectAll(c context.Context, parameter mo
 
 	if parameter.Now {
 		conditionString += ` AND NOW()::date BETWEEN DEF.START_DATE AND END_DATE`
+	} else if parameter.Date != "" {
+		conditionString += ` AND '` + parameter.Date + `' BETWEEN DEF.START_DATE AND END_DATE`
 	}
 	statement := models.PointPromoSelectStatement + models.PointPromoWhereStatement +
 		conditionString +

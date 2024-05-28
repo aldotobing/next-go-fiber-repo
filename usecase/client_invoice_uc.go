@@ -978,7 +978,7 @@ func (uc CilentInvoiceUC) GetRedisDataSyncPointOnly(c context.Context) (res []mo
 								if customer[0].CustomerStatusInstall {
 									pointPromoUC := PointPromoUC{ContractUC: uc.ContractUC}
 									pointPromo, err := pointPromoUC.SelectAll(c, models.PointPromoParameter{
-										Now:  true,
+										Date: *invoiceObject.InvoiceDate,
 										Sort: "asc",
 										By:   "def.id",
 									})
