@@ -221,7 +221,7 @@ func (uc PointPromoUC) EligiblePoint(c context.Context, cartList string) (out st
 
 					pointEligible += getPoint
 					flag = true
-				} else if len(pointPromoData.Strata)-1 == x && !flag {
+				} else if len(pointPromoData.Strata)-1 == x && !flag && totalPrice > to {
 					getPoint, _ := strconv.ParseFloat(strata.Point, 64)
 
 					pointEligible += getPoint
@@ -249,7 +249,7 @@ func (uc PointPromoUC) EligiblePoint(c context.Context, cartList string) (out st
 
 						pointEligible += getPoint
 						flag = true
-					} else if len(pointPromoData.Strata)-1 == x && !flag {
+					} else if len(pointPromoData.Strata)-1 == x && !flag && totalItem > to*stockQty {
 						getPoint, _ := strconv.ParseFloat(strata.Point, 64)
 
 						pointEligible += getPoint
@@ -278,7 +278,7 @@ func (uc PointPromoUC) EligiblePoint(c context.Context, cartList string) (out st
 
 					pointEligible += getPoint * (totalItem / stockQty)
 					flag = true
-				} else if len(pointPromoData.Strata)-1 == x && !flag {
+				} else if len(pointPromoData.Strata)-1 == x && !flag && totalItem > to*stockQty {
 					getPoint, _ := strconv.ParseFloat(strata.Point, 64)
 
 					pointEligible += getPoint * (totalItem / stockQty)

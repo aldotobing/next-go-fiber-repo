@@ -978,7 +978,7 @@ func (uc CilentInvoiceUC) GetRedisDataSyncPointOnly(c context.Context) (res []mo
 								if customer[0].CustomerStatusInstall {
 									pointPromoUC := PointPromoUC{ContractUC: uc.ContractUC}
 									pointPromo, err := pointPromoUC.SelectAll(c, models.PointPromoParameter{
-										Now:  true,
+										Date: *invoiceObject.InvoiceDate,
 										Sort: "asc",
 										By:   "def.id",
 									})
@@ -1021,88 +1021,88 @@ func (uc CilentInvoiceUC) GetRedisDataSyncPointOnly(c context.Context) (res []mo
 												}
 											}
 										case models.PromoTypeStrata:
-											var totalPrice float64
-											for _, itemPromo := range pointPromoData.Items {
-												for _, itemCart := range *invoiceObject.ListLine {
-													if itemCart.ItemID != nil && itemPromo.ID == *itemCart.ItemID {
-														price, _ := strconv.ParseFloat(*itemCart.NetAmount, 64)
-														totalPrice += price
-													}
-												}
-											}
+											// var totalPrice float64
+											// for _, itemPromo := range pointPromoData.Items {
+											// 	for _, itemCart := range *invoiceObject.ListLine {
+											// 		if itemCart.ItemID != nil && itemPromo.ID == *itemCart.ItemID {
+											// 			price, _ := strconv.ParseFloat(*itemCart.NetAmount, 64)
+											// 			totalPrice += price
+											// 		}
+											// 	}
+											// }
 
-											var flag bool
-											for x, strata := range pointPromoData.Strata {
-												from, _ := strconv.ParseFloat(strata.From, 64)
-												to, _ := strconv.ParseFloat(strata.To, 64)
-												if totalPrice >= from && totalPrice <= to {
-													getPoint, _ := strconv.ParseFloat(strata.Point, 64)
+											// var flag bool
+											// for x, strata := range pointPromoData.Strata {
+											// 	from, _ := strconv.ParseFloat(strata.From, 64)
+											// 	to, _ := strconv.ParseFloat(strata.To, 64)
+											// 	if totalPrice >= from && totalPrice <= to {
+											// 		getPoint, _ := strconv.ParseFloat(strata.Point, 64)
 
-													pointEligible += getPoint
-													flag = true
-												} else if len(pointPromoData.Strata)-1 == x && !flag {
-													getPoint, _ := strconv.ParseFloat(strata.Point, 64)
+											// 		pointEligible += getPoint
+											// 		flag = true
+											// 	} else if len(pointPromoData.Strata)-1 == x && !flag && totalPrice > to {
+											// 		getPoint, _ := strconv.ParseFloat(strata.Point, 64)
 
-													pointEligible += getPoint
-												}
-											}
+											// 		pointEligible += getPoint
+											// 	}
+											// }
 										case models.PromoTypeStrataTotal:
-											for _, itemPromo := range pointPromoData.Items {
-												var totalItem float64
+											// for _, itemPromo := range pointPromoData.Items {
+											// 	var totalItem float64
 
-												for _, itemCart := range *invoiceObject.ListLine {
-													if itemCart.ItemID != nil && itemPromo.ID == *itemCart.ItemID {
-														qty, _ := strconv.ParseFloat(*itemCart.Qty, 64)
-														stockQty, _ := strconv.ParseFloat(*itemCart.StockQty, 64)
-														totalItem += qty * stockQty
-													}
-												}
+											// 	for _, itemCart := range *invoiceObject.ListLine {
+											// 		if itemCart.ItemID != nil && itemPromo.ID == *itemCart.ItemID {
+											// 			qty, _ := strconv.ParseFloat(*itemCart.Qty, 64)
+											// 			stockQty, _ := strconv.ParseFloat(*itemCart.StockQty, 64)
+											// 			totalItem += qty * stockQty
+											// 		}
+											// 	}
 
-												var flag bool
-												for x, strata := range pointPromoData.Strata {
-													stockQty, _ := strconv.ParseFloat(strata.StockQty, 64)
-													from, _ := strconv.ParseFloat(strata.From, 64)
-													to, _ := strconv.ParseFloat(strata.To, 64)
-													if totalItem >= from*stockQty && totalItem <= to*stockQty {
-														getPoint, _ := strconv.ParseFloat(strata.Point, 64)
+											// 	var flag bool
+											// 	for x, strata := range pointPromoData.Strata {
+											// 		stockQty, _ := strconv.ParseFloat(strata.StockQty, 64)
+											// 		from, _ := strconv.ParseFloat(strata.From, 64)
+											// 		to, _ := strconv.ParseFloat(strata.To, 64)
+											// 		if totalItem >= from*stockQty && totalItem <= to*stockQty {
+											// 			getPoint, _ := strconv.ParseFloat(strata.Point, 64)
 
-														pointEligible += getPoint
-														flag = true
-													} else if len(pointPromoData.Strata)-1 == x && !flag {
-														getPoint, _ := strconv.ParseFloat(strata.Point, 64)
+											// 			pointEligible += getPoint
+											// 			flag = true
+											// 		} else if len(pointPromoData.Strata)-1 == x && !flag && totalItem > to*stockQty {
+											// 			getPoint, _ := strconv.ParseFloat(strata.Point, 64)
 
-														pointEligible += getPoint
-													}
-												}
-											}
+											// 			pointEligible += getPoint
+											// 		}
+											// 	}
+											// }
 
 										case models.PromoTypeStrataPerUOM:
-											var totalItem float64
-											for _, itemPromo := range pointPromoData.Items {
-												for _, itemCart := range *invoiceObject.ListLine {
-													if itemCart.ItemID != nil && itemPromo.ID == *itemCart.ItemID {
-														qty, _ := strconv.ParseFloat(*itemCart.Qty, 64)
-														stockQty, _ := strconv.ParseFloat(*itemCart.StockQty, 64)
-														totalItem += qty * stockQty
-													}
-												}
-											}
-											var flag bool
-											for x, strata := range pointPromoData.Strata {
-												stockQty, _ := strconv.ParseFloat(strata.StockQty, 64)
-												from, _ := strconv.ParseFloat(strata.From, 64)
-												to, _ := strconv.ParseFloat(strata.To, 64)
-												if totalItem >= from*stockQty && totalItem <= to*stockQty {
-													getPoint, _ := strconv.ParseFloat(strata.Point, 64)
+											// var totalItem float64
+											// for _, itemPromo := range pointPromoData.Items {
+											// 	for _, itemCart := range *invoiceObject.ListLine {
+											// 		if itemCart.ItemID != nil && itemPromo.ID == *itemCart.ItemID {
+											// 			qty, _ := strconv.ParseFloat(*itemCart.Qty, 64)
+											// 			stockQty, _ := strconv.ParseFloat(*itemCart.StockQty, 64)
+											// 			totalItem += qty * stockQty
+											// 		}
+											// 	}
+											// }
+											// var flag bool
+											// for x, strata := range pointPromoData.Strata {
+											// 	stockQty, _ := strconv.ParseFloat(strata.StockQty, 64)
+											// 	from, _ := strconv.ParseFloat(strata.From, 64)
+											// 	to, _ := strconv.ParseFloat(strata.To, 64)
+											// 	if totalItem >= from*stockQty && totalItem <= to*stockQty {
+											// 		getPoint, _ := strconv.ParseFloat(strata.Point, 64)
 
-													pointEligible += getPoint * (totalItem / stockQty)
-													flag = true
-												} else if len(pointPromoData.Strata)-1 == x && !flag {
-													getPoint, _ := strconv.ParseFloat(strata.Point, 64)
+											// 		pointEligible += getPoint * (totalItem / stockQty)
+											// 		flag = true
+											// 	} else if len(pointPromoData.Strata)-1 == x && !flag && totalItem > to*stockQty {
+											// 		getPoint, _ := strconv.ParseFloat(strata.Point, 64)
 
-													pointEligible += getPoint * (totalItem / stockQty)
-												}
-											}
+											// 		pointEligible += getPoint * (totalItem / stockQty)
+											// 	}
+											// }
 										}
 									}
 
