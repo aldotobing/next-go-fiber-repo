@@ -206,8 +206,9 @@ func (uc PointPromoUC) EligiblePoint(c context.Context, cartList string) (out st
 			for _, itemPromo := range pointPromoData.Items {
 				for _, itemCart := range cart {
 					if itemCart.ItemID != nil && itemPromo.ID == *itemCart.ItemID {
-						price, _ := strconv.ParseFloat(*itemCart.TotalPrice, 64)
-						totalPrice += price
+						price, _ := strconv.ParseFloat(*itemCart.Price, 64)
+						qty, _ := strconv.ParseFloat(*itemCart.Qty, 64)
+						totalPrice += price * qty
 					}
 				}
 			}
