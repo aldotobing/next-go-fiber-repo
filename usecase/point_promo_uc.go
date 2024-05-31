@@ -229,31 +229,30 @@ func (uc PointPromoUC) EligiblePoint(c context.Context, cartList string) (out st
 				}
 			}
 		case models.PromoTypeStrataTotal:
+			var totalItem float64
 			for _, itemPromo := range pointPromoData.Items {
-				var totalItem float64
-
 				for _, itemCart := range cart {
 					if itemCart.ItemID != nil && itemPromo.ID == *itemCart.ItemID {
 						stockQty, _ := strconv.ParseFloat(*itemCart.StockQty, 64)
 						totalItem += stockQty
 					}
 				}
+			}
 
-				var flag bool
-				for x, strata := range pointPromoData.Strata {
-					stockQty, _ := strconv.ParseFloat(strata.StockQty, 64)
-					from, _ := strconv.ParseFloat(strata.From, 64)
-					to, _ := strconv.ParseFloat(strata.To, 64)
-					if totalItem >= from*stockQty && totalItem <= to*stockQty {
-						getPoint, _ := strconv.ParseFloat(strata.Point, 64)
+			var flag bool
+			for x, strata := range pointPromoData.Strata {
+				stockQty, _ := strconv.ParseFloat(strata.StockQty, 64)
+				from, _ := strconv.ParseFloat(strata.From, 64)
+				to, _ := strconv.ParseFloat(strata.To, 64)
+				if totalItem >= from*stockQty && totalItem <= to*stockQty {
+					getPoint, _ := strconv.ParseFloat(strata.Point, 64)
 
-						pointEligible += getPoint
-						flag = true
-					} else if len(pointPromoData.Strata)-1 == x && !flag && totalItem > to*stockQty {
-						getPoint, _ := strconv.ParseFloat(strata.Point, 64)
+					pointEligible += getPoint
+					flag = true
+				} else if len(pointPromoData.Strata)-1 == x && !flag && totalItem > to*stockQty {
+					getPoint, _ := strconv.ParseFloat(strata.Point, 64)
 
-						pointEligible += getPoint
-					}
+					pointEligible += getPoint
 				}
 			}
 
