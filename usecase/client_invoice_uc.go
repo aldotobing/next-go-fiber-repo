@@ -798,8 +798,7 @@ func (uc CilentInvoiceUC) SFASyncData(c context.Context) (res []models.CilentInv
 												}
 												if itemCart.ItemID != nil && itemPromo.ID == *itemCart.ItemID {
 													cartStock, _ := strconv.ParseFloat(*itemCart.StockQty, 64)
-													cartQty, _ := strconv.ParseFloat(*itemCart.Qty, 64)
-													itemCartTotalQty := cartStock * cartQty
+													itemCartTotalQty := cartStock
 
 													itemPromoConvertion, _ := strconv.ParseFloat(itemPromo.Convertion, 64)
 													itemPromoQty, _ := strconv.ParseFloat(itemPromo.Quantity, 64)
@@ -824,22 +823,81 @@ func (uc CilentInvoiceUC) SFASyncData(c context.Context) (res []models.CilentInv
 										for _, itemPromo := range pointPromoData.Items {
 											for _, itemCart := range *invoiceObject.ListLine {
 												if itemCart.ItemID != nil && itemPromo.ID == *itemCart.ItemID {
-													price, _ := strconv.ParseFloat(*itemCart.NetAmount, 64)
-													totalPrice += price
+													price, _ := strconv.ParseFloat(*itemCart.UnitPrice, 64)
+													qty, _ := strconv.ParseFloat(*itemCart.Qty, 64)
+													totalPrice += price * qty
 												}
 											}
 										}
-										for _, strata := range pointPromoData.Strata {
+
+										var flag bool
+										for x, strata := range pointPromoData.Strata {
 											from, _ := strconv.ParseFloat(strata.From, 64)
 											to, _ := strconv.ParseFloat(strata.To, 64)
 											if totalPrice >= from && totalPrice <= to {
 												getPoint, _ := strconv.ParseFloat(strata.Point, 64)
 
 												pointEligible += getPoint
+												flag = true
+											} else if len(pointPromoData.Strata)-1 == x && !flag && totalPrice > to {
+												getPoint, _ := strconv.ParseFloat(strata.Point, 64)
+
+												pointEligible += getPoint
 											}
 										}
 									case models.PromoTypeStrataTotal:
+										var totalItem float64
+										for _, itemPromo := range pointPromoData.Items {
+											for _, itemCart := range *invoiceObject.ListLine {
+												if itemCart.ItemID != nil && itemPromo.ID == *itemCart.ItemID {
+													stockQty, _ := strconv.ParseFloat(*itemCart.StockQty, 64)
+													totalItem += stockQty
+												}
+											}
+										}
+
+										var flag bool
+										for x, strata := range pointPromoData.Strata {
+											stockQty, _ := strconv.ParseFloat(strata.StockQty, 64)
+											from, _ := strconv.ParseFloat(strata.From, 64)
+											to, _ := strconv.ParseFloat(strata.To, 64)
+											if totalItem >= from*stockQty && totalItem <= to*stockQty {
+												getPoint, _ := strconv.ParseFloat(strata.Point, 64)
+
+												pointEligible += getPoint
+												flag = true
+											} else if len(pointPromoData.Strata)-1 == x && !flag && totalItem > to*stockQty {
+												getPoint, _ := strconv.ParseFloat(strata.Point, 64)
+
+												pointEligible += getPoint
+											}
+										}
 									case models.PromoTypeStrataPerUOM:
+										var totalItem float64
+										for _, itemPromo := range pointPromoData.Items {
+											for _, itemCart := range *invoiceObject.ListLine {
+												if itemCart.ItemID != nil && itemPromo.ID == *itemCart.ItemID {
+													stockQty, _ := strconv.ParseFloat(*itemCart.StockQty, 64)
+													totalItem += stockQty
+												}
+											}
+										}
+										var flag bool
+										for x, strata := range pointPromoData.Strata {
+											stockQty, _ := strconv.ParseFloat(strata.StockQty, 64)
+											from, _ := strconv.ParseFloat(strata.From, 64)
+											to, _ := strconv.ParseFloat(strata.To, 64)
+											if totalItem >= from*stockQty && totalItem <= to*stockQty {
+												getPoint, _ := strconv.ParseFloat(strata.Point, 64)
+
+												pointEligible += getPoint * float64(int((totalItem / stockQty)))
+												flag = true
+											} else if len(pointPromoData.Strata)-1 == x && !flag && totalItem > to*stockQty {
+												getPoint, _ := strconv.ParseFloat(strata.Point, 64)
+
+												pointEligible += getPoint * float64(int((totalItem / stockQty)))
+											}
+										}
 									}
 								}
 

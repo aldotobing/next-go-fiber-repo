@@ -255,7 +255,6 @@ func (uc PointPromoUC) EligiblePoint(c context.Context, cartList string) (out st
 					pointEligible += getPoint
 				}
 			}
-
 		case models.PromoTypeStrataPerUOM:
 			var totalItem float64
 			for _, itemPromo := range pointPromoData.Items {
