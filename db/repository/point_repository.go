@@ -395,7 +395,7 @@ func (repository PointRepository) Report(c context.Context, parameter models.Poi
 		left join region r on r.id = b.region_id
 		left join partner pt on pt.id = c.partner_id
 		WHERE P.DELETED_AT IS NULL 
-			AND sih.transaction_source_document_no IS NOT NULL` + conditionString + `
+			AND ptt.id in (2,4)` + conditionString + `
 		order by branch_code asc;`
 
 	rows, err := repository.DB.QueryContext(c, statement)
