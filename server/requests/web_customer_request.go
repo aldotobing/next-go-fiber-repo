@@ -28,6 +28,7 @@ type WebCustomerRequest struct {
 	UserID                 int    `json:"user_id"`
 	CustomerShowInApp      string `json:"customer_show_in_app"`
 	AdminValidate          bool   `json:"customer_admin_validate"`
+	Note                   string `json:"note"`
 }
 
 // WebCustomerBulkRequest ...
@@ -37,5 +38,3 @@ type WebCustomerBulkRequest struct {
 	ShowInApp string               `json:"show_in_app"`
 	Customers []WebCustomerRequest `json:"customers"`
 }
-
-

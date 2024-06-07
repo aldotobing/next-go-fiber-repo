@@ -71,6 +71,7 @@ type CustomerVM struct {
 	CustomerAdminValidate      bool   `json:"customer_admin_validate"`
 	IndexPoint                 int    `json:"index_point"`
 	MonthlyMaxPoint            string `json:"monthly_max_point"`
+	Note                       string `json:"note"`
 }
 
 type CustomerData struct {

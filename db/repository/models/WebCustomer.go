@@ -77,6 +77,7 @@ type WebCustomer struct {
 	SalesmanTypeName           sql.NullString `json:"salesman_type_name"`
 	CustomerAdminValidate      bool           `json:"customer_admin_validate"`
 	IndexPoint                 int            `json:"index_point"`
+	Note                       sql.NullString `json:"note"`
 }
 
 // CustomerParameter ...
@@ -125,10 +126,10 @@ var (
 		"c.customer_name",
 	}
 
-	//CustomerGenderList ...
+	// CustomerGenderList ...
 	CustomerGenderList = []string{"male", "female"}
 
-	//CustomerProfileStatusComplete ...
+	// CustomerProfileStatusComplete ...
 	CustomerProfileStatusComplete   = "Lengkap"
 	CustomerProfileStatusIncomplete = "Tidak Lengkap"
 
@@ -205,6 +206,7 @@ var (
 		C.customer_photo_ktp_dashboard,
 		C.customer_photo_npwp,
 		C.customer_photo_npwp_dashboard
+		C.NOTE,
 	FROM CUSTOMER C
 	LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
 	LEFT JOIN REGION REG ON REG.ID = B.REGION_ID
