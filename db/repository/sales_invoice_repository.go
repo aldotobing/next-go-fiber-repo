@@ -37,7 +37,7 @@ func (repository SalesInvoiceRepository) scanRows(rows *sql.Rows) (res models.Sa
 		&res.ID, &res.CustomerName, &res.NoInvoice, &res.NoOrder, &res.TrasactionDate, &res.ModifiedDate, &res.JatuhTempo, &res.Status, &res.NetAmount, &res.OutStandingAmount, &res.InvoiceLine,
 		&res.TotalPaid, &res.PaymentMethod,
 		&res.SourceDocumentNo, &res.CustomerCode,
-		&res.IDCustomerOrderHeader, &res.CustomerID,
+		&res.IDCustomerOrderHeader, &res.CustomerID, &res.GlobalDiscAmount,
 	)
 
 	return
@@ -49,7 +49,7 @@ func (repository SalesInvoiceRepository) scanRow(row *sql.Row) (res models.Sales
 		&res.ID, &res.CustomerName, &res.NoInvoice, &res.NoOrder, &res.TrasactionDate, &res.ModifiedDate, &res.JatuhTempo, &res.Status, &res.NetAmount, &res.OutStandingAmount, &res.InvoiceLine,
 		&res.TotalPaid, &res.PaymentMethod,
 		&res.SourceDocumentNo, &res.CustomerCode,
-		&res.IDCustomerOrderHeader, &res.CustomerID,
+		&res.IDCustomerOrderHeader, &res.CustomerID, &res.GlobalDiscAmount,
 	)
 
 	return

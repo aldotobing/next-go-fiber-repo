@@ -22,6 +22,7 @@ type SalesInvoice struct {
 	CustomerCode          *string          `json:"customer_code"`
 	IDCustomerOrderHeader *string          `json:"id_customer_order_header"`
 	CustomerID            *string          `json:"customer_id"`
+	GlobalDiscAmount      *string          `json:"global_disc_amount"`
 }
 
 // SalesInvoiceParameter ...
@@ -79,7 +80,8 @@ var (
 	def.transaction_source_document_no,
 	C.CUSTOMER_CODE,
 	COH.ID AS ORDER_ID,
-	C.ID
+	C.ID,
+	coalesce(DEF.GLOBAL_DISC_AMOUNT, 0) AS global_disc_amount
 	FROM SALES_INVOICE_HEADER DEF
 	left JOIN SALES_ORDER_HEADER SOH ON SOH.ID = DEF.SALES_ORDER_ID
 	JOIN CUSTOMER C ON C.ID = DEF.CUST_BILL_TO_ID
