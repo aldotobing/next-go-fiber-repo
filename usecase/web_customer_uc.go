@@ -146,6 +146,7 @@ func (uc WebCustomerUC) BuildBody(data *models.WebCustomer, res *viewmodel.Custo
 	res.SalesmanTypeName = data.SalesmanTypeName.String
 	res.CustomerAdminValidate = data.CustomerAdminValidate
 	res.IndexPoint = data.IndexPoint
+	res.Note = data.Note.String
 }
 
 // SelectAll ...
@@ -630,6 +631,7 @@ func (uc WebCustomerUC) Edit(c context.Context, id string, data *requests.WebCus
 		UserID:                     sql.NullInt64{Int64: int64(data.UserID)},
 		ShowInApp:                  sql.NullString{String: data.CustomerShowInApp},
 		CustomerAdminValidate:      data.AdminValidate,
+		Note:                       sql.NullString{String: data.Note},
 	}
 
 	in.ID.String, err = repo.Edit(c, in)
@@ -847,6 +849,7 @@ func (uc WebCustomerUC) Add(c context.Context, data *requests.WebCustomerRequest
 		CustomerLevelID:        sql.NullInt64{Int64: int64(data.CustomerLevelID)},
 		CustomerGender:         sql.NullString{String: data.CustomerGender},
 		CustomerBirthDate:      sql.NullString{String: data.CustomerBirthDate},
+		Note:                   sql.NullString{String: data.Note},
 	}
 
 	in.ID.String, err = repo.Add(c, in)

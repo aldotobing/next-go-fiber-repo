@@ -534,8 +534,9 @@ func (repository WebCustomerRepository) Edit(c context.Context, model models.Web
 		admin_validate = $17,
 		customer_photo_ktp_dashboard = $18,
 		customer_photo_npwp = $19,
-		customer_photo_npwp_dashboard = $20
-	WHERE id = $21
+		customer_photo_npwp_dashboard = $20,
+		note = $21
+	WHERE id = $22
 	RETURNING id`
 	err = repository.DB.QueryRowContext(c, statement,
 		model.CustomerName.String,
@@ -558,6 +559,7 @@ func (repository WebCustomerRepository) Edit(c context.Context, model models.Web
 		model.CustomerPhotoKtpDashboard.String,
 		model.CustomerPhotoNpwp.String,
 		model.CustomerPhotoNpwpDashboard.String,
+		model.Note.String,
 		model.ID.String).Scan(&res)
 	if err != nil {
 		return res, err
@@ -618,14 +620,14 @@ func (repository WebCustomerRepository) Add(c context.Context, model models.WebC
 			customer_cp_name, customer_profile_picture, created_date, modified_date, 
 			tax_calc_method, branch_id, customer_code, device_id, 
 			salesman_id, user_id, customer_religion, customer_nik,
-			customer_level_id, customer_gender, customer_birthdate
+			customer_level_id, customer_gender, customer_birthdate, note
 		)
 	VALUES (
 			$1, $2, $3, $4,
 			$5, $6, now(), now(),
 			$7, $8, $9, 99, 
 			$10, $11, $12, $13,
-			$14, $15, $16
+			$14, $15, $16, $17
 		) RETURNING id`
 
 	customerUserID, _ := strconv.Atoi(model.CustomerUserID.String)
