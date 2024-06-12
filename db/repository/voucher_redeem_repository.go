@@ -88,7 +88,7 @@ func (repository VoucherRedeemRepository) SelectAll(c context.Context, in models
 	}
 
 	if in.ShowAll != "1" {
-		conditionString += ` AND (DEF.REDEEMED is null  or DEF.REDEEMED = '0') `
+		conditionString += ` AND (DEF.REDEEMED is null  or DEF.REDEEMED = '0') AND NOW() BETWEEN V.START_DATE AND V.END_DATE`
 	}
 
 	if in.VoucherID != "" {
@@ -104,7 +104,6 @@ func (repository VoucherRedeemRepository) SelectAll(c context.Context, in models
 		` ORDER BY ` + in.By + ` ` + in.Sort
 
 	rows, err := repository.DB.QueryContext(c, statement)
-
 	if err != nil {
 		return data, err
 	}
@@ -243,7 +242,6 @@ func (repository VoucherRedeemRepository) Update(c context.Context, in viewmodel
 
 // Redeem ...
 func (repository VoucherRedeemRepository) Redeem(c context.Context, in viewmodel.VoucherRedeemVM) (res string, err error) {
-
 	transaction, err := repository.DB.BeginTx(c, nil)
 	if err != nil {
 		return res, err
