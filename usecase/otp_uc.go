@@ -15,13 +15,15 @@ import (
 
 var (
 	// OtpTypeRegister ...
-	OtpTypeRegister = "register"
-	OtpTypeLogin    = "login"
+	OtpTypeRegister   = "register"
+	OtpTypeLogin      = "login"
+	OtpCouponExchange = "coupon_exchange"
 
 	// OtpTypeWhiteList ...
 	OtpTypeWhiteList = []string{
 		OtpTypeRegister,
 		OtpTypeLogin,
+		OtpCouponExchange,
 	}
 )
 
@@ -38,7 +40,6 @@ func (uc OtpUC) OtpRequest(c context.Context, id string, data *requests.UserOtpR
 	}
 
 	// Generate OTP and save to redis
-	rand.Seed(time.Now().UTC().UnixNano())
 	res = str.RandomNumberString(4)
 
 	if id == "9203-RT22-325" || id == "1200266" {

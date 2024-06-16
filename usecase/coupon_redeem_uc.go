@@ -108,6 +108,114 @@ func (uc CouponRedeemUC) FindByID(c context.Context, parameter models.CouponRede
 	return
 }
 
+// SendOTP ...
+func (uc CouponRedeemUC) SendOTP(c context.Context, in requests.CouponRedeemRequest) (out viewmodel.CouponRedeemVM, err error) {
+	couponData, err := CouponUC{ContractUC: uc.ContractUC}.FindByID(c, models.CouponParameter{ID: in.CouponID})
+	if err != nil {
+		err = errors.New("coupon not found")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	pointUC := PointUC{ContractUC: uc.ContractUC}
+	customerPoint, err := pointUC.GetBalance(c, models.PointParameter{
+		CustomerID: in.CustomerID,
+		Renewal:    "1",
+	})
+	if err != nil {
+		err = errors.New("customer point not found")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	point, _ := strconv.ParseFloat(customerPoint.Balance, 64)
+	couponConversion, _ := strconv.ParseFloat(couponData.PointConversion, 64)
+	if point < couponConversion {
+		err = errors.New("there are insufficient point on your account")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "insufficient_point", c.Value("requestid"))
+		return
+	}
+
+	user, err := WebCustomerUC{ContractUC: uc.ContractUC}.FindByID(c, models.WebCustomerParameter{ID: in.CustomerID})
+	if err != nil {
+		err = errors.New("customer not found")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	otpUc := OtpUC{ContractUC: uc.ContractUC}
+	otp, err := otpUc.OtpRequest(c, user.ID, &requests.UserOtpRequest{
+		Type:  OtpCouponExchange,
+		Phone: user.CustomerPhone,
+	})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "otp_request", uc.ContractUC.ReqID)
+		return
+	}
+
+	err = uc.ContractUC.StoreToRedisExp(OtpCouponExchange+":"+user.ID+":"+user.CustomerPhone, otp, "1h")
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "store_to_redis", uc.ContractUC.ReqID)
+		return
+	}
+
+	_ = uc.ContractUC.OtpWhatsApp.SendWA(user.CustomerPhone, otp)
+
+	return
+}
+
+// VerifyOTP ...
+func (uc CouponRedeemUC) VerifyOTP(c context.Context, in requests.CouponRedeemRequest) (out viewmodel.CouponRedeemVM, err error) {
+	var otp string
+
+	user, err := WebCustomerUC{ContractUC: uc.ContractUC}.FindByID(c, models.WebCustomerParameter{ID: in.CustomerID})
+	if err != nil {
+		err = errors.New("customer not found")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	err = uc.ContractUC.GetFromRedis(OtpCouponExchange+":"+user.ID+":"+user.CustomerPhone, &otp)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "get_from_redis", uc.ContractUC.ReqID)
+		return
+	}
+	if otp != in.Otp {
+		err = errors.New("otp not valid")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "otp_not_valid", uc.ContractUC.ReqID)
+		return
+	}
+
+	couponData, err := CouponUC{ContractUC: uc.ContractUC}.FindByID(c, models.CouponParameter{ID: in.CouponID})
+	if err != nil {
+		err = errors.New("coupon not found")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	now := time.Now()
+	out = viewmodel.CouponRedeemVM{
+		CouponID:   in.CouponID,
+		CustomerID: in.CustomerID,
+		ExpiredAt:  helper.GetExpiredWithInterval(time.Now(), couponData.Interval),
+		CouponCode: user.CustomerBranchCode + strconv.Itoa(int(now.Month())) + strconv.Itoa(now.Year()) + helper.StringWithCharset(6),
+	}
+
+	repo := repository.NewCouponRedeemRepository(uc.DB)
+	out.ID, err = repo.Add(c, out)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+
+	PointUC{ContractUC: uc.ContractUC}.AddWithdraw(c, requests.PointRequest{
+		Point:      couponData.PointConversion,
+		CustomerID: in.CustomerID,
+	})
+
+	return
+}
+
 // Add ...
 func (uc CouponRedeemUC) Add(c context.Context, in requests.CouponRedeemRequest) (out viewmodel.CouponRedeemVM, err error) {
 	couponData, err := CouponUC{ContractUC: uc.ContractUC}.FindByID(c, models.CouponParameter{ID: in.CouponID})

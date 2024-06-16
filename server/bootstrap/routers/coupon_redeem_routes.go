@@ -27,6 +27,8 @@ func (route CouponRedeemRoutes) RegisterRoute() {
 	r.Get("/", handler.FindAll)
 	r.Get("/select", handler.SelectAll)
 	r.Get("/id/:id", handler.FindByID)
+	r.Post("/otp", handler.SendOTP)
+	r.Post("/otp/verify", handler.VerifyOTP)
 	r.Post("/", handler.Add)
 	r.Put("/revert/:invoice_no", handler.Revert)
 
