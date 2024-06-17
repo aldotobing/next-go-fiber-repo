@@ -74,6 +74,50 @@ func (h *CouponRedeemHandler) FindByID(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
+// SendOTP ...
+func (h *CouponRedeemHandler) SendOTP(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	input := new(requests.CouponRedeemRequest)
+	if err := ctx.BodyParser(input); err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+	if err := h.Validator.Struct(input); err != nil {
+		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
+		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+	}
+
+	uc := usecase.CouponRedeemUC{ContractUC: h.ContractUC}
+	_, err := uc.SendOTP(c, *input)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err, 0)
+	}
+
+	return h.SendResponse(ctx, nil, nil, err, 0)
+}
+
+// VerifyOTP ...
+func (h *CouponRedeemHandler) VerifyOTP(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	input := new(requests.CouponRedeemRequest)
+	if err := ctx.BodyParser(input); err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+	if err := h.Validator.Struct(input); err != nil {
+		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
+		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+	}
+
+	uc := usecase.CouponRedeemUC{ContractUC: h.ContractUC}
+	res, err := uc.VerifyOTP(c, *input)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err, 0)
+	}
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
 // Add ...
 func (h *CouponRedeemHandler) Add(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
