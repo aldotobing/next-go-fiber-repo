@@ -88,6 +88,28 @@ func (h *PointPromoHandler) EligiblePoint(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
+// EligiblePointTest ...
+func (h *PointPromoHandler) EligiblePointTest(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	input := new(models.CilentInvoice)
+	if err := ctx.BodyParser(input); err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+	if err := h.Validator.Struct(input); err != nil {
+		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
+		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+	}
+
+	uc := usecase.PointPromoUC{ContractUC: h.ContractUC}
+	res, err := uc.EligiblePointTest(c, *input)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
 // Add ...
 func (h *PointPromoHandler) Add(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
