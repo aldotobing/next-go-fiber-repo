@@ -78,7 +78,7 @@ func (h *CouponRedeemHandler) FindByID(ctx *fiber.Ctx) error {
 func (h *CouponRedeemHandler) SendOTP(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
-	input := new(requests.CouponRedeemRequest)
+	input := new(requests.CouponRedeemOTPRequest)
 	if err := ctx.BodyParser(input); err != nil {
 		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
 	}
@@ -100,7 +100,7 @@ func (h *CouponRedeemHandler) SendOTP(ctx *fiber.Ctx) error {
 func (h *CouponRedeemHandler) VerifyOTP(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
-	input := new(requests.CouponRedeemRequest)
+	input := new(requests.CouponRedeemOTPRequest)
 	if err := ctx.BodyParser(input); err != nil {
 		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
 	}
