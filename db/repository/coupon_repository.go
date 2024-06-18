@@ -73,12 +73,22 @@ func (repository CouponRepository) SelectAll(c context.Context, parameter models
 	if parameter.Now != "" {
 		conditionString += ` AND '` + parameter.Now + `' BETWEEN DEF.START_DATE AND DEF.END_DATE `
 	}
+	if len(parameter.IDs) > 0 {
+		var ids string
+		for _, id := range parameter.IDs {
+			if ids != "" {
+				ids += `,` + id
+			} else {
+				ids += id
+			}
+		}
+		conditionString += ` AND DEF.ID IN (` + ids + `) `
+	}
 	statement := models.CouponSelectStatement + models.CouponWhereStatement +
 		conditionString +
 		` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 
 	rows, err := repository.DB.QueryContext(c, statement)
-
 	if err != nil {
 		return data, err
 	}

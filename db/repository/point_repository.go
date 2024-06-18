@@ -18,6 +18,7 @@ type IPointRepository interface {
 	Add(c context.Context, model viewmodel.PointVM) (string, error)
 	AddInject(c context.Context, model []viewmodel.PointVM) (string, error)
 	AddWithdraw(c context.Context, in viewmodel.PointVM) (res string, err error)
+	AddWithdrawBulk(c context.Context, in []viewmodel.PointVM) (err error)
 	Update(c context.Context, model viewmodel.PointVM) (string, error)
 	Delete(c context.Context, id string) (string, error)
 	Report(c context.Context, parameter models.PointParameter) ([]models.Point, error)
@@ -327,6 +328,30 @@ func (repository PointRepository) AddWithdraw(c context.Context, in viewmodel.Po
 	)`
 
 	err = repository.DB.QueryRowContext(c, statement, in.PointType, in.Point, in.CustomerID).Err()
+
+	return
+}
+
+// AddWithdrawBulk ...
+func (repository PointRepository) AddWithdrawBulk(c context.Context, in []viewmodel.PointVM) (err error) {
+	var statementInsert string
+	for _, datum := range in {
+		if statementInsert == "" {
+			statementInsert += `(` + datum.PointType + `, '` + datum.Point + `', ` + datum.CustomerID + `, NOW(), NOW())`
+		} else {
+			statementInsert += `, (` + datum.PointType + `, '` + datum.Point + `', ` + datum.CustomerID + `, NOW(), NOW())`
+		}
+	}
+	statement := `INSERT INTO POINTS (
+			POINT_TYPE,
+			POINT,
+			CUSTOMER_ID,
+			CREATED_AT,
+			UPDATED_AT
+		)
+	VALUES ` + statementInsert
+
+	err = repository.DB.QueryRowContext(c, statement).Err()
 
 	return
 }
