@@ -251,9 +251,9 @@ func (repository CouponRedeemRepository) SelectReport(c context.Context, paramet
 	}
 
 	if parameter.StartDate != "" && parameter.EndDate != "" {
-		conditionString += ` AND DEF.REDEEMED_AT::DATE BETWEEN '` + parameter.StartDate + `' AND '` + parameter.EndDate + `'`
+		conditionString += ` AND DEF.CREATED_AT::DATE BETWEEN '` + parameter.StartDate + `' AND '` + parameter.EndDate + `'`
 	} else {
-		conditionString += ` AND DEF.REDEEMED_AT::DATE BETWEEN date_trunc('MONTH',now())::DATE AND now()::date`
+		conditionString += ` AND DEF.CREATED_AT::DATE BETWEEN date_trunc('MONTH',now())::DATE AND now()::date`
 	}
 
 	if parameter.BranchID != "" {
