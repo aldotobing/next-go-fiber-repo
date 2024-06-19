@@ -365,6 +365,15 @@ func (uc CouponRedeemUC) SelectReport(c context.Context, parameter models.Coupon
 	}
 
 	for _, datum := range data {
+		if datum.InvoiceNo.String == "" && datum.Redeem == "1" {
+			datum.InvoiceNo.String = ""
+			datum.Redeem = "0"
+			datum.RedeemAt.String = ""
+			datum.RedeemedToDocumentNo.String = ""
+		}
+		if parameter.CouponStatus == "1" && datum.InvoiceNo.String == "" {
+			continue
+		}
 		out = append(out, viewmodel.CouponRedeemReportVM{
 			ID:                    datum.ID,
 			CouponID:              datum.CouponID,
