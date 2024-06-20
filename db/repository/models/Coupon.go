@@ -19,15 +19,16 @@ type Coupon struct {
 
 // CouponParameter ...
 type CouponParameter struct {
-	ID      string `json:"id"`
-	Now     string `json:"now"`
-	Search  string `json:"search"`
-	ShowAll string `json:"show_all"`
-	Page    int    `json:"page"`
-	Offset  int    `json:"offset"`
-	Limit   int    `json:"limit"`
-	By      string `json:"by"`
-	Sort    string `json:"sort"`
+	ID      string   `json:"id"`
+	IDs     []string `json:"ids"`
+	Now     string   `json:"now"`
+	Search  string   `json:"search"`
+	ShowAll string   `json:"show_all"`
+	Page    int      `json:"page"`
+	Offset  int      `json:"offset"`
+	Limit   int      `json:"limit"`
+	By      string   `json:"by"`
+	Sort    string   `json:"sort"`
 }
 
 var (

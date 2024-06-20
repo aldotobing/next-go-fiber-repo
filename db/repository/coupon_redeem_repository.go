@@ -14,6 +14,7 @@ type ICouponRedeemRepository interface {
 	FindAll(ctx context.Context, parameter models.CouponRedeemParameter) ([]models.CouponRedeem, int, error)
 	FindByID(c context.Context, parameter models.CouponRedeemParameter) (models.CouponRedeem, error)
 	Add(c context.Context, model viewmodel.CouponRedeemVM) (string, error)
+	AddBulk(c context.Context, model []viewmodel.CouponRedeemVM) error
 	Redeem(c context.Context, model viewmodel.CouponRedeemVM) (string, error)
 	Revert(c context.Context, model viewmodel.CouponRedeemVM) (string, error)
 	SelectReport(c context.Context, parameter models.CouponRedeemParameter) ([]models.CouponRedeemReport, error)
@@ -178,6 +179,31 @@ func (repository CouponRedeemRepository) Add(c context.Context, in viewmodel.Cou
 	return
 }
 
+// AddBulk ...
+func (repository CouponRedeemRepository) AddBulk(c context.Context, in []viewmodel.CouponRedeemVM) (err error) {
+	var valueStatement string
+	for _, item := range in {
+		if valueStatement != "" {
+			valueStatement += `, ('` + item.CouponID + `', '` + item.CustomerID + `', NOW(), NOW(), '` + item.ExpiredAt + `', '` + item.CouponCode + `')`
+		} else {
+			valueStatement += `('` + item.CouponID + `', '` + item.CustomerID + `', NOW(), NOW(), '` + item.ExpiredAt + `', '` + item.CouponCode + `')`
+		}
+	}
+	statement := `INSERT INTO COUPON_REDEEM (
+			COUPON_ID, 
+			CUSTOMER_ID,
+			CREATED_AT,
+			UPDATED_AT,
+			EXPIRED_AT,
+            COUPON_CODE
+		)
+	VALUES ` + valueStatement
+
+	err = repository.DB.QueryRowContext(c, statement).Err()
+
+	return
+}
+
 // Redeem ...
 func (repository CouponRedeemRepository) Redeem(c context.Context, in viewmodel.CouponRedeemVM) (res string, err error) {
 	statement := `UPDATE COUPON_REDEEM SET 
@@ -225,9 +251,9 @@ func (repository CouponRedeemRepository) SelectReport(c context.Context, paramet
 	}
 
 	if parameter.StartDate != "" && parameter.EndDate != "" {
-		conditionString += ` AND DEF.REDEEMED_AT::DATE BETWEEN '` + parameter.StartDate + `' AND '` + parameter.EndDate + `'`
+		conditionString += ` AND DEF.CREATED_AT::DATE BETWEEN '` + parameter.StartDate + `' AND '` + parameter.EndDate + `'`
 	} else {
-		conditionString += ` AND DEF.REDEEMED_AT::DATE BETWEEN date_trunc('MONTH',now())::DATE AND now()::date`
+		conditionString += ` AND DEF.CREATED_AT::DATE BETWEEN date_trunc('MONTH',now())::DATE AND now()::date`
 	}
 
 	if parameter.BranchID != "" {
