@@ -281,6 +281,34 @@ func (uc PointPromoUC) EligiblePoint(c context.Context, cartList string) (out st
 					pointEligible += getPoint * float64(int((totalItem / stockQty)))
 				}
 			}
+		case models.PromoTypeStarataInsentive:
+			var totalPrice float64
+			for _, itemPromo := range pointPromoData.Items {
+				for _, itemCart := range cart {
+					if itemCart.ItemID != nil && itemPromo.ID == *itemCart.ItemID {
+						price, _ := strconv.ParseFloat(*itemCart.Price, 64)
+						qty, _ := strconv.ParseFloat(*itemCart.Qty, 64)
+						totalPrice += price * qty
+					}
+				}
+			}
+
+			var flag bool
+			for x, strata := range pointPromoData.Strata {
+				from, _ := strconv.ParseFloat(strata.From, 64)
+				to, _ := strconv.ParseFloat(strata.To, 64)
+				if totalPrice >= from && totalPrice <= to {
+					insentive, _ := strconv.ParseFloat(strata.Point, 64)
+
+					pointEligible += totalPrice * insentive / 100
+					flag = true
+				} else if len(pointPromoData.Strata)-1 == x && !flag && totalPrice > to {
+					insentive, _ := strconv.ParseFloat(strata.Point, 64)
+
+					pointEligible += totalPrice * insentive / 100
+				}
+			}
+
 		}
 	}
 
