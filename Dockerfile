@@ -23,16 +23,19 @@ WORKDIR /app/server
 # Build the Go application
 RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 
-# Start a new stage from a minimal Alpine base image
-FROM alpine:latest
+# Start a new stage from a minimal Debian base image
+FROM debian:stable-slim
 
 # Install CA certificates for HTTPS connections and set the timezone to Indonesia/Jakarta
-RUN apk --no-cache add ca-certificates tzdata && \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates tzdata && \
     cp /usr/share/zoneinfo/Asia/Jakarta /etc/localtime && \
-    echo "Asia/Jakarta" > /etc/timezone
+    echo "Asia/Jakarta" > /etc/timezone && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user and group
-RUN addgroup -S appgroup && adduser -S -G appgroup appuser
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
 # Set the working directory
 WORKDIR /app/server
