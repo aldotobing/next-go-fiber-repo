@@ -122,6 +122,23 @@ func (h *SalesInvoiceHandler) FindByDocumentNo(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
+// FindByTransactionSourceDocumentNo ...
+func (h *SalesInvoiceHandler) FindByTransactionSourceDocumentNo(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.SalesInvoiceParameter{
+		ID: ctx.Params("transaction_source_document_no"),
+	}
+	if parameter.ID == "" {
+		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
+	}
+
+	uc := usecase.SalesInvoiceUC{ContractUC: h.ContractUC}
+	res, err := uc.FindByTransactionSourceDocumentNo(c, parameter)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
 // FindByCustomerId ...
 func (h *SalesInvoiceHandler) FindByCustomerId(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)

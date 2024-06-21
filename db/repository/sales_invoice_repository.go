@@ -15,6 +15,7 @@ type ISalesInvoiceRepository interface {
 	FindAll(ctx context.Context, parameter models.SalesInvoiceParameter) ([]models.SalesInvoice, int, error)
 	FindByID(c context.Context, parameter models.SalesInvoiceParameter) (models.SalesInvoice, error)
 	FindByDocumentNo(c context.Context, parameter models.SalesInvoiceParameter) (models.SalesInvoice, error)
+	FindByTransactionSourceDocumentNo(c context.Context, parameter models.SalesInvoiceParameter) (models.SalesInvoice, error)
 	FindByCustomerId(c context.Context, parameter models.SalesInvoiceParameter) (models.SalesInvoice, error)
 	// Add(c context.Context, model *models.SalesInvoice) (*string, error)
 	Edit(c context.Context, model *models.SalesInvoice) (*string, error)
@@ -255,6 +256,19 @@ func (repository SalesInvoiceRepository) FindByID(c context.Context, parameter m
 // FindByDocumentNo ...
 func (repository SalesInvoiceRepository) FindByDocumentNo(c context.Context, parameter models.SalesInvoiceParameter) (data models.SalesInvoice, err error) {
 	statement := models.SalesInvoiceSelectStatement + ` WHERE  def.document_no = $1`
+	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
+
+	data, err = repository.scanRow(row)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
+}
+
+// FindByTransactionSourceDocumentNo ...
+func (repository SalesInvoiceRepository) FindByTransactionSourceDocumentNo(c context.Context, parameter models.SalesInvoiceParameter) (data models.SalesInvoice, err error) {
+	statement := models.SalesInvoiceSelectStatement + ` WHERE  left(def.transaction_source_document_no,15) = left($1, 15)`
 	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
 
 	data, err = repository.scanRow(row)
