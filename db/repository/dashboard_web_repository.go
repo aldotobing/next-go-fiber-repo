@@ -1175,7 +1175,7 @@ func (repo DashboardWebRepository) TrackingInvoice(ctx context.Context, input mo
 	from sales_invoice_header sih 
 		left join term_of_payment top on top.id = sih.payment_terms_id 
 		left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
-		left join sales_order_header soh on soh.request_document_no = sih.transaction_source_document_no 
+		left join sales_order_header soh on soh.document_no = sih.transaction_source_document_no 
 		left join customer_temp ct on ct.customer_id = sih.cust_bill_to_id 
 	where sih.transaction_date between ` + startDate + ` and ` + endDate + `
 		` + whereStatement + `
