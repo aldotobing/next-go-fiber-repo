@@ -1168,7 +1168,7 @@ func (repo DashboardWebRepository) TrackingInvoice(ctx context.Context, input mo
 		ct.customer_name, ct.customer_code, ct.customer_level_name, ct.CUST_DISTRICT_NAME, ct.CUST_SUBDISTRICT_NAME,
 		sih.id, sih.document_no as invoice_no,
 		coh.document_no as customer_order_document_no, coh.created_date as customer_order_created_date,
-		soh.document_no as sales_order_document_no, soh.created_date as sales_order_created_date,
+		coalesce (soh.document_no, soh2.document_no) as sales_order_document_no, coalesce (soh.created_date, soh2.created_date) as sales_order_created_date,
 		sih.transaction_date + sih.transaction_time as invoice_created_date, sih.invoice_date, sih.modified_date as invoice_updated_date,
 		sih.paid_date,
 		top.days
@@ -1176,6 +1176,7 @@ func (repo DashboardWebRepository) TrackingInvoice(ctx context.Context, input mo
 		left join term_of_payment top on top.id = sih.payment_terms_id 
 		left join customer_order_header coh on coh.document_no = sih.transaction_source_document_no
 		left join sales_order_header soh on soh.document_no = sih.transaction_source_document_no 
+		left join sales_order_header soh2 on soh2.request_document_no = sih.transaction_source_document_no
 		left join customer_temp ct on ct.customer_id = sih.cust_bill_to_id 
 	where sih.transaction_date between ` + startDate + ` and ` + endDate + `
 		` + whereStatement + `
