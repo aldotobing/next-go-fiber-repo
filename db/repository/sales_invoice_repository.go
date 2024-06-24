@@ -256,7 +256,7 @@ func (repository SalesInvoiceRepository) FindByID(c context.Context, parameter m
 // FindByDocumentNo ...
 func (repository SalesInvoiceRepository) FindByDocumentNo(c context.Context, parameter models.SalesInvoiceParameter) (data models.SalesInvoice, err error) {
 	statement := models.SalesInvoiceSelectStatement + ` WHERE  def.document_no = $1`
-	row := repository.DB.QueryRowContext(c, statement, parameter.ID)
+	row := repository.DB.QueryRowContext(c, statement, parameter.NoInvoice)
 
 	data, err = repository.scanRow(row)
 	if err != nil {
