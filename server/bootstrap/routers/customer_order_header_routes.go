@@ -40,4 +40,5 @@ func (route CustomerOrderHeaderRoutes) RegisterRoute() {
 	r3.Get("/", handler.FindAllForWeb)
 	r3.Get("/select", handler.SelectAll)
 	r3.Get("/id/:id", handler.FindByID)
+	r3.Get("/document_no/:document_no", handler.FindByDocumentNo)
 }
