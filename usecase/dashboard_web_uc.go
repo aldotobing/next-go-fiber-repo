@@ -272,7 +272,7 @@ func (uc DashboardWebUC) GetOmzetValue(c context.Context, parameter models.Dashb
 		RegionGroupName: &regionNameNational,
 	})
 
-	//Append the rest of region
+	// Append the rest of region
 	for i := range regionData {
 		res = append(res, viewmodel.OmzetValueVM{
 			RegionGroupID:   regionData[i].GroupID,
@@ -616,7 +616,7 @@ func (uc DashboardWebUC) GetTrackingInvoiceData(c context.Context, parameter mod
 			confirmationDate = datum.SalesOrderCreatedDate.String
 		} else {
 			sourceTransaction = "SFA"
-			processedDate = datum.CustomerOrderCreatedDate.String
+			processedDate = datum.SalesOrderCreatedDate.String
 			confirmationDate = datum.SalesOrderCreatedDate.String
 		}
 
