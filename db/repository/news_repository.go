@@ -35,7 +35,7 @@ func NewNewsRepository(DB *sql.DB) INewsRepository {
 // Scan rows
 func (repository NewsRepository) scanRows(rows *sql.Rows) (res models.News, err error) {
 	err = rows.Scan(
-		&res.ID, &res.Title, &res.Description, &res.StartDate, &res.EndDate,
+		&res.ID, &res.Title, &res.Description, &res.StartDate, &res.EndDate, &res.Url,
 	)
 	if err != nil {
 
@@ -48,7 +48,7 @@ func (repository NewsRepository) scanRows(rows *sql.Rows) (res models.News, err 
 // Scan row
 func (repository NewsRepository) scanRow(row *sql.Row) (res models.News, err error) {
 	err = row.Scan(
-		&res.ID, &res.Title, &res.Description, &res.StartDate, &res.StartDate,
+		&res.ID, &res.Title, &res.Description, &res.StartDate, &res.StartDate, &res.Url,
 	)
 	if err != nil {
 		return res, err
@@ -124,10 +124,10 @@ func (repository NewsRepository) FindAll(ctx context.Context, parameter models.N
 }
 
 func (repository NewsRepository) Add(c context.Context, model *models.News) (res *string, err error) {
-	statement := `INSERT INTO news (start_date, end_date, title, description, active)
-	VALUES ($1, $2, $3, $4, $5) RETURNING id`
+	statement := `INSERT INTO news (start_date, end_date, title, description, active,url)
+	VALUES ($1, $2, $3, $4, $5,$6) RETURNING id`
 
-	err = repository.DB.QueryRowContext(c, statement, model.StartDate, model.EndDate, model.Title, model.Description, 1).Scan(&res)
+	err = repository.DB.QueryRowContext(c, statement, model.StartDate, model.EndDate, model.Title, model.Description, 1, model.Url).Scan(&res)
 
 	if err != nil {
 		return res, err
