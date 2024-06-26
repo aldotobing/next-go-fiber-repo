@@ -74,7 +74,7 @@ definitions:
             variables:
               SSH_USER: "$SSH_USER"
               SERVER: "$SSH_ADDR"
-              COMMAND: "docker pull $DOCKERHUB_USERNAME/nextapi:latest && docker stop go-api-service go-api-service-backup || true && docker rm go-api-service go-api-service-backup || true && docker run -d --name go-api-service -p 5000:5000 $DOCKERHUB_USERNAME/nextapi:latest && docker run --restart unless-stopped -d --name go-api-service-backup -p 5050:5000 $DOCKERHUB_USERNAME/nextapi:latest && echo 'Docker run commands executed.' && sleep 5 && docker ps -f name=go-api-service -f name=go-api-service-backup"
+              COMMAND: "docker pull $DOCKERHUB_USERNAME/nextapi:latest && docker stop go-api-service go-api-service-backup || true && docker rm go-api-service go-api-service-backup || true && docker run --restart unless-stopped -d --name go-api-service -p 5000:5000 $DOCKERHUB_USERNAME/nextapi:latest && docker run --restart unless-stopped -d --name go-api-service-backup -p 5050:5000 $DOCKERHUB_USERNAME/nextapi:latest && echo 'Docker run commands executed.' && sleep 5 && docker ps -f name=go-api-service -f name=go-api-service-backup"
         after-script:
           - if [[ $BITBUCKET_EXIT_CODE -ne 0 ]]; then ALERT_TYPE="error"; else ALERT_TYPE="success"; fi
           - pipe: atlassian/email-notify:0.8.0
