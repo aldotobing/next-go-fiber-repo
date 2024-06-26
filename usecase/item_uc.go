@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -42,11 +43,11 @@ func (uc ItemUC) SelectAll(c context.Context, parameter models.ItemParameter) (r
 }
 
 // SelectAllV2 ...
-func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter) (res []viewmodel.ItemVM, err error) {
+func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter, allParam, oldprice bool) (res []viewmodel.ItemVM, err error) {
 	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(0, 0, parameter.By, parameter.Sort, models.ItemOrderBy, models.ItemOrderByrByString)
 
 	repo := repository.NewItemRepository(uc.DB)
-	data, err := repo.SelectAllV2(c, parameter)
+	data, err := repo.SelectAllV2(c, parameter, allParam)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return
@@ -56,6 +57,8 @@ func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter) 
 		additional := strings.Split(*data[i].AdditionalData, "|")
 
 		var uoms []viewmodel.Uom
+		var lowestVisibleUOM string
+		var lowestVisibleConversion float64
 		if len(additional) > 0 && additional[0] != "" {
 			// Find Lowest Price and lowest conversion
 			var lowestPrice, lowestConversion float64
@@ -66,10 +69,16 @@ func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter) 
 				conversion, _ := strconv.ParseFloat(perAddDatum[2], 64)
 
 				dbUpdatedDate, errParse := time.Parse("2006-01-02 15:04:05.999999", perAddDatum[3])
-				if (newestModifiedDate.Before(dbUpdatedDate) && errParse != nil) || lowestPrice == 0 {
+				if (newestModifiedDate.Before(dbUpdatedDate) || errParse != nil) || lowestPrice == 0 {
 					lowestPrice = price
 					lowestConversion = conversion
 					newestModifiedDate = dbUpdatedDate
+				} else if oldprice {
+					lowestPrice = price
+					lowestConversion = conversion
+					newestModifiedDate = dbUpdatedDate
+
+					oldprice = false
 				}
 			}
 
@@ -82,6 +91,11 @@ func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter) 
 					if perMultiDatum[3] == "1" {
 						conversion, _ := strconv.ParseFloat(perMultiDatum[2], 64)
 						price := strconv.FormatFloat(basePrice*conversion, 'f', 2, 64)
+
+						if lowestVisibleUOM == "" || conversion < lowestVisibleConversion {
+							lowestVisibleUOM = perMultiDatum[1]
+							lowestVisibleConversion = conversion
+						}
 
 						uoms = append(uoms, viewmodel.Uom{
 							ID:               &perMultiDatum[0],
@@ -104,10 +118,220 @@ func (uc ItemUC) SelectAllV2(c context.Context, parameter models.ItemParameter) 
 				ItemCategoryName: data[i].ItemCategoryName,
 				ItemPicture:      data[i].ItemPicture,
 				Uom:              uoms,
+				LowestUom:        lowestVisibleUOM,
 			})
 		}
 	}
 
+	return
+}
+
+func (uc ItemUC) SelectAllMultyItem(c context.Context, parameter models.ItemParameter, allParam, oldprice bool) (res []viewmodel.ItemVM, err error) {
+	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(0, 0, parameter.By, parameter.Sort, models.ItemOrderBy, models.ItemOrderByrByString)
+	shoppingcartRepo := repository.NewShoppingCartRepository(uc.DB)
+
+	scdata, errsc := shoppingcartRepo.SelectAll(c, models.ShoppingCartParameter{CustomerID: parameter.CustomerID, By: "def.created_date"})
+
+	if errsc != nil {
+		fmt.Println("error")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+	for _, cdata := range scdata {
+		repo := repository.NewItemRepository(uc.DB)
+		parameter.ID = *cdata.ItemID
+		data, errs := repo.SelectAllV2(c, parameter, allParam)
+		if errs != nil {
+			logruslogger.Log(logruslogger.WarnLevel, errs.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+			return
+		}
+
+		for i := range data {
+			additional := strings.Split(*data[i].AdditionalData, "|")
+
+			var uoms []viewmodel.Uom
+			var lowestVisibleUOM string
+			var lowestVisibleConversion float64
+			if len(additional) > 0 && additional[0] != "" {
+				// Find Lowest Price and lowest conversion
+				var lowestPrice, lowestConversion float64
+				var newestModifiedDate time.Time
+				for _, addDatum := range additional {
+					perAddDatum := strings.Split(addDatum, "#sep#")
+					price, _ := strconv.ParseFloat(perAddDatum[4], 64)
+					conversion, _ := strconv.ParseFloat(perAddDatum[2], 64)
+
+					dbUpdatedDate, errParse := time.Parse("2006-01-02 15:04:05.999999", perAddDatum[3])
+					if (newestModifiedDate.Before(dbUpdatedDate) || errParse != nil) || lowestPrice == 0 {
+						lowestPrice = price
+						lowestConversion = conversion
+						newestModifiedDate = dbUpdatedDate
+					} else if oldprice {
+						lowestPrice = price
+						lowestConversion = conversion
+						newestModifiedDate = dbUpdatedDate
+
+						oldprice = false
+					}
+				}
+
+				multiplyData := strings.Split(*data[i].MultiplyData, "|")
+				if len(multiplyData) > 0 && multiplyData[0] != "" {
+					basePrice := lowestPrice / lowestConversion
+					for _, multiplyDatum := range multiplyData {
+						perMultiDatum := strings.Split(multiplyDatum, "#sep#")
+
+						if perMultiDatum[3] == "1" {
+							conversion, _ := strconv.ParseFloat(perMultiDatum[2], 64)
+							price := strconv.FormatFloat(basePrice*conversion, 'f', 2, 64)
+
+							if lowestVisibleUOM == "" || conversion < lowestVisibleConversion {
+								lowestVisibleUOM = perMultiDatum[1]
+								lowestVisibleConversion = conversion
+							}
+							cartPrice := ""
+							fmt.Println("datum ", perMultiDatum[0], *cdata.UomID)
+							if perMultiDatum[0] == *cdata.UomID {
+								fmt.Println("datum sama ", perMultiDatum[0], *cdata.UomID)
+								cartPrice = *cdata.Price
+								if cartPrice != price {
+									cartPrice = *cdata.Price + " update data"
+								}
+
+								if cartPrice == price {
+									cartPrice = *cdata.Price + " no update data"
+								}
+							}
+
+							uoms = append(uoms, viewmodel.Uom{
+								ID:                   &perMultiDatum[0],
+								Name:                 &perMultiDatum[1],
+								Conversion:           &perMultiDatum[2],
+								ItemDetailsPrice:     &price,
+								CartItemDetailsPrice: &cartPrice,
+							})
+						}
+					}
+				}
+			}
+
+			if len(uoms) > 0 {
+				res = append(res, viewmodel.ItemVM{
+					ID:               data[i].ID,
+					Name:             data[i].Name,
+					Code:             data[i].Code,
+					Description:      data[i].Description,
+					ItemCategoryId:   data[i].ItemCategoryId,
+					ItemCategoryName: data[i].ItemCategoryName,
+					ItemPicture:      data[i].ItemPicture,
+					Uom:              uoms,
+					LowestUom:        lowestVisibleUOM,
+				})
+			}
+		}
+	}
+
+	return
+}
+
+func (uc ItemUC) SelectAllMultyItemWithCart(c context.Context, parameter models.ItemParameter, allParam, oldprice bool) (res []models.ShoppingCart, err error) {
+	_, _, _, parameter.By, parameter.Sort = uc.setPaginationParameter(0, 0, parameter.By, parameter.Sort, models.ItemOrderBy, models.ItemOrderByrByString)
+	shoppingcartRepo := repository.NewShoppingCartRepository(uc.DB)
+
+	scdata, errsc := shoppingcartRepo.SelectAll(c, models.ShoppingCartParameter{CustomerID: parameter.CustomerID, By: "def.created_date"})
+
+	if errsc != nil {
+		fmt.Println("error")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return
+	}
+	for si, cdata := range scdata {
+		// scdata[i].ID=cdata.ID
+		repo := repository.NewItemRepository(uc.DB)
+		parameter.ID = *cdata.ItemID
+		data, errs := repo.SelectAllV2(c, parameter, allParam)
+		if errs != nil {
+			logruslogger.Log(logruslogger.WarnLevel, errs.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+			return
+		}
+
+		for i := range data {
+			additional := strings.Split(*data[i].AdditionalData, "|")
+
+			// var uoms []viewmodel.Uom
+			var lowestVisibleUOM string
+			var lowestVisibleConversion float64
+			if len(additional) > 0 && additional[0] != "" {
+				// Find Lowest Price and lowest conversion
+				var lowestPrice, lowestConversion float64
+				var newestModifiedDate time.Time
+				for _, addDatum := range additional {
+					perAddDatum := strings.Split(addDatum, "#sep#")
+					price, _ := strconv.ParseFloat(perAddDatum[4], 64)
+					conversion, _ := strconv.ParseFloat(perAddDatum[2], 64)
+
+					dbUpdatedDate, errParse := time.Parse("2006-01-02 15:04:05.999999", perAddDatum[3])
+					if (newestModifiedDate.Before(dbUpdatedDate) || errParse != nil) || lowestPrice == 0 {
+						lowestPrice = price
+						lowestConversion = conversion
+						newestModifiedDate = dbUpdatedDate
+					} else if oldprice {
+						lowestPrice = price
+						lowestConversion = conversion
+						newestModifiedDate = dbUpdatedDate
+
+						oldprice = false
+					}
+				}
+
+				multiplyData := strings.Split(*data[i].MultiplyData, "|")
+				if len(multiplyData) > 0 && multiplyData[0] != "" {
+					basePrice := lowestPrice / lowestConversion
+					for _, multiplyDatum := range multiplyData {
+						perMultiDatum := strings.Split(multiplyDatum, "#sep#")
+
+						if perMultiDatum[3] == "1" {
+							conversion, _ := strconv.ParseFloat(perMultiDatum[2], 64)
+							price := strconv.FormatFloat(basePrice*conversion, 'f', 2, 64)
+
+							if lowestVisibleUOM == "" || conversion < lowestVisibleConversion {
+								lowestVisibleUOM = perMultiDatum[1]
+								lowestVisibleConversion = conversion
+							}
+							// cartPrice := ""
+							if perMultiDatum[0] == *cdata.UomID {
+								scdata[si].LatestPrice = &price
+
+							}
+
+							// uoms = append(uoms, viewmodel.Uom{
+							// 	ID:                   &perMultiDatum[0],
+							// 	Name:                 &perMultiDatum[1],
+							// 	Conversion:           &perMultiDatum[2],
+							// 	ItemDetailsPrice:     &price,
+							// 	CartItemDetailsPrice: &cartPrice,
+							// })
+						}
+					}
+				}
+			}
+
+			// if len(uoms) > 0 {
+			// 	res = append(res, viewmodel.ItemVM{
+			// 		ID:               data[i].ID,
+			// 		Name:             data[i].Name,
+			// 		Code:             data[i].Code,
+			// 		Description:      data[i].Description,
+			// 		ItemCategoryId:   data[i].ItemCategoryId,
+			// 		ItemCategoryName: data[i].ItemCategoryName,
+			// 		ItemPicture:      data[i].ItemPicture,
+			// 		Uom:              uoms,
+			// 		LowestUom:        lowestVisibleUOM,
+			// 	})
+			// }
+		}
+	}
+	res = scdata
 	return
 }
 

@@ -9,11 +9,7 @@ import (
 	"strings"
 )
 
-var (
-	baseOTPRequstMessage = `JANGAN BERI kode ini ke siapa pun, TERMASUK SALESMAN & PIC SIDOMUNCUL. WASPADA PENIPUAN!
-
-	MASUK KE AKUN dengan kode verifikasi (OTP) #OTP#`
-)
+var baseOTPRequstMessage = `JANGAN BERI KODE ini ke siapa pun, TERMASUK SALESMAN & PIC SIDOMUNCUL. WASPADA PENIPUAN! MASUK KE AKUN dengan kode verifikasi (OTP) #OTP#. OTP bisa lewat WA/SMS`
 
 type Client struct {
 	apiurl string
@@ -28,7 +24,6 @@ func NewWooWAClient(ApiUrl, Apikey string) *Client {
 }
 
 func (cl Client) SendWA(phoneNo, txtMessages string) (err error) {
-
 	type confi struct {
 		Key   string `json:"key"`
 		Phone string `json:"phone_no"`
@@ -40,7 +35,7 @@ func (cl Client) SendWA(phoneNo, txtMessages string) (err error) {
 	Waconf.Phone = phoneNo
 	Waconf.Pesan = strings.ReplaceAll(baseOTPRequstMessage, "#OTP#", txtMessages)
 	jsonReq, err := json.Marshal(Waconf)
-
+	// fmt.Println("api key ", cl.apikey)
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", cl.apiurl, bytes.NewBuffer(jsonReq))
 	if err != nil {
@@ -54,7 +49,6 @@ func (cl Client) SendWA(phoneNo, txtMessages string) (err error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-
 		fmt.Print(err.Error())
 	}
 	defer resp.Body.Close()
@@ -69,7 +63,6 @@ func (cl Client) SendWA(phoneNo, txtMessages string) (err error) {
 }
 
 func (cl Client) SendTransactionWA(phoneNo, txtMessages string) (err error) {
-
 	type confi struct {
 		Key   string `json:"key"`
 		Phone string `json:"phone_no"`
@@ -95,7 +88,6 @@ func (cl Client) SendTransactionWA(phoneNo, txtMessages string) (err error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-
 		fmt.Print(err.Error())
 	}
 	defer resp.Body.Close()

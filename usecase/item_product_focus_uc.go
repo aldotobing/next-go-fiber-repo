@@ -10,6 +10,7 @@ import (
 	"nextbasis-service-v-0.1/db/repository/models"
 	"nextbasis-service-v-0.1/pkg/functioncaller"
 	"nextbasis-service-v-0.1/pkg/logruslogger"
+	"nextbasis-service-v-0.1/server/requests"
 	"nextbasis-service-v-0.1/usecase/viewmodel"
 )
 
@@ -28,7 +29,6 @@ func (uc ItemProductFocusUC) SelectAll(c context.Context, parameter models.ItemP
 
 	repo := repository.NewItemProductFocusRepository(uc.DB)
 	res, err = repo.SelectAll(c, parameter)
-
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
@@ -117,25 +117,18 @@ func (uc ItemProductFocusUC) SelectAllV2(c context.Context, parameter models.Ite
 		if len(additional) > 0 && additional[0] != "" {
 			// Find Lowest Price and lowest conversion
 			var lowestPrice, lowestConversion float64
-			var updatedData string
+			var updatedData time.Time
 			for _, addDatum := range additional {
 				perAddDatum := strings.Split(addDatum, "#sep#")
 				price, _ := strconv.ParseFloat(perAddDatum[3], 64)
 				conversion, _ := strconv.ParseFloat(perAddDatum[2], 64)
 
-				if lowestPrice == 0 {
-					lowestPrice = price
-					lowestConversion = conversion
-					updatedData = perAddDatum[6]
-				}
-
-				dbUpdatedData, _ := time.Parse("2006-01-02 15:04:05.999999", perAddDatum[6])
-				updatedDataTime, errParse := time.Parse("2006-01-02 15:04:05.999999", updatedData)
-				if lowestConversion == conversion && (updatedDataTime.Before(dbUpdatedData) && errParse != nil) {
+				dbUpdatedData, errParse := time.Parse("2006-01-02 15:04:05.999999", perAddDatum[6])
+				if (updatedData.Before(dbUpdatedData) || errParse != nil) || lowestPrice == 0 {
 					lowestPrice = price
 					lowestConversion = conversion
 
-					updatedData = perAddDatum[6]
+					updatedData = dbUpdatedData
 				}
 
 			}
@@ -183,6 +176,18 @@ func (uc ItemProductFocusUC) SelectAllV2(c context.Context, parameter models.Ite
 func (uc ItemProductFocusUC) CountByBranchID(c context.Context, customerBranchID string) (res int, err error) {
 	repo := repository.NewItemProductFocusRepository(uc.DB)
 	res, err = repo.CountByBranchID(c, customerBranchID)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+
+	return res, err
+}
+
+// Add ...
+func (uc ItemProductFocusUC) Add(c context.Context, in requests.ProductFocusRequest) (res []viewmodel.ItemVM, err error) {
+	repo := repository.NewItemProductFocusRepository(uc.DB)
+	err = repo.Add(c, in)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err

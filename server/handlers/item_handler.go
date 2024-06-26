@@ -65,7 +65,7 @@ func (h *ItemHandler) SelectAllV2(ctx *fiber.Ctx) error {
 		ExceptId:           ctx.Query("except_id"),
 	}
 	uc := usecase.ItemUC{ContractUC: h.ContractUC}
-	res, err := uc.SelectAllV2(c, parameter)
+	res, err := uc.SelectAllV2(c, parameter, false, false)
 
 	type StructObject struct {
 		ListObject []viewmodel.ItemVM `json:"list_item"`
@@ -128,4 +128,68 @@ func (h *ItemHandler) FindByID(ctx *fiber.Ctx) error {
 	res, err := uc.FindByID(c, parameter)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *ItemHandler) SelectAllMultyItem(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.ItemParameter{
+		ID:                 ctx.Query("item_id"),
+		ItemCategoryId:     ctx.Query("item_category_id"),
+		UomID:              ctx.Query("uom_id"),
+		PriceListVersionId: ctx.Query("price_list_version_id"),
+		PriceListId:        ctx.Query("price_list_id"),
+		CustomerTypeId:     ctx.Query("customer_type_id"),
+		Search:             ctx.Query("search"),
+		By:                 ctx.Query("by"),
+		Sort:               ctx.Query("sort"),
+		ExceptId:           ctx.Query("except_id"),
+		CustomerID:         ctx.Query("customer_id"),
+	}
+	uc := usecase.ItemUC{ContractUC: h.ContractUC}
+	res, err := uc.SelectAllMultyItem(c, parameter, false, false)
+
+	type StructObject struct {
+		ListObject []viewmodel.ItemVM `json:"list_item"`
+	}
+
+	ObjectData := new(StructObject)
+
+	if res != nil {
+		ObjectData.ListObject = res
+	}
+
+	return h.SendResponse(ctx, ObjectData, nil, err, 0)
+}
+
+func (h *ItemHandler) SelectAllMultyItemWithCart(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.ItemParameter{
+		ID:                 ctx.Query("item_id"),
+		ItemCategoryId:     ctx.Query("item_category_id"),
+		UomID:              ctx.Query("uom_id"),
+		PriceListVersionId: ctx.Query("price_list_version_id"),
+		PriceListId:        ctx.Query("price_list_id"),
+		CustomerTypeId:     ctx.Query("customer_type_id"),
+		Search:             ctx.Query("search"),
+		By:                 ctx.Query("by"),
+		Sort:               ctx.Query("sort"),
+		ExceptId:           ctx.Query("except_id"),
+		CustomerID:         ctx.Query("customer_id"),
+	}
+	uc := usecase.ItemUC{ContractUC: h.ContractUC}
+	res, err := uc.SelectAllMultyItemWithCart(c, parameter, false, false)
+
+	type StructObject struct {
+		ListObject []models.ShoppingCart `json:"list_cart"`
+	}
+
+	ObjectData := new(StructObject)
+
+	if res != nil {
+		ObjectData.ListObject = res
+	}
+
+	return h.SendResponse(ctx, ObjectData, nil, err, 0)
 }

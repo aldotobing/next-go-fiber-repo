@@ -32,14 +32,15 @@ type CustomerOrderLine struct {
 
 // CustomerOrderLineParameter ...
 type CustomerOrderLineParameter struct {
-	ID       string `json:"id_customer_order_line"`
-	HeaderID string `json:"header_id"`
-	Search   string `json:"search"`
-	Page     int    `json:"page"`
-	Offset   int    `json:"offset"`
-	Limit    int    `json:"limit"`
-	By       string `json:"by"`
-	Sort     string `json:"sort"`
+	ID             string `json:"id_customer_order_line"`
+	HeaderID       string `json:"header_id"`
+	Search         string `json:"search"`
+	Page           int    `json:"page"`
+	Offset         int    `json:"offset"`
+	Limit          int    `json:"limit"`
+	By             string `json:"by"`
+	Sort           string `json:"sort"`
+	ExcludeBonuses string `json:"excluded_bonuses"`
 }
 
 var (
@@ -82,6 +83,49 @@ var (
 	join item_category ic on ic.id = i.item_category_id
 	join uom uo on uo.id = def.uom_id
 	join salesman s on s.id =cus.salesman_id	
+	
+	`
+
+	RestCustomerOrderLineSelectStatement = `
+	select 
+	def.id as order_line_id, def.header_id, ic._name as cat_name, ic.id as ic_id,
+	i.id as item_id, i._name as i_name,
+	(case when br.lowest_uom_only=1 then 
+	
+		(select uom_id from item_uom_line where item_id =i.id and conversion=
+		 (
+			select min(conversion) from item_uom_line where item_id =i.id
+		 ) limit 1
+		)
+	
+	 else uo.id end ) as uom_id,
+	(case when br.lowest_uom_only=1 then 
+	 (
+		 select _name from uom where id = (select uom_id from item_uom_line where item_id =i.id and conversion=
+		 (
+			select min(conversion) from item_uom_line where item_id =i.id
+		 ) limit 1
+		)
+	)
+	else uo._name end ) as uom_name,
+	(case when br.lowest_uom_only=1 then 
+	 def.stock_qty
+	else def.qty end ) as qty,
+	def.stock_qty,
+	(case when br.lowest_uom_only=1 then
+	 (round(def.unit_price/(def.stock_qty/def.qty),4))
+	else def.unit_price end ) as unit_price,def.gross_amount,
+	def.use_disc_percent,def.disc_percent1,def.disc_percent2,def.disc_percent3,
+	def.disc_percent4,def.disc_percent5, def.taxable_amount, def.tax_amount,
+	def.rounding_amount, def.net_amount, s.salesman_name, s.salesman_code, i.item_picture, coalesce(def.from_promo,0)
+	from customer_order_line def
+	join customer_order_header coh on coh.id = def.header_id
+	join customer cus on cus.id = coh.cust_ship_to_id
+	join item i on i.id = def.item_id
+	join item_category ic on ic.id = i.item_category_id
+	join uom uo on uo.id = def.uom_id
+	join salesman s on s.id =cus.salesman_id
+	join branch br on br.id = cus.branch_id	
 	
 	`
 

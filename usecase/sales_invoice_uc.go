@@ -27,7 +27,6 @@ func (uc SalesInvoiceUC) SelectAll(c context.Context, parameter models.SalesInvo
 
 	repo := repository.NewSalesInvoiceRepository(uc.DB)
 	res, err = repo.SelectAll(c, parameter)
-
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
@@ -86,6 +85,19 @@ func (uc SalesInvoiceUC) FindByDocumentNo(c context.Context, parameter models.Sa
 	return res, err
 }
 
+// FindByTransactionSourceDocumentNo ...
+func (uc SalesInvoiceUC) FindByTransactionSourceDocumentNo(c context.Context, parameter models.SalesInvoiceParameter) (res models.SalesInvoice, err error) {
+	repo := repository.NewSalesInvoiceRepository(uc.DB)
+	res, err = repo.FindByTransactionSourceDocumentNo(c, parameter)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+	uc.BuildBody(&res)
+
+	return res, err
+}
+
 // FindByCustomerId ...
 func (uc SalesInvoiceUC) FindByCustomerId(c context.Context, parameter models.SalesInvoiceParameter) (res models.SalesInvoice, err error) {
 	repo := repository.NewSalesInvoiceRepository(uc.DB)
@@ -101,7 +113,6 @@ func (uc SalesInvoiceUC) FindByCustomerId(c context.Context, parameter models.Sa
 
 // Edit ...
 func (uc SalesInvoiceUC) Edit(c context.Context, id string, input *requests.SalesInvoiceRequest) (res models.SalesInvoice, err error) {
-
 	now := time.Now().UTC()
 	strnow := now.Format(time.RFC3339)
 

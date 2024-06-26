@@ -1,21 +1,22 @@
 package models
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 // DashboardWeb ...
 type DashboardWeb struct {
-	RegionGroupID            *string                    `json:"region_id"`
-	RegionGroupName          *string                    `json:"region_name"`
-	TotalVisitUser           *string                    `json:"total_visit_user"`
-	TotalRepeatUser          *string                    `json:"total_repeat_order_user"`
-	TotalOrderUser           *string                    `json:"total_order_user"`
-	TotalInvoice             *string                    `json:"total_invoice_user"`
-	TotalRegisteredUser      *string                    `json:"total_registered_user"`
-	DetailData               []DashboardWebRegionDetail `json:"detailed_data"`
-	CustomerCountRepeatOrder *string                    `json:"customer_count_repeat_order"`
-	TotalActiveOutlet        *string                    `json:"total_active_outlet"`
-	TotalOutlet              *string                    `json:"total_outlet"`
-	TotalCompleteCustomer    *string                    `json:"total_complete_customer"`
+	RegionGroupID            string `json:"region_id"`
+	RegionGroupName          string `json:"region_name"`
+	TotalVisitUser           string `json:"total_visit_user"`
+	TotalRepeatUser          string `json:"total_repeat_order_user"`
+	TotalOrderUser           string `json:"total_order_user"`
+	TotalInvoice             string `json:"total_invoice_user"`
+	TotalRegisteredUser      string `json:"total_registered_user"`
+	CustomerCountRepeatOrder string `json:"customer_count_repeat_order"`
+	TotalActiveOutlet        string `json:"total_active_outlet"`
+	TotalOutlet              string `json:"total_outlet"`
+	TotalCompleteCustomer    string `json:"total_complete_customer"`
 }
 
 type DashboardWebRegionDetail struct {
@@ -56,6 +57,11 @@ type DashboardWebBranchDetail struct {
 	CustomerCityName         *string `json:"customer_city_name_detail"`
 	StatusInstall            *string `json:"status_install"`
 	StatusComplete           *string `json:"status_complete"`
+	SalesmanCode             *string `json:"salesman_code"`
+	SalesmanName             *string `json:"salesman_name"`
+	SalesmanTypeCode         *string `json:"salesman_type_code"`
+	SalesmanTypeName         *string `json:"salesman_type_name"`
+	CustomerFirstLogin       *string `json:"customer_user_first_login_time"`
 }
 
 type DashboardWebGetWithUserID struct {
@@ -85,18 +91,21 @@ type DashboardWebGetWithUserID struct {
 	CompleteCustomer        *string `json:"complete_customer"`
 }
 type OmzetValueModel struct {
-	RegionID            sql.NullString `json:"region_id"`
-	RegionName          sql.NullString `json:"region_name"`
-	RegionGroupID       sql.NullString `json:"region_group_id"`
-	RegionGroupName     sql.NullString `json:"region_group_name"`
-	BranchID            sql.NullString `json:"branch_id"`
-	CustomerID          sql.NullString `json:"customer_id"`
-	ItemID              sql.NullString `json:"item_id"`
-	ItemName            sql.NullString `json:"item_name"`
-	TotalGrossAmount    string         `json:"total_gross_amount"`
-	TotalNettAmount     string         `json:"total_nett_amount"`
-	TotalQuantity       string         `json:"total_quantity"`
-	TotalActiveCustomer string         `json:"total_active_customer"`
+	TransactionYearMonth string         `json:"transaction_year_month"`
+	TransactionYear      string         `json:"transaction_year"`
+	TransactionMonthName string         `json:"transaction_month_name"`
+	RegionID             sql.NullString `json:"region_id"`
+	RegionName           sql.NullString `json:"region_name"`
+	RegionGroupID        sql.NullString `json:"region_group_id"`
+	RegionGroupName      sql.NullString `json:"region_group_name"`
+	BranchID             sql.NullString `json:"branch_id"`
+	CustomerID           sql.NullString `json:"customer_id"`
+	ItemID               sql.NullString `json:"item_id"`
+	ItemName             sql.NullString `json:"item_name"`
+	TotalGrossAmount     string         `json:"total_gross_amount"`
+	TotalNettAmount      string         `json:"total_nett_amount"`
+	TotalQuantity        string         `json:"total_quantity"`
+	TotalActiveCustomer  string         `json:"total_active_customer"`
 }
 
 type OmzetValueBranchModel struct {
@@ -125,6 +134,8 @@ type DashboardTrackingInvoice struct {
 	CustomerName             string         `json:"customer_name"`
 	CustomerCode             string         `json:"customer_code"`
 	CustomerLevel            sql.NullString `json:"customer_level"`
+	CustomerDistrictName     sql.NullString `json:"customer_district_name"`
+	CustomerSubDistrictName  sql.NullString `json:"customer_subdistrict_name"`
 	InvoiceID                string         `json:"invoice_id"`
 	InvoiceNumber            string         `json:"invoice_number"`
 	CustomerOrderDocumentNo  sql.NullString `json:"customer_order_document_no"`
@@ -136,6 +147,25 @@ type DashboardTrackingInvoice struct {
 	InvoiceUpdatedDate       sql.NullString `json:"invoice_updated_date"`
 	PaidOffDate              sql.NullString `json:"paid_off_date"`
 	DueDate                  sql.NullString `json:"due_date"`
+}
+
+type DashboardVirtualAccount struct {
+	RegionGroupName         sql.NullString `json:"region_group_name"`
+	RegionName              sql.NullString `json:"region_name"`
+	BranchName              sql.NullString `json:"branch_name"`
+	BranchArea              sql.NullString `json:"branch_area"`
+	BranchCode              sql.NullString `json:"branch_code"`
+	CustomerName            sql.NullString `json:"customer_name"`
+	CustomerCode            sql.NullString `json:"customer_code"`
+	CustomerPhoneNo         sql.NullString `json:"customer_phone_number"`
+	InvoiceNumber           string         `json:"invoice_number"`
+	SourceDocumentNo        sql.NullString `json:"source_document_no"`
+	VirtualAccountNumber    sql.NullString `json:"virtual_account_number"`
+	VirtualAccountStartDate sql.NullString `json:"virtual_start_date"`
+	VirtualAccountEndDate   sql.NullString `json:"virtual_end_date"`
+	Amount                  sql.NullString `json:"amount"`
+	VirtualAccountRef1      sql.NullString `json:"virtual_account_ref1"`
+	VirtualAccountRef2      sql.NullString `json:"virtual_account_ref2"`
 }
 
 // DashboardWebParameter ...
@@ -153,17 +183,18 @@ type DashboardWebParameter struct {
 }
 
 type DashboardWebRegionParameter struct {
-	BranchID  string `json:"branch_id"`
-	GroupID   string `json:"group_id"`
-	RegionID  string `json:"region_id"`
-	Search    string `json:"search"`
-	Page      int    `json:"page"`
-	Offset    int    `json:"offset"`
-	Limit     int    `json:"limit"`
-	By        string `json:"by"`
-	Sort      string `json:"sort"`
-	StartDate string `json:"start_date"`
-	EndDate   string `json:"end_date"`
+	BranchID        string `json:"branch_id"`
+	GroupID         string `json:"group_id"`
+	RegionID        string `json:"region_id"`
+	CustomerLevelID string `json:"customer_level_id"`
+	Search          string `json:"search"`
+	Page            int    `json:"page"`
+	Offset          int    `json:"offset"`
+	Limit           int    `json:"limit"`
+	By              string `json:"by"`
+	Sort            string `json:"sort"`
+	StartDate       string `json:"start_date"`
+	EndDate         string `json:"end_date"`
 }
 
 type DashboardWebBranchParameter struct {
@@ -187,6 +218,7 @@ type DashboardWebBranchParameter struct {
 	CustomerLevelID string `json:"customer_level_id"`
 	CustomerTypeID  string `json:"customer_type_id"`
 	BranchArea      string `json:"branch_area"`
+	Year            string `json:"year"`
 }
 
 var (
@@ -196,6 +228,110 @@ var (
 	DashboardWebSelectStatement = ` 
 	select * from os_fetch_dashborad_regiongroupdata($1,$2,null,null,null)
 	`
+
+	DashboardWebSelectStatementNew = `with dataRepeatOrder as (
+		select c.id as customer_id, count(soh.id) as total_transaction
+		from customer c 
+		left join sales_invoice_header soh ON soh.cust_bill_to_id = c.id 
+		where soh.status='submitted'
+			and soh.transaction_source_document_no like 'CO%'
+			and soh.transaction_date between {START_DATE} and {END_DATE} 
+		group by c.id 
+	),
+	dataTransaction as (
+		select c.id as customer_id, count(soh.id) as total_transaction
+		from customer c 
+		left join sales_order_header soh ON soh.cust_bill_to_id = c.id 
+		where document_no like 'OSO%' 
+			and soh.status='submitted'
+			and soh.transaction_date between {START_DATE} and {END_DATE} 
+			and c.show_in_apps = 1
+		group by c.id 
+	),
+	dataInvoice as (
+		select r.group_id as region_group_id, count(sih.id) total_invoice
+		from sales_invoice_header sih
+			left join customer c on c.id = sih.cust_bill_to_id 
+			left join branch b on b.id = sih.branch_id 
+			left join region r on r.id = b.region_id 
+		where sih.transaction_source_document_no like 'CO%'
+			and sih.transaction_date between {START_DATE} and {END_DATE}
+			and c.show_in_apps = 1
+		group by r.group_id
+	),
+	dataVisitedUser as (
+		select cus.id as cus_id, count(*) as visit_user
+		from user_checkin_activity uca 
+			left join customer cus on cus.user_id = uca.user_id 
+		where uca.checkin_time::date between {START_DATE} and {END_DATE}
+			and cus.show_in_apps = 1
+		group by cus.id
+	),
+	dataOutlet as (
+		select r.group_id as region_group_id, count(distinct c.id) as total_outlet
+		from branch b 
+		left join customer c on c.branch_id = b.id
+		left join sales_invoice_header sih on sih.cust_bill_to_id = c.id
+		left join region r on r.id = b.region_id
+		where c.created_date IS not NULL 
+			and c.show_in_apps = 1 
+		group by r.group_id 
+	), 
+	dataActiveOutlet as (
+		select r.group_id as region_group_id,
+		count(distinct sih.cust_bill_to_id) as active_outlet
+		from branch b 
+		left join customer c on c.branch_id = b.id
+		left join sales_invoice_header sih on sih.cust_bill_to_id = c.id
+		left join region r on r.id = b.region_id
+		where c.created_date IS not NULL 
+			and c.show_in_apps = 1
+			and sih.transaction_date between {START_DATE} and {END_DATE}
+			and sih.transaction_source_document_no like 'CO%' 
+		group by r.group_id 
+	),
+	dataCompleteCustomer as (
+		select r.group_id as region_group_id,
+		count(c.id) as total_complete_customer
+		from region r 
+		left join branch b on b.region_id = r.id
+		left join customer c on c.branch_id = b.id
+		left join _user us on us.id = c.user_id 
+		where c.modified_date::date between {START_DATE} and {END_DATE}
+			and c.created_date IS not null and c.show_in_apps = 1
+			and coalesce(c.is_data_completed, false) = true
+			and us.fcm_token is not null and length(trim(us.fcm_token))>0
+		group by r.group_id 
+	)
+	select r.group_id, r.group_name,
+	coalesce(sum(dvs.visit_user),0) as total_visit_user,
+	sum(case when dro.total_transaction>1 then(dro.total_transaction-1) else 0 end) as total_repeat_order_user,
+	coalesce (sum(dt.total_transaction), 0) as total_order_user,
+	count(u.id) filter (
+		where u.fcm_token is not null 
+			and c.show_in_apps = 1
+			and u.first_login_time::date between {START_DATE} and {END_DATE} 
+			and length(trim(u.fcm_token))>0
+	) as total_register_user,
+	coalesce(count(dro.customer_id) filter (where dro.total_transaction > 1), 0) as customer_count_repeat_order,
+	coalesce (ddo.total_outlet,0) as total_outlet,
+	coalesce(dao.active_outlet,0) as total_active_outlet,
+	coalesce (di.total_invoice,0) as total_invoice,
+	coalesce (dcc.total_complete_customer,0) as total_complete_customer
+	from customer c 
+		left join branch b on b.id = c.branch_id
+		left join region r on r.id = b.region_id
+		left join "_user" u on u.id = c.user_id
+		left join dataRepeatOrder dro on dro.customer_id = c.id
+		left join dataVisitedUser dvs on dvs.cus_id = c.id
+		left join dataOutlet ddo on ddo.region_group_id = r.group_id 
+		left join dataActiveOutlet dao on dao.region_group_id= r.group_id
+		left join dataInvoice di on di.region_group_id = r.group_id
+		left join dataCompleteCustomer dcc on dcc.region_group_id = r.group_id
+		left join dataTransaction dt on dt.customer_id = c.id
+	where r.group_id is not null
+	group by r.group_id,r.group_name, ddo.total_outlet, dao.active_outlet, di.total_invoice, dcc.total_complete_customer
+	order by group_id desc`
 
 	DashboardWebSelectByGroupIDStatement = ` 
 	with dataRepeatOrder as (
@@ -214,23 +350,26 @@ var (
 		where lower(document_no) like '%oso%' 
 			and soh.status='submitted'
 			and soh.transaction_date between '{START_DATE}' and '{END_DATE}' 
+			and c.show_in_apps = 1
 		group by c.id 
 	),
 	dataInvoice as (
 		select r.id region_id, count(sih.id) total_invoice
 		from sales_invoice_header sih 
+			left join customer c on c.id = sih.cust_bill_to_id 
 			left join branch b on b.id = sih.branch_id 
 			left join region r on r.id = b.region_id 
 		where sih.transaction_source_document_no like 'CO%'
 			and sih.transaction_date between '{START_DATE}' and '{END_DATE}' 
+			and c.show_in_apps = 1
 		group by r.id
 	),
 	dataVisitedUser as (
 		select cus.id as cus_id, count(*) as visit_user
-		from user_checkin_activity uca
-			left join _user us on us.id = uca.user_id
-			left join customer cus on cus.customer_code = us.login
-		where  cus.show_in_apps = 1 and uca.checkin_time::date between '{START_DATE}' and '{END_DATE}'
+		from user_checkin_activity uca 
+			left join customer cus on cus.user_id = uca.user_id 
+		where uca.checkin_time::date between '{START_DATE}' and '{END_DATE}'
+			and cus.show_in_apps = 1
 		group by cus.id
 	),
 	dataOutlet as (
@@ -251,6 +390,7 @@ var (
 		left join sales_invoice_header sih on sih.cust_bill_to_id = c.id
 		left join region r on r.id = b.region_id
 		where c.created_date IS not NULL 
+			and c.show_in_apps = 1
 			and sih.transaction_date between '{START_DATE}' and '{END_DATE}'
 			and sih.transaction_source_document_no like 'CO%' 
 		group by r.id 
@@ -263,15 +403,8 @@ var (
 		left join customer c on c.branch_id = b.id
 		left join _user us on us.id = c.user_id 
 		where c.modified_date::date between '{START_DATE}' and '{END_DATE}'
-			and(c.customer_nik is not null and c.customer_nik != '')
-			and (c.customer_name is not null and c.customer_name != '')
-			and (c.customer_birthdate is not null)
-			and (c.customer_religion is not null and c.customer_religion != '')
-			and (c.customer_photo_ktp is not null and c.customer_photo_ktp != '')
-			and (c.customer_profile_picture is not null and c.customer_profile_picture != '')
-			and (c.customer_phone is not null and c.customer_phone != '')
-			and (c.customer_code is not null and c.customer_code != '')
 			and c.created_date IS not null and c.show_in_apps = 1
+			and coalesce(c.is_data_completed, false) = true
 			and us.fcm_token is not null and length(trim(us.fcm_token))>0
 		group by r.id
 	)
@@ -281,6 +414,7 @@ var (
 	coalesce (sum(dt.total_transaction), 0) as total_order_user,
 	count(u.id) filter (
 		where u.fcm_token is not null 
+			and c.show_in_apps = 1
 			and u.first_login_time::date between '{START_DATE}' and '{END_DATE}' 
 			and length(trim(u.fcm_token))>0
 	) as total_register_user,
@@ -310,7 +444,7 @@ var (
 		
 	 `
 	DashboardWebRegionDetailByRegionIDSelectStatement = `
-	select * from os_fetch_dashborad_regiongroupdetaildata_by_region_id($1::integer,$2,$3,null,null,null) `
+	select * from os_fetch_dashborad_regiongroupdetaildata_by_region_id($1::integer,$2::integer,$3,$4,$5,null,null,null) `
 
 	DashboardWebCustomerDetailByRegionDetailByRegionIDSelectStatement = `
 	select * from os_fetch_dashborad_get_total_user_by_branch_id($1::integer,$2,$3) `
@@ -324,7 +458,7 @@ var (
 	DashboardWebBranchDetailSelectStatement = ` select * from os_fetch_dashborad_branchcustomerdata($1::integer,$2,$3,null,null,null)
 	   `
 
-	DashboardWebReportBranchDetailSelectStatement = ` select * from os_fetch_dashborad_branchcustomerdata2($1::varchar,$2,$3,null,null,null)
+	DashboardWebReportBranchDetailSelectStatement = ` select * from os_fetch_dashborad_branchcustomerdata4($1::varchar,$2,$3::varchar,$4,$5,null,null,null)
 	   `
 
 	DashboardWebBranchDetailSelectWithUserIDStatement = ` select * from os_fetch_dashborad_customerdata_using_user_id($1::integer,$2,$3,null,null,null)

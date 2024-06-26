@@ -40,7 +40,7 @@ func (repository UserAccountRepository) scanRows(rows *sql.Rows) (res models.Use
 // Scan row
 func (repository UserAccountRepository) scanRow(row *sql.Row) (res models.UserAccount, err error) {
 	err = row.Scan(
-		&res.ID, &res.LoginCode, &res.RoleIDList, &res.FCMToken,
+		&res.ID, &res.LoginCode, &res.RoleIDList, &res.FCMToken, &res.ShowInApp, &res.Active,
 	)
 
 	if err != nil {

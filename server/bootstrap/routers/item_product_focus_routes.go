@@ -29,4 +29,5 @@ func (route ItemProductFocusRoutes) RegisterRoute() {
 	r.Get("/id/:id", handler.FindByID)
 
 	r.Get("/v2/select", handler.SelectAllV2)
+	r.Post("/", handler.Add)
 }

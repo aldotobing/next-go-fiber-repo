@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -109,15 +110,35 @@ func (h *SalesInvoiceHandler) FindByID(ctx *fiber.Ctx) error {
 func (h *SalesInvoiceHandler) FindByDocumentNo(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
+	id := ctx.Params("document_no")
+	id = strings.ReplaceAll(id, "&", "/")
+
 	parameter := models.SalesInvoiceParameter{
-		ID: ctx.Params("document_no"),
+		NoInvoice: id,
+	}
+	if parameter.NoInvoice == "" {
+		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
+	}
+
+	uc := usecase.SalesInvoiceUC{ContractUC: h.ContractUC}
+	res, err := uc.FindByDocumentNo(c, parameter)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+// FindByTransactionSourceDocumentNo ...
+func (h *SalesInvoiceHandler) FindByTransactionSourceDocumentNo(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.SalesInvoiceParameter{
+		ID: ctx.Params("transaction_source_document_no"),
 	}
 	if parameter.ID == "" {
 		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
 	}
 
 	uc := usecase.SalesInvoiceUC{ContractUC: h.ContractUC}
-	res, err := uc.FindByDocumentNo(c, parameter)
+	res, err := uc.FindByTransactionSourceDocumentNo(c, parameter)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }

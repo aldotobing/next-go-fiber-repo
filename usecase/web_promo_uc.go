@@ -91,6 +91,7 @@ func (uc WebPromoUC) Add(c context.Context, data *requests.WebPromoRequest, imgB
 		RegionAreaIdList:    &data.RegionIDList,
 		BranchIdList:        &data.BranchIdList,
 		CustomerLevelIdList: &data.CustomerLevelIDList,
+		Priority:            &data.Priority,
 	}
 	res.ID, err = repo.Add(c, &res)
 	if err != nil {
@@ -141,6 +142,7 @@ func (uc WebPromoUC) Edit(c context.Context, data *requests.WebPromoRequest, img
 		RegionAreaIdList:    &data.RegionIDList,
 		CustomerLevelIdList: &data.CustomerLevelIDList,
 		BranchIdList:        &data.BranchIdList,
+		Priority:            &data.Priority,
 	}
 
 	res.ID, err = repo.Edit(c, &res)

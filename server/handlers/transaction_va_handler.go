@@ -3,8 +3,11 @@ package handlers
 import (
 	"context"
 	"crypto/sha512"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -192,7 +195,7 @@ func (h *TransactionVAHandler) GetTransactionByVaCode(ctx *fiber.Ctx) error {
 		ObjectDataDetail.BillCode = "01"
 		ObjectDataDetail.BillName = *res.InvoiceCode
 		ObjectDataDetail.BillShortName = "Pembayaran"
-		ObjectDataDetail.BillAmount = *res.Amount
+		ObjectDataDetail.BillAmount = *res.PaidAmount
 		ObjectData.InquiryResult.VabillDetails.BillDetail = append(ObjectData.InquiryResult.VabillDetails.BillDetail, *ObjectDataDetail)
 		ObjectData.InquiryResult.Currency = "360"
 		ObjectData.InquiryResult.Status.IsError = "false"
@@ -305,7 +308,10 @@ func (h *TransactionVAHandler) PaidTransactionByVaCode(ctx *fiber.Ctx) error {
 		inputUpdate.VaPairID = input.PaymentRequestBody.TransactionID
 		inputUpdate.Amount = input.PaymentRequestBody.PaymentAmount
 
-		if inputUpdate.Amount != *res.Amount {
+		paidAmounts := strings.Split(inputUpdate.Amount, ".")
+
+		inputUpdate.Amount = paidAmounts[0]
+		if inputUpdate.Amount != *res.PaidAmount {
 			ObjectData.InquiryResult.Status.ErrorCode = "B5"
 			ObjectData.InquiryResult.Status.IsError = "true"
 			ObjectData.InquiryResult.Status.StatusDescription = "Bill Not Found"
@@ -328,11 +334,81 @@ func (h *TransactionVAHandler) PaidTransactionByVaCode(ctx *fiber.Ctx) error {
 
 				ObjectData.InquiryResult.BillInfo1 = *resafterupdate.VACode
 				ObjectData.InquiryResult.BillInfo2 = *resafterupdate.Customername
-
+				ucvoucher := usecase.VoucherRedeemUC{ContractUC: h.ContractUC}
+				_, errvoucherpaid := ucvoucher.PaidRedeem(c, viewmodel.VoucherRedeemVM{RedeemedToDocumentNo: *resafterupdate.InvoiceCode})
+				if errvoucherpaid != nil {
+					fmt.Println(errvoucherpaid)
+				}
 				ObjectData.InquiryResult.Status.IsError = "false"
 				ObjectData.InquiryResult.Status.ErrorCode = "00"
 				ObjectData.InquiryResult.Status.StatusDescription = "Transaction Success"
 
+				customerData, _ := usecase.WebCustomerUC{ContractUC: h.ContractUC}.FindByID(c, models.WebCustomerParameter{ID: *resafterupdate.CustomerID})
+				salesInvoiceData, _ := usecase.SalesInvoiceUC{ContractUC: h.ContractUC}.FindByDocumentNo(c, models.SalesInvoiceParameter{ID: *resafterupdate.InvoiceCode})
+				var detailLine, deadLineFooter string
+				var emptyJson json.RawMessage
+
+				if salesInvoiceData.InvoiceLine != nil {
+					detailLine += `Berikut merupakan rincian pesanan:\n`
+					var invoiceLine []viewmodel.InvoiceLineVM
+					if salesInvoiceData.InvoiceLine == nil {
+						salesInvoiceData.InvoiceLine = &emptyJson
+					}
+					invoiceDataJson, _ := json.Marshal(salesInvoiceData.InvoiceLine)
+					errMarshal := json.Unmarshal(invoiceDataJson, &invoiceLine)
+					if errMarshal == nil {
+						for i := range invoiceLine {
+							detailLine += invoiceLine[i].Quantity + " " + invoiceLine[i].UomName + " " + invoiceLine[i].ItemName + "/n"
+						}
+						deadLineFooter += `Total ` + strconv.Itoa(len(invoiceLine)) + ` item, senilai ` + *salesInvoiceData.NetAmount
+					}
+				}
+				if customerData.CustomerFCMToken != "" {
+
+					message := `Kepada Yang Terhormat
+
+					` + customerData.Code + ` - ` + *resafterupdate.Customername + ` 
+					
+					NO ORDERAN ` + *salesInvoiceData.SourceDocumentNo + ` 
+					NO INVOICE ` + *resafterupdate.InvoiceCode + ` 
+					pada tanggal ` + time.Now().Format("2006-01-02") + ` oleh Toko : ` + customerData.CustomerName + `  dengan No. Virtual Account ` + *resafterupdate.VACode + ` TELAH LUNAS
+					
+					Berikut merupakan rincian pesanan anda:
+					` + detailLine + `
+					
+					Terima kasih atas pembayaran anda
+					
+					Salam Sehat
+					
+					NB : Bila ini bukan transaksi dari Toko Bapak/Ibu, silahkan menghubungi Distributor Produk Sido Muncul.`
+
+					_, _ = usecase.FCMUC{ContractUC: h.ContractUC}.SendFCMMessage(c, "Lunas "+*salesInvoiceData.SourceDocumentNo, message, customerData.CustomerFCMToken)
+				}
+				if customerData.CustomerBranchPicPhoneNo != "" {
+
+					message := `*Kepada Yang Terhormat PIC*
+
+					*` + customerData.CustomerBranchPicName + `*
+				
+					*NO ORDERAN ` + *salesInvoiceData.SourceDocumentNo + `*
+				
+					*NO INVOICE ` + *resafterupdate.InvoiceCode + `*
+				
+					*pada tanggal ` + time.Now().Format("2006-01-02") + ` oleh Toko : ` + customerData.CustomerName + `(` + customerData.Code + `) dengan No. Virtual Account ` + *resafterupdate.VACode + ` TELAH LUNAS*
+					
+					*Pelanggan dari salesman : ` + customerData.CustomerSalesmanName + `(` + customerData.CustomerSalesmanCode + `)*
+
+					`
+
+					message += detailLine + deadLineFooter
+					message += `Terima kasih atas pemesanan anda
+				
+					Salam Sehat
+				
+					NB : Bila ini bukan transaksi dari Toko Bapak/Ibu, silahkan periksa data transaksi di SFA WEB(NEXT)/WEB CMS MYSM.`
+
+					_ = uc.ContractUC.WhatsApp.SendTransactionWA(customerData.CustomerBranchPicPhoneNo, message)
+				}
 			}
 		}
 	}

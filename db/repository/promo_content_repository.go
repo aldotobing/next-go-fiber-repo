@@ -40,6 +40,7 @@ func (repository PromoContent) scanRows(rows *sql.Rows) (res models.PromoContent
 		&res.StartDate,
 		&res.EndDate,
 		&res.Active,
+		&res.Priority,
 	)
 	if err != nil {
 
@@ -59,6 +60,7 @@ func (repository PromoContent) scanRow(row *sql.Row) (res models.PromoContent, e
 		&res.StartDate,
 		&res.EndDate,
 		&res.Active,
+		&res.Priority,
 	)
 	if err != nil {
 		return res, err
@@ -96,6 +98,13 @@ func (repository PromoContent) SelectAll(c context.Context, parameter models.Pro
 			FROM promo pc2
 			left join branch_eligible_promo BEP on BEP.promo_id = pc2.id
 			WHERE BEP.branch_id = ` + parameter.BranchID + ` or BEP.id is null)`
+	}
+
+	if parameter.RegionID != "" {
+		conditionString += ` AND PC.ID IN (SELECT pc2.id 
+			FROM promo pc2
+			left join region_area_eligible_promo REP on REP.promo_id = pc2.id
+			WHERE REP.region_id = ` + parameter.RegionID + ` or REP.id is null)`
 	}
 
 	statement := models.PromoContentSelectStatement + ` ` + models.PromoContentWhereStatement +

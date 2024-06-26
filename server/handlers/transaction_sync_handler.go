@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"nextbasis-service-v-0.1/db/repository/models"
+	"nextbasis-service-v-0.1/pkg/str"
 	"nextbasis-service-v-0.1/usecase"
 
 	"github.com/gofiber/fiber/v2"
@@ -29,7 +30,7 @@ func (h *TransactionDataSyncHandler) CustomerOrderVoidDataSync(ctx *fiber.Ctx) e
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
-func (h *TransactionDataSyncHandler) InvoiceSync(ctx *fiber.Ctx) error {
+func (h *TransactionDataSyncHandler) InvoiceSFAPull(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.CilentInvoiceParameter{
@@ -39,12 +40,97 @@ func (h *TransactionDataSyncHandler) InvoiceSync(ctx *fiber.Ctx) error {
 		Sort:       ctx.Query("sort"),
 	}
 	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
+	res, err := uc.SFAPullData(c, parameter)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *TransactionDataSyncHandler) InvoiceMYSMPull(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.CilentInvoiceParameter{
+		CustomerID: ctx.Params("customer_id"),
+		Search:     ctx.Query("search"),
+		By:         ctx.Query("by"),
+		Sort:       ctx.Query("sort"),
+	}
+	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
+	res, err := uc.MYSMPullData(c, parameter)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *TransactionDataSyncHandler) InvoiceSyncGetRedis(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
+	res, err := uc.GetRedisDataSync(c)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *TransactionDataSyncHandler) InvoiceReserveSyncGetRedis(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
+	res, err := uc.GetRedisDataReserveSync(c)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *TransactionDataSyncHandler) InvoiceSyncSFA(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
+	res, err := uc.SFASyncData(c)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *TransactionDataSyncHandler) InvoiceSyncGetRedisPointOnly(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
+	res, err := uc.GetRedisDataSyncPointOnly(c)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *TransactionDataSyncHandler) ReturnInvoiceSync(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.CilentReturnInvoiceParameter{
+		CustomerID: ctx.Params("customer_id"),
+		Search:     ctx.Query("search"),
+		By:         ctx.Query("by"),
+		Sort:       ctx.Query("sort"),
+	}
+	uc := usecase.CilentReturnInvoiceUC{ContractUC: h.ContractUC}
 	res, err := uc.DataSync(c, parameter)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
 
-func (h *TransactionDataSyncHandler) SalesOrderCustomerSync(ctx *fiber.Ctx) error {
+func (h *TransactionDataSyncHandler) UndoneDataSync(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.CilentInvoiceParameter{
+		CustomerID: ctx.Params("customer_id"),
+		Search:     ctx.Query("search"),
+		By:         ctx.Query("by"),
+		Sort:       ctx.Query("sort"),
+		StartDate:  ctx.Query("start_date"),
+		EndDate:    ctx.Query("end_date"),
+		Page:       str.StringToInt(ctx.Query("page")),
+		Limit:      str.StringToInt(ctx.Query("limit")),
+	}
+	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
+	res, err := uc.UndoneDataSync(c, parameter)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *TransactionDataSyncHandler) SalesOrderCustomerPullData(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.SalesOrderCustomerSyncParameter{
@@ -54,7 +140,52 @@ func (h *TransactionDataSyncHandler) SalesOrderCustomerSync(ctx *fiber.Ctx) erro
 		Sort:       ctx.Query("sort"),
 	}
 	uc := usecase.SalesOrderCustomerSyncUC{ContractUC: h.ContractUC}
-	res, err := uc.DataSync(c, parameter)
+	res, err := uc.PullDataSync(c, parameter)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *TransactionDataSyncHandler) SalesOrderCustomerPushData(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.SalesOrderCustomerSyncParameter{
+		CustomerID: ctx.Params("customer_id"),
+		Search:     ctx.Query("search"),
+		By:         ctx.Query("by"),
+		Sort:       ctx.Query("sort"),
+	}
+	uc := usecase.SalesOrderCustomerSyncUC{ContractUC: h.ContractUC}
+	res, err := uc.PushDataSync(c, parameter)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *TransactionDataSyncHandler) SalesOrderCustomerSendFcmMessage(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.SalesOrderCustomerSyncParameter{
+		CustomerID: ctx.Params("customer_id"),
+		Search:     ctx.Query("search"),
+		By:         ctx.Query("by"),
+		Sort:       ctx.Query("sort"),
+	}
+	uc := usecase.SalesOrderCustomerSyncUC{ContractUC: h.ContractUC}
+	res, err := uc.SendSubmittedSOFCMNotification(c, parameter)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *TransactionDataSyncHandler) SalesOrderCustomerSendSalesmanWa(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.SalesOrderCustomerSyncParameter{
+		CustomerID: ctx.Params("customer_id"),
+		Search:     ctx.Query("search"),
+		By:         ctx.Query("by"),
+		Sort:       ctx.Query("sort"),
+	}
+	uc := usecase.SalesOrderCustomerSyncUC{ContractUC: h.ContractUC}
+	res, err := uc.SendSubmittedSOSalesmanWa(c, parameter)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }
@@ -70,6 +201,32 @@ func (h *TransactionDataSyncHandler) SalesOrderCustomerRevisedSync(ctx *fiber.Ct
 	}
 	uc := usecase.SalesOrderCustomerSyncUC{ContractUC: h.ContractUC}
 	res, err := uc.RevisedSync(c, parameter)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+//undone sfa sync
+
+func (h *TransactionDataSyncHandler) UndoneInvoiceSFAPull(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.CilentInvoiceParameter{
+		CustomerID: ctx.Params("customer_id"),
+		Search:     ctx.Query("search"),
+		By:         ctx.Query("by"),
+		Sort:       ctx.Query("sort"),
+	}
+	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
+	res, err := uc.UndoneSFAPullData(c, parameter)
+
+	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+func (h *TransactionDataSyncHandler) UndoneInvoiceSyncSFA(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	uc := usecase.CilentInvoiceUC{ContractUC: h.ContractUC}
+	res, err := uc.UndoneSFASyncData(c)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
 }

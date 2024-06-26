@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -32,6 +33,7 @@ func (h *WebCustomerHandler) SelectAll(ctx *fiber.Ctx) error {
 	parameter := models.WebCustomerParameter{
 		ID:             ctx.Query("customer_id"),
 		CustomerTypeId: ctx.Query("customer_type_id"),
+		SalesmanTypeID: ctx.Query("salesman_type_id"),
 		UserId:         ctx.Query("admin_user_id"),
 		BranchId:       ctx.Query("branch_id"),
 		Search:         ctx.Query("search"),
@@ -58,17 +60,21 @@ func (h *WebCustomerHandler) SelectAll(ctx *fiber.Ctx) error {
 func (h *WebCustomerHandler) FindAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 	parameter := models.WebCustomerParameter{
-		ID:             ctx.Query("customer_id"),
-		CustomerTypeId: ctx.Query("customer_type_id"),
-		UserId:         ctx.Query("admin_user_id"),
-		BranchId:       ctx.Query("branch_id"),
-		Search:         ctx.Query("search"),
-		Page:           str.StringToInt(ctx.Query("page")),
-		Limit:          str.StringToInt(ctx.Query("limit")),
-		By:             ctx.Query("by"),
-		Sort:           ctx.Query("sort"),
-		PhoneNumber:    ctx.Query("phone_number"),
-		ShowInApp:      ctx.Query("show_in_app"),
+		ID:              ctx.Query("customer_id"),
+		CustomerTypeId:  ctx.Query("customer_type_id"),
+		UserId:          ctx.Query("admin_user_id"),
+		BranchId:        ctx.Query("branch_id"),
+		Search:          ctx.Query("search"),
+		Page:            str.StringToInt(ctx.Query("page")),
+		Limit:           str.StringToInt(ctx.Query("limit")),
+		By:              ctx.Query("by"),
+		Sort:            ctx.Query("sort"),
+		PhoneNumber:     ctx.Query("phone_number"),
+		ShowInApp:       ctx.Query("show_in_app"),
+		Active:          ctx.Query("active"),
+		IsDataComplete:  ctx.Query("is_data_complete"),
+		AdminValidate:   ctx.Query("admin_validate"),
+		MonthlyMaxPoint: ctx.Query("monthly_max_point"),
 	}
 	uc := usecase.WebCustomerUC{ContractUC: h.ContractUC}
 	res, meta, err := uc.FindAll(c, parameter)
@@ -101,7 +107,10 @@ func (h *WebCustomerHandler) FindByID(ctx *fiber.Ctx) error {
 	res, err := uc.FindByID(c, parameter)
 
 	type StructObject struct {
-		ListObject viewmodel.CustomerVM `json:"customer"`
+		ListObject          viewmodel.CustomerVM   `json:"customer"`
+		CustomerTarget      interface{}            `json:"customer_target"`
+		CustomerAchievement map[string]interface{} `json:"customer_achievement"`
+		SalesmanVisit       interface{}            `json:"salesman_visit"`
 	}
 
 	objectData := new(StructObject)
@@ -110,8 +119,62 @@ func (h *WebCustomerHandler) FindByID(ctx *fiber.Ctx) error {
 
 	target := h.FetchVisitDay(parameter)
 	if target != "" {
-		objectData.ListObject.VisitDay = &target
+		objectData.ListObject.VisitDay = target
 	}
+
+	objectData.CustomerTarget = helper.FetchClientDataTarget(models.CustomerTargetSemesterParameter{
+		ID:   res.ID,
+		Code: res.Code,
+	})
+
+	achievement := make(map[string]interface{})
+	quarterAchievement, _ := usecase.CustomerAchievementQuarterUC{ContractUC: h.ContractUC}.SelectAll(c, models.CustomerAchievementQuarterParameter{
+		ID: res.ID,
+		By: "cus.created_date",
+	})
+	if len(quarterAchievement) == 1 {
+		achievement["quater_achievement"] = quarterAchievement[0].Achievement
+	}
+	semesterAchievement, _ := usecase.CustomerAchievementSemesterUC{ContractUC: h.ContractUC}.SelectAll(c, models.CustomerAchievementSemesterParameter{
+		ID: res.ID,
+		By: "cus.created_date",
+	})
+	if len(semesterAchievement) == 1 {
+		achievement["semester_achievement"] = semesterAchievement[0].Achievement
+	}
+	yearAchievement, _ := usecase.CustomerAchievementYearUC{ContractUC: h.ContractUC}.SelectAll(c, models.CustomerAchievementYearParameter{
+		ID: res.ID,
+		By: "cus.created_date",
+	})
+	if len(yearAchievement) == 1 {
+		achievement["year_achievement"] = yearAchievement[0].Achievement
+	}
+	annualAchievement, _ := usecase.CustomerAchievementUC{ContractUC: h.ContractUC}.SelectAll(c, models.CustomerAchievementParameter{
+		ID: res.ID,
+		By: "cus.created_date",
+	})
+	if len(annualAchievement) == 1 {
+		achievement["month_achievement"] = annualAchievement[0].Achievement
+	}
+	objectData.CustomerAchievement = achievement
+
+	objectData.SalesmanVisit = helper.FetchVisitDay(models.CustomerParameter{
+		ID:   res.ID,
+		Code: res.Code,
+	})
+
+	pointData, _ := usecase.PointMaxCustomerUC{ContractUC: h.ContractUC}.FindByCustomerCode(c, res.Code)
+	if pointData.MonthlyMaxPoint == "" {
+		pointRules, _ := usecase.PointRuleUC{ContractUC: uc.ContractUC}.SelectAll(c, models.PointRuleParameter{
+			By:   "def.id",
+			Sort: "asc",
+			Now:  time.Now().Format("2006-01-02"),
+		})
+		if len(pointRules) > 0 {
+			pointData.MonthlyMaxPoint = pointRules[0].MonthlyMaxPoint
+		}
+	}
+	objectData.ListObject.MonthlyMaxPoint = pointData.MonthlyMaxPoint
 
 	return h.SendResponse(ctx, objectData, nil, err, 0)
 }
@@ -131,7 +194,6 @@ func (h *WebCustomerHandler) FetchVisitDay(params models.WebCustomerParameter) s
 
 	resp, err := client.Do(req)
 	if err != nil {
-
 		fmt.Print(err.Error())
 	}
 	defer resp.Body.Close()
@@ -177,10 +239,35 @@ func (h *WebCustomerHandler) Edit(ctx *fiber.Ctx) error {
 
 	imgProfile, _ := ctx.FormFile("img_profile")
 	imgKtp, _ := ctx.FormFile("img_ktp")
+	imgKtpDasboard, _ := ctx.FormFile("img_ktp_dasboard")
+	imgNpwp, _ := ctx.FormFile("img_npwp")
+	imgNpwpDashboard, _ := ctx.FormFile("img_npwp_dashboard")
 	uc := usecase.WebCustomerUC{ContractUC: h.ContractUC}
-	res, err := uc.Edit(c, id, input, imgProfile, imgKtp)
+	res, err := uc.Edit(c, id, input, imgProfile, imgKtp, imgKtpDasboard, imgNpwp, imgNpwpDashboard)
 
 	return h.SendResponse(ctx, res, nil, err, 0)
+}
+
+// EditBulk ...
+func (h *WebCustomerHandler) EditBulk(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	input := new(requests.WebCustomerBulkRequest)
+	if err := ctx.BodyParser(input); err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+	if err := h.Validator.Struct(input); err != nil {
+		errMessage := h.ExtractErrorValidationMessages(err.(validator.ValidationErrors))
+		return h.SendResponse(ctx, nil, nil, errMessage, http.StatusBadRequest)
+	}
+
+	uc := usecase.WebCustomerUC{ContractUC: h.ContractUC}
+	err := uc.EditBulk(c, *input)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err, http.StatusBadRequest)
+	}
+
+	return h.SendResponse(ctx, nil, nil, err, 0)
 }
 
 // Edit ...
@@ -203,9 +290,9 @@ func (h *WebCustomerHandler) Add(ctx *fiber.Ctx) error {
 
 	imgProfile, _ := ctx.FormFile("img_profile")
 	uc := usecase.WebCustomerUC{ContractUC: h.ContractUC}
-	res, err := uc.Add(c, input, imgProfile)
+	_, err = uc.Add(c, input, imgProfile)
 
-	return h.SendResponse(ctx, res, nil, err, 0)
+	return h.SendResponse(ctx, nil, nil, err, 0)
 }
 
 // ReportSelect ...

@@ -1,88 +1,109 @@
 package models
 
+import "database/sql"
+
 // Customer ...
 type WebCustomer struct {
-	ID                       *string `json:"customer_id"`
-	Code                     *string `json:"customer_code"`
-	CustomerName             *string `json:"customer_name"`
-	CustomerProfilePicture   *string `json:"customer_profile_picture"`
-	CustomerActiveStatus     *string `json:"customer_active_status"`
-	CustomerBirthDate        *string `json:"customer_birthdate"`
-	CustomerReligion         *string `json:"customer_religion"`
-	CustomerLatitude         *string `json:"customer_latitude"`
-	CustomerLongitude        *string `json:"customer_longitude"`
-	CustomerBranchCode       *string `json:"customer_branch_code"`
-	CustomerBranchName       *string `json:"customer_branch_name"`
-	CustomerBranchArea       *string `json:"customer_branch_area"`
-	CustomerBranchAddress    *string `json:"customer_branch_address"`
-	CustomerBranchLat        *string `json:"customer_branch_lat"`
-	CustomerBranchLng        *string `json:"customer_branch_lng"`
-	CustomerBranchPicPhoneNo *string `json:"customer_branch_pic_phone_no"`
-	CustomerRegionCode       *string `json:"customer_region_code"`
-	CustomerRegionName       *string `json:"customer_region_name"`
-	CustomerRegionGroup      *string `json:"customer_region_group"`
-	CustomerEmail            *string `json:"customer_email"`
-	CustomerCpName           *string `json:"customer_cp_name"`
-	CustomerAddress          *string `json:"customer_address"`
-	CustomerPostalCode       *string `json:"customer_postal_code"`
-	CustomerProvinceID       *string `json:"customer_province_id"`
-	CustomerProvinceName     *string `json:"customer_province_name"`
-	CustomerCityID           *string `json:"customer_city_id"`
-	CustomerCityName         *string `json:"customer_city_name"`
-	CustomerDistrictID       *string `json:"customer_district_id"`
-	CustomerDistrictName     *string `json:"customer_district_name"`
-	CustomerSubdistrictID    *string `json:"customer_subdistrict_id"`
-	CustomerSubdistrictName  *string `json:"customer_subdistrict_name"`
-	CustomerSalesmanCode     *string `json:"customer_salesman_code"`
-	CustomerSalesmanName     *string `json:"customer_salesman_name"`
-	CustomerSalesmanPhone    *string `json:"customer_salesman_phone"`
-	CustomerSalesCycle       *string `json:"customer_sales_cycle"`
-	CustomerTypeId           *string `json:"customer_type_id"`
-	CustomerTypeName         *string `json:"customer_type_name"`
-	CustomerPhone            *string `json:"customer_phone"`
-	CustomerPoint            *string `json:"customer_point"`
-	GiftName                 *string `json:"customer_gift_name"`
-	Loyalty                  *string `json:"customer_loyalty"`
-	VisitDay                 *string `json:"visit_day"`
-	CustomerTaxCalcMethod    *string `json:"customer_tax_calc_method"`
-	CustomerBranchID         *string `json:"customer_branch_id"`
-	CustomerSalesmanID       *string `json:"customer_salesman_id"`
-	CustomerNik              *string `json:"customer_nik"`
-	CustomerPhotoKtp         *string `json:"customer_photo_ktp"`
-	CustomerLevelID          *int    `json:"customer_level_id"`
-	CustomerLevel            *string `json:"customer_level_name"`
-	CustomerUserID           *string `json:"customer_user_id"`
-	CustomerUserName         *string `json:"customer_user_name"`
-	CustomerGender           *string `json:"customer_gender"`
-	CustomerProfileStatus    *string `json:"customer_profile_status"`
-	ModifiedDate             *string `json:"modified_date"`
-	ModifiedBy               *string `json:"modified_by"`
-	UserID                   *int    `json:"user_id"`
-	RegionID                 *string `json:"region_id"`
-	RegionGroupID            *string `json:"region_group_id"`
-	CreatedDate              *string `json:"created_date"`
-	CustomerPriceListID      *string `json:"customer_price_list_id"`
-	CustomerPriceListName    *string `json:"customer_price_list_name"`
+	ID                         sql.NullString `json:"customer_id"`
+	Code                       sql.NullString `json:"customer_code"`
+	CustomerName               sql.NullString `json:"customer_name"`
+	CustomerProfilePicture     sql.NullString `json:"customer_profile_picture"`
+	CustomerActiveStatus       sql.NullString `json:"customer_active_status"`
+	CustomerBirthDate          sql.NullString `json:"customer_birthdate"`
+	CustomerReligion           sql.NullString `json:"customer_religion"`
+	CustomerLatitude           sql.NullString `json:"customer_latitude"`
+	CustomerLongitude          sql.NullString `json:"customer_longitude"`
+	CustomerBranchCode         sql.NullString `json:"customer_branch_code"`
+	CustomerBranchName         sql.NullString `json:"customer_branch_name"`
+	CustomerBranchArea         sql.NullString `json:"customer_branch_area"`
+	CustomerBranchAddress      sql.NullString `json:"customer_branch_address"`
+	CustomerBranchLat          sql.NullString `json:"customer_branch_lat"`
+	CustomerBranchLng          sql.NullString `json:"customer_branch_lng"`
+	CustomerBranchPicPhoneNo   sql.NullString `json:"customer_branch_pic_phone_no"`
+	CustomerBranchPicName      sql.NullString `json:"customer_branch_pic_name"`
+	CustomerRegionCode         sql.NullString `json:"customer_region_code"`
+	CustomerRegionName         sql.NullString `json:"customer_region_name"`
+	CustomerRegionGroup        sql.NullString `json:"customer_region_group"`
+	CustomerEmail              sql.NullString `json:"customer_email"`
+	CustomerCpName             sql.NullString `json:"customer_cp_name"`
+	CustomerAddress            sql.NullString `json:"customer_address"`
+	CustomerPostalCode         sql.NullString `json:"customer_postal_code"`
+	CustomerProvinceID         sql.NullString `json:"customer_province_id"`
+	CustomerProvinceName       sql.NullString `json:"customer_province_name"`
+	CustomerCityID             sql.NullString `json:"customer_city_id"`
+	CustomerCityName           sql.NullString `json:"customer_city_name"`
+	CustomerDistrictID         sql.NullString `json:"customer_district_id"`
+	CustomerDistrictName       sql.NullString `json:"customer_district_name"`
+	CustomerSubdistrictID      sql.NullString `json:"customer_subdistrict_id"`
+	CustomerSubdistrictName    sql.NullString `json:"customer_subdistrict_name"`
+	CustomerSalesmanCode       sql.NullString `json:"customer_salesman_code"`
+	CustomerSalesmanName       sql.NullString `json:"customer_salesman_name"`
+	CustomerSalesmanPhone      sql.NullString `json:"customer_salesman_phone"`
+	CustomerSalesCycle         sql.NullString `json:"customer_sales_cycle"`
+	CustomerTypeId             sql.NullString `json:"customer_type_id"`
+	CustomerTypeName           sql.NullString `json:"customer_type_name"`
+	CustomerPhone              sql.NullString `json:"customer_phone"`
+	CustomerPoint              sql.NullString `json:"customer_point"`
+	GiftName                   sql.NullString `json:"customer_gift_name"`
+	Loyalty                    sql.NullString `json:"customer_loyalty"`
+	VisitDay                   sql.NullString `json:"visit_day"`
+	CustomerTaxCalcMethod      sql.NullString `json:"customer_tax_calc_method"`
+	CustomerBranchID           sql.NullString `json:"customer_branch_id"`
+	CustomerSalesmanID         sql.NullString `json:"customer_salesman_id"`
+	CustomerNik                sql.NullString `json:"customer_nik"`
+	CustomerPhotoKtp           sql.NullString `json:"customer_photo_ktp"`
+	CustomerPhotoKtpDashboard  sql.NullString `json:"customer_photo_ktp_dashboard"`
+	CustomerPhotoNpwp          sql.NullString `json:"customer_photo_npwp"`
+	CustomerPhotoNpwpDashboard sql.NullString `json:"customer_photo_npwp_dashboard"`
+	CustomerLevelID            sql.NullInt64  `json:"customer_level_id"`
+	CustomerLevel              sql.NullString `json:"customer_level_name"`
+	CustomerUserID             sql.NullString `json:"customer_user_id"`
+	CustomerUserName           sql.NullString `json:"customer_user_name"`
+	CustomerUserToken          sql.NullString `json:"customer_user_token"`
+	CustomerUserFirstLoginTime sql.NullString `json:"customer_user_first_login_time"`
+	CustomerGender             sql.NullString `json:"customer_gender"`
+	CustomerProfileStatus      sql.NullString `json:"customer_profile_status"`
+	ModifiedDate               sql.NullString `json:"modified_date"`
+	ModifiedBy                 sql.NullString `json:"modified_by"`
+	UserID                     sql.NullInt64  `json:"user_id"`
+	RegionID                   sql.NullString `json:"region_id"`
+	RegionGroupID              sql.NullString `json:"region_group_id"`
+	CreatedDate                sql.NullString `json:"created_date"`
+	CustomerPriceListID        sql.NullString `json:"customer_price_list_id"`
+	CustomerPriceListName      sql.NullString `json:"customer_price_list_name"`
+	ShowInApp                  sql.NullString `json:"show_in_app"`
+	IsDataComplete             bool           `json:"is_data_complete"`
+	SalesmanTypeCode           sql.NullString `json:"salesman_type_code"`
+	SalesmanTypeName           sql.NullString `json:"salesman_type_name"`
+	CustomerAdminValidate      bool           `json:"customer_admin_validate"`
+	IndexPoint                 int            `json:"index_point"`
+	Note                       sql.NullString `json:"note"`
 }
 
 // CustomerParameter ...
 type WebCustomerParameter struct {
-	ID             string `json:"customer_id"`
-	Code           string `json:"customer_code"`
-	Name           string `json:"customer_name"`
-	CustomerTypeId string `json:"custome_type_id"`
-	UserId         string `json:"admin_user_id"`
-	BranchId       string `json:"branch_id"`
-	Search         string `json:"search"`
-	Page           int    `json:"page"`
-	Offset         int    `json:"offset"`
-	Limit          int    `json:"limit"`
-	By             string `json:"by"`
-	Sort           string `json:"sort"`
-	PhoneNumber    string `json:"phone_number"`
-	StartDate      string `json:"start_date"`
-	EndDate        string `json:"end_date"`
-	ShowInApp      string `json:"show_in_app"`
+	ID              string `json:"customer_id"`
+	Code            string `json:"customer_code"`
+	Codes           string `json:"customer_codes"`
+	Name            string `json:"customer_name"`
+	CustomerTypeId  string `json:"custome_type_id"`
+	SalesmanTypeID  string `json:"salesman_type_id"`
+	UserId          string `json:"admin_user_id"`
+	BranchId        string `json:"branch_id"`
+	Search          string `json:"search"`
+	Page            int    `json:"page"`
+	Offset          int    `json:"offset"`
+	Limit           int    `json:"limit"`
+	By              string `json:"by"`
+	Sort            string `json:"sort"`
+	PhoneNumber     string `json:"phone_number"`
+	StartDate       string `json:"start_date"`
+	EndDate         string `json:"end_date"`
+	ShowInApp       string `json:"show_in_app"`
+	Active          string `json:"active"`
+	IsDataComplete  string `json:"is_data_complete"`
+	AdminValidate   string `json:"admin_validate"`
+	MonthlyMaxPoint string `json:"monthly_max_point"`
 }
 
 // WebCustomerReportParameter ...
@@ -99,16 +120,16 @@ type WebCustomerReportParameter struct {
 
 var (
 	// CustomerOrderBy ...
-	WebCustomerOrderBy = []string{"c.id", "c.customer_name", "c.created_date"}
+	WebCustomerOrderBy = []string{"c.id", "c.customer_name", "c.show_in_apps", "c.active", "c.customer_phone", "c.created_date"}
 	// CustomerOrderByrByString ...
 	WebCustomerOrderByrByString = []string{
 		"c.customer_name",
 	}
 
-	//CustomerGenderList ...
+	// CustomerGenderList ...
 	CustomerGenderList = []string{"male", "female"}
 
-	//CustomerProfileStatusComplete ...
+	// CustomerProfileStatusComplete ...
 	CustomerProfileStatusComplete   = "Lengkap"
 	CustomerProfileStatusIncomplete = "Tidak Lengkap"
 
@@ -139,6 +160,7 @@ var (
 		B.LATITUDE AS BRANCH_LATITUDE,
 		B.LONGITUDE AS BRANCH_LONGITUDE,
 		B.PIC_PHONE_NO AS PIC_PHONE_NO,
+		B.PIC_NAME AS PIC_NAME,
 		REG.CODE AS REGION_CODE,
 		REG._NAME AS REGION_NAME,
 		REG.GROUP_NAME AS REGION_GROUP,
@@ -150,8 +172,8 @@ var (
 		DIST._NAME AS CUST_DISTRICT_NAME,
 		SDIST.ID AS CUST_SUBDISTRICT_ID,
 		SDIST._NAME AS CUST_SUBDISTRICT_NAME,
-		PS.CODE as CUST_SALESMAN_CODE,
-		PS._NAME AS CUST_SALESMAN_NAME,
+		S.SALESMAN_CODE as CUST_SALESMAN_CODE,
+		S.SALESMAN_NAME AS CUST_SALESMAN_NAME,
 		S.SALESMAN_PHONE_NO AS CUST_SALESMAN_PHONE,
 		C.SALES_CYCLE CUST_SALES_CYCLE,
 		C.CUSTOMER_TYPE_ID AS CUST_TYPE_ID,
@@ -169,10 +191,22 @@ var (
 		c.customer_level_id,
 		usr.id as user_id,
 		usr.login as user_name,
+		usr.fcm_token as user_token,
+		usr.first_login_time as first_login_time,
 		usr_edited.login,
 		c.modified_date,
 		C.price_list_id,
-		PL._name
+		PL._name,
+		coalesce(c.show_in_apps,0),
+		coalesce(C.is_data_completed,false),
+		ST.CODE,
+		ST._NAME,
+		c.admin_validate,
+		c.index_point,
+		C.customer_photo_ktp_dashboard,
+		C.customer_photo_npwp,
+		C.customer_photo_npwp_dashboard,
+		C.NOTE
 	FROM CUSTOMER C
 	LEFT JOIN BRANCH B ON B.ID = C.BRANCH_ID
 	LEFT JOIN REGION REG ON REG.ID = B.REGION_ID
@@ -182,6 +216,7 @@ var (
 	left JOIN DISTRICT DIST ON DIST.ID = C.CUSTOMER_DISTRICT_ID
 	left JOIN SUBDISTRICT SDIST ON SDIST.ID = C.CUSTOMER_SUBDISTRICT_ID
 	LEFT JOIN SALESMAN S ON S.ID = C.SALESMAN_ID
+	LEFT JOIN SALESMAN_TYPE ST ON ST.ID = S.SALESMAN_TYPE_ID
 	LEFT JOIN PARTNER PS ON PS.ID = S.PARTNER_ID
 	LEFT JOIN CUSTOMER_GIFT CG ON CG.CUSTOMER_ID = C.ID
 	LEFT JOIN CUSTOMER_POINT CP ON CP.CUSTOMER_ID = C.ID
@@ -193,7 +228,7 @@ var (
 	`
 
 	// CustomerWhereStatement ...
-	WebCustomerWhereStatement = ` WHERE c.created_date IS not NULL and c.show_in_apps = 1 `
+	WebCustomerWhereStatement = ` WHERE c.show_in_apps = 1 and c.created_date IS not NULL `
 
 	// CustomerWhereStatement ...
 	WebCustomerWhereStatementAll = ` WHERE c.created_date IS not NULL `
@@ -241,8 +276,8 @@ var (
 		  DIST._NAME AS CUST_DISTRICT_NAME,
 		  SDIST.ID AS CUST_SUBDISTRICT_ID,
 		  SDIST._NAME AS CUST_SUBDISTRICT_NAME,
-		  PS.CODE as CUST_SALESMAN_CODE,
-		  PS._NAME AS CUST_SALESMAN_NAME,
+		  S.SALESMAN_CODE as CUST_SALESMAN_CODE,
+		  S.SALESMAN_NAME AS CUST_SALESMAN_NAME,
 		  S.SALESMAN_PHONE_NO AS CUST_SALESMAN_PHONE,
 		  C.SALES_CYCLE CUST_SALES_CYCLE,
 		  C.CUSTOMER_TYPE_ID AS CUST_TYPE_ID,

@@ -38,7 +38,6 @@ func (uc CustomerOrderHeaderUC) SelectAll(c context.Context, parameter models.Cu
 
 	repo := repository.NewCustomerOrderHeaderRepository(uc.DB)
 	res, err = repo.SelectAll(c, parameter)
-
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
@@ -84,13 +83,25 @@ func (uc CustomerOrderHeaderUC) FindByID(c context.Context, parameter models.Cus
 	return res, err
 }
 
+// FindByDocumentNo ...
+func (uc CustomerOrderHeaderUC) FindByDocumentNo(c context.Context, documentNo string) (res models.CustomerOrderHeader, err error) {
+	repo := repository.NewCustomerOrderHeaderRepository(uc.DB)
+	res, err = repo.FindByDocumentNo(c, documentNo)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
+		return res, err
+	}
+	uc.BuildBody(&res)
+
+	return res, err
+}
+
 // Add ...
 func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.CustomerOrderHeaderRequest) (res models.CustomerOrderHeader, err error) {
-
 	repo := repository.NewCustomerOrderHeaderRepository(uc.DB)
-
+	couponUC := CouponRedeemUC{ContractUC: uc.ContractUC}
 	chekablerepo := repository.NewShoppingCartRepository(uc.DB)
-
+	vredeemrepo := repository.NewVoucherRedeemRepository(uc.DB)
 	checkAble, err := chekablerepo.GetTotal(c, models.ShoppingCartParameter{
 		CustomerID: data.CustomerID,
 		ListLine:   data.LineList,
@@ -104,6 +115,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 	// 	bayar, _ := strconv.ParseFloat(*checkAble.MinOmzet, 0)
 	// 	minOrder := strings.ReplaceAll(number.FormatCurrency(bayar, "IDR", ".", "", 0), "Rp", "")
 	// 	return res, errors.New(helper.InvalidMinimumAmountOrder + minOrder + ` rupiah.`)
+
 	case checkAble.IsMinOrder == nil || *checkAble.IsMinOrder == "0":
 		bayar, _ := strconv.ParseFloat(*checkAble.MinOrder, 0)
 		minOrder := number.FormatCurrency(bayar, "", ".", "", 0)
@@ -118,6 +130,61 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 	tax_amount := "0"
 	net_amount := "0"
 	disc_amount := "0"
+	global_disc_amount := "0"
+
+	if &data.VoucherRedeemID != nil && data.VoucherRedeemID != "" {
+		vcrr, errvcrr := vredeemrepo.FindByID(c, models.VoucherRedeemParameter{ID: data.VoucherRedeemID})
+		if errvcrr == nil {
+			vcrrepo := repository.NewVoucherRepository(uc.DB)
+			vcr, errvcr := vcrrepo.FindByID(c, models.VoucherParameter{ID: vcrr.VoucherID})
+			if errvcr == nil {
+				if &vcr.CashValue != nil && vcr.CashValue != "" {
+					cashVal, _ := strconv.ParseFloat(vcr.CashValue, 64)
+					globalDisc, _ := strconv.ParseFloat(global_disc_amount, 64)
+					globalDisc += cashVal
+
+					global_disc_amount = strconv.FormatFloat(globalDisc, 'f', 2, 64)
+				}
+			}
+		}
+	}
+
+	if data.CouponRedeemID != "" {
+		coupon, err := couponUC.FindByID(c, models.CouponRedeemParameter{ID: data.CouponRedeemID})
+		if err == nil {
+			cashVal, _ := strconv.ParseFloat(coupon.CouponPointConversion, 64)
+			globalDisc, _ := strconv.ParseFloat(global_disc_amount, 64)
+			globalDisc += cashVal
+
+			global_disc_amount = strconv.FormatFloat(globalDisc, 'f', 2, 64)
+		}
+	}
+
+	var oldPriceData []viewmodel.ItemOldPriceCustomerOrderVM
+	if data.OldPriceID != "" {
+		oldPriceIDs := strings.Split(data.OldPriceID, ",")
+		oldPriceQtys := strings.Split(data.OldPriceQuantity, ",")
+		if len(oldPriceIDs) != len(oldPriceQtys) {
+			err = errors.New("old_price_data_not_matched")
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "update_preserved_quantity", c.Value("requestid"))
+			return res, err
+		}
+		for i := range oldPriceIDs {
+			_, err := ItemOldPriceUC{ContractUC: uc.ContractUC}.UpdatePreservedQuantity(c, oldPriceIDs[i], oldPriceQtys[i])
+			if err != nil {
+				logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "update_preserved_quantity", c.Value("requestid"))
+				return res, err
+			}
+			oldPriceData = append(oldPriceData, viewmodel.ItemOldPriceCustomerOrderVM{
+				ID:       oldPriceIDs[i],
+				Quantity: oldPriceQtys[i],
+			})
+		}
+
+	}
+
+	oldPriceJson, _ := json.Marshal(oldPriceData)
+
 	res = models.CustomerOrderHeader{
 		TransactionDate:      &data.TransactionDate,
 		TransactionTime:      &data.TransactionTime,
@@ -135,6 +202,9 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 		BranchID:             &data.BranchID,
 		PriceLIstID:          &data.PriceLIstID,
 		LineList:             &data.LineList,
+		GlobalDiscAmount:     &global_disc_amount,
+		OldPriceData:         string(oldPriceJson),
+		PointPromo:           data.PointPromo,
 	}
 
 	res.ID, err = repo.CheckOut(c, &res)
@@ -149,12 +219,28 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 
 	var msgSubBody string
 	if erruser == nil {
-
 		FcmUc := FCMUC{ContractUC: uc.ContractUC}
 		orderrepo := repository.NewCustomerOrderHeaderRepository(uc.DB)
 		orderlinerepo := repository.NewCustomerOrderLineRepository(uc.DB)
 		order, errorder := orderrepo.FindByID(c, models.CustomerOrderHeaderParameter{ID: *res.ID})
 		if errorder == nil {
+			if &data.VoucherRedeemID != nil && data.VoucherRedeemID != "" {
+				fmt.Println("start voucher redeem")
+				_, errvredem := vredeemrepo.CheckOutPaidRedeem(c, viewmodel.VoucherRedeemVM{ID: data.VoucherRedeemID, RedeemedToDocumentNo: *order.DocumentNo})
+				if errvredem == nil {
+					fmt.Println("redeem voucher sukes")
+				}
+				if errvredem != nil {
+					fmt.Println("redeem voucher error,", errvredem)
+				}
+			}
+
+			if data.CouponRedeemID != "" {
+				couponUC.Redeem(c, models.CouponRedeemParameter{
+					ID:                   data.CouponRedeemID,
+					RedeemedToDocumentNo: *order.DocumentNo,
+				})
+			}
 			// fmt.Println("tanggal ", *order.TransactionDate)
 			dateString := pkgtime.GetDate(*order.TransactionDate+"T00:00:00Z", "02 - 01 - 2006", "Asia/Jakarta")
 
@@ -165,7 +251,7 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 			msgsalesmanheader := `*Kepada Yang Terhormat* \n\n *` + *useraccount.CustomerSalesmanName + `*`
 			msgsalesmanheader += `\n\n*NO ORDERAN ` + *order.DocumentNo + ` pada tanggal ` + dateString + ` oleh Toko : (` + *useraccount.CustomerName + `(` + *useraccount.Code + `)) telah berhasil dan akan diproses*`
 
-			msgSubBody += `\n\n*NO ORDERAN ` + *order.DocumentNo + ` pada tanggal ` + dateString + ` oleh Toko : (` + *useraccount.CustomerName + `(` + *useraccount.Code + `)) telah berhasil dan akan diproses*\n\n*dari Salesman : {{salesman_detail}}*`
+			msgSubBody += `\n\n*NO ORDERAN ` + *order.DocumentNo + ` pada tanggal ` + dateString + ` oleh Toko : (` + *useraccount.CustomerName + `(` + *useraccount.Code + `)) telah berhasil dan akan diproses*\n\n*Pelanggan dari salesman : {{salesman_detail}}*`
 
 			msgcustomerheader := `*Kepada Yang Terhormat* \n\n *` + *useraccount.Code + ` - ` + *useraccount.CustomerName + `*`
 			msgcustomerheader += `\n\n*NO ORDERAN ` + *order.DocumentNo + ` anda pada tanggal ` + dateString + ` oleh Toko : (` + *useraccount.CustomerName + `(` + *useraccount.Code + `)) telah berhasil dan akan diproses*`
@@ -207,7 +293,6 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 				msgcustomer := msgcustomerheader + msgbody
 				_, errfcm := FcmUc.SendFCMMessage(c, msgtitle, msgcustomer, *useraccount.CustomerFCMToken)
 				if errfcm == nil {
-
 				}
 
 				userNotificationRepo := repository.NewUserNotificationRepository(uc.DB)
@@ -219,7 +304,6 @@ func (uc CustomerOrderHeaderUC) CheckOut(c context.Context, data *requests.Custo
 					RowID:  order.ID,
 				})
 				if errnotifinsert == nil {
-
 				}
 
 			}
@@ -290,7 +374,6 @@ func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter mode
 
 	resp, err := client.Do(req)
 	if err != nil {
-
 		fmt.Print(err.Error())
 	}
 	defer resp.Body.Close()
@@ -315,7 +398,6 @@ func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter mode
 			fmt.Print(errinsert)
 		}
 		if errcurrent == nil {
-
 			if currentOrder.Status != nil && *currentOrder.Status != *invoiceObject.Status {
 				userrepo := repository.NewCustomerRepository(uc.DB)
 
@@ -344,7 +426,6 @@ func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter mode
 							FcmUc := FCMUC{ContractUC: uc.ContractUC}
 							_, errfcm := FcmUc.SendFCMMessage(c, messageTitle, messageTemplate, *useraccount.CustomerFCMToken)
 							if errfcm == nil {
-
 							}
 
 							userNotificationRepo := repository.NewUserNotificationRepository(uc.DB)
@@ -356,7 +437,6 @@ func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter mode
 								RowID:  currentOrder.ID,
 							})
 							if errnotifinsert == nil {
-
 							}
 
 						}
@@ -387,11 +467,15 @@ func (uc CustomerOrderHeaderUC) VoidedDataSync(c context.Context, parameter mode
 												fmt.Println("sukses")
 											}
 										}
-
 									}
 								}
 							}
-
+						}
+						if useraccount.CustomerBranchPicPhoneNo != nil && useraccount.CustomerBranchPicName != nil {
+							picMessageTemplate := helper.BuildTransactionTemplateForPIC(currentOrder, orderline, useraccount, *invoiceObject.Status)
+							if picMessageTemplate != "" {
+								_ = uc.ContractUC.WhatsApp.SendTransactionWA(*useraccount.CustomerBranchPicPhoneNo, picMessageTemplate)
+							}
 						}
 
 					}
@@ -416,7 +500,6 @@ func (uc CustomerOrderHeaderUC) AppsSelectAll(c context.Context, parameter model
 
 	repo := repository.NewCustomerOrderHeaderRepository(uc.DB)
 	res, err = repo.AppsSelectAll(c, parameter)
-
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err

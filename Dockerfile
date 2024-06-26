@@ -23,28 +23,39 @@ WORKDIR /app/server
 # Build the Go application
 RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 
-# Start a new stage from scratch
-FROM debian:10-slim
-# Install the ca-certificates and tzdata packages.
-RUN apt-get update && apt-get install -y \
-    ca-certificates \
-    tzdata \
-    && rm -rf /var/lib/apt/lists/*
+# Start a new stage from a minimal Debian base image
+FROM debian:stable-slim
+
+# Install CA certificates for HTTPS connections and set the timezone to Indonesia/Jakarta
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates tzdata && \
+    cp /usr/share/zoneinfo/Asia/Jakarta /etc/localtime && \
+    echo "Asia/Jakarta" > /etc/timezone && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create a non-root user and group
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
 # Set the working directory
-WORKDIR /app/
+WORKDIR /app/server
 
 # Copy the pre-built binary file from the previous stage to /app/server/
-COPY --from=builder /app/server/main /app/server/
+COPY --from=builder /app/server/main .
 
 # Copy the .env file and firebaseconfig.json from the build stage to /app/
 COPY --from=builder /app/.env /app/
 COPY --from=builder /app/firebaseconfig.json /app/
 
-# Expose port 5050 for the API service
+# Set file permissions for configuration files
+RUN chown appuser:appgroup /app/.env /app/firebaseconfig.json && \
+    chmod 600 /app/.env /app/firebaseconfig.json
+
+# Switch to non-root user
+USER appuser
+
+# Expose port 5000 for the API service
 EXPOSE 5000
 
-# Set the working directory to /app/server/ and the entry point of the container
-WORKDIR /app/server/
-
+# Define the entry point of the container
 CMD ["./main"]

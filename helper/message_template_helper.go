@@ -56,6 +56,9 @@ func BuildProcessSalesOrderTransactionTemplate(customerOrderHeader models.SalesO
 	} else if mode == 2 {
 		msgbody += `*Kepada Yang Terhormat Salesman* \n\n`
 		msgbody += `*` + *userData.CustomerSalesmanName + `*`
+	} else if mode == 3 {
+		msgbody += `*Kepada Yang Terhormat PIC* \n\n`
+		msgbody += `*` + *userData.CustomerBranchPicName + `*`
 	}
 
 	msgbody += `\n\n*NO ORDERAN ` + *customerOrderHeader.DocumentNo + ` anda pada tanggal ` + dateString + CretaedBy + ` telah diproses*`
@@ -175,6 +178,46 @@ func BuildProcessTransactionTemplateForSalesman(customerOrderHeader models.Custo
 		msgbody += `\n`
 		msgbody += `\nSalam Sehat`
 
+	}
+
+	return msgbody
+}
+
+func BuildTransactionTemplateForPIC(customerOrderHeader models.CustomerOrderHeader, lineData []models.CustomerOrderLine, userData models.Customer, status string) (res string) {
+	voidReasonText := ``
+	var msgbody string
+	if customerOrderHeader.VoidReasonText != nil {
+		voidReasonText = *customerOrderHeader.VoidReasonText
+	}
+	dateString := pkgtime.GetDate(*customerOrderHeader.TransactionDate+"T00:00:00Z", "02 - 01 - 2006", "Asia/Jakarta")
+	CretaedBy := ` oleh Toko : ` + *userData.CustomerName + `(` + *userData.Code + `)`
+
+	msgbody += `*Kepada Yang Terhormat PIC* \n\n`
+	msgbody += `*` + *userData.CustomerBranchPicName + `*`
+	if status == "voided" {
+		msgbody += `\n\n*NO ORDERAN ` + *customerOrderHeader.DocumentNo + ` pada tanggal ` + dateString + CretaedBy + ` telah dibatalkan karena ` + voidReasonText + `*`
+	} else if status == "submitted" {
+		msgbody += `\n\n*NO ORDERAN ` + *customerOrderHeader.DocumentNo + ` pada tanggal ` + dateString + CretaedBy + ` telah diproses*`
+	} else {
+		return
+	}
+	msgbody += `\n\n*Berikut merupakan rincian pesanan anda:*`
+
+	bayar, _ := strconv.ParseFloat(*customerOrderHeader.NetAmount, 0)
+	harga := strings.ReplaceAll(number.FormatCurrency(bayar, "IDR", ".", "", 0), "Rp", "")
+	if lineData != nil && len(lineData) > 0 {
+		msgbody += `\n`
+		for i := range lineData {
+			msgbody += `\n ` + *lineData[i].QTY + ` ` + *lineData[i].UomName + ` ` + *lineData[i].ItemName + `\n`
+
+		}
+		ordercount := len(lineData)
+		msgbody += `\n`
+		msgbody += `Total ` + strconv.Itoa(ordercount) + ` item, senilai ` + harga
+		msgbody += `\n`
+		msgbody += `\nTerima kasih atas pemesanan anda`
+		msgbody += `\n`
+		msgbody += `\nSalam Sehat`
 	}
 
 	return msgbody

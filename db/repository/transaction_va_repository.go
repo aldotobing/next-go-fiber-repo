@@ -48,6 +48,7 @@ func (repository TransactionVARepository) scanRows(rows *sql.Rows) (res models.T
 		&res.Customername,
 		&res.CustomerID,
 		&res.BasicInvoiceCode,
+		&res.PaidAmount,
 	)
 	if err != nil {
 
@@ -74,6 +75,7 @@ func (repository TransactionVARepository) scanRow(row *sql.Row) (res models.Tran
 		&res.Customername,
 		&res.CustomerID,
 		&res.BasicInvoiceCode,
+		&res.PaidAmount,
 	)
 	if err != nil {
 		return res, err

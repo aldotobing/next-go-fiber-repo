@@ -11,6 +11,7 @@ import (
 // ICustomerOrderLineRepository ...
 type ICustomerOrderLineRepository interface {
 	SelectAll(c context.Context, parameter models.CustomerOrderLineParameter) ([]models.CustomerOrderLine, error)
+	RestSelectAll(c context.Context, parameter models.CustomerOrderLineParameter) ([]models.CustomerOrderLine, error)
 	FindAll(ctx context.Context, parameter models.CustomerOrderLineParameter) ([]models.CustomerOrderLine, int, error)
 	FindByID(c context.Context, parameter models.CustomerOrderLineParameter) (models.CustomerOrderLine, error)
 
@@ -39,7 +40,6 @@ func (repository CustomerOrderLineRepository) scanRows(rows *sql.Rows) (res mode
 		&res.FromPromo,
 	)
 	if err != nil {
-
 		return res, err
 	}
 
@@ -75,7 +75,6 @@ func (repository CustomerOrderLineRepository) SelectAll(c context.Context, param
 	statement := models.CustomerOrderLineSelectStatement + ` ` + models.CustomerOrderLineWhereStatement +
 		` AND (LOWER(cus."customer_name") LIKE $1 ) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
-
 	if err != nil {
 		return data, err
 	}
@@ -159,7 +158,37 @@ func (repository CustomerOrderLineRepository) SFASelectAll(c context.Context, pa
 	statement := models.SFACustomerOrderLineSelectStatement + ` ` + models.CustomerOrderLineWhereStatement +
 		` AND (LOWER(cus."customer_name") LIKE $1 ) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
+	if err != nil {
+		return data, err
+	}
 
+	defer rows.Close()
+	for rows.Next() {
+
+		temp, err := repository.scanRows(rows)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
+	}
+
+	return data, err
+}
+
+// SelectAll ...
+func (repository CustomerOrderLineRepository) RestSelectAll(c context.Context, parameter models.CustomerOrderLineParameter) (data []models.CustomerOrderLine, err error) {
+	conditionString := ``
+
+	if parameter.HeaderID != "" {
+		conditionString += ` AND def.header_id = '` + parameter.HeaderID + `'`
+	}
+	if parameter.ExcludeBonuses != "" && parameter.ExcludeBonuses == "1" {
+		conditionString += ` AND coalesce(def.from_promo,0) = 0 `
+	}
+
+	statement := models.RestCustomerOrderLineSelectStatement + ` ` + models.CustomerOrderLineWhereStatement +
+		` AND (LOWER(cus."customer_name") LIKE $1 ) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
+	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")
 	if err != nil {
 		return data, err
 	}

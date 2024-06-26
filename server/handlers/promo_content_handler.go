@@ -28,6 +28,7 @@ func (h *PromoContentHandler) SelectAll(ctx *fiber.Ctx) error {
 		CustomerTypeId:  ctx.Query("customer_type_id"),
 		CustomerLevelID: ctx.Query("customer_level_id"),
 		BranchID:        ctx.Query("branch_id"),
+		RegionID:        ctx.Query("region_id"),
 		Code:            ctx.Query("promo_code"),
 		StartDate:       ctx.Query("start_date"),
 		EndDate:         ctx.Query("end_date"),

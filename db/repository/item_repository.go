@@ -14,7 +14,7 @@ type IItemRepository interface {
 	SelectAll(c context.Context, parameter models.ItemParameter) ([]models.Item, error)
 	FindAll(ctx context.Context, parameter models.ItemParameter) ([]models.Item, int, error)
 	FindByID(c context.Context, parameter models.ItemParameter) (models.Item, error)
-	SelectAllV2(c context.Context, parameter models.ItemParameter) (data []models.ItemV2, err error)
+	SelectAllV2(c context.Context, parameter models.ItemParameter, allParam bool) (data []models.ItemV2, err error)
 	// Add(c context.Context, model *models.Item) (*string, error)
 	// Edit(c context.Context, model *models.Item) (*string, error)
 	// Delete(c context.Context, id string, now time.Time) (string, error)
@@ -475,11 +475,22 @@ func (repository ItemRepository) FindByCategoryID(c context.Context, parameter m
 // 	return
 // }
 
-func (repository ItemRepository) SelectAllV2(c context.Context, parameter models.ItemParameter) (out []models.ItemV2, err error) {
+func (repository ItemRepository) SelectAllV2(c context.Context, parameter models.ItemParameter, allParam bool) (out []models.ItemV2, err error) {
 	conditionString := ``
+
+	selectStatement := models.ItemV2SelectStatement
+	var allParamString string
+	if !allParam {
+		allParamString += ` AND DEF.ACTIVE = 1 AND DEF.HIDE = 0`
+	}
+	selectStatement = strings.ReplaceAll(selectStatement, "{{ALL_PARAM}}", allParamString)
 
 	if parameter.ID != "" {
 		conditionString += ` AND DEF.ID = '` + parameter.ID + `'`
+	}
+
+	if parameter.IDs != "" {
+		conditionString += ` AND DEF.ID in (` + parameter.IDs + `)`
 	}
 
 	if parameter.ItemCategoryId != "" {
@@ -516,11 +527,17 @@ func (repository ItemRepository) SelectAllV2(c context.Context, parameter models
 		conditionString += ` or (LOWER (ic."_name") like ` + `'%` + strings.ToLower(parameter.ItemCategoryName) + `%')`
 	}
 
-	if parameter.CustomerTypeId != "" && (parameter.CustomerTypeId != "7" && parameter.CustomerTypeId != "15") {
+	if parameter.CustomerTypeId != "" && (parameter.CustomerTypeId != "7" &&
+		parameter.CustomerTypeId != "15" &&
+		parameter.CustomerTypeId != "9") {
 		conditionString += ` AND def.id NOT IN (83, 307, 393) `
 	}
 
-	statement := models.ItemV2SelectStatement + conditionString +
+	if parameter.Code != "" {
+		conditionString += ` AND def.code IN ('` + parameter.Code + `') `
+	}
+
+	statement := selectStatement + conditionString +
 		`GROUP by def.id, td.MULTIPLY_DATA ` +
 		`ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Search)+"%")

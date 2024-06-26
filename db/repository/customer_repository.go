@@ -53,7 +53,9 @@ func (repository CustomerRepository) scanRows(rows *sql.Rows) (res models.Custom
 		&res.CustomerBranchAddress,
 		&res.CustomerBranchLat,
 		&res.CustomerBranchLng,
+		&res.CustomerBranchPicName,
 		&res.CustomerBranchPicPhoneNo,
+		&res.CustomerRegionID,
 		&res.CustomerRegionCode,
 		&res.CustomerRegionName,
 		&res.CustomerRegionGroup,
@@ -86,6 +88,7 @@ func (repository CustomerRepository) scanRows(rows *sql.Rows) (res models.Custom
 		&res.CustomerFCMToken,
 		&res.CustomerPaymentTermsID,
 		&res.CustomerPaymentTermsCode,
+		&res.CustomerAdminValidate,
 	)
 	if err != nil {
 
@@ -116,7 +119,9 @@ func (repository CustomerRepository) scanRow(row *sql.Row) (res models.Customer,
 		&res.CustomerBranchAddress,
 		&res.CustomerBranchLat,
 		&res.CustomerBranchLng,
+		&res.CustomerBranchPicName,
 		&res.CustomerBranchPicPhoneNo,
+		&res.CustomerRegionID,
 		&res.CustomerRegionCode,
 		&res.CustomerRegionName,
 		&res.CustomerRegionGroup,
@@ -149,6 +154,7 @@ func (repository CustomerRepository) scanRow(row *sql.Row) (res models.Customer,
 		&res.CustomerFCMToken,
 		&res.CustomerPaymentTermsID,
 		&res.CustomerPaymentTermsCode,
+		&res.CustomerAdminValidate,
 	)
 	if err != nil {
 		return res, err
@@ -177,6 +183,44 @@ func (repository CustomerRepository) SelectAll(c context.Context, parameter mode
 
 	if parameter.FlagToken {
 		conditionString += ` AND us.FCM_TOKEN IS NOT NULL `
+	}
+
+	if parameter.CustomerTypeId != "" {
+		conditionString += ` AND C.CUSTOMER_TYPE_ID = $` + strconv.Itoa(index)
+		args = append(args, parameter.CustomerTypeId)
+		index++
+	}
+
+	if parameter.BranchID != "" {
+		conditionString += ` AND C.BRANCH_ID = $` + strconv.Itoa(index)
+		args = append(args, parameter.BranchID)
+		index++
+	}
+
+	if parameter.RegionID != "" {
+		conditionString += ` AND REG.ID = $` + strconv.Itoa(index)
+		args = append(args, parameter.RegionID)
+		index++
+	}
+
+	if parameter.RegionGroupID != "" {
+		conditionString += ` AND C.GROUP_ID = $` + strconv.Itoa(index)
+		args = append(args, parameter.RegionGroupID)
+		index++
+	}
+
+	if parameter.CustomerLevelId != "" {
+		conditionString += ` AND C.CUSTOMER_LEVEL_ID = $` + strconv.Itoa(index)
+		args = append(args, parameter.CustomerLevelId)
+		index++
+	}
+
+	if parameter.CustomerCodes != "" {
+		conditionString += ` AND C.CUSTOMER_CODE in (` + parameter.CustomerCodes + `)`
+	}
+
+	if parameter.CustomerReligion != "" {
+		conditionString += ` AND C.customer_religion = '` + parameter.CustomerReligion + `'`
 	}
 
 	statement := models.CustomerSelectStatement + ` ` + models.CustomerWhereStatement +

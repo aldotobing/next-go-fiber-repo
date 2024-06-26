@@ -47,6 +47,7 @@ func (repository ItemDetailsRepository) scanRows(rows *sql.Rows) (res models.Ite
 		&res.ItemDetailsPrice,
 		&res.PriceListVersionId,
 		&res.ItemPriceCreatedAT,
+		&res.ItemPriceUpdatedAt,
 	)
 	if err != nil {
 
@@ -91,6 +92,7 @@ func (repository ItemDetailsRepository) scanRow(row *sql.Row) (res models.ItemDe
 		&res.ItemDetailsPrice,
 		&res.PriceListVersionId,
 		&res.ItemPriceCreatedAT,
+		&res.ItemPriceUpdatedAt,
 	)
 	if err != nil {
 		return res, err

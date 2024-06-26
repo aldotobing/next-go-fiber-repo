@@ -29,6 +29,12 @@ func (route SalesmanRoutes) RegisterRoute() {
 	r.Get("/id/:id", handler.FindByID)
 	r.Get("/except", handler.SelectAll)
 
+	r2 := route.RouterGroup.Group("/api/salesman_type")
+	handlerType := handlers.SalesmanTypeHandler{Handler: route.Handler}
+	// r.Use(jwtMiddleware.VerifyUser)
+	r2.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
+	r2.Get("/select", handlerType.SelectAll)
+
 	// r2 := route.RouterGroup.Group("/api/web/salesman")
 	// // r.Use(jwtMiddleware.VerifyUser)
 	// r2.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))

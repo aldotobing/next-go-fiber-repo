@@ -55,12 +55,48 @@ func (uc WebItemUC) FindAll(c context.Context, parameter models.WebItemParameter
 }
 
 // FindByID ...
-func (uc WebItemUC) FindByID(c context.Context, parameter models.WebItemParameter) (res models.WebItem, err error) {
+func (uc WebItemUC) FindByID(c context.Context, parameter models.WebItemParameter) (res viewmodel.WebItemVM, err error) {
 	repo := repository.NewWebItemRepository(uc.DB)
-	res, err = repo.FindByID(c, parameter)
+	data, err := repo.FindByID(c, parameter)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query", c.Value("requestid"))
 		return res, err
+	}
+
+	uomData, err := WebItemUomLineUC{ContractUC: uc.ContractUC}.SelectAll(c, models.WebItemUomLineParameter{
+		Sort:   "asc",
+		By:     "def.conversion",
+		ItemID: *data.ID,
+	})
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "get_uom_data", c.Value("requestid"))
+		return res, err
+	}
+
+	var uoms []viewmodel.Uom
+	for i := range uomData {
+		uoms = append(uoms, viewmodel.Uom{
+			ID:         uomData[i].ID,
+			Name:       uomData[i].ItemUomName,
+			Conversion: uomData[i].ItemUomConversion,
+			Visibility: uomData[i].Visibility,
+		})
+	}
+	if uoms == nil {
+		uoms = make([]viewmodel.Uom, 0)
+	}
+
+	res = viewmodel.WebItemVM{
+		ID:               data.ID,
+		Code:             data.Code,
+		Name:             data.Name,
+		ItemPicture:      data.ItemPicture,
+		ItemCategoryId:   data.ItemCategoryId,
+		ItemCategoryName: data.ItemCategoryName,
+		ItemHide:         data.ItemHide,
+		ItemActive:       data.ItemActive,
+		ItemDescription:  data.ItemDescription,
+		Uom:              uoms,
 	}
 
 	return res, err

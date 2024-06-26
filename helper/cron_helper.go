@@ -170,5 +170,19 @@ func SetCronJobs() {
 
 	})
 
+	c.AddFunc("CRON_TZ=Asia/Jakarta 0 * * * *", func() {
+		fmt.Println("execute procedure reupdate co modifieddate")
+		url := envConfig["APP_BASE_URL"] + "/v1/api/broadcast/run/scheduler"
+		client := &http.Client{}
+		req, _ := http.NewRequest("POST", url, nil)
+		req.Header.Set("Authorization", "Basic Og==")
+		res, _ := client.Do(req)
+
+		if res != nil {
+			// fmt.Println("error")
+		}
+
+	})
+
 	c.Start()
 }

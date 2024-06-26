@@ -124,6 +124,43 @@ func (h *CustomerOrderHeaderHandler) FindByID(ctx *fiber.Ctx) error {
 	return h.SendResponse(ctx, ObjcetData, nil, err, 0)
 }
 
+// FindByDocumentNo ...
+func (h *CustomerOrderHeaderHandler) FindByDocumentNo(ctx *fiber.Ctx) error {
+	c := ctx.Locals("ctx").(context.Context)
+
+	parameter := models.CustomerOrderHeaderParameter{
+		DocumentNo: ctx.Params("document_no"),
+	}
+	if parameter.DocumentNo == "" {
+		return h.SendResponse(ctx, nil, nil, helper.InvalidParameter, http.StatusBadRequest)
+	}
+
+	uc := usecase.CustomerOrderHeaderUC{ContractUC: h.ContractUC}
+	res, err := uc.FindByDocumentNo(c, parameter.DocumentNo)
+
+	lineuc := usecase.CustomerOrderLineUC{ContractUC: h.ContractUC}
+	lineparameter := models.CustomerOrderLineParameter{
+		HeaderID: *res.ID,
+		Search:   ctx.Query("search"),
+		By:       "def.created_date",
+		Sort:     ctx.Query("sort"),
+	}
+	listLine, _ := lineuc.SelectAll(c, lineparameter)
+
+	if listLine != nil {
+		res.ListLine = listLine
+	}
+
+	type StructObject struct {
+		ListObjcet []models.CustomerOrderHeader `json:"list_customer_order"`
+	}
+
+	ObjcetData := new(StructObject)
+	ObjcetData.ListObjcet = append(ObjcetData.ListObjcet, res)
+
+	return h.SendResponse(ctx, ObjcetData, nil, err, 0)
+}
+
 // rest
 func (h *CustomerOrderHeaderHandler) RestSelectAll(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
@@ -140,12 +177,13 @@ func (h *CustomerOrderHeaderHandler) RestSelectAll(ctx *fiber.Ctx) error {
 	for i := range res {
 		lineuc := usecase.CustomerOrderLineUC{ContractUC: h.ContractUC}
 		lineparameter := models.CustomerOrderLineParameter{
-			HeaderID: *res[i].ID,
-			Search:   ctx.Query("search"),
-			By:       ctx.Query("by"),
-			Sort:     ctx.Query("sort"),
+			HeaderID:       *res[i].ID,
+			Search:         ctx.Query("search"),
+			By:             ctx.Query("by"),
+			Sort:           ctx.Query("sort"),
+			ExcludeBonuses: "1",
 		}
-		listLine, _ := lineuc.SelectAll(c, lineparameter)
+		listLine, _ := lineuc.RestSelectAll(c, lineparameter)
 
 		if listLine != nil {
 			res[i].ListLine = listLine
@@ -171,12 +209,15 @@ func (h *CustomerOrderHeaderHandler) FindAllForWeb(ctx *fiber.Ctx) error {
 	c := ctx.Locals("ctx").(context.Context)
 
 	parameter := models.CustomerOrderHeaderParameter{
-		UserID: ctx.Query("admin_user_id"),
-		Search: ctx.Query("search"),
-		Page:   str.StringToInt(ctx.Query("page")),
-		Limit:  str.StringToInt(ctx.Query("limit")),
-		By:     ctx.Query("by"),
-		Sort:   ctx.Query("sort"),
+		UserID:    ctx.Query("admin_user_id"),
+		Search:    ctx.Query("search"),
+		Status:    ctx.Query("status"),
+		Page:      str.StringToInt(ctx.Query("page")),
+		Limit:     str.StringToInt(ctx.Query("limit")),
+		By:        ctx.Query("by"),
+		Sort:      ctx.Query("sort"),
+		StartDate: ctx.Query("start_date"),
+		EndDate:   ctx.Query("end_date"),
 	}
 	uc := usecase.CustomerOrderHeaderUC{ContractUC: h.ContractUC}
 	res, meta, err := uc.FindAll(c, parameter)
