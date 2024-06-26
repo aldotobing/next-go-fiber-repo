@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -35,7 +36,8 @@ func NewNewsRepository(DB *sql.DB) INewsRepository {
 // Scan rows
 func (repository NewsRepository) scanRows(rows *sql.Rows) (res models.News, err error) {
 	err = rows.Scan(
-		&res.ID, &res.Title, &res.Description, &res.StartDate, &res.EndDate,
+		&res.ID, &res.Title, &res.Description, &res.StartDate, &res.EndDate, &res.ImageUrl,
+		&res.Active, &res.Priority,
 	)
 	if err != nil {
 		return res, err
@@ -47,7 +49,8 @@ func (repository NewsRepository) scanRows(rows *sql.Rows) (res models.News, err 
 // Scan row
 func (repository NewsRepository) scanRow(row *sql.Row) (res models.News, err error) {
 	err = row.Scan(
-		&res.ID, &res.Title, &res.Description, &res.StartDate, &res.StartDate,
+		&res.ID, &res.Title, &res.Description, &res.StartDate, &res.StartDate, &res.EndDate, &res.ImageUrl,
+		&res.Active, &res.Priority,
 	)
 	if err != nil {
 		return res, err
@@ -64,14 +67,14 @@ func (repository NewsRepository) SelectAll(c context.Context, parameter models.N
 	// 	conditionString += ` AND def.start_date between '` + parameter.StartDate + `' AND '` + parameter.EndDate + `'`
 	// }
 
-	conditionString += ` AND now()::date between def.start_date and def.end_date `
+	// conditionString += ` AND now()::date between def.start_date and def.end_date `
 	statement := models.NewsSelectStatement + ` ` + models.NewsWhereStatement +
 		` AND (LOWER(def."title") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Title)+"%")
 	if err != nil {
 		return data, err
 	}
-
+	fmt.Println(statement)
 	defer rows.Close()
 	for rows.Next() {
 
