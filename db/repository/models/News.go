@@ -8,6 +8,8 @@ type News struct {
 	StartDate   *string `json:"start_date"`
 	EndDate     *string `json:"end_date"`
 	Active      *string `json:"active"`
+	ImageUrl    *string `json:"image_url"`
+	Priority    string  `json:"priority"`
 }
 
 // NewsParameter ...
@@ -39,7 +41,14 @@ var (
 		DEF.TITLE AS TITLE,
 		DEF.DESCRIPTION AS DESCRIPTION,
 		DEF.START_DATE AS NEWS_START_DATE,
-		DEF.END_DATE AS NEWS_END_DATE 
+		DEF.END_DATE AS NEWS_END_DATE,
+<<<<<<< HEAD
+		DEF.URL AS URL_NEWS 
+=======
+		DEF.IMAGE_URL,
+		DEF.ACTIVE,
+		DEF.PRIORITY
+>>>>>>> 3c9340e87a37921d12f3bd4efe63b6a83345787c
 	FROM NEWS DEF`
 
 	// NewsWhereStatement ...
