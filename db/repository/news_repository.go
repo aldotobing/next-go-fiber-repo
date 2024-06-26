@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strings"
 
 	"nextbasis-service-v-0.1/db/repository/models"
@@ -48,7 +49,7 @@ func (repository NewsRepository) scanRows(rows *sql.Rows) (res models.News, err 
 // Scan row
 func (repository NewsRepository) scanRow(row *sql.Row) (res models.News, err error) {
 	err = row.Scan(
-		&res.ID, &res.Title, &res.Description, &res.StartDate, &res.EndDate, &res.ImageUrl,
+		&res.ID, &res.Title, &res.Description, &res.StartDate, &res.StartDate, &res.EndDate, &res.ImageUrl,
 		&res.Active, &res.Priority,
 	)
 	if err != nil {
@@ -66,14 +67,14 @@ func (repository NewsRepository) SelectAll(c context.Context, parameter models.N
 	// 	conditionString += ` AND def.start_date between '` + parameter.StartDate + `' AND '` + parameter.EndDate + `'`
 	// }
 
-	conditionString += ` AND now()::date between def.start_date and def.end_date `
+	// conditionString += ` AND now()::date between def.start_date and def.end_date `
 	statement := models.NewsSelectStatement + ` ` + models.NewsWhereStatement +
 		` AND (LOWER(def."title") LIKE $1) ` + conditionString + ` ORDER BY ` + parameter.By + ` ` + parameter.Sort
 	rows, err := repository.DB.QueryContext(c, statement, "%"+strings.ToLower(parameter.Title)+"%")
 	if err != nil {
 		return data, err
 	}
-
+	fmt.Println(statement)
 	defer rows.Close()
 	for rows.Next() {
 
@@ -121,11 +122,11 @@ func (repository NewsRepository) FindAll(ctx context.Context, parameter models.N
 }
 
 func (repository NewsRepository) Add(c context.Context, model *models.News) (res *string, err error) {
-	statement := `INSERT INTO news (start_date, end_date, title, description, active, image_url)
-	VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`
+	statement := `INSERT INTO news (start_date, end_date, title, description, active)
+	VALUES ($1, $2, $3, $4, $5) RETURNING id`
 
-	err = repository.DB.QueryRowContext(c, statement,
-		model.StartDate, model.EndDate, model.Title, model.Description, 1, model.ImageUrl).Scan(&res)
+	err = repository.DB.QueryRowContext(c, statement, model.StartDate, model.EndDate, model.Title, model.Description, 1).Scan(&res)
+
 	if err != nil {
 		return res, err
 	}
