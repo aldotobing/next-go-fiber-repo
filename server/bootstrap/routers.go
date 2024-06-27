@@ -23,8 +23,9 @@ func (boot Bootstrap) RegisterRouters() {
 		return ctx.Status(http.StatusOK).JSON("work")
 	})
 
+	// jwtMiddleware := middlewares.JwtMiddleware{ContractUC: handler.ContractUC}
+
 	apiV1 := boot.App.Group("/v1")
-	//http.ListenAndServeTLS(":5000", "../fullchain.pem", "../privkey.pem", nil)
 
 	// auth routes
 	authRoutes := routers.AuthRoutes{RouterGroup: apiV1, Handler: handler}

@@ -51,7 +51,10 @@ func (jwtMiddleware JwtMiddleware) verify(ctx *fiber.Ctx, role string) (res map[
 	header := ctx.Get("Authorization")
 	if !strings.Contains(header, "Bearer") {
 		logruslogger.Log(logruslogger.WarnLevel, helper.HeaderNotPresent, functioncaller.PrintFuncName(), "middleware-jwt-header")
-		return res, errors.New(helper.HeaderNotPresent)
+		return res, &fiber.Error{
+			Code:    fiber.StatusUnauthorized,
+			Message: "Unauthorized: Bearer token not present in Authorization header",
+		}
 	}
 
 	//check claims and signing method

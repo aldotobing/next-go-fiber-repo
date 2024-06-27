@@ -19,10 +19,10 @@ type BranchRoutes struct {
 // RegisterRoute register Branch routes
 func (route BranchRoutes) RegisterRoute() {
 	handler := handlers.BranchHandler{Handler: route.Handler}
-	// jwtMiddleware := middlewares.JwtMiddleware{ContractUC: handler.ContractUC}
+	jwtMiddleware := middlewares.JwtMiddleware{ContractUC: handler.ContractUC}
 
 	r := route.RouterGroup.Group("/api/apps/branch")
-	// r.Use(jwtMiddleware.VerifyUser)
+	r.Use(jwtMiddleware.VerifyUser)
 	r.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
 	r.Get("/", handler.FindAll)
 	r.Get("/select", handler.SelectAll)
@@ -30,7 +30,7 @@ func (route BranchRoutes) RegisterRoute() {
 	r.Get("/except", handler.SelectAll)
 
 	r2 := route.RouterGroup.Group("/api/web/branch")
-	// r.Use(jwtMiddleware.VerifyUser)
+	r.Use(jwtMiddleware.VerifyUser)
 	r2.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
 	r2.Get("/", handler.FindAll)
 	r2.Get("/select", handler.SelectAll)
