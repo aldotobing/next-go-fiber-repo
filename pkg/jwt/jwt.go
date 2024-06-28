@@ -20,11 +20,30 @@ type jwtClaims struct {
 }
 
 // GetToken ...
-func (cred *Credential) GetToken(id string) (string, string, error) {
-	expirationTime := time.Now().Add(time.Duration(cred.ExpSecret) * time.Minute).Unix()
+// func (cred *Credential) GetToken(id string) (string, string, error) {
+// 	expirationTime := time.Now().Add(time.Duration(cred.ExpSecret) * time.Minute).Unix()
 
-	unixTimeUTC := time.Unix(expirationTime, 0)
-	unitTimeInRFC3339 := unixTimeUTC.UTC().Format(time.RFC3339)
+// 	unixTimeUTC := time.Unix(expirationTime, 0)
+// 	unitTimeInRFC3339 := unixTimeUTC.UTC().Format(time.RFC3339)
+
+// 	claims := &jwtClaims{
+// 		jwt.StandardClaims{
+// 			Id:        id,
+// 			ExpiresAt: expirationTime,
+// 		},
+// 	}
+// 	rawToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+// 	token, err := rawToken.SignedString([]byte(cred.Secret))
+
+// 	return token, unitTimeInRFC3339, err
+// }
+
+func (cred *Credential) GetToken(id string) (string, string, error) {
+	localExpirationTime := time.Now().Add(time.Duration(cred.ExpSecret) * time.Minute)
+	expirationTime := localExpirationTime.Unix()
+
+	// Format the local time for logging/debugging
+	localTimeFormatted := localExpirationTime.Format(time.RFC3339)
 
 	claims := &jwtClaims{
 		jwt.StandardClaims{
@@ -35,7 +54,7 @@ func (cred *Credential) GetToken(id string) (string, string, error) {
 	rawToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	token, err := rawToken.SignedString([]byte(cred.Secret))
 
-	return token, unitTimeInRFC3339, err
+	return token, localTimeFormatted, err
 }
 
 // GetRefreshToken ...
