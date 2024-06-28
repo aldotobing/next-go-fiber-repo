@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -84,11 +84,18 @@ func (h *CustomerTargetHandler) FindAll(ctx *fiber.Ctx) error {
 
 func (h *CustomerTargetHandler) FetchClientDataTarget(params models.CustomerTargetParameter) string {
 	jsonReq, err := json.Marshal(params)
+	if err != nil {
+		fmt.Println("client err")
+		fmt.Print(err.Error())
+		return "fail fetch client_data_target : mysmagon"
+	}
+
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", "http://nextbasis.id:8080/mysmagonsrv/rest/customertarget/data/1", bytes.NewBuffer(jsonReq))
 	if err != nil {
 		fmt.Println("client err")
 		fmt.Print(err.Error())
+		return "fail fetch client_data_target : mysmagon"
 	}
 
 	req.Header.Add("Accept", "application/json")
@@ -97,27 +104,32 @@ func (h *CustomerTargetHandler) FetchClientDataTarget(params models.CustomerTarg
 
 	resp, err := client.Do(req)
 	if err != nil {
-
 		fmt.Print(err.Error())
+		return "fail fetch client_data_target : mysmagon"
 	}
 	defer resp.Body.Close()
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
+
+	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Print(err.Error())
+		return "fail fetch client_data_target : mysmagon"
 	}
 
-	type resutlData struct {
+	type resultData struct {
 		QuartalTarget string `json:"quartal_target"`
 		CurrentTarget string `json:"current_target"`
 		AnualTarget   string `json:"anual_target"`
 	}
 
-	ObjectData := new(resutlData)
+	objectData := new(resultData)
 
-	// var responseObject http.Response
-	json.Unmarshal(bodyBytes, &ObjectData)
+	err = json.Unmarshal(bodyBytes, &objectData)
+	if err != nil {
+		fmt.Print(err.Error())
+		return "fail fetch client_data_target : mysmagon"
+	}
 
-	return ObjectData.CurrentTarget
+	return objectData.CurrentTarget
 }
 
 // FindByID ...
