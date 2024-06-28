@@ -19,10 +19,10 @@ type NewsRoutes struct {
 // RegisterRoute register News routes
 func (route NewsRoutes) RegisterRoute() {
 	handler := handlers.NewsHandler{Handler: route.Handler}
-	jwtMiddleware := middlewares.JwtMiddleware{ContractUC: handler.ContractUC}
+	// jwtMiddleware := middlewares.JwtMiddleware{ContractUC: handler.ContractUC}
 
 	r := route.RouterGroup.Group("/api/apps/news")
-	r.Use(jwtMiddleware.VerifyUser)
+	// r.Use(jwtMiddleware.VerifyUser)
 	r.Use(middlewares.SavingContextValue(time.Duration(str.StringToInt(route.Handler.ContractUC.EnvConfig["APP_TIMEOUT"])) * time.Second))
 	r.Get("/", handler.FindAll)
 	r.Get("/select", handler.SelectAll)
