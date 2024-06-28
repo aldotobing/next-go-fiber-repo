@@ -49,6 +49,8 @@ func (jwtMiddleware JwtMiddleware) verify(ctx *fiber.Ctx, role string) (res map[
 	claims := &jwt.StandardClaims{}
 
 	header := ctx.Get("Authorization")
+	fmt.Printf("Authorization Header: %s\n", header)
+
 	if !strings.Contains(header, "Bearer") {
 		logruslogger.Log(logruslogger.WarnLevel, helper.HeaderNotPresent, functioncaller.PrintFuncName(), "middleware-jwt-header")
 		return res, &fiber.Error{
