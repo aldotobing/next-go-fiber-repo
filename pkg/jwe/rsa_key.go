@@ -10,6 +10,7 @@ import (
 )
 
 func rsaConfigSetup(rsaPrivateKeyLocation, rsaPrivateKeyPassword string) (*rsa.PrivateKey, error) {
+	fmt.Println("Start Set Up")
 	if rsaPrivateKeyLocation == "" {
 		fmt.Println("No RSA Key given, generating temp one")
 		return GenRSA(4096)
@@ -17,7 +18,7 @@ func rsaConfigSetup(rsaPrivateKeyLocation, rsaPrivateKeyPassword string) (*rsa.P
 
 	priv, err := ioutil.ReadFile(rsaPrivateKeyLocation)
 	if err != nil {
-		fmt.Println("No RSA private key found, generating temp one")
+		fmt.Println("No RSA private key found, generating temp one on err ", err)
 		return GenRSA(4096)
 	}
 
@@ -36,7 +37,7 @@ func rsaConfigSetup(rsaPrivateKeyLocation, rsaPrivateKeyPassword string) (*rsa.P
 	var parsedKey interface{}
 	if parsedKey, err = x509.ParsePKCS1PrivateKey(privPemBytes); err != nil {
 		if parsedKey, err = x509.ParsePKCS8PrivateKey(privPemBytes); err != nil { // note this returns type `interface{}`
-			fmt.Println("Unable to parse RSA private key, generating a temp one")
+			fmt.Println("Unable to parse RSA private key, generating a temp one", err)
 			return GenRSA(4096)
 		}
 	}
@@ -45,7 +46,7 @@ func rsaConfigSetup(rsaPrivateKeyLocation, rsaPrivateKeyPassword string) (*rsa.P
 	var ok bool
 	privateKey, ok = parsedKey.(*rsa.PrivateKey)
 	if !ok {
-		fmt.Println("Unable to parse RSA private key, generating a temp one (2)")
+		fmt.Println("Unable to parse RSA private key, generating a temp one (2)", ok)
 		return GenRSA(4096)
 	}
 
