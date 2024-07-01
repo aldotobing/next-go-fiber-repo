@@ -41,14 +41,18 @@ func StartDBEventListener(configs config.Configs) {
 				log.Fatal("Failed to load the Asia/Jakarta timezone")
 			}
 			jakartaTime := time.Now().In(location).Format("2006-01-02 15:04:05")
-			fmt.Println(jakartaTime, "- Received notification:", n.Extra)
+
 			// Extract the ID from the notification
 			splitMsg := strings.Split(n.Extra, " ")
 			if len(splitMsg) >= 4 {
 				customerID := splitMsg[3]
 				cacheKey := "customer:" + customerID
 				configs.RedisClient.Client.Del(cacheKey)
-				fmt.Printf("%s - Deleted Redis cache for key: %s\n", jakartaTime, cacheKey)
+
+				logMessage := fmt.Sprintf("%s - Received notification: UPDATE on CustomerID %s, cache deleted.", jakartaTime, customerID)
+				fmt.Println(logMessage)
+			} else {
+				fmt.Printf("%s - Received notification: %s\n", jakartaTime, n.Extra)
 			}
 		case <-time.After(90 * time.Second):
 			fmt.Println("Received no events for 90 seconds, checking connection")
